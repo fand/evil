@@ -326,7 +326,7 @@ var SynthView = function(model, id){
 
     this.EG_inputs     = this.dom.find('.EG > input');
     this.FEG_inputs    = this.dom.find('.FEG > input');    
-    this.filter_inputs = this.dom.find(".filter > input");
+    this.filter_inputs = this.dom.find(".filter input");
     this.gain_inputs   = this.dom.find('.gain > input');    
 
     this.canvasEG   = this.dom.find(".canvasEG").get()[0];
@@ -340,13 +340,14 @@ var SynthView = function(model, id){
 SynthView.prototype.initBind = function(){
     var self = this;
     
+    this.setParam();
     this.vcos.bind("change", function(){
         self.setVCOParam();
     });    
     this.gain_inputs.bind("change", function(){
         self.setGain();
     });
-    this.dom.find(".filter").bind("change", function(){
+    this.filter_inputs.bind("change", function(){
         self.setFilterParam();
     });
     this.EG_inputs.bind("change", function(){
