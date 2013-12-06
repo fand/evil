@@ -1,0 +1,3 @@
+name="Wasynth2"
+[build]
+build_class = "builder::MyBuilder"
