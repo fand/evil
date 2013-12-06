@@ -350,9 +350,9 @@ legend {
 
 .filter_slider {
     width: 200px;
-    height: 75px;
-    margin-top: 10px;
-    margin-left: -45px;
+    height: 70px;
+    margin-top: 13px;
+    margin-left: -50px;
     -webkit-transform-origin: 60% 100%;
     -webkit-transform: rotate(270deg);
 }
