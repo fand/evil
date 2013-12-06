@@ -1,5 +1,5 @@
-var SEMITONE = 1.05946309;
-var KEY_LIST = {
+const SEMITONE = 1.05946309;
+const KEY_LIST = {
     A:  55,
     Bb: 58.27047018976124,
     B:  61.7354126570155,
@@ -13,7 +13,7 @@ var KEY_LIST = {
     G:  48.999429497718666,
     Ab: 51.91308719749314
 };
-var SCALE_LIST = {
+const SCALE_LIST = {
     IONIAN:     [0,2,4,5,7,9,11,12,14,16],
     DORIAN:     [0,2,3,5,7,9,10,12,14,15],
     PHRYGIAN:   [0,1,3,5,7,8,10,12,13,15],
@@ -22,8 +22,9 @@ var SCALE_LIST = {
     AEOLIAN:    [0,2,3,5,7,8,10,12,14,15],
     LOCRIAN:    [0,1,3,5,6,8,10,12,13,15]
 };
-var STREAM_LENGTH = 1024;
-var SAMPLE_RATE   = 44100;
+const CONTEXT = new webkitAudioContext();
+const SAMPLE_RATE = CONTEXT.sampleRate;
+const T = new MutekiTimer();
 
 
 var Player = function(){
@@ -31,14 +32,10 @@ var Player = function(){
     this.duration = 500; // msec
     this.freq_key = 55;
     this.scale = [];
-    this.setBPM();
-    this.setScale();
     this.is_playing = false;
     this.position = 0;
 
-
-    this.context = new webkitAudioContext();
-    SAMPLE_RATE = this.context.sampleRate;
+    this.context = CONTEXT;
     this.synth = [];
     this.synth.push(new Synth(this.context, 42));
 
@@ -47,23 +44,26 @@ var Player = function(){
     for (var i=0; i<this.synth.length; i++) {
         this.synth[i].connect(this.context.destination);
     }
+
+    this.view = new PlayerView(this);    
 };
-Player.prototype.setBPM = function(){
-    this.bpm = $("#control [name=bpm]").val();
-    this.duration = 15.0 / this.bpm* 1000; // msec
+Player.prototype.setBPM = function(bpm){
+    this.bpm = bpm;
+    this.duration = 15.0 / this.bpm * 1000; // msec
 };
-Player.prototype.setKey = function(){
-    this.freq_key = KEY_LIST[$("#key").val()];
+Player.prototype.setKey = function(key){
+    this.freq_key = KEY_LIST[key];
     for (var i=0; i < this.synth.length; i++) {
         this.synth[i].setKey(this.freq_key);
     }
 };
-Player.prototype.setScale = function(){
-    this.scale = SCALE_LIST[$("#control [name=mode]").val()];
+Player.prototype.setScale = function(scale){
+    console.log(scale);
+    this.scale = SCALE_LIST[scale];
 };
 Player.prototype.addPattern = function(time, note){
     this.pattern[time] = note;
- 
+    
 };
 Player.prototype.removePattern = function(time){
     this.pattern[time] = 0;
@@ -73,12 +73,12 @@ Player.prototype.isPlaying = function(){
 };
 Player.prototype.play = function(pos){
     this.is_playing = true;
-    if(pos!=undefined){
+    if (pos !== undefined) {
         this.position = pos;
     }
     var self = this;
     $("#indicator").show();
-    setTimeout(function(){self.play_seq();},100);
+    T.setTimeout(function(){self.play_seq();}, 100);
 };
 Player.prototype.play_seq = function(){
     if(this.is_playing){
@@ -89,30 +89,32 @@ Player.prototype.play_seq = function(){
             this.noteOn(this.pattern[this.position]);
         }
         var self = this;
-        setTimeout(function(){
+        T.setTimeout(function(){
             self.noteOff();
         }, self.duration-10);
-        setTimeout(function(){self.position++;self.play_seq();}, self.duration);
+        T.setTimeout(function(){self.position++;self.play_seq();}, self.duration);
         
         $("#indicator").css("left", (26*this.position + 70)+"px");
     }
 };
 Player.prototype.stop = function(){
+    this.noteOff();        
     this.is_playing = false;
     this.position = this.pattern.length;
     $("#indicator").hide().css("left", "-1000px");
 };
 Player.prototype.pause = function(){
+    this.noteOff();
     this.is_playing = false;
 };
 Player.prototype.noteOn = function(note){
-    for(var i=0; i<this.synth.length; i++){
+    for (var i=0; i<this.synth.length; i++) {
         this.synth[i].setNote(this.intervalToSemitone(note));
         this.synth[i].noteOn();
     }
 };
 Player.prototype.noteOff = function(){
-    for(var i=0; i<this.synth.length; i++){
+    for (var i=0; i < this.synth.length; i++) {
         this.synth[i].noteOff();
     }
 };
@@ -137,6 +139,50 @@ Player.prototype.getPattern = function(){
 
 
 
+var PlayerView = function(model){
+    this.model = model;
+    this.dom = $("#control");
+    
+    this.bpm   = this.dom.find("[name=bpm]");
+    this.key   = this.dom.find("[name=key]");
+    this.scale = this.dom.find("[name=mode]");
+
+    this.setBPM();
+    this.setKey();
+    this.setScale();
+
+    this.initEvent();
+};
+PlayerView.prototype.initEvent = function(){
+    var self = this;
+    this.dom.on("change", function(){
+        self.setBPM();
+        self.setKey();
+        self.setScale();
+    });
+};
+PlayerView.prototype.setBPM = function(){
+    this.model.setBPM(parseInt(this.bpm.val()));
+};
+PlayerView.prototype.setKey = function(){
+    this.model.setKey(this.key.val());
+};
+PlayerView.prototype.setScale = function(){
+    console.log(this.scale.val());
+    this.model.setScale(this.scale.val());
+};
+
+
+
+
+var Sequencer = function(){
+    
+};
+var SequencerView = function(){
+    
+};
+
+
 
 $(function(){
     $("#twitter").socialbutton('twitter', {
@@ -155,16 +201,12 @@ $(function(){
     var pressed_key = false;
     var pressed_mouse = false;
 
-    player.setBPM();
-    player.setKey();
-    player.setScale();
-
     
     $("td").each(function(){
         $(this).addClass("off");
     });
-  
-    $("tr").bind("mouseenter", function(event){
+    
+    $("tr").on("mouseenter", function(event){
         note = $(this).attr("note");
     });
     
@@ -203,7 +245,7 @@ $(function(){
         pressed_mouse = false;
     });
     
-    $("#play").bind("mousedown", function(){
+    $("#play").on("mousedown", function(){
         if (player.isPlaying()) {
             player.pause();
             $(this).attr("value", "play");
@@ -214,7 +256,7 @@ $(function(){
         }
     });
 
-    $("#stop").bind("mousedown", function(){
+    $("#stop").on("mousedown", function(){
         player.stop();
         $("#play").attr("value", "play");
     });
@@ -228,23 +270,17 @@ $(function(){
         player.noteOff();
     });
 
-    $("#control").bind("change", function(){
-        player.setBPM();
-        player.setKey();
-        player.setScale();
-    });
-
 
 
     $(window).keydown(function(e){
-        if(pressed_key==false){
-            pressed_key=true;
+        if (pressed_key == false) {
+            pressed_key = true;
             
-            if(player.isPlaying()){
+            if (player.isPlaying()) {
                 player.noteOff();
             }
             
-            switch(e.keyCode){
+            switch (e.keyCode) {
             case 90:
                 player.noteOn(1); break;
             case 88:
