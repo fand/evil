@@ -1,7 +1,6 @@
-var SEMITONE = 1.05946309;
-
-var STREAM_LENGTH = 1024;
-var SAMPLE_RATE = 44100;
+const SEMITONE = 1.05946309;
+const STREAM_LENGTH = 1024;
+const SAMPLE_RATE = 44100;
 
 
 var VCO = function(){
@@ -334,25 +333,25 @@ var SynthView = function(model, id){
     this.contextFEG = this.canvasFEG.getContext('2d');
     
     this.model = model;
-    this.initBind();
+    this.initOn();
 };
-SynthView.prototype.initBind = function(){
+SynthView.prototype.initOn = function(){
     var self = this;
     
     this.setParam();
-    this.vcos.bind("change", function(){
+    this.vcos.on("change", function(){
         self.setVCOParam();
     });    
-    this.gain_inputs.bind("change", function(){
+    this.gain_inputs.on("change", function(){
         self.setGain();
     });
-    this.filter_inputs.bind("change", function(){
+    this.filter_inputs.on("change", function(){
         self.setFilterParam();
     });
-    this.EG_inputs.bind("change", function(){
+    this.EG_inputs.on("change", function(){
         self.setEGParam();
     });
-    this.FEG_inputs.bind("change", function(){
+    this.FEG_inputs.on("change", function(){
         self.setFEGParam();
     });
     
@@ -361,11 +360,12 @@ SynthView.prototype.initBind = function(){
 SynthView.prototype.updateCanvas = function(name){
     var canvas, context, adsr;
 
-    if (name == "EG"){
+    if (name == "EG") {
         canvas  = this.canvasEG;
         context = this.contextEG;
         adsr    = this.model.eg.getParam();
-    }else{
+    }
+    else {
         canvas  = this.canvasFEG;
         context = this.contextFEG;
         adsr    = this.model.feg.getParam();
@@ -429,7 +429,7 @@ SynthView.prototype.setFilterParam = function(){
     );
 };
 SynthView.prototype.setGain = function(){
-    for(var i=0; i < this.gain_inputs.length; i++){
+    for (var i=0; i < this.gain_inputs.length; i++) {
         this.model.setGain(
             i,
             parseInt(this.gain_inputs.eq(i).val())

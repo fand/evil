@@ -26,9 +26,9 @@
   <div id="instruments">
   </div>
 
-  <form name="control"id="control" class="module">
-    key: <select id="key">
-      <option>A</option>
+  <form name="control" id="control" class="module">
+    key: <select name="key">
+      <option selected="selected">A</option>
       <option>D</option>
       <option>G</option>
       <option>C</option>
@@ -42,7 +42,7 @@
       <option>E</option>
     </select>
     mode: <select name="mode">
-      <option>IONIAN</option>
+      <option selected="selected">IONIAN</option>
       <option>DORIAN</option>
       <option>PHRYGIAN</option>
       <option>LYDIAN</option>
