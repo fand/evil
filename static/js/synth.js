@@ -22,21 +22,21 @@ VCO.prototype.setShape = function(shape){
     this.shape = shape;
 };
 VCO.prototype.setOctave = function(oct){
-    this.octave = parseInt(oct);
+    this.octave = oct;
 };
 VCO.prototype.setInterval = function(ival){
-    this.interval = parseInt(ival);
+    this.interval = ival;
 };
 VCO.prototype.setFine = function(fine){
-    this.fine = parseInt(fine);
+    this.fine = fine;
 };
 VCO.prototype.setNote = function(note){
-    this.note = parseInt(note);
+    this.note = note;
 };
 VCO.prototype.setFreq = function(){
     this.freq =
         Math.pow(2, this.octave)
-        * Math.pow(SEMITONE, this.interval+this.note)
+        * Math.pow(SEMITONE, this.interval + this.note)
         * this.freq_key
         + this.fine;
     this.period_sample = SAMPLE_RATE / this.freq;
@@ -205,12 +205,11 @@ var Synth = function(ctx, id){
 
     this.view = new SynthView(this, id);
 };
-Synth.prototype.setVCOParam = function(i, shape, oct, interval, fine, key){
+Synth.prototype.setVCOParam = function(i, shape, oct, interval, fine){
     this.vco[i].setShape(shape);
     this.vco[i].setOctave(oct);
     this.vco[i].setInterval(interval);
     this.vco[i].setFine(fine);
-    this.vco[i].setKey(key);
     this.vco[i].setFreq();
 };
 Synth.prototype.setEGParam = function(a, d, s, r){
@@ -399,10 +398,9 @@ SynthView.prototype.setVCOParam = function(){
         this.model.setVCOParam(
             i, 
             vco.find('.shape').val(),
-            vco.find('.octave').val(),
-            vco.find('.interval').val(),
-            vco.find('.fine').val(),
-            vco.find('.key').val()
+            parseInt(vco.find('.octave').val()),
+            parseInt(vco.find('.interval').val()),
+            parseInt(vco.find('.fine').val())
         );        
     }
 };
