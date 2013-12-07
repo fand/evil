@@ -14,8 +14,7 @@
     <link href="<: static_file('/static/css/riff.css') :>" rel="stylesheet" type="text/css" media="screen" />    
     
     <script src="<: uri_for('/static/coffee/synth.js') :>"></script>
-    <script src="<: uri_for('/static/js/webapi.js') :>"></script>
-    <script src="<: uri_for('/static/js/keyboard.js') :>"></script>
+    <script src="<: uri_for('/static/coffee/webapi.js') :>"></script>
     
   </head>
   <body>
