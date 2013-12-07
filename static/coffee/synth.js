@@ -526,6 +526,7 @@
 
     Synth.prototype.setDuration = function(duration) {
       this.duration = duration;
+      return this.view.setDuration(this.duration * 32);
     };
 
     Synth.prototype.noteOn = function(note) {
@@ -537,7 +538,11 @@
       return this.core.noteOff();
     };
 
-    Synth.prototype.play = function(time) {
+    Synth.prototype.play = function() {
+      return this.view.play();
+    };
+
+    Synth.prototype.playAt = function(time) {
       var _this = this;
       if (this.pattern[time] !== 0) {
         this.noteOn(this.noteToSemitone(this.pattern[time]));
@@ -553,6 +558,11 @@
       return this.view.hideIndicator();
     };
 
+    Synth.prototype.pause = function(time) {
+      this.noteOff();
+      return this.view.pause(time);
+    };
+
     Synth.prototype.readPattern = function(p) {
       this.pattern = p;
       return this.view.redraw(p);
@@ -560,6 +570,10 @@
 
     Synth.prototype.addNote = function(time, note) {
       return this.pattern[time] = note;
+    };
+
+    Synth.prototype.removeNote = function(time) {
+      return this.pattern[time] = 0;
     };
 
     return Synth;
@@ -629,11 +643,11 @@
     };
 
     SynthView.prototype.showIndicator = function(time) {
-      return this.indicator.css("-webkit-transform", "translateX(" + (26 * time + 70) + "px)");
+      return this.indicator.css("display", "block");
     };
 
     SynthView.prototype.hideIndicator = function() {
-      return this.indicator.css("-webkit-transform", "translateX(90000px)");
+      return this.indicator.css("display", "none");
     };
 
     SynthView.prototype.redraw = function(pattern) {
@@ -648,6 +662,28 @@
         }
       }
       return _results;
+    };
+
+    SynthView.prototype.setDuration = function(duration) {
+      this.duration = duration;
+      return this.indicator.css('-webkit-animation-duration', (this.duration / 1000) + 's');
+    };
+
+    SynthView.prototype.play = function() {
+      return this.indicator.css('-webkit-animation-play-state', 'running');
+    };
+
+    SynthView.prototype.pause = function(time) {
+      var remain;
+      this.indicator.css('-webkit-animation-play-state', 'paused');
+      if ((time % 32) !== 0) {
+        remain = this.duration * (32 - time) / 1000;
+        return this.indicator.css('-webkit-animation', 'indicator' + time + ' ' + remain + 's steps(' + (32 - time) + ', end) 0s 1 paused, indicator0 ' + (this.duration / 1000) + 's steps(32, end) ' + remain + 's infinite paused');
+      }
+    };
+
+    SynthView.prototype.stop = function() {
+      return this.indicator.css('-webkit-animation', 'indicator0 ' + (this.duration / 1000) + 's steps(32, end) 0s infinite paused');
     };
 
     return SynthView;

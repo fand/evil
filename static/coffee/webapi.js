@@ -47,11 +47,7 @@
       this.time = 0;
       this.scene_position = 0;
       this.scenes = [];
-      this.scene = {
-        bpm: this.bpm,
-        key: this.freq_key,
-        patterns: [[8, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-      };
+      this.scene = null;
       this.context = CONTEXT;
       this.synth = [new Synth(this.context, 42)];
       this.synth_now = this.synth[0];
@@ -100,14 +96,6 @@
       return _results;
     };
 
-    Player.prototype.addNote = function(time, note) {
-      return this.pattern[time] = note;
-    };
-
-    Player.prototype.removeNote = function(time) {
-      return this.pattern[time] = 0;
-    };
-
     Player.prototype.isPlaying = function() {
       return this.is_playing;
     };
@@ -119,24 +107,29 @@
         this.time = pos;
       }
       return T.setTimeout((function() {
+        var s, _i, _len, _ref;
+        _ref = _this.synth;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          s.play();
+        }
         return _this.play_seq();
-      }), 100);
+      }), 150);
     };
 
     Player.prototype.play_seq = function() {
       var s, _i, _len, _ref,
         _this = this;
       if (this.is_playing) {
-        if (this.time >= this.scene.num_measure * 32) {
+        if (this.time >= this.scene.size) {
           this.time = 0;
         }
         _ref = this.synth;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           s = _ref[_i];
-          s.play(this.time);
+          s.playAt(this.time++);
         }
         return T.setTimeout((function() {
-          _this.time++;
           return _this.play_seq();
         }), this.duration);
       }
@@ -150,57 +143,29 @@
         s.stop();
       }
       this.is_playing = false;
-      return this.time = this.scene.num_measure * 32 - 1;
+      return this.time = this.scene.size;
     };
 
     Player.prototype.pause = function() {
-      this.noteOff();
+      var s, _i, _len, _ref;
+      _ref = this.synth;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        s.pause(this.time + 1);
+      }
       return this.is_playing = false;
     };
 
     Player.prototype.noteOn = function(note) {
-      var s, _i, _len, _ref, _results;
-      _ref = this.synth;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        _results.push(s.noteOn(note));
-      }
-      return _results;
+      return this.synth_now.noteOn(note);
     };
 
     Player.prototype.noteOff = function() {
-      var s, _i, _len, _ref, _results;
-      _ref = this.synth;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        _results.push(s.noteOff());
-      }
-      return _results;
-    };
-
-    Player.prototype.intervalToSemitone = function(ival) {
-      return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
+      return this.synth_now.noteOff();
     };
 
     Player.prototype.readSong = function(song) {
       return null;
-    };
-
-    Player.prototype.readPattern = function(pat) {
-      var i, _i, _ref;
-      $(".on").removeClass("on").addClass("off");
-      for (i = _i = 0, _ref = pat.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        if (pat[i] !== 0) {
-          $("tr").eq(10 - pat[i]).find("td").eq(i).removeClass("off").addClass("on");
-        }
-      }
-      return this.pattern = pat;
-    };
-
-    Player.prototype.getPattern = function() {
-      return this.pattern;
     };
 
     Player.prototype.readScene = function(scene) {
@@ -209,6 +174,12 @@
       patterns = this.scene.patterns;
       while (patterns.length > this.synth.length) {
         this.synth.push(new Synth());
+      }
+      if (this.scene.bpm != null) {
+        this.setBPM(this.scene.bpm);
+      }
+      if (this.scene.scale != null) {
+        this.setScale(this.scene.scale);
       }
       _results = [];
       for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -304,7 +275,7 @@
       return player.noteOff();
     });
     scn = {
-      num_measure: 1,
+      size: 32,
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
     };
     return player.readScene(scn);

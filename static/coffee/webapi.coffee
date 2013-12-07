@@ -37,12 +37,9 @@ class @Player
         @is_playing = false
         @is_loop = false
         @time = 0
-        @scene_position = 0        
+        @scene_position = 0
         @scenes = []
-        @scene =
-            bpm: @bpm
-            key: @freq_key
-            patterns: [[8,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
+        @scene = null
 
         @context = CONTEXT
         @synth = [new Synth(@context, 42)]
@@ -64,64 +61,42 @@ class @Player
         @scale = SCALE_LIST[scale]
         s.setScale(@scale) for s in @synth
 
-    addNote: (time, note) ->
-        @pattern[time] = note
-    
-    removeNote: (time) ->
-        @pattern[time] = 0
-
     isPlaying: -> @is_playing
 
     play: (pos) ->
         @is_playing = true
-        @time = pos if pos?        
-        T.setTimeout(( => @play_seq()), 100)
+        @time = pos if pos?
+        T.setTimeout(( =>
+            s.play() for s in @synth
+            @play_seq()
+         ), 150)
 
     play_seq: ->
-        if @is_playing
-            if @time >= @scene.num_measure * 32
-                @time = 0                
-            s.play(@time) for s in @synth
-            T.setTimeout(( => @time++; @play_seq()), @duration)
+        if @is_playing            
+            @time = 0 if @time >= @scene.size
+            s.playAt(@time++) for s in @synth
+            T.setTimeout(( => @play_seq()), @duration)
             
     stop: ->
         s.stop() for s in @synth
         @is_playing = false
-        @time = @scene.num_measure * 32 - 1
+        @time = @scene.size
 
     pause: ->
-        @noteOff()
+        s.pause(@time + 1) for s in @synth
         @is_playing = false
         
-    noteOn: (note)->
-        for s in @synth
-            s.noteOn(note)
-            
-    noteOff: ->
-        for s in @synth
-            s.noteOff()
-
-    intervalToSemitone: (ival) ->
-        Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]
-
+    noteOn: (note) -> @synth_now.noteOn(note)
+    noteOff: ()    -> @synth_now.noteOff()
 
     readSong: (song) -> null
         
-    readPattern: (pat) ->        
-        $(".on").removeClass("on").addClass("off")
-
-        for i in [0...pat.length]
-            if pat[i] != 0
-                $("tr").eq(10 - pat[i]).find("td").eq(i).removeClass("off").addClass("on")
-
-        @pattern = pat
-
-    getPattern: -> @pattern
-
     readScene: (@scene) ->
         patterns = @scene.patterns
         while patterns.length > @synth.length
             @synth.push(new Synth())
+        @setBPM(@scene.bpm) if @scene.bpm?
+        @setScale(@scene.scale) if @scene.scale?
         for i in [0...patterns.length]
             @synth[i].readPattern(patterns[i])
 
@@ -161,7 +136,7 @@ class @PlayerView
             @model.stop()
             @play.attr("value", "play")
         )
-
+        
     setBPM:   ->  @model.setBPM(parseInt(@bpm.val()))
     setKey:   ->  @model.setKey(@key.val())
     setScale: ->  @model.setScale(@scale.val())
@@ -195,7 +170,7 @@ $(() ->
     )
     
     scn =
-        num_measure: 1
+        size: 32
         patterns: [[3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]]
     player.readScene(scn)
 )

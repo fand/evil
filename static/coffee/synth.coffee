@@ -348,6 +348,7 @@ class @Synth
     
     setScale: (@scale) ->
     setDuration: (@duration) ->
+        @view.setDuration(@duration * 32)
         
     noteOn: (note) ->
         @core.setNote(note)
@@ -355,7 +356,9 @@ class @Synth
         
     noteOff: -> @core.noteOff()
 
-    play: (time) ->
+    play: -> @view.play()
+
+    playAt: (time) ->
         if @pattern[time] != 0
             @noteOn(@noteToSemitone(@pattern[time]))
             T.setTimeout(( => @core.noteOff()), @duration - 10)
@@ -365,12 +368,20 @@ class @Synth
         @noteOff()
         @view.hideIndicator()
 
+    pause: (time) ->
+        @noteOff()
+        @view.pause(time)
+
     readPattern: (p) ->
         @pattern = p
         @view.redraw(p)
 
     addNote: (time, note) ->
         @pattern[time] = note
+        
+    removeNote: (time) ->
+        @pattern[time] = 0
+
 
                                                                 
 class @SynthView
@@ -384,7 +395,7 @@ class @SynthView
         @rows = @dom.find('tr').each(-> $(this).find('td'))
 
         @initEvent()
-    
+
     initEvent: ->
         @dom.find("td").each(() -> $(this).addClass("off"))
     
@@ -428,12 +439,36 @@ class @SynthView
             .on("mouseup", ( -> self.model.noteOff()))
         
     showIndicator: (time) ->
-        @indicator.css("-webkit-transform", "translateX(" + (26 * time + 70) + "px)")
+        #@indicator.css("-webkit-transform", "translateX(" + (26 * time + 70) + "px)")
+        @indicator.css("display", "block")
 
     hideIndicator: ->
-        @indicator.css("-webkit-transform", "translateX(90000px)")
+        #@indicator.css("-webkit-transform", "translateX(90000px, 0px, 0px)")
+        @indicator.css("display", "none")
         
     redraw: (pattern) ->
         for i in [0...pattern.length]
             y = 10 - pattern[i]
             @rows.eq(y).find('td').eq(i).addClass('on') if pattern[i] != 0
+
+    setDuration: (@duration) ->
+        # @indicator.css('-webkit-animation-name', 'indicator ' + (@duration / 1000) + 's linear 0s infinite normal')
+        @indicator.css('-webkit-animation-duration', (@duration / 1000) + 's')
+
+    play: ->
+        @indicator.css('-webkit-animation-play-state', 'running')
+
+    pause: (time) ->
+        @indicator.css('-webkit-animation-play-state', 'paused')
+        if (time % 32) != 0            
+            remain = @duration * (32 - time) / 1000
+            @indicator.css(
+                '-webkit-animation',
+                'indicator' + time + ' ' + remain + 's steps(' + (32 - time) + ', end) 0s 1 paused, indicator0 ' + (@duration / 1000) + 's steps(32, end) ' + remain + 's infinite paused'
+            )
+        
+    stop: ->
+        @indicator.css(
+            '-webkit-animation',
+            'indicator0 ' + (@duration / 1000) + 's steps(32, end) 0s infinite paused'
+        )
