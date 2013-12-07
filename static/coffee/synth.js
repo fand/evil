@@ -55,7 +55,7 @@
     };
 
     VCO.prototype.sine = function() {
-      return Math.sin(this.phase * this.d_phase);
+      return Math.cos(this.phase * this.d_phase);
     };
 
     VCO.prototype.triangle = function() {
@@ -231,6 +231,7 @@
       this.ctx = ctx;
       this.id = id;
       this.node = this.ctx.createJavaScriptNode(STREAM_LENGTH, 1, 2);
+      this.is_initialized = false;
       this.vco = [new VCO(), new VCO(), new VCO()];
       this.gain = [1.0, 1.0, 1.0];
       this.eg = new EG();
@@ -302,28 +303,23 @@
     };
 
     SynthCore.prototype.noteOn = function() {
-      var _this = this;
       this.is_playing = true;
       this.eg.noteOn();
       this.feg.noteOn();
-      return this.node.onaudioprocess = function(event) {
-        var data_L, data_R, i, s, _i, _ref, _results;
-        data_L = event.outputBuffer.getChannelData(0);
-        data_R = event.outputBuffer.getChannelData(1);
-        s = _this.nextStream();
-        _results = [];
-        for (i = _i = 0, _ref = data_L.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          _results.push(data_L[i] = data_R[i] = s[i]);
-        }
-        return _results;
-      };
+      if (!this.is_initialized) {
+        return this.initNode();
+      }
     };
 
     SynthCore.prototype.noteOff = function() {
-      var _this = this;
       this.is_playing = false;
       this.eg.noteOff();
-      this.feg.noteOff();
+      return this.feg.noteOff();
+    };
+
+    SynthCore.prototype.initNode = function() {
+      var _this = this;
+      this.is_initialized = true;
       return this.node.onaudioprocess = function(event) {
         var data_L, data_R, i, s, _i, _ref, _results;
         data_L = event.outputBuffer.getChannelData(0);

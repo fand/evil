@@ -32,7 +32,7 @@ class @VCO
         @d_phase = (2.0 * Math.PI) / @period_sample
         
     sine: ->
-        Math.sin(@phase * @d_phase)
+        Math.cos(@phase * @d_phase)
     triangle: ->
         saw2 = @saw() * 2.0;
         switch
@@ -132,6 +132,7 @@ class @ResFilter
 class @SynthCore
     constructor: (@parent, @ctx, @id) ->
         @node = @ctx.createJavaScriptNode(STREAM_LENGTH, 1, 2)
+        @is_initialized = false
         @vco  = [new VCO(), new VCO(), new VCO()]
         @gain = [1.0, 1.0, 1.0]
         
@@ -148,7 +149,7 @@ class @SynthCore
         @ratio      = 1.0
         @freq_key   = 0
         @is_playing = false
-
+    
         @view = new SynthCoreView(this, id, @parent.view.dom.find('.core'))
 
     setVCOParam: (i, shape, oct, interval, fine) ->
@@ -192,22 +193,18 @@ class @SynthCore
         @is_playing = true
         @eg.noteOn()
         @feg.noteOn()
-
-        @node.onaudioprocess = (event) =>
-            data_L = event.outputBuffer.getChannelData(0);
-            data_R = event.outputBuffer.getChannelData(1);
-            s = @nextStream()
-            for i in [0...data_L.length]
-                data_L[i] = data_R[i] = s[i]
+        @initNode() unless @is_initialized
 
     noteOff: ->
         @is_playing = false
         @eg.noteOff()
         @feg.noteOff()
-        
+
+    initNode: ->
+        @is_initialized = true
         @node.onaudioprocess = (event) =>
-            data_L = event.outputBuffer.getChannelData(0)
-            data_R = event.outputBuffer.getChannelData(1)
+            data_L = event.outputBuffer.getChannelData(0);
+            data_R = event.outputBuffer.getChannelData(1);
             s = @nextStream()
             for i in [0...data_L.length]
                 data_L[i] = data_R[i] = s[i]
