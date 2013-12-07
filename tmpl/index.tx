@@ -12,55 +12,46 @@
   
   <div id="env"></div>
 
-  <div id="indicator"></div>
-
-  <table>
-    <: for [0..9] -> $i { :>
-      <tr note="<: 10 - $i :>">
-        <th><: 10 - $i :>th</th>
-        <: for [0..31] -> $j { :><td><: $j :></td><: } :>
-      </tr>
-    <: } :>
-  </table>      
-
   <div id="instruments">
   </div>
-
-  <form name="control" id="control" class="module">
-    key: <select name="key">
-      <option selected="selected">A</option>
-      <option>D</option>
-      <option>G</option>
-      <option>C</option>
-      <option>F</option>
-      <option>Bb</option>
-      <option>Eb</option>
-      <option>Ab</option>
-      <option>Db</option>
-      <option>Gb</option>
-      <option>B</option>
-      <option>E</option>
-    </select>
-    mode: <select name="mode">
-      <option selected="selected">IONIAN</option>
-      <option>DORIAN</option>
-      <option>PHRYGIAN</option>
-      <option>LYDIAN</option>
-      <option>MIXOLYDIAN</option>
-      <option>AEOLIAN</option>
-      <option>LOCRIAN</option>
-    </select>
-    BPM: <input name="bpm" min="60" max="240" value="70" type="number">
-    <input type="button" id="play" value="play" style="width:80px;"/>
-    <input type="button" id="stop" value="stop" />
-  </form>
-
-
   
   <div id="templates">
     <: include 'synth/synth.tx' { id => 0 } :>
   </div>
-  
 </div>
+
+
+<!-- <div id="wrapper-right"></div> -->
+<!-- <div id="wrapper-left"></div> -->
+
+
+<form name="control" id="control" class="module">
+  key: <select name="key">
+    <option selected="selected">A</option>
+    <option>D</option>
+    <option>G</option>
+    <option>C</option>
+    <option>F</option>
+    <option>Bb</option>
+    <option>Eb</option>
+    <option>Ab</option>
+    <option>Db</option>
+    <option>Gb</option>
+    <option>B</option>
+    <option>E</option>
+  </select>
+  mode: <select name="mode">
+    <option selected="selected">IONIAN</option>
+    <option>DORIAN</option>
+    <option>PHRYGIAN</option>
+    <option>LYDIAN</option>
+    <option>MIXOLYDIAN</option>
+    <option>AEOLIAN</option>
+    <option>LOCRIAN</option>
+  </select>
+  bpm: <input name="bpm" min="60" max="240" value="70" type="number">
+  <input type="button" name="play" value="play" style="width:80px;"/>
+  <input type="button" name="stop" value="stop" />
+</form>
 
 : }

@@ -1,6 +1,6 @@
 const SEMITONE = 1.05946309;
 const STREAM_LENGTH = 1024;
-const SAMPLE_RATE = 44100;
+const SAMPLE_RATE = 48000;
 
 
 var VCO = function(){
