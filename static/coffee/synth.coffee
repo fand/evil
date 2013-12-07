@@ -362,11 +362,10 @@ class @Synth
         if @pattern[time] != 0
             @noteOn(@noteToSemitone(@pattern[time]))
             T.setTimeout(( => @core.noteOff()), @duration - 10)
-        @view.showIndicator(time)
 
     stop: () ->
         @noteOff()
-        @view.hideIndicator()
+        @view.stop()
 
     pause: (time) ->
         @noteOff()
@@ -436,15 +435,7 @@ class @SynthView
 
         @dom.find('th')
             .on('mousedown', ( -> self.model.noteOn(self.model.noteToSemitone($(this).data('y')))))
-            .on("mouseup", ( -> self.model.noteOff()))
-        
-    showIndicator: (time) ->
-        #@indicator.css("-webkit-transform", "translateX(" + (26 * time + 70) + "px)")
-        @indicator.css("display", "block")
-
-    hideIndicator: ->
-        #@indicator.css("-webkit-transform", "translateX(90000px, 0px, 0px)")
-        @indicator.css("display", "none")
+            .on("mouseup", ( -> self.model.noteOff()))        
         
     redraw: (pattern) ->
         for i in [0...pattern.length]
@@ -456,6 +447,7 @@ class @SynthView
         @indicator.css('-webkit-animation-duration', (@duration / 1000) + 's')
 
     play: ->
+        @indicator.css("display", "block")        
         @indicator.css('-webkit-animation-play-state', 'running')
 
     pause: (time) ->
@@ -468,6 +460,7 @@ class @SynthView
             )
         
     stop: ->
+        @indicator.css("display", "none")        
         @indicator.css(
             '-webkit-animation',
             'indicator0 ' + (@duration / 1000) + 's steps(32, end) 0s infinite paused'

@@ -546,16 +546,15 @@
       var _this = this;
       if (this.pattern[time] !== 0) {
         this.noteOn(this.noteToSemitone(this.pattern[time]));
-        T.setTimeout((function() {
+        return T.setTimeout((function() {
           return _this.core.noteOff();
         }), this.duration - 10);
       }
-      return this.view.showIndicator(time);
     };
 
     Synth.prototype.stop = function() {
       this.noteOff();
-      return this.view.hideIndicator();
+      return this.view.stop();
     };
 
     Synth.prototype.pause = function(time) {
@@ -642,14 +641,6 @@
       }));
     };
 
-    SynthView.prototype.showIndicator = function(time) {
-      return this.indicator.css("display", "block");
-    };
-
-    SynthView.prototype.hideIndicator = function() {
-      return this.indicator.css("display", "none");
-    };
-
     SynthView.prototype.redraw = function(pattern) {
       var i, y, _i, _ref, _results;
       _results = [];
@@ -670,6 +661,7 @@
     };
 
     SynthView.prototype.play = function() {
+      this.indicator.css("display", "block");
       return this.indicator.css('-webkit-animation-play-state', 'running');
     };
 
@@ -683,6 +675,7 @@
     };
 
     SynthView.prototype.stop = function() {
+      this.indicator.css("display", "none");
       return this.indicator.css('-webkit-animation', 'indicator0 ' + (this.duration / 1000) + 's steps(32, end) 0s infinite paused');
     };
 
