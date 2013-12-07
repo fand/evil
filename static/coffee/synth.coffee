@@ -1,7 +1,7 @@
 SEMITONE = 1.05946309
 STREAM_LENGTH = 1024
 SAMPLE_RATE = 48000
-
+T = new MutekiTimer()
 
 
 class @VCO
@@ -129,18 +129,16 @@ class @ResFilter
 
 
 
-class @Synth
-    constructor: (ctx, id) ->
-        @id = id;
-        
-        @node = ctx.createJavaScriptNode(STREAM_LENGTH, 1, 2)
+class @SynthCore
+    constructor: (@parent, @ctx, @id) ->
+        @node = @ctx.createJavaScriptNode(STREAM_LENGTH, 1, 2)
         @vco  = [new VCO(), new VCO(), new VCO()]
         @gain = [1.0, 1.0, 1.0]
         
         @eg  = new EG()
         @feg = new EG()
         
-        @filter = new ResFilter(ctx)
+        @filter = new ResFilter(@ctx)
         @filter.connectFEG(@feg);
 
         # resonance用ノイズ生成
@@ -151,7 +149,7 @@ class @Synth
         @freq_key   = 0
         @is_playing = false
 
-        @view = new SynthView(this, id)
+        @view = new SynthCoreView(this, id, @parent.view.dom.find('.core'))
 
     setVCOParam: (i, shape, oct, interval, fine) ->
         @vco[i].setShape(shape)
@@ -211,8 +209,8 @@ class @Synth
             data_L = event.outputBuffer.getChannelData(0)
             data_R = event.outputBuffer.getChannelData(1)
             s = @nextStream()
-            data_L = s[0 ... data_L.length]
-            data_R = s[0 ... data_L.length]            
+            for i in [0...data_L.length]
+                data_L[i] = data_R[i] = s[i]
 
     setKey: (@freq_key) ->
         v.setKey(@freq_key) for v in @vco
@@ -230,15 +228,11 @@ class @Synth
 
 
 
-class @SynthView
-    constructor: (@model, @id) ->
-        @dom = $('#tmpl_synth')
-        @dom.attr('id', 'synth' + id)
-        
-        $("#instruments").append(this.dom)
-        
+class @SynthCoreView
+    constructor: (@model, @id, @dom) ->
+             
         @vcos = $(@dom.find('.vco'))
-
+        
         @EG_inputs     = @dom.find('.EG > input')
         @FEG_inputs    = @dom.find('.FEG > input')    
         @filter_inputs = @dom.find(".filter input")
@@ -332,3 +326,117 @@ class @SynthView
             @model.setGain(i, parseInt(@gain_inputs.eq(i).val()))
 
 
+
+class @Synth
+    constructor: (@ctx, @id) ->
+        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @position = 0
+        @measure = 0
+        @scale = []
+             
+        @view = new SynthView(this)
+        @core = new SynthCore(this, @ctx, @id)
+
+    note: (i) ->
+        @pattern[i]
+
+    noteToSemitone: (ival) ->
+        Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]
+
+    noteAt: (i) ->  @pattern[i]
+
+    connect: (dst) -> @core.connect(dst)
+    setKey:  (key) -> @core.setKey(key)
+    setNote: (note) -> @core.setNote(note)
+    
+    setScale: (@scale) ->
+    setDuration: (@duration) ->
+        
+    noteOn: (note) ->
+        @core.setNote(note)
+        @core.noteOn()
+        
+    noteOff: -> @core.noteOff()
+
+    play: (time) ->
+        if @pattern[time] != 0
+            @noteOn(@noteToSemitone(@pattern[time]))
+            T.setTimeout(( => @core.noteOff()), @duration - 10)
+        @view.showIndicator(time)
+
+    stop: () ->
+        @noteOff()
+        @view.hideIndicator()
+
+    readPattern: (p) ->
+        @pattern = p
+        @view.redraw(p)
+
+    addNote: (time, note) ->
+        @pattern[time] = note
+
+                                                                
+class @SynthView
+    constructor: (@model, @id) ->
+
+        @dom = $('#tmpl_synth').clone()
+        @dom.attr('id', 'synth' + id)        
+        $("#instruments").append(@dom)
+                
+        @indicator = @dom.find('.indicator')
+        @rows = @dom.find('tr').each(-> $(this).find('td'))
+
+        @initEvent()
+    
+    initEvent: ->
+        @dom.find("td").each(() -> $(this).addClass("off"))
+    
+        @dom.find("tr").on("mouseenter", (event) ->
+            @mouse_note = $(this).attr("note")
+        )
+
+        self = this
+        @dom.find("td").on('mousedown', () ->
+            self.mouse_pressed = true
+            mouse_time = +($(this).data('x'))
+            mouse_note = +($(this).data('y'))
+
+            if $(this).hasClass("on")
+                $(this).removeClass()
+                self.removeNote($(this).text())
+            else
+                self.rows.each( ->
+                    $(this).find('td').eq(mouse_time).removeClass()
+                )
+                $(this).addClass("on")
+                self.model.addNote(mouse_time, mouse_note)
+        ).on('mouseenter', () ->
+            if self.mouse_pressed
+                mouse_time = +($(this).data('x'))
+                mouse_note = +($(this).data('y'))
+
+                self.rows.each( ->
+                    $(this).find('td').eq(mouse_time).removeClass()
+                )
+                $(this).addClass("on")
+                self.model.addNote(mouse_time, mouse_note)
+        ).on('mouseup', () ->
+            self.mouse_pressed = false
+        )
+
+        @rows.on('mouseup', ( -> self.mouse_pressed = false))
+
+        @dom.find('th')
+            .on('mousedown', ( -> self.model.noteOn(self.model.noteToSemitone($(this).data('y')))))
+            .on("mouseup", ( -> self.model.noteOff()))
+        
+    showIndicator: (time) ->
+        @indicator.css("-webkit-transform", "translateX(" + (26 * time + 70) + "px)")
+
+    hideIndicator: ->
+        @indicator.css("-webkit-transform", "translateX(90000px)")
+        
+    redraw: (pattern) ->
+        for i in [0...pattern.length]
+            y = 10 - pattern[i]
+            @rows.eq(y).find('td').eq(i).addClass('on') if pattern[i] != 0

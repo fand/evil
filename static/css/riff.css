@@ -3,6 +3,12 @@
     -webkit-user-select:none;
 }
 
+body {
+    mix-width: 100%;
+    mix-height: 100%;
+    overflow: hidden;
+}
+
 #social {
     position: absolute;
     text-align: right;
@@ -13,7 +19,7 @@
     float: left;
 }
 
-table {
+.table {
     displey: block;
     position: absolute;
     margin: 5px;
@@ -24,14 +30,13 @@ table {
     height: 290px;
 }
 
-#indicator {
-    display: none;
+.indicator {
     position: absolute;
     float: left;
     width: 24px;
     height: 259px;
     top: 47px;
-    left: 70px;
+    -webkit-transform: translateX(-80000px);
 
     background-color: #dff;
     border: 1px solid #dFF;
@@ -106,8 +111,45 @@ td {
   height: 20px;
   min-width: 20px;
   min-height: 20px;
-}
 
+      background:-moz-radial-gradient(
+        center -20%,
+        circle,
+        rgba(255,255,255,0.8),
+        rgba(255,255,255,0.3) 58%,
+        rgba(255,255,255,0) 60%
+    ),
+    -moz-linear-gradient(
+        rgba(230,230,230,0.5),
+        rgba(230,230,230,1)
+    );
+    background:-webkit-radial-gradient(
+        center -20%,
+        circle,
+        rgba(255,255,255,0.8),
+        rgba(255,255,255,0.3) 58%,
+        rgba(255,255,255,0) 60%
+    ),
+    -webkit-gradient(
+        linear,
+        100% 0%,
+        100% 100%,
+        from(rgba(230,230,230,0.5)),
+        to(rgba(230,230,230,1))
+    );
+
+    border:1px solid #fff;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+
+    box-shadow:1px 1px 2px rgba(0,0,0,0.3),
+    0px 1px 0px rgba(255,255,255,0.8) inset,
+    0px -1px 0px rgba(255,255,255,0.3) inset;
+}
+td:hover {
+    box-shadow:0px 0px 5px rgb(0,255,255);
+}
 .on {
     background:-moz-radial-gradient(
         center -20%,
@@ -145,50 +187,9 @@ td {
                0px -1px 0px rgba(255,255,255,0.3) inset;
 }
 
-.off {
-    background:-moz-radial-gradient(
-        center -20%,
-        circle,
-        rgba(255,255,255,0.8),
-        rgba(255,255,255,0.3) 58%,
-        rgba(255,255,255,0) 60%
-    ),
-    -moz-linear-gradient(
-        rgba(230,230,230,0.5),
-        rgba(230,230,230,1)
-    );
-    background:-webkit-radial-gradient(
-        center -20%,
-        circle,
-        rgba(255,255,255,0.8),
-        rgba(255,255,255,0.3) 58%,
-        rgba(255,255,255,0) 60%
-    ),
-    -webkit-gradient(
-        linear,
-        100% 0%,
-        100% 100%,
-        from(rgba(230,230,230,0.5)),
-        to(rgba(230,230,230,1))
-    );
-
-    border:1px solid #fff;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-    border-radius: 2px;
-
-    box-shadow:1px 1px 2px rgba(0,0,0,0.3),
-    0px 1px 0px rgba(255,255,255,0.8) inset,
-    0px -1px 0px rgba(255,255,255,0.3) inset;
-}
-
-td:hover {
-    box-shadow:0px 0px 5px rgb(0,255,255);
-}
 
 #wrapper {
     position: absolute;
-    display: block;    
 
     width: 910px;
     height: 590px;
@@ -196,51 +197,89 @@ td:hover {
     margin: 0px;
     padding: 0px;
 
-    margin-left: -470px;
-    margin-top: -300px;
-
-    left: 50%;
     top: 50%;
+    left: 50%;
+
+    margin-top: -300px;
+    margin-left: -470px;
 
     background-color: #fff;
     border: 1px solid #0df;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
-
 }
 
-#control {
+#wrapper-right {
     position: absolute;
-    margin:0px;
-    padding: 10px 30px;
-    top: -1px;
-    left: -1px;
-    width: 850px;
-    height: 20px;
-    color: #0df;
+
+    width: 910px;
+    height: 590px;
+
+    margin: 0px;
+    padding: 0px;
+
+    top: 50%;
+    left: 50%;
+
+    margin-top: -300px;
+    margin-left: 530px;
 
     background-color: #fff;
-    border: 1px solid #adf;
+    border: 1px solid #f0d;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
+    
+    opacity: 0.1;
+}
+#wrapper-right:hover {
+    opacity: 0.5;
+}
+
+#btn-right {
+
+}
+
+
+#control {
+    position: absolute;
+    margin:0px auto;
+    padding: 10px 30px;
+    top: 50%;
+    left: 50%;
+    margin-top: 300px;
+    margin-left: -480px;
+    width: 850px;
+    height: 20px;
+
+
+    font-size: 22px;
+    color: #88e0ff;    
+    background-color: #fff;
 }
 
 #instruments {
     margin: 0px;
     padding: 0px;
-    top: 300px;
-    width:960px;
-    height: 340px;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;    
 }
 
 .instrument {
     position: absolute;
-    top:300px;
+    top:0px;
     left:0px;
-    width: 960px;
-    height:300px;
+    width: 100%;
+    height: 100%;    
+}
+
+.core {
+    position: absolute;
+    top: 300px;
+    left: 0px;
 }
 
 .RS_module {

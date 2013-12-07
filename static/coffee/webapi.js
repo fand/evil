@@ -43,11 +43,18 @@
       this.freq_key = 55;
       this.scale = [];
       this.is_playing = false;
-      this.position = 0;
+      this.is_loop = false;
+      this.time = 0;
+      this.scene_position = 0;
+      this.scenes = [];
+      this.scene = {
+        bpm: this.bpm,
+        key: this.freq_key,
+        patterns: [[8, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+      };
       this.context = CONTEXT;
       this.synth = [new Synth(this.context, 42)];
       this.synth_now = this.synth[0];
-      this.pattern = [8, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       _ref = this.synth;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
@@ -57,8 +64,16 @@
     }
 
     Player.prototype.setBPM = function(bpm) {
+      var s, _i, _len, _ref, _results;
       this.bpm = bpm;
-      return this.duration = 15.0 / this.bpm * 1000;
+      this.duration = 15.0 / this.bpm * 1000;
+      _ref = this.synth;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        _results.push(s.setDuration(this.duration));
+      }
+      return _results;
     };
 
     Player.prototype.setKey = function(key) {
@@ -74,14 +89,22 @@
     };
 
     Player.prototype.setScale = function(scale) {
-      return this.scale = SCALE_LIST[scale];
+      var s, _i, _len, _ref, _results;
+      this.scale = SCALE_LIST[scale];
+      _ref = this.synth;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        _results.push(s.setScale(this.scale));
+      }
+      return _results;
     };
 
-    Player.prototype.addPattern = function(time, note) {
+    Player.prototype.addNote = function(time, note) {
       return this.pattern[time] = note;
     };
 
-    Player.prototype.removePattern = function(time) {
+    Player.prototype.removeNote = function(time) {
       return this.pattern[time] = 0;
     };
 
@@ -93,39 +116,41 @@
       var _this = this;
       this.is_playing = true;
       if (pos != null) {
-        this.position = pos;
+        this.time = pos;
       }
-      $("#indicator").show();
       return T.setTimeout((function() {
         return _this.play_seq();
       }), 100);
     };
 
     Player.prototype.play_seq = function() {
-      var _this = this;
+      var s, _i, _len, _ref,
+        _this = this;
       if (this.is_playing) {
-        if (this.position >= this.pattern.length) {
-          this.position = 0;
+        if (this.time >= this.scene.num_measure * 32) {
+          this.time = 0;
         }
-        if (this.pattern[this.position] !== 0) {
-          this.noteOn(this.pattern[this.position]);
+        _ref = this.synth;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          s.play(this.time);
         }
-        T.setTimeout((function() {
-          return _this.noteOff();
-        }), this.duration - 10);
-        T.setTimeout((function() {
-          _this.position++;
+        return T.setTimeout((function() {
+          _this.time++;
           return _this.play_seq();
         }), this.duration);
-        return $("#indicator").css("left", (26 * this.position + 70) + "px");
       }
     };
 
     Player.prototype.stop = function() {
-      this.noteOff();
+      var s, _i, _len, _ref;
+      _ref = this.synth;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        s.stop();
+      }
       this.is_playing = false;
-      this.position = this.pattern.length;
-      return $("#indicator").hide().css("left", "-1000px");
+      return this.time = this.scene.num_measure * 32 - 1;
     };
 
     Player.prototype.pause = function() {
@@ -139,8 +164,7 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        s.setNote(this.intervalToSemitone(note));
-        _results.push(s.noteOn());
+        _results.push(s.noteOn(note));
       }
       return _results;
     };
@@ -179,6 +203,20 @@
       return this.pattern;
     };
 
+    Player.prototype.readScene = function(scene) {
+      var i, patterns, _i, _ref, _results;
+      this.scene = scene;
+      patterns = this.scene.patterns;
+      while (patterns.length > this.synth.length) {
+        this.synth.push(new Synth());
+      }
+      _results = [];
+      for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.synth[i].readPattern(patterns[i]));
+      }
+      return _results;
+    };
+
     return Player;
 
   })();
@@ -187,6 +225,8 @@
     function PlayerView(model) {
       this.model = model;
       this.dom = $("#control");
+      this.play = this.dom.find('[name=play]');
+      this.stop = this.dom.find('[name=stop]');
       this.bpm = this.dom.find("[name=bpm]");
       this.key = this.dom.find("[name=key]");
       this.scale = this.dom.find("[name=mode]");
@@ -198,11 +238,24 @@
 
     PlayerView.prototype.initEvent = function() {
       var _this = this;
-      return this.dom.on("change", (function() {
+      this.dom.on("change", function() {
         _this.setBPM();
         _this.setKey();
         return _this.setScale();
-      }));
+      });
+      this.play.on('mousedown', function() {
+        if (_this.model.isPlaying()) {
+          _this.model.pause();
+          return _this.play.attr("value", "play");
+        } else {
+          _this.model.play();
+          return _this.play.attr("value", "pause");
+        }
+      });
+      return this.stop.on('mousedown', function() {
+        _this.model.stop();
+        return _this.play.attr("value", "play");
+      });
     };
 
     PlayerView.prototype.setBPM = function() {
@@ -222,7 +275,7 @@
   })();
 
   $(function() {
-    var note, pat, player, pressed_key, pressed_mouse, time;
+    var is_key_pressed, player, scn;
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
@@ -232,68 +285,11 @@
       button: 'button_count'
     });
     player = new Player();
-    note = 0;
-    time = 0;
-    pressed_key = false;
-    pressed_mouse = false;
-    $("td").each(function() {
-      return $(this).addClass("off");
-    });
-    $("tr").on("mouseenter", function(event) {
-      return note = $(this).attr("note");
-    });
-    $("td").mousedown(function() {
-      pressed_mouse = true;
-      time = $(this).text();
-      if ($(this).hasClass("on")) {
-        $(this).removeClass().addClass("off");
-        return player.removePattern(time);
-      } else {
-        $(".on").filter(function(i) {
-          return $(this).text() === time;
-        }).each(function() {
-          return $(this).removeClass().addClass("off");
-        });
-        $(this).removeClass().addClass("on");
-        return player.addPattern(time, note);
-      }
-    }).mouseenter(function() {
-      if (pressed_mouse) {
-        time = $(this).text();
-        $(".on").filter(function(i) {
-          return $(this).text() === time;
-        }).each(function() {
-          return $(this).removeClass().addClass("off");
-        });
-        $(this).removeClass().addClass("on");
-        return player.addPattern(time, note);
-      }
-    }).mouseup(function() {
-      return pressed_mouse = false;
-    });
-    $("#play").on("mousedown", function() {
-      if (player.isPlaying()) {
-        player.pause();
-        return $(this).attr("value", "play");
-      } else {
-        player.play();
-        return $(this).attr("value", "pause");
-      }
-    });
-    $("#stop").on("mousedown", function() {
-      player.stop();
-      return $("#play").attr("value", "play");
-    });
-    $("th").on("mousedown", (function() {
-      return player.noteOn(note);
-    }));
-    $("th").on("mouseup", (function() {
-      return player.noteOff();
-    }));
+    is_key_pressed = false;
     $(window).keydown(function(e) {
       var n;
-      if (pressed_key === false) {
-        pressed_key = true;
+      if (is_key_pressed === false) {
+        is_key_pressed = true;
         if (player.isPlaying()) {
           player.noteOff();
         }
@@ -304,11 +300,14 @@
       }
     });
     $(window).keyup(function() {
-      pressed_key = false;
+      is_key_pressed = false;
       return player.noteOff();
     });
-    pat = [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2];
-    return player.readPattern(pat);
+    scn = {
+      num_measure: 1,
+      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
+    };
+    return player.readScene(scn);
   });
 
   KEYCODE_TO_NOTE = {

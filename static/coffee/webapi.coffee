@@ -35,61 +35,59 @@ class @Player
         @freq_key = 55
         @scale = []
         @is_playing = false
-        @position = 0
+        @is_loop = false
+        @time = 0
+        @scene_position = 0        
+        @scenes = []
+        @scene =
+            bpm: @bpm
+            key: @freq_key
+            patterns: [[8,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
 
         @context = CONTEXT
         @synth = [new Synth(@context, 42)]
-
         @synth_now = @synth[0]
-
-        @pattern = [8,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-
         for s in @synth
             s.connect(@context.destination)
-            
+        
         @view = new PlayerView(this)
 
     setBPM: (@bpm) ->
         @duration = 15.0 / @bpm * 1000  # msec
+        s.setDuration(@duration) for s in @synth
         
     setKey: (key)->
         @freq_key = KEY_LIST[key]
-        for s in @synth
-            s.setKey(@freq_key)
+        s.setKey(@freq_key) for s in @synth
             
     setScale: (scale) ->
         @scale = SCALE_LIST[scale]
+        s.setScale(@scale) for s in @synth
 
-    addPattern: (time, note) ->
+    addNote: (time, note) ->
         @pattern[time] = note
     
-    removePattern: (time) ->
+    removeNote: (time) ->
         @pattern[time] = 0
 
     isPlaying: -> @is_playing
 
     play: (pos) ->
         @is_playing = true
-        @position = pos if pos?
-        $("#indicator").show()
+        @time = pos if pos?        
         T.setTimeout(( => @play_seq()), 100)
 
     play_seq: ->
         if @is_playing
-            if @position >= @pattern.length
-                @position = 0
-            if @pattern[@position] != 0
-                @noteOn(@pattern[@position])
-            T.setTimeout(( => @noteOff()), @duration - 10)
-            T.setTimeout(( => @position++; @play_seq()), @duration)
-            
-            $("#indicator").css("left", (26 * @position + 70) + "px");
+            if @time >= @scene.num_measure * 32
+                @time = 0                
+            s.play(@time) for s in @synth
+            T.setTimeout(( => @time++; @play_seq()), @duration)
             
     stop: ->
-        @noteOff()
+        s.stop() for s in @synth
         @is_playing = false
-        @position = @pattern.length
-        $("#indicator").hide().css("left", "-1000px")
+        @time = @scene.num_measure * 32 - 1
 
     pause: ->
         @noteOff()
@@ -97,8 +95,7 @@ class @Player
         
     noteOn: (note)->
         for s in @synth
-            s.setNote(@intervalToSemitone(note))
-            s.noteOn()
+            s.noteOn(note)
             
     noteOff: ->
         for s in @synth
@@ -110,7 +107,7 @@ class @Player
 
     readSong: (song) -> null
         
-    readPattern: (pat) ->
+    readPattern: (pat) ->        
         $(".on").removeClass("on").addClass("off")
 
         for i in [0...pat.length]
@@ -121,12 +118,22 @@ class @Player
 
     getPattern: -> @pattern
 
+    readScene: (@scene) ->
+        patterns = @scene.patterns
+        while patterns.length > @synth.length
+            @synth.push(new Synth())
+        for i in [0...patterns.length]
+            @synth[i].readPattern(patterns[i])
+
 
 
 class @PlayerView
     constructor: (@model) ->
         @dom = $("#control")
-        
+
+        @play  = @dom.find('[name=play]')
+        @stop  = @dom.find('[name=stop]')        
+                
         @bpm   = @dom.find("[name=bpm]")
         @key   = @dom.find("[name=key]")
         @scale = @dom.find("[name=mode]")
@@ -137,20 +144,27 @@ class @PlayerView
         @initEvent()
 
     initEvent: ->
-        @dom.on("change", (() =>
+        @dom.on("change", () =>
             @setBPM()
             @setKey()
             @setScale()
-        ));
+        )
+        @play.on('mousedown', () =>
+            if @model.isPlaying()
+                @model.pause()
+                @play.attr("value", "play")
+            else 
+                @model.play()
+                @play.attr("value", "pause")
+        )
+        @stop.on('mousedown', () =>
+            @model.stop()
+            @play.attr("value", "play")
+        )
 
     setBPM:   ->  @model.setBPM(parseInt(@bpm.val()))
     setKey:   ->  @model.setKey(@key.val())
     setScale: ->  @model.setScale(@scale.val())
-
-
-
-# class @Sequencer
-# class @SequencerView    
 
 
 
@@ -165,82 +179,25 @@ $(() ->
     })
     
     player = new Player()
-    note = 0
-    time = 0
 
-    pressed_key = false
-    pressed_mouse = false
-
-    $("td").each(() -> $(this).addClass("off"))
-    $("tr").on("mouseenter", (event) ->
-        note = $(this).attr("note")
-    )
-    
-    $("td").mousedown(() ->
-        pressed_mouse = true;
-        time = $(this).text();
-        
-        if $(this).hasClass("on")
-            $(this).removeClass().addClass("off")
-            player.removePattern(time)
-        else
-            # 同じ列でクリックされた以外のセルをonクラスをremove
-            $(".on").filter(
-                (i) -> ($(this).text() == time)
-            ).each(() ->
-                $(this).removeClass().addClass("off")
-            )
-            $(this).removeClass().addClass("on")
-            player.addPattern(time, note)
-    ).mouseenter(() ->
-        if pressed_mouse
-            time = $(this).text()
-
-            # 同じ列でクリックされた以外のセルをonクラスをremove
-            $(".on").filter(
-                (i) -> ($(this).text() == time)
-            ).each(() ->
-                $(this).removeClass().addClass("off")
-            )
-            $(this).removeClass().addClass("on")
-            player.addPattern(time, note)
-    ).mouseup(
-        () -> pressed_mouse = false
-    )
-    
-    $("#play").on("mousedown", () ->
-        if player.isPlaying()
-            player.pause()
-            $(this).attr("value", "play")
-        else 
-            player.play()
-            $(this).attr("value", "pause")
-    )
-    $("#stop").on("mousedown", () ->
-        player.stop()
-        $("#play").attr("value", "play")
-    )
-    
-    $("th").on("mousedown", ( -> player.noteOn(note)))
-    $("th").on("mouseup", ( -> player.noteOff()))
-
+    is_key_pressed = false
     $(window).keydown((e) ->
-        if pressed_key == false
-            pressed_key = true;
-            
+        if is_key_pressed == false
+            is_key_pressed = true            
             player.noteOff() if player.isPlaying() 
 
             n = KEYCODE_TO_NOTE[e.keyCode]
             player.noteOn(n) if n?
     )
-    
     $(window).keyup( ->
-        pressed_key = false
+        is_key_pressed = false
         player.noteOff()
     )
     
-    pat = [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]
-    player.readPattern(pat)
+    scn =
+        num_measure: 1
+        patterns: [[3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]]
+    player.readScene(scn)
 )
 
 
