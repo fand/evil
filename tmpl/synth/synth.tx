@@ -2,15 +2,17 @@
 
   <div class="sequencer">
     <div class="indicator"></div>
-    
-    <table class="table">
-      <: for [0..9] -> $i { :>
-        <tr note="<: 10 - $i :>">
-          <th data-y="<: 10 - $i :>"><: 10 - $i :>th</th>
-          <: for [0..31] -> $j { :><td data-x="<: $j :>" data-y="<: 10 - $i :>"></td><: } :>
-        </tr>
-      <: } :>
-    </table>
+
+    <div class="sequencer-table">
+      <table class="table">
+        <: for [0..9] -> $i { :>
+          <tr note="<: 10 - $i :>">
+            <!-- <th data-y="<: 10 - $i :>"><: 10 - $i :>th</th> -->
+            <: for [0..255] -> $j { :><td data-x="<: $j :>" data-y="<: 10 - $i :>"></td><: } :>
+          </tr>
+          <: } :>
+      </table>
+    </div>
   </div>
 
   <div class="core">

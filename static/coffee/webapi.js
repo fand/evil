@@ -151,7 +151,7 @@
       _ref = this.synth;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        s.pause(this.time + 1);
+        s.pause(this.time);
       }
       return this.is_playing = false;
     };
@@ -246,7 +246,7 @@
   })();
 
   $(function() {
-    var is_key_pressed, player, scn;
+    var is_key_pressed, player, scn1, scn2, scn3;
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
@@ -274,11 +274,19 @@
       is_key_pressed = false;
       return player.noteOff();
     });
-    scn = {
+    scn1 = {
       size: 32,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
+      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
     };
-    return player.readScene(scn);
+    scn2 = {
+      size: 64,
+      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
+    };
+    scn3 = {
+      size: 96,
+      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1]]
+    };
+    return player.readScene(scn3);
   });
 
   KEYCODE_TO_NOTE = {
