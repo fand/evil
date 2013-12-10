@@ -100,12 +100,9 @@
       return this.is_playing;
     };
 
-    Player.prototype.play = function(pos) {
+    Player.prototype.play = function() {
       var _this = this;
       this.is_playing = true;
-      if (pos != null) {
-        this.time = pos;
-      }
       return T.setTimeout((function() {
         var s, _i, _len, _ref;
         _ref = _this.synth;
@@ -113,11 +110,11 @@
           s = _ref[_i];
           s.play();
         }
-        return _this.play_seq();
+        return _this.playNext();
       }), 150);
     };
 
-    Player.prototype.play_seq = function() {
+    Player.prototype.playNext = function() {
       var s, _i, _len, _ref,
         _this = this;
       if (this.is_playing) {
@@ -130,7 +127,7 @@
           s.playAt(this.time++);
         }
         return T.setTimeout((function() {
-          return _this.play_seq();
+          return _this.playNext();
         }), this.duration);
       }
     };
@@ -151,7 +148,7 @@
       _ref = this.synth;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        s.pause(this.time + 1);
+        s.pause(this.time);
       }
       return this.is_playing = false;
     };
@@ -246,7 +243,7 @@
   })();
 
   $(function() {
-    var is_key_pressed, player, scn;
+    var is_key_pressed, player, scn1, scn2, scn3, scn8;
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
@@ -274,11 +271,24 @@
       is_key_pressed = false;
       return player.noteOff();
     });
-    scn = {
+    scn1 = {
       size: 32,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
+      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
     };
-    return player.readScene(scn);
+    scn2 = {
+      size: 64,
+      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
+    };
+    scn3 = {
+      size: 96,
+      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1]]
+    };
+    scn8 = {
+      bpm: 240,
+      size: 256,
+      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
+    };
+    return player.readScene(scn8);
   });
 
   KEYCODE_TO_NOTE = {

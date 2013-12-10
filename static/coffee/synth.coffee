@@ -243,11 +243,11 @@ class @SynthCoreView
         @initEvent()
 
     initEvent: ->
-        @vcos.on("change", () => @setVCOParam())
-        @gain_inputs.on("change", () => @setGain())
+        @vcos.on("change",          () => @setVCOParam())
+        @gain_inputs.on("change",   () => @setGain())
         @filter_inputs.on("change", () => @setFilterParam())
-        @EG_inputs.on("change", () => @setEGParam())
-        @FEG_inputs.on("change", () => @setFEGParam())
+        @EG_inputs.on("change",     () => @setEGParam())
+        @FEG_inputs.on("change",    () => @setFEGParam())
         @setParam()
 
     updateCanvas: (name) ->
@@ -327,53 +327,49 @@ class @SynthCoreView
 class @Synth
     constructor: (@ctx, @id) ->
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        @position = 0
-        @measure = 0
+        @time = 0
         @scale = []
-             
+        
         @view = new SynthView(this)
         @core = new SynthCore(this, @ctx, @id)
 
-    note: (i) ->
-        @pattern[i]
-
+    connect: (dst) -> @core.connect(dst)
+    
+    setDuration: (@duration) ->
+    setKey:  (key) -> @core.setKey(key)
+    setScale: (@scale) ->
+    setNote: (note) -> @core.setNote(note)
+    
     noteToSemitone: (ival) ->
         Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]
 
-    noteAt: (i) ->  @pattern[i]
-
-    connect: (dst) -> @core.connect(dst)
-    setKey:  (key) -> @core.setKey(key)
-    setNote: (note) -> @core.setNote(note)
-    
-    setScale: (@scale) ->
-    setDuration: (@duration) ->
-        @view.setDuration(@duration * 32)
-        
     noteOn: (note) ->
-        @core.setNote(note)
+        @core.setNote(@noteToSemitone(note))
         @core.noteOn()
         
     noteOff: -> @core.noteOff()
 
-    play: -> @view.play()
-
-    playAt: (time) ->
-        if @pattern[time] != 0
-            @noteOn(@noteToSemitone(@pattern[time]))
-            T.setTimeout(( => @core.noteOff()), @duration - 10)
-
+    playAt: (@time) ->
+        @view.playAt(@time)
+        if @pattern[@time] != 0
+            @core.setNote(@noteToSemitone(@pattern[@time]))
+            @core.noteOn()
+            T.setTimeout(( =>
+                @core.noteOff()
+                ), @duration - 10)
+                
+    play: () ->
+        @view.play()
+        
     stop: () ->
-        @noteOff()
+        @core.noteOff()
         @view.stop()
 
     pause: (time) ->
-        @noteOff()
-        @view.pause(time)
+        @core.noteOff()
 
-    readPattern: (p) ->
-        @pattern = p
-        @view.redraw(p)
+    readPattern: (@pattern) ->
+        @view.readPattern(@pattern)        
 
     addNote: (time, note) ->
         @pattern[time] = note
@@ -382,16 +378,22 @@ class @Synth
         @pattern[time] = 0
 
 
-                                                                
+
 class @SynthView
     constructor: (@model, @id) ->
 
         @dom = $('#tmpl_synth').clone()
-        @dom.attr('id', 'synth' + id)        
+        @dom.attr('id', 'synth' + id)
         $("#instruments").append(@dom)
                 
         @indicator = @dom.find('.indicator')
-        @rows = @dom.find('tr').each(-> $(this).find('td'))
+        @table = @dom.find('.table').eq(0)
+        @rows  = @dom.find('tr').filter(-> $(this).find('td').length > 0)
+        @cells = @dom.find('td')
+
+        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+        @control_total = @table.find('.pattern-total')
 
         @initEvent()
 
@@ -433,35 +435,25 @@ class @SynthView
 
         @rows.on('mouseup', ( -> self.mouse_pressed = false))
 
-        @dom.find('th')
-            .on('mousedown', ( -> self.model.noteOn(self.model.noteToSemitone($(this).data('y')))))
-            .on("mouseup", ( -> self.model.noteOff()))        
-        
-    redraw: (pattern) ->
-        for i in [0...pattern.length]
-            y = 10 - pattern[i]
-            @rows.eq(y).find('td').eq(i).addClass('on') if pattern[i] != 0
+        # @dom.find('th')
+        #     .on('mousedown', ( -> self.model.noteOn(self.model.noteToSemitone($(this).data('y')))))
+        #     .on("mouseup", ( -> self.model.noteOff()))        
 
-    setDuration: (@duration) ->
-        # @indicator.css('-webkit-animation-name', 'indicator ' + (@duration / 1000) + 's linear 0s infinite normal')
-        @indicator.css('-webkit-animation-duration', (@duration / 1000) + 's')
+    readPattern: (@pattern) ->
+        @cells.removeClass()
+        for i in [0...@pattern.length]
+            y = 10 - @pattern[i]
+            @rows.eq(y).find('td').eq(i).addClass('on') if @pattern[i] != 0
+        @page_total = @pattern.length / 32
+        @control_total.text(' ' + @page_total)
 
-    play: ->
-        @indicator.css("display", "block")        
-        @indicator.css('-webkit-animation-play-state', 'running')
+    playAt: (time) ->        
+        @indicator.css('left', (26 * (time % 32)) + 'px')
+        if @pattern.length % 32 == 0
+            page = Math.floor((time % @pattern.length) / 32)
+            @table.css('left', page * (-832) + 'px')
 
-    pause: (time) ->
-        @indicator.css('-webkit-animation-play-state', 'paused')
-        if (time % 32) != 0            
-            remain = @duration * (32 - time) / 1000
-            @indicator.css(
-                '-webkit-animation',
-                'indicator' + time + ' ' + remain + 's steps(' + (32 - time) + ', end) 0s 1 paused, indicator0 ' + (@duration / 1000) + 's steps(32, end) ' + remain + 's infinite paused'
-            )
-        
+    play: -> @indicator.css("display", "block")
     stop: ->
-        @indicator.css("display", "none")        
-        @indicator.css(
-            '-webkit-animation',
-            'indicator0 ' + (@duration / 1000) + 's steps(32, end) 0s infinite paused'
-        )
+        @indicator.css("display", "none")
+        @table.css('left', '0px')

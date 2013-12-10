@@ -489,48 +489,38 @@
       this.ctx = ctx;
       this.id = id;
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      this.position = 0;
-      this.measure = 0;
+      this.time = 0;
       this.scale = [];
       this.view = new SynthView(this);
       this.core = new SynthCore(this, this.ctx, this.id);
     }
 
-    Synth.prototype.note = function(i) {
-      return this.pattern[i];
-    };
-
-    Synth.prototype.noteToSemitone = function(ival) {
-      return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
-    };
-
-    Synth.prototype.noteAt = function(i) {
-      return this.pattern[i];
-    };
-
     Synth.prototype.connect = function(dst) {
       return this.core.connect(dst);
+    };
+
+    Synth.prototype.setDuration = function(duration) {
+      this.duration = duration;
     };
 
     Synth.prototype.setKey = function(key) {
       return this.core.setKey(key);
     };
 
-    Synth.prototype.setNote = function(note) {
-      return this.core.setNote(note);
-    };
-
     Synth.prototype.setScale = function(scale) {
       this.scale = scale;
     };
 
-    Synth.prototype.setDuration = function(duration) {
-      this.duration = duration;
-      return this.view.setDuration(this.duration * 32);
+    Synth.prototype.setNote = function(note) {
+      return this.core.setNote(note);
+    };
+
+    Synth.prototype.noteToSemitone = function(ival) {
+      return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
     };
 
     Synth.prototype.noteOn = function(note) {
-      this.core.setNote(note);
+      this.core.setNote(this.noteToSemitone(note));
       return this.core.noteOn();
     };
 
@@ -538,33 +528,35 @@
       return this.core.noteOff();
     };
 
-    Synth.prototype.play = function() {
-      return this.view.play();
-    };
-
     Synth.prototype.playAt = function(time) {
       var _this = this;
-      if (this.pattern[time] !== 0) {
-        this.noteOn(this.noteToSemitone(this.pattern[time]));
+      this.time = time;
+      this.view.playAt(this.time);
+      if (this.pattern[this.time] !== 0) {
+        this.core.setNote(this.noteToSemitone(this.pattern[this.time]));
+        this.core.noteOn();
         return T.setTimeout((function() {
           return _this.core.noteOff();
         }), this.duration - 10);
       }
     };
 
+    Synth.prototype.play = function() {
+      return this.view.play();
+    };
+
     Synth.prototype.stop = function() {
-      this.noteOff();
+      this.core.noteOff();
       return this.view.stop();
     };
 
     Synth.prototype.pause = function(time) {
-      this.noteOff();
-      return this.view.pause(time);
+      return this.core.noteOff();
     };
 
-    Synth.prototype.readPattern = function(p) {
-      this.pattern = p;
-      return this.view.redraw(p);
+    Synth.prototype.readPattern = function(pattern) {
+      this.pattern = pattern;
+      return this.view.readPattern(this.pattern);
     };
 
     Synth.prototype.addNote = function(time, note) {
@@ -587,9 +579,13 @@
       this.dom.attr('id', 'synth' + id);
       $("#instruments").append(this.dom);
       this.indicator = this.dom.find('.indicator');
-      this.rows = this.dom.find('tr').each(function() {
-        return $(this).find('td');
+      this.table = this.dom.find('.table').eq(0);
+      this.rows = this.dom.find('tr').filter(function() {
+        return $(this).find('td').length > 0;
       });
+      this.cells = this.dom.find('td');
+      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.control_total = this.table.find('.pattern-total');
       this.initEvent();
     }
 
@@ -631,52 +627,41 @@
       }).on('mouseup', function() {
         return self.mouse_pressed = false;
       });
-      this.rows.on('mouseup', (function() {
+      return this.rows.on('mouseup', (function() {
         return self.mouse_pressed = false;
       }));
-      return this.dom.find('th').on('mousedown', (function() {
-        return self.model.noteOn(self.model.noteToSemitone($(this).data('y')));
-      })).on("mouseup", (function() {
-        return self.model.noteOff();
-      }));
     };
 
-    SynthView.prototype.redraw = function(pattern) {
-      var i, y, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = pattern.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        y = 10 - pattern[i];
-        if (pattern[i] !== 0) {
-          _results.push(this.rows.eq(y).find('td').eq(i).addClass('on'));
-        } else {
-          _results.push(void 0);
+    SynthView.prototype.readPattern = function(pattern) {
+      var i, y, _i, _ref;
+      this.pattern = pattern;
+      this.cells.removeClass();
+      for (i = _i = 0, _ref = this.pattern.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        y = 10 - this.pattern[i];
+        if (this.pattern[i] !== 0) {
+          this.rows.eq(y).find('td').eq(i).addClass('on');
         }
       }
-      return _results;
+      this.page_total = this.pattern.length / 32;
+      return this.control_total.text(' ' + this.page_total);
     };
 
-    SynthView.prototype.setDuration = function(duration) {
-      this.duration = duration;
-      return this.indicator.css('-webkit-animation-duration', (this.duration / 1000) + 's');
+    SynthView.prototype.playAt = function(time) {
+      var page;
+      this.indicator.css('left', (26 * (time % 32)) + 'px');
+      if (this.pattern.length % 32 === 0) {
+        page = Math.floor((time % this.pattern.length) / 32);
+        return this.table.css('left', page * (-832) + 'px');
+      }
     };
 
     SynthView.prototype.play = function() {
-      this.indicator.css("display", "block");
-      return this.indicator.css('-webkit-animation-play-state', 'running');
-    };
-
-    SynthView.prototype.pause = function(time) {
-      var remain;
-      this.indicator.css('-webkit-animation-play-state', 'paused');
-      if ((time % 32) !== 0) {
-        remain = this.duration * (32 - time) / 1000;
-        return this.indicator.css('-webkit-animation', 'indicator' + time + ' ' + remain + 's steps(' + (32 - time) + ', end) 0s 1 paused, indicator0 ' + (this.duration / 1000) + 's steps(32, end) ' + remain + 's infinite paused');
-      }
+      return this.indicator.css("display", "block");
     };
 
     SynthView.prototype.stop = function() {
       this.indicator.css("display", "none");
-      return this.indicator.css('-webkit-animation', 'indicator0 ' + (this.duration / 1000) + 's steps(32, end) 0s infinite paused');
+      return this.table.css('left', '0px');
     };
 
     return SynthView;
