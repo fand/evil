@@ -335,7 +335,7 @@ class @Synth
 
     connect: (dst) -> @core.connect(dst)
     
-    setDuration: (@duration) -> @view.setDuration(@duration, @time)
+    setDuration: (@duration) ->
     setKey:  (key) -> @core.setKey(key)
     setScale: (@scale) ->
     setNote: (note) -> @core.setNote(note)
@@ -350,20 +350,22 @@ class @Synth
     noteOff: -> @core.noteOff()
 
     playAt: (@time) ->
+        @view.playAt(@time)
         if @pattern[@time] != 0
             @noteOn(@noteToSemitone(@pattern[@time]))
             T.setTimeout(( =>
                 @core.noteOff()
                 ), @duration - 10)
                 
-    play: -> @view.play()                
+    play: () ->
+        @view.play()
+        
     stop: () ->
         @noteOff()
         @view.stop()
 
     pause: (time) ->
         @noteOff()
-        @view.pause(time)
 
     readPattern: (@pattern) ->
         @view.readPattern(@pattern)        
@@ -442,50 +444,11 @@ class @SynthView
         for i in [0...@pattern.length]
             y = 10 - @pattern[i]
             @rows.eq(y).find('td').eq(i).addClass('on') if @pattern[i] != 0
-        @page_total = @pattern.length / 32
-        @resetAnimation()
 
-    setDuration: (duration, @time) ->       
-        @duration = duration * 32 / 985
-        @resetAnimation()
+    playAt: (time) ->        
+        @indicator.css('left', (26 * (time % 32)) + 68 + 'px')
+        page = Math.floor((time % @pattern.length) / 32)
+        @table.css('left', page * (-832) + 'px')
 
-    play: ->
-        @table.css('-webkit-animation-play-state', 'running')
-        @indicator.css({ 'display': 'block', '-webkit-animation-play-state': 'running' })
-
-    pause: (@time) ->
-        @resetAnimation()
-
-    stop: ->
-        @time = 0
-        @indicator.css("display", "none")
-        @resetAnimation()
-
-    # requirements:
-    #   @time, @pattern, @page_total, @duration
-    resetAnimation: ->
-        @page = Math.floor((@time % @pattern.length) / 32)
-        page_left = @page_total - @page - 1
-        remain = @duration * (32 - (@time % 32)) /32
-
-        if @time == 0
-            @setTableAnimation([
-                ['0', @page_total, @page_total * @duration, @page_total, 0, 'infinite']])
-            @setIndicatorAnimation([
-                ['0', @duration, 32, 0, 'infinite']])
-        else
-            @setTableAnimation([
-                [(@page + 1), @page_total, page_left * @duration, (page_left + 1), remain, '1'],
-                ['0', @page_total, @duration * @page_total, @page_total, remain + (page_left * @duration), 'infinite']])
-                
-            @setIndicatorAnimation([
-                [(@time % 32), remain, (32 - (@time % 32)), '0', '1']
-                ['0', @duration, 32, remain, 'infinite']])
-                    
-    setTableAnimation: (args) ->
-        l = (('table' + a[0] + '_' + a[1] + ' ' + a[2] + 's steps(' + a[3] + ',end)' + a[4] + 's ' + a[5] + ' paused') for a in args).join(', ')
-        @table.css('-webkit-animation', l)
-
-    setIndicatorAnimation: (args) ->
-        l = (('indicator' + a[0] + ' ' + a[1] + 's steps(' + a[2] + ',end)' + a[3] + 's ' + a[4] + ' paused') for a in args).join(', ')
-        @indicator.css('-webkit-animation', l)
+    play: -> @indicator.css("display", "block")
+    stop: -> @indicator.css("display", "none")

@@ -501,7 +501,6 @@
 
     Synth.prototype.setDuration = function(duration) {
       this.duration = duration;
-      return this.view.setDuration(this.duration, this.time);
     };
 
     Synth.prototype.setKey = function(key) {
@@ -532,6 +531,7 @@
     Synth.prototype.playAt = function(time) {
       var _this = this;
       this.time = time;
+      this.view.playAt(this.time);
       if (this.pattern[this.time] !== 0) {
         this.noteOn(this.noteToSemitone(this.pattern[this.time]));
         return T.setTimeout((function() {
@@ -550,8 +550,7 @@
     };
 
     Synth.prototype.pause = function(time) {
-      this.noteOff();
-      return this.view.pause(time);
+      return this.noteOff();
     };
 
     Synth.prototype.readPattern = function(pattern) {
@@ -640,84 +639,34 @@
     };
 
     SynthView.prototype.readPattern = function(pattern) {
-      var i, y, _i, _ref;
+      var i, y, _i, _ref, _results;
       this.pattern = pattern;
       this.cells.removeClass();
+      _results = [];
       for (i = _i = 0, _ref = this.pattern.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         y = 10 - this.pattern[i];
         if (this.pattern[i] !== 0) {
-          this.rows.eq(y).find('td').eq(i).addClass('on');
+          _results.push(this.rows.eq(y).find('td').eq(i).addClass('on'));
+        } else {
+          _results.push(void 0);
         }
       }
-      this.page_total = this.pattern.length / 32;
-      return this.resetAnimation();
+      return _results;
     };
 
-    SynthView.prototype.setDuration = function(duration, time) {
-      this.time = time;
-      this.duration = duration * 32 / 985;
-      return this.resetAnimation();
+    SynthView.prototype.playAt = function(time) {
+      var page;
+      this.indicator.css('left', (26 * (time % 32)) + 68 + 'px');
+      page = Math.floor((time % this.pattern.length) / 32);
+      return this.table.css('left', page * (-832) + 'px');
     };
 
     SynthView.prototype.play = function() {
-      this.table.css('-webkit-animation-play-state', 'running');
-      return this.indicator.css({
-        'display': 'block',
-        '-webkit-animation-play-state': 'running'
-      });
-    };
-
-    SynthView.prototype.pause = function(time) {
-      this.time = time;
-      return this.resetAnimation();
+      return this.indicator.css("display", "block");
     };
 
     SynthView.prototype.stop = function() {
-      this.time = 0;
-      this.indicator.css("display", "none");
-      return this.resetAnimation();
-    };
-
-    SynthView.prototype.resetAnimation = function() {
-      var page_left, remain;
-      this.page = Math.floor((this.time % this.pattern.length) / 32);
-      page_left = this.page_total - this.page - 1;
-      remain = this.duration * (32 - (this.time % 32)) / 32;
-      if (this.time === 0) {
-        this.setTableAnimation([['0', this.page_total, this.page_total * this.duration, this.page_total, 0, 'infinite']]);
-        return this.setIndicatorAnimation([['0', this.duration, 32, 0, 'infinite']]);
-      } else {
-        this.setTableAnimation([[this.page + 1, this.page_total, page_left * this.duration, page_left + 1, remain, '1'], ['0', this.page_total, this.duration * this.page_total, this.page_total, remain + (page_left * this.duration), 'infinite']]);
-        return this.setIndicatorAnimation([[this.time % 32, remain, 32 - (this.time % 32), '0', '1'], ['0', this.duration, 32, remain, 'infinite']]);
-      }
-    };
-
-    SynthView.prototype.setTableAnimation = function(args) {
-      var a, l;
-      l = ((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = args.length; _i < _len; _i++) {
-          a = args[_i];
-          _results.push('table' + a[0] + '_' + a[1] + ' ' + a[2] + 's steps(' + a[3] + ',end)' + a[4] + 's ' + a[5] + ' paused');
-        }
-        return _results;
-      })()).join(', ');
-      return this.table.css('-webkit-animation', l);
-    };
-
-    SynthView.prototype.setIndicatorAnimation = function(args) {
-      var a, l;
-      l = ((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = args.length; _i < _len; _i++) {
-          a = args[_i];
-          _results.push('indicator' + a[0] + ' ' + a[1] + 's steps(' + a[2] + ',end)' + a[3] + 's ' + a[4] + ' paused');
-        }
-        return _results;
-      })()).join(', ');
-      return this.indicator.css('-webkit-animation', l);
+      return this.indicator.css("display", "none");
     };
 
     return SynthView;
