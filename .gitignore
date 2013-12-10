@@ -16,3 +16,4 @@ MYMETA.yml
 /_build/
 /local/
 /.carton/
+node_modules/
