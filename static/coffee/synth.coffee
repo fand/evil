@@ -243,11 +243,11 @@ class @SynthCoreView
         @initEvent()
 
     initEvent: ->
-        @vcos.on("change", () => @setVCOParam())
-        @gain_inputs.on("change", () => @setGain())
+        @vcos.on("change",          () => @setVCOParam())
+        @gain_inputs.on("change",   () => @setGain())
         @filter_inputs.on("change", () => @setFilterParam())
-        @EG_inputs.on("change", () => @setEGParam())
-        @FEG_inputs.on("change", () => @setFEGParam())
+        @EG_inputs.on("change",     () => @setEGParam())
+        @FEG_inputs.on("change",    () => @setFEGParam())
         @setParam()
 
     updateCanvas: (name) ->
@@ -344,7 +344,7 @@ class @Synth
         Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]
 
     noteOn: (note) ->
-        @core.setNote(note)
+        @core.setNote(@noteToSemitone(note))
         @core.noteOn()
         
     noteOff: -> @core.noteOff()
@@ -352,7 +352,8 @@ class @Synth
     playAt: (@time) ->
         @view.playAt(@time)
         if @pattern[@time] != 0
-            @noteOn(@noteToSemitone(@pattern[@time]))
+            @core.setNote(@noteToSemitone(@pattern[@time]))
+            @core.noteOn()
             T.setTimeout(( =>
                 @core.noteOff()
                 ), @duration - 10)
@@ -361,11 +362,11 @@ class @Synth
         @view.play()
         
     stop: () ->
-        @noteOff()
+        @core.noteOff()
         @view.stop()
 
     pause: (time) ->
-        @noteOff()
+        @core.noteOff()
 
     readPattern: (@pattern) ->
         @view.readPattern(@pattern)        
@@ -377,23 +378,22 @@ class @Synth
         @pattern[time] = 0
 
 
-                                                                                                                                
+
 class @SynthView
     constructor: (@model, @id) ->
 
         @dom = $('#tmpl_synth').clone()
-        @dom.attr('id', 'synth' + id)        
+        @dom.attr('id', 'synth' + id)
         $("#instruments").append(@dom)
                 
         @indicator = @dom.find('.indicator')
         @table = @dom.find('.table').eq(0)
-        @rows  = @dom.find('tr').each(-> $(this).find('td'))
+        @rows  = @dom.find('tr').filter(-> $(this).find('td').length > 0)
         @cells = @dom.find('td')
 
-        @time = 0
-        @page_total = 1
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        @duration = 0
+
+        @control_total = @table.find('.pattern-total')
 
         @initEvent()
 
@@ -435,20 +435,25 @@ class @SynthView
 
         @rows.on('mouseup', ( -> self.mouse_pressed = false))
 
-        @dom.find('th')
-            .on('mousedown', ( -> self.model.noteOn(self.model.noteToSemitone($(this).data('y')))))
-            .on("mouseup", ( -> self.model.noteOff()))        
+        # @dom.find('th')
+        #     .on('mousedown', ( -> self.model.noteOn(self.model.noteToSemitone($(this).data('y')))))
+        #     .on("mouseup", ( -> self.model.noteOff()))        
 
     readPattern: (@pattern) ->
         @cells.removeClass()
         for i in [0...@pattern.length]
             y = 10 - @pattern[i]
             @rows.eq(y).find('td').eq(i).addClass('on') if @pattern[i] != 0
+        @page_total = @pattern.length / 32
+        @control_total.text(' ' + @page_total)
 
     playAt: (time) ->        
-        @indicator.css('left', (26 * (time % 32)) + 68 + 'px')
-        page = Math.floor((time % @pattern.length) / 32)
-        @table.css('left', page * (-832) + 'px')
+        @indicator.css('left', (26 * (time % 32)) + 'px')
+        if @pattern.length % 32 == 0
+            page = Math.floor((time % @pattern.length) / 32)
+            @table.css('left', page * (-832) + 'px')
 
     play: -> @indicator.css("display", "block")
-    stop: -> @indicator.css("display", "none")
+    stop: ->
+        @indicator.css("display", "none")
+        @table.css('left', '0px')

@@ -100,12 +100,9 @@
       return this.is_playing;
     };
 
-    Player.prototype.play = function(pos) {
+    Player.prototype.play = function() {
       var _this = this;
       this.is_playing = true;
-      if (pos != null) {
-        this.time = pos;
-      }
       return T.setTimeout((function() {
         var s, _i, _len, _ref;
         _ref = _this.synth;
@@ -113,11 +110,11 @@
           s = _ref[_i];
           s.play();
         }
-        return _this.play_seq();
+        return _this.playNext();
       }), 150);
     };
 
-    Player.prototype.play_seq = function() {
+    Player.prototype.playNext = function() {
       var s, _i, _len, _ref,
         _this = this;
       if (this.is_playing) {
@@ -130,7 +127,7 @@
           s.playAt(this.time++);
         }
         return T.setTimeout((function() {
-          return _this.play_seq();
+          return _this.playNext();
         }), this.duration);
       }
     };

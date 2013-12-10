@@ -19,77 +19,19 @@ body {
     float: left;
 }
 
-.indicator {
-    display: none;
-    position: absolute;
-    float: left;
-    width: 24px;
-    height: 259px;
-    top: 47px;
-    
-    background-color: #dff;
-    border: 1px solid #dFF;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-    border-radius: 2px;
-    
-    box-shadow: 0px 0px 5px #0FF;
-}
 
 
-th {
-  display: block;
-  float: left; 
-  margin: 0px;
-  padding: 0px;
-  width: 60px;
-  height: 23px;
-  min-width: 18px;
-  min-height:18px;
-  line-height: 20px;
-  font-size: 10px;
-  font-weight:100;
-  color:#888;
-  text-shadow: 0px 0px 3px #EEE;
-
-  border: 1px solid #DDD;
-  background:-moz-linear-gradient(
-      top,
-      rgb(255,255,255)0,
-      rgb(245,245,245)50,
-      rgb(230,230,230)50,
-      rgb(238,238,238)100%
-  );
-  background:-webkit-gradient(
-      linear, left top, left bottom,
-      color-stop(0,  rgb(255,255,255)),
-      color-stop(0.5,rgb(245,245,245)),
-      color-stop(0.5,rgb(238,238,238)),
-      color-stop(1.0,rgb(240,240,240))
-  );
-}
-th:hover {
-    -webkit-opacity:0.65;
-    opacity:0.65;
-    box-shadow:0px 1px 3px rgb(210,210,210);
-}
-
-th:active {
-    -webkit-opacity:1.0;
-    opacity:1.0;
-    box-shadow:0px 30px 0px rgba(200,200,200, 0.3) inset;
-    color:#fff;
-}
+/* Sequencer */
 
 .sequencer-table {
     display: block;
     position: absolute;
     margin: 5px;
     padding: 0;
-    top: 40px;
+    top: 0px;
     left: 62px;
-    width: 832px;
-    height: 265px;
+    width: 834px;
+    height: 320px;
     overflow: hidden;
 }
 .table {
@@ -100,8 +42,43 @@ th:active {
     top: 0;
     left: 0;
     min-width: 8000px;
-    height: 265px;
+    height: 320px;
     overflow-y: hidden;
+}
+.indicator {
+    display: none;
+    position: absolute;
+    float: left;
+    width: 24px;
+    height: 261px;
+    top: 43px;
+    
+    background-color: #dff;
+    border: 1px solid #dFF;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    
+    box-shadow: 0px 0px 5px #0FF;
+}
+.table > thead .position{
+    width: 810px;
+    height: 30px;
+    margin: 0px;
+    padding: 5px 15px 5px 5px;    
+    color: #aaefff;
+    font-size: 16px;
+    text-align: right;
+}
+.table > thead .position > span {
+    font-size: 16px;
+    float: right;
+}
+.table > thead > tr.header {
+  margin:0px;
+  padding:0px;
+  max-height:40px;
+  width: 8000px;
 }
 tr {
   display:block;
@@ -201,6 +178,9 @@ td:hover {
 }
 
 
+
+/* Wrapper */
+
 #wrapper {
     position: absolute;
 
@@ -255,6 +235,9 @@ td:hover {
 }
 
 
+
+/* Controll */
+
 #control {
     position: absolute;
     margin:0px auto;
@@ -266,11 +249,11 @@ td:hover {
     width: 850px;
     height: 20px;
 
-
     font-size: 22px;
     color: #88e0ff;    
     background-color: #fff;
 }
+
 
 #instruments {
     margin: 0px;
@@ -294,6 +277,10 @@ td:hover {
     top: 300px;
     left: 0px;
 }
+
+
+
+/* Synthesizer */
 
 .RS_module {
     color: #0df;

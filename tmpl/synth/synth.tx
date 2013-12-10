@@ -1,17 +1,30 @@
 <div id="tmpl_synth" class="instrument clearfix">
 
   <div class="sequencer">
-    <div class="indicator"></div>
-
     <div class="sequencer-table">
+      <div class="indicator"></div>
+      
       <table class="table">
-        <: for [0..9] -> $i { :>
-          <tr note="<: 10 - $i :>">
-            <!-- <th data-y="<: 10 - $i :>"><: 10 - $i :>th</th> -->
-            <: for [0..255] -> $j { :><td data-x="<: $j :>" data-y="<: 10 - $i :>"></td><: } :>
+        <thead>
+          <tr class="header">
+            <: for [0..8] -> $pos { :>
+              <th class="position clearfix">
+                <span class="pattern-total"></span>
+                <span><: $pos + 1 :> / </span>
+              </th>
+            <: } :>
           </tr>
+        </thead>
+
+        <tbody>
+          <: for [0..9] -> $i { :>
+            <tr note="<: 10 - $i :>">
+              <: for [0..255] -> $j { :><td data-x="<: $j :>" data-y="<: 10 - $i :>"></td><: } :>
+            </tr>
           <: } :>
+        </tbody>
       </table>
+      
     </div>
   </div>
 

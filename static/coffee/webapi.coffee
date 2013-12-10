@@ -63,19 +63,18 @@ class @Player
 
     isPlaying: -> @is_playing
 
-    play: (pos) ->
+    play: ->
         @is_playing = true
-        @time = pos if pos?
         T.setTimeout(( =>
             s.play() for s in @synth
-            @play_seq()
+            @playNext()
          ), 150)
 
-    play_seq: ->
+    playNext: ->
         if @is_playing            
             @time = 0 if @time >= @scene.size
             s.playAt(@time++) for s in @synth
-            T.setTimeout(( => @play_seq()), @duration)
+            T.setTimeout(( => @playNext()), @duration)
             
     stop: ->
         s.stop() for s in @synth

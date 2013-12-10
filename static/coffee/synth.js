@@ -520,7 +520,7 @@
     };
 
     Synth.prototype.noteOn = function(note) {
-      this.core.setNote(note);
+      this.core.setNote(this.noteToSemitone(note));
       return this.core.noteOn();
     };
 
@@ -533,7 +533,8 @@
       this.time = time;
       this.view.playAt(this.time);
       if (this.pattern[this.time] !== 0) {
-        this.noteOn(this.noteToSemitone(this.pattern[this.time]));
+        this.core.setNote(this.noteToSemitone(this.pattern[this.time]));
+        this.core.noteOn();
         return T.setTimeout((function() {
           return _this.core.noteOff();
         }), this.duration - 10);
@@ -545,12 +546,12 @@
     };
 
     Synth.prototype.stop = function() {
-      this.noteOff();
+      this.core.noteOff();
       return this.view.stop();
     };
 
     Synth.prototype.pause = function(time) {
-      return this.noteOff();
+      return this.core.noteOff();
     };
 
     Synth.prototype.readPattern = function(pattern) {
@@ -579,14 +580,12 @@
       $("#instruments").append(this.dom);
       this.indicator = this.dom.find('.indicator');
       this.table = this.dom.find('.table').eq(0);
-      this.rows = this.dom.find('tr').each(function() {
-        return $(this).find('td');
+      this.rows = this.dom.find('tr').filter(function() {
+        return $(this).find('td').length > 0;
       });
       this.cells = this.dom.find('td');
-      this.time = 0;
-      this.page_total = 1;
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      this.duration = 0;
+      this.control_total = this.table.find('.pattern-total');
       this.initEvent();
     }
 
@@ -628,37 +627,32 @@
       }).on('mouseup', function() {
         return self.mouse_pressed = false;
       });
-      this.rows.on('mouseup', (function() {
+      return this.rows.on('mouseup', (function() {
         return self.mouse_pressed = false;
-      }));
-      return this.dom.find('th').on('mousedown', (function() {
-        return self.model.noteOn(self.model.noteToSemitone($(this).data('y')));
-      })).on("mouseup", (function() {
-        return self.model.noteOff();
       }));
     };
 
     SynthView.prototype.readPattern = function(pattern) {
-      var i, y, _i, _ref, _results;
+      var i, y, _i, _ref;
       this.pattern = pattern;
       this.cells.removeClass();
-      _results = [];
       for (i = _i = 0, _ref = this.pattern.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         y = 10 - this.pattern[i];
         if (this.pattern[i] !== 0) {
-          _results.push(this.rows.eq(y).find('td').eq(i).addClass('on'));
-        } else {
-          _results.push(void 0);
+          this.rows.eq(y).find('td').eq(i).addClass('on');
         }
       }
-      return _results;
+      this.page_total = this.pattern.length / 32;
+      return this.control_total.text(' ' + this.page_total);
     };
 
     SynthView.prototype.playAt = function(time) {
       var page;
-      this.indicator.css('left', (26 * (time % 32)) + 68 + 'px');
-      page = Math.floor((time % this.pattern.length) / 32);
-      return this.table.css('left', page * (-832) + 'px');
+      this.indicator.css('left', (26 * (time % 32)) + 'px');
+      if (this.pattern.length % 32 === 0) {
+        page = Math.floor((time % this.pattern.length) / 32);
+        return this.table.css('left', page * (-832) + 'px');
+      }
     };
 
     SynthView.prototype.play = function() {
@@ -666,7 +660,8 @@
     };
 
     SynthView.prototype.stop = function() {
-      return this.indicator.css("display", "none");
+      this.indicator.css("display", "none");
+      return this.table.css('left', '0px');
     };
 
     return SynthView;
