@@ -12,8 +12,14 @@ module.exports = function(grunt) {
             }
         },
         coffee: {
-            dist: {
-                src: 'static/coffee/*.coffee', dest: 'static/coffee/*.js'
+            main: {
+                files: [{
+                    expand: true,
+                    cwd: 'static/coffee/',
+                    src: ['*.coffee'],
+                    dest: 'static/coffee/',
+                    ext: '.js'
+                }]            
             }
         },
         concat: {
