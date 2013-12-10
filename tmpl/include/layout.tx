@@ -7,14 +7,10 @@
     <meta http-equiv="Content-Script-Type" content="text/javascript" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
     <meta name="format-detection" content="telephone=no" />
-    <script src="<: uri_for('/static/js/jquery-2.0.3.min.js') :>"></script>
-    <script src="<: uri_for('/static/js/jquery.socialbutton-1.9.0.min.js') :>"></script>    
-    <script src="<: uri_for('/static/js/MutekiTimer.js') :>"></script>
     <link href="<: static_file('/static/css/main.css') :>" rel="stylesheet" type="text/css" media="screen" />
     <link href="<: static_file('/static/css/riff.css') :>" rel="stylesheet" type="text/css" media="screen" />    
     
-    <script src="<: uri_for('/static/coffee/synth.js') :>"></script>
-    <script src="<: uri_for('/static/coffee/webapi.js') :>"></script>
+    <script src="<: uri_for('/static/js/Wasynth2.min.js') :>"></script>
     
   </head>
   <body>

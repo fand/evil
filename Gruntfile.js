@@ -13,7 +13,7 @@ module.exports = function(grunt) {
         },
         coffee: {
             dist: {
-                src: 'static/coffee/', dest: 'static/coffee/'
+                src: 'static/coffee/*.coffee', dest: 'static/coffee/*.js'
             }
         },
         concat: {
@@ -21,15 +21,15 @@ module.exports = function(grunt) {
                 separator: ';'
             },
             dist: {
-                src: ['static/coffee/*.js'],
+                src: ['static/js/lib/*.js', 'static/coffee/*.js'],
                 dest: 'static/js/<%= pkg.name %>.js'
             }
         },
         watch: {
             coffee: {
                 files: ['static/coffee/*.coffee'],
-                tasks: 'coffee concat min'
-            }
+                tasks: ['coffee', 'concat', 'uglify']
+            }           
         }
     });
     grunt.loadNpmTasks('grunt-contrib-uglify');
