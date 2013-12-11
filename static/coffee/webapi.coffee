@@ -54,14 +54,14 @@ class @Player
     setBPM: (@bpm) ->
         @duration = 15.0 / @bpm * 1000  # msec
         s.setDuration(@duration) for s in @synth
-        console.log('bpm: ' + @bpm)
         
     setKey: (key)->
         @freq_key = KEY_LIST[key]
         s.setKey(@freq_key) for s in @synth
             
-    setScale: (scale) ->
-        @scale = SCALE_LIST[scale]
+    setScale: (@scale) ->
+        if ! Array.isArray(@scale)
+            @scale = SCALE_LIST[@scale]
         s.setScale(@scale) for s in @synth
 
     isPlaying: -> @is_playing
@@ -75,7 +75,7 @@ class @Player
 
     playNext: ->
         if @is_playing            
-            @time = 0 if @time >= @scene.size
+            @time = 0 if @time >= @scene_size
             s.playAt(@time) for s in @synth
             @time++
             T.setTimeout(( => @playNext()), @duration)
@@ -83,7 +83,7 @@ class @Player
     stop: ->
         s.stop() for s in @synth
         @is_playing = false
-        @time = @scene.size        
+        @time = @scene_size        
 
     pause: ->
         s.pause(@time) for s in @synth
@@ -92,25 +92,12 @@ class @Player
     noteOn: (note) -> @synth_now.noteOn(note)
     noteOff: ()    -> @synth_now.noteOff()
 
-    readSong: (song) -> null
-        
-    readScene: (@scene) ->
-        patterns = @scene.patterns
-        while patterns.length > @synth.length
-            @addSynth()
-        @setBPM(@scene.bpm) if @scene.bpm?
-        @setScale(@scene.scale) if @scene.scale?
-        for i in [0...patterns.length]
-            @synth[i].readPattern(patterns[i])
-        @view.synth_total = @synth.length
-
     addSynth: (callback) ->
         s = new Synth(@context, @num_id++)
         s.setScale(@scale)
         s.setKey(@freq_key)
         s.connect(@context.destination)
         @synth.push(s)
-        callback() if callback?
 
     moveRight: (next_idx) ->
         @synth[next_idx - 1].inactivate()
@@ -120,7 +107,59 @@ class @Player
     moveLeft: (next_idx) ->
         @synth[next_idx + 1].inactivate()
         @synth_now = @synth[next_idx]
-        @synth_now.activate()        
+        @synth_now.activate()
+
+    saveSong: () ->
+        @scene =
+            size:     @scene_size
+            patterns: (s.pattern for s in @synth)
+            bpm:      @bpm
+            scale:    @scale
+            key:      @key
+
+        @scenes = [@scene]
+        song_json = JSON.stringify(@scenes)
+        csrf_token = $('#ajax-form > input[name=csrf_token]').val()
+        $.ajax(
+            url: '/'
+            type: 'POST'
+            dataType: 'text'
+            data:
+                json: song_json
+                csrf_token: csrf_token
+        ).done((d) =>
+            @showSuccess(d)
+        ).fail((err) =>
+            @showError(err)
+        )
+
+    readSong: (scn) ->
+        if song_read?        
+            @scenes = song_read
+        else
+            @scenes = [scn]
+        @readScene(@scenes[0])
+                        
+    readScene: (@scene) ->
+        #@scenes = [@scene]
+        @scene_size = @scene.size
+        patterns = @scene.patterns
+        while patterns.length > @synth.length
+            @addSynth()
+        @setBPM(@scene.bpm) if @scene.bpm?
+        @setKey(@scene.key) if @scene.key?        
+        @setScale(@scene.scale) if @scene.scale?
+        for i in [0...patterns.length]
+            @synth[i].readPattern(patterns[i])
+        @view.synth_total = @synth.length
+
+    showSuccess: (url) ->
+        console.log("success!")
+        console.log(url)
+        
+    showError: (error) ->
+        console.log(error)
+        
         
 
 class @PlayerView
@@ -144,6 +183,8 @@ class @PlayerView
         @synth_now = 0
         @synth_total = 1
 
+        @btn_save = $('#btn-save')
+
         @initEvent()
 
     initEvent: ->
@@ -166,6 +207,9 @@ class @PlayerView
         )
         @btn_left.on('mousedown',  () => @moveLeft())
         @btn_right.on('mousedown', () => @moveRight())
+
+        @btn_save.on('click', () => @model.saveSong())
+        
         
     setBPM:   ->  @model.setBPM(parseInt(@bpm.val()))
     setKey:   ->  @model.setKey(@key.val())
@@ -184,6 +228,8 @@ class @PlayerView
             @synth_now--
             @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
             @model.moveLeft(@synth_now)
+
+
 
 $(() ->
     $("#twitter").socialbutton('twitter', {
@@ -257,7 +303,8 @@ $(() ->
              1,2,3,5,8,3,5,8,2,3,4,6,9,4,6,9,3,4,5,7,10,5,7,10,7,8,1,3,5,8,1,1,
              1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8]
             ]
-    player.readScene(scn22)
+    #player.readScene(scn22)
+    player.readSong(scn22)
 )
 
 

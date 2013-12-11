@@ -54,5 +54,8 @@
 </div>
 
 
+<input type="button" id="btn-save" value="save" />
+<form id="ajax-form" method="POST" />
+<script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
 
 : }

@@ -296,6 +296,8 @@ class @Synth
     noteOff: -> @core.noteOff()
 
     playAt: (@time) ->
+        #console.log(@noteToSemitone(@pattern[@time]))
+        console.log(@scale)
         @view.playAt(@time)
         if @pattern[@time] != 0
             @core.setNote(@noteToSemitone(@pattern[@time]))
@@ -315,7 +317,8 @@ class @Synth
         @core.noteOff()
 
     readPattern: (@pattern) ->
-        @view.readPattern(@pattern)        
+        @view.readPattern(@pattern)
+        console.log(@pattern)
 
     addNote: (time, note) ->
         @pattern[time] = note
@@ -360,7 +363,7 @@ class @SynthView
 
             if $(this).hasClass("on")
                 $(this).removeClass()
-                self.removeNote($(this).text())
+                self.model.removeNote(parseInt($(this).text()))
             else
                 self.rows.each( ->
                     $(this).find('td').eq(mouse_time).removeClass()
@@ -394,7 +397,6 @@ class @SynthView
             @rows.eq(y).find('td').eq(i).addClass('on') if @pattern[i] != 0
         @page_total = @pattern.length / 32
         @control_total.text(' ' + @page_total)
-        console.log(@pattern)
 
     playAt: (time) ->        
         @indicator.css('left', (26 * (time % 32)) + 'px')

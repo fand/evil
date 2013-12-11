@@ -8,9 +8,9 @@ use Teng::Schema::Declare;
 base_row_class 'Wasynth2::DB::Row';
 
 table {
-    name 'member';
+    name 'songs';
     pk 'id';
-    columns qw(id name);
+    columns qw(id json);
 };
 
 1;

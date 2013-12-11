@@ -452,6 +452,7 @@
     Synth.prototype.playAt = function(time) {
       var _this = this;
       this.time = time;
+      console.log(this.scale);
       this.view.playAt(this.time);
       if (this.pattern[this.time] !== 0) {
         this.core.setNote(this.noteToSemitone(this.pattern[this.time]));
@@ -477,7 +478,8 @@
 
     Synth.prototype.readPattern = function(pattern) {
       this.pattern = pattern;
-      return this.view.readPattern(this.pattern);
+      this.view.readPattern(this.pattern);
+      return console.log(this.pattern);
     };
 
     Synth.prototype.addNote = function(time, note) {
@@ -534,7 +536,7 @@
         mouse_note = +($(this).data('y'));
         if ($(this).hasClass("on")) {
           $(this).removeClass();
-          return self.removeNote($(this).text());
+          return self.model.removeNote(parseInt($(this).text()));
         } else {
           self.rows.each(function() {
             return $(this).find('td').eq(mouse_time).removeClass();
@@ -572,8 +574,7 @@
         }
       }
       this.page_total = this.pattern.length / 32;
-      this.control_total.text(' ' + this.page_total);
-      return console.log(this.pattern);
+      return this.control_total.text(' ' + this.page_total);
     };
 
     SynthView.prototype.playAt = function(time) {
