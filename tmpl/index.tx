@@ -12,7 +12,7 @@
   
   <div id="env"></div>
 
-  <div id="instruments">
+  <div id="instruments" class="clearfix">
   </div>
   
   <div id="templates">
@@ -20,12 +20,7 @@
   </div>
 </div>
 
-
-<!-- <div id="wrapper-right"></div> -->
-<!-- <div id="wrapper-left"></div> -->
-
-
-<form name="control" id="control" class="module">
+<div name="control" id="control" class="module">
   key: <select name="key">
     <option selected="selected">A</option>
     <option>D</option>
@@ -52,6 +47,12 @@
   bpm: <input name="bpm" min="60" max="240" value="70" type="number">
   <input type="button" name="play" value="play" style="width:80px;"/>
   <input type="button" name="stop" value="stop" />
-</form>
+
+  <div id="btn-left"></div>
+  <div id="btn-right"></div>
+  
+</div>
+
+
 
 : }

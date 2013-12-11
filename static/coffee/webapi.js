@@ -47,9 +47,11 @@
       this.scene_position = 0;
       this.scenes = [];
       this.scene = null;
+      this.num_id = 0;
       this.context = CONTEXT;
-      this.synth = [new Synth(this.context, 42)];
+      this.synth = [new Synth(this.context, this.num_id++)];
       this.synth_now = this.synth[0];
+      this.synth_pos = 0;
       _ref = this.synth;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
@@ -59,16 +61,15 @@
     }
 
     Player.prototype.setBPM = function(bpm) {
-      var s, _i, _len, _ref, _results;
+      var s, _i, _len, _ref;
       this.bpm = bpm;
       this.duration = 15.0 / this.bpm * 1000;
       _ref = this.synth;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        _results.push(s.setDuration(this.duration));
+        s.setDuration(this.duration);
       }
-      return _results;
+      return console.log('bpm: ' + this.bpm);
     };
 
     Player.prototype.setKey = function(key) {
@@ -123,8 +124,9 @@
         _ref = this.synth;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           s = _ref[_i];
-          s.playAt(this.time++);
+          s.playAt(this.time);
         }
+        this.time++;
         return T.setTimeout((function() {
           return _this.playNext();
         }), this.duration);
@@ -165,11 +167,11 @@
     };
 
     Player.prototype.readScene = function(scene) {
-      var i, patterns, _i, _ref, _results;
+      var i, patterns, _i, _ref;
       this.scene = scene;
       patterns = this.scene.patterns;
       while (patterns.length > this.synth.length) {
-        this.synth.push(new Synth(this.context, Math.floor(Math.random() * 100)));
+        this.addSynth();
       }
       if (this.scene.bpm != null) {
         this.setBPM(this.scene.bpm);
@@ -177,11 +179,34 @@
       if (this.scene.scale != null) {
         this.setScale(this.scene.scale);
       }
-      _results = [];
       for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.synth[i].readPattern(patterns[i]));
+        this.synth[i].readPattern(patterns[i]);
       }
-      return _results;
+      return this.view.synth_total = this.synth.length;
+    };
+
+    Player.prototype.addSynth = function(callback) {
+      var s;
+      s = new Synth(this.context, this.num_id++);
+      s.setScale(this.scale);
+      s.setKey(this.freq_key);
+      s.connect(this.context.destination);
+      this.synth.push(s);
+      if (callback != null) {
+        return callback();
+      }
+    };
+
+    Player.prototype.moveRight = function(next_idx) {
+      this.synth[next_idx - 1].inactivate();
+      this.synth_now = this.synth[next_idx];
+      return this.synth_now.activate();
+    };
+
+    Player.prototype.moveLeft = function(next_idx) {
+      this.synth[next_idx + 1].inactivate();
+      this.synth_now = this.synth[next_idx];
+      return this.synth_now.activate();
     };
 
     return Player;
@@ -200,6 +225,11 @@
       this.setBPM();
       this.setKey();
       this.setScale();
+      this.instruments = $('#instruments');
+      this.btn_left = this.dom.find('#btn-left');
+      this.btn_right = this.dom.find('#btn-right');
+      this.synth_now = 0;
+      this.synth_total = 1;
       this.initEvent();
     }
 
@@ -219,9 +249,15 @@
           return _this.play.attr("value", "pause");
         }
       });
-      return this.stop.on('mousedown', function() {
+      this.stop.on('mousedown', function() {
         _this.model.stop();
         return _this.play.attr("value", "play");
+      });
+      this.btn_left.on('mousedown', function() {
+        return _this.moveLeft();
+      });
+      return this.btn_right.on('mousedown', function() {
+        return _this.moveRight();
       });
     };
 
@@ -237,12 +273,30 @@
       return this.model.setScale(this.scale.val());
     };
 
+    PlayerView.prototype.moveRight = function() {
+      if (this.synth_now === (this.synth_total - 1)) {
+        this.model.addSynth();
+        this.synth_total++;
+      }
+      this.synth_now++;
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+      return this.model.moveRight(this.synth_now);
+    };
+
+    PlayerView.prototype.moveLeft = function() {
+      if (this.synth_now !== 0) {
+        this.synth_now--;
+        this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+        return this.model.moveLeft(this.synth_now);
+      }
+    };
+
     return PlayerView;
 
   })();
 
   $(function() {
-    var is_key_pressed, player, scn1, scn2, scn3, scn55, scn8;
+    var is_key_pressed, player, scn1, scn2, scn22, scn3, scn55, scn8;
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
@@ -272,26 +326,30 @@
     });
     scn55 = {
       size: 32,
-      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
+      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
+    };
+    scn22 = {
+      size: 32,
+      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [1, 1, 8, 1, 8, 1, 7, 1, 1, 1, 8, 1, 8, 1, 7, 1, 3, 1, 3, 1, 1, 2, 3, 5, 8, 1, 8, 7, 5, 1, 3, 2]]
     };
     scn1 = {
       size: 32,
-      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
+      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
     };
     scn2 = {
       size: 64,
-      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
+      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
     };
     scn3 = {
       size: 96,
-      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1]]
+      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1]]
     };
     scn8 = {
       bpm: 240,
       size: 256,
-      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
+      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
     };
-    return player.readScene(scn1);
+    return player.readScene(scn22);
   });
 
   KEYCODE_TO_NOTE = {

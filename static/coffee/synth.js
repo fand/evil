@@ -488,6 +488,14 @@
       return this.pattern[time] = 0;
     };
 
+    Synth.prototype.activate = function() {
+      return this.view.activate();
+    };
+
+    Synth.prototype.inactivate = function() {
+      return this.view.inactivate();
+    };
+
     return Synth;
 
   })();
@@ -564,7 +572,8 @@
         }
       }
       this.page_total = this.pattern.length / 32;
-      return this.control_total.text(' ' + this.page_total);
+      this.control_total.text(' ' + this.page_total);
+      return console.log(this.pattern);
     };
 
     SynthView.prototype.playAt = function(time) {
@@ -583,6 +592,16 @@
     SynthView.prototype.stop = function() {
       this.indicator.css("display", "none");
       return this.table.css('left', '0px');
+    };
+
+    SynthView.prototype.activate = function() {
+      this.indicator.show();
+      return this.table.show();
+    };
+
+    SynthView.prototype.inactivate = function() {
+      this.indicator.hide();
+      return this.table.hide();
     };
 
     return SynthView;

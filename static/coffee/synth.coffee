@@ -323,6 +323,8 @@ class @Synth
     removeNote: (time) ->
         @pattern[time] = 0
 
+    activate: -> @view.activate()
+    inactivate: -> @view.inactivate()
 
 
 class @SynthView
@@ -392,6 +394,7 @@ class @SynthView
             @rows.eq(y).find('td').eq(i).addClass('on') if @pattern[i] != 0
         @page_total = @pattern.length / 32
         @control_total.text(' ' + @page_total)
+        console.log(@pattern)
 
     playAt: (time) ->        
         @indicator.css('left', (26 * (time % 32)) + 'px')
@@ -403,3 +406,11 @@ class @SynthView
     stop: ->
         @indicator.css("display", "none")
         @table.css('left', '0px')
+
+    activate: ->
+        @indicator.show()
+        @table.show()
+        
+    inactivate: ->
+        @indicator.hide()
+        @table.hide()

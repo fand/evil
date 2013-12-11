@@ -21,6 +21,72 @@ body {
 
 
 
+/* Wrapper */
+
+#wrapper {
+}
+#instruments {
+    position: absolute;
+
+    /* width: 910px; */
+    width: 800000px;
+    max-height: 600px;
+    margin: 0px;
+    padding: 0px;
+    top: 50%;
+    left: 50%;
+    margin-top: -300px;
+    margin-left: -470px;
+    overflow-y: hidden;
+
+    transition: all 0.2s ease 0s;
+}
+.instrument {
+    position: relative;
+    display: box;
+    float: left;
+    
+    width: 910px;
+    height: 590px;
+    margin: 0px;
+    padding: 0px;
+    margin-right: 130px;
+
+    background-color: #fff;
+    border: 1px solid #0df;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+#btn-right {
+    position: fixed;
+
+    width: 800px;
+    min-height: 600px;
+    margin: 0px;
+    padding: 0px;
+    top: 50%;
+    left: 50%;
+    margin-top: -300px;
+    margin-left: 520px;
+    opacity: 0.1;
+}
+#btn-left {
+    position: fixed;
+
+    width: 800px;
+    min-height: 600px;
+    margin: 0px;
+    padding: 0px;
+    top: 50%;
+    right: 50%;
+    margin-top: -300px;
+    margin-right: 550px;
+    opacity: 0.1;
+}
+    
+
+
 /* Sequencer */
 
 .sequencer-table {
@@ -179,63 +245,6 @@ td:hover {
 
 
 
-/* Wrapper */
-
-#wrapper {
-    position: absolute;
-
-    width: 910px;
-    height: 590px;
-
-    margin: 0px;
-    padding: 0px;
-
-    top: 50%;
-    left: 50%;
-
-    margin-top: -300px;
-    margin-left: -470px;
-
-    background-color: #fff;
-    border: 1px solid #0df;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-}
-
-#wrapper-right {
-    position: absolute;
-
-    width: 910px;
-    height: 590px;
-
-    margin: 0px;
-    padding: 0px;
-
-    top: 50%;
-    left: 50%;
-
-    margin-top: -300px;
-    margin-left: 530px;
-
-    background-color: #fff;
-    border: 1px solid #f0d;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-    
-    opacity: 0.1;
-}
-#wrapper-right:hover {
-    opacity: 0.5;
-}
-
-#btn-right {
-
-}
-
-
-
 /* Controll */
 
 #control {
@@ -255,22 +264,6 @@ td:hover {
 }
 
 
-#instruments {
-    margin: 0px;
-    padding: 0px;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 100%;    
-}
-
-.instrument {
-    position: absolute;
-    top:0px;
-    left:0px;
-    width: 100%;
-    height: 100%;    
-}
 
 .core {
     position: absolute;

@@ -41,10 +41,11 @@ class @Player
         @scenes = []
         @scene = null
 
+        @num_id = 0
         @context = CONTEXT
-        @synth = [new Synth(@context, 42)]
-#        @synth = [new Synth(@context, 42), new Synth(@context, 101), new Synth(@context, 1)]
+        @synth = [new Synth(@context, @num_id++)]
         @synth_now = @synth[0]
+        @synth_pos = 0
         for s in @synth
             s.connect(@context.destination)
         
@@ -53,6 +54,7 @@ class @Player
     setBPM: (@bpm) ->
         @duration = 15.0 / @bpm * 1000  # msec
         s.setDuration(@duration) for s in @synth
+        console.log('bpm: ' + @bpm)
         
     setKey: (key)->
         @freq_key = KEY_LIST[key]
@@ -74,7 +76,8 @@ class @Player
     playNext: ->
         if @is_playing            
             @time = 0 if @time >= @scene.size
-            s.playAt(@time++) for s in @synth
+            s.playAt(@time) for s in @synth
+            @time++
             T.setTimeout(( => @playNext()), @duration)
             
     stop: ->
@@ -94,13 +97,31 @@ class @Player
     readScene: (@scene) ->
         patterns = @scene.patterns
         while patterns.length > @synth.length
-            @synth.push(new Synth(@context, Math.floor(Math.random() * 100)))
+            @addSynth()
         @setBPM(@scene.bpm) if @scene.bpm?
         @setScale(@scene.scale) if @scene.scale?
         for i in [0...patterns.length]
             @synth[i].readPattern(patterns[i])
+        @view.synth_total = @synth.length
 
+    addSynth: (callback) ->
+        s = new Synth(@context, @num_id++)
+        s.setScale(@scale)
+        s.setKey(@freq_key)
+        s.connect(@context.destination)
+        @synth.push(s)
+        callback() if callback?
 
+    moveRight: (next_idx) ->
+        @synth[next_idx - 1].inactivate()
+        @synth_now = @synth[next_idx]
+        @synth_now.activate()
+        
+    moveLeft: (next_idx) ->
+        @synth[next_idx + 1].inactivate()
+        @synth_now = @synth[next_idx]
+        @synth_now.activate()        
+        
 
 class @PlayerView
     constructor: (@model) ->
@@ -116,6 +137,13 @@ class @PlayerView
         @setBPM()
         @setKey()
         @setScale()
+
+        @instruments = $('#instruments')
+        @btn_left  = @dom.find('#btn-left')
+        @btn_right = @dom.find('#btn-right')
+        @synth_now = 0
+        @synth_total = 1
+
         @initEvent()
 
     initEvent: ->
@@ -136,12 +164,26 @@ class @PlayerView
             @model.stop()
             @play.attr("value", "play")
         )
+        @btn_left.on('mousedown',  () => @moveLeft())
+        @btn_right.on('mousedown', () => @moveRight())
         
     setBPM:   ->  @model.setBPM(parseInt(@bpm.val()))
     setKey:   ->  @model.setKey(@key.val())
     setScale: ->  @model.setScale(@scale.val())
 
-
+    moveRight: ->
+        if @synth_now == (@synth_total - 1)
+            @model.addSynth()
+            @synth_total++
+        @synth_now++
+        @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
+        @model.moveRight(@synth_now)
+        
+    moveLeft: ->
+        if @synth_now != 0
+            @synth_now--
+            @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
+            @model.moveLeft(@synth_now)
 
 $(() ->
     $("#twitter").socialbutton('twitter', {
@@ -172,27 +214,33 @@ $(() ->
     scn55 =
         size: 32
         patterns: [
-            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],            
-            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],            
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]
             ]
+    scn22 =
+        size: 32
+        patterns: [
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [1,1,8,1,8,1,7,1,1,1,8,1,8,1,7,1,3,1,3,1,1,2,3,5,8,1,8,7,5,1,3,2]
+        ]
     scn1 =
         size: 32
         patterns: [
-            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]
             ]
     scn2 =
         size: 64
         patterns: [
-            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
              1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8]
             ]
     scn3 =
         size: 96
         patterns: [
-            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
              1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,
              1,2,3,5,8,3,5,8,2,3,4,6,9,4,6,9,3,4,5,7,10,5,7,10,7,8,1,3,5,8,1,1]
             ]
@@ -200,7 +248,7 @@ $(() ->
         bpm: 240
         size: 256
         patterns: [
-            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
              1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,
              1,2,3,5,8,3,5,8,2,3,4,6,9,4,6,9,3,4,5,7,10,5,7,10,7,8,1,3,5,8,1,1,
              1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,
@@ -209,7 +257,7 @@ $(() ->
              1,2,3,5,8,3,5,8,2,3,4,6,9,4,6,9,3,4,5,7,10,5,7,10,7,8,1,3,5,8,1,1,
              1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8]
             ]
-    player.readScene(scn1)
+    player.readScene(scn22)
 )
 
 
