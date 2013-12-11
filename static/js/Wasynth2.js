@@ -110,9 +110,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   this.MutekiTimer = MutekiTimer;
 
 }).call(this);
-
-(function() {
-  var SAMPLE_RATE, SEMITONE, STREAM_LENGTH, T;
+;(function() {
+  var OSC_TYPE, SAMPLE_RATE, SEMITONE, STREAM_LENGTH, T;
 
   SEMITONE = 1.05946309;
 
@@ -122,34 +121,86 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   T = new MutekiTimer();
 
+  OSC_TYPE = {
+    SINE: 0,
+    RECT: 1,
+    SAW: 2,
+    TRIANGLE: 3
+  };
+
+  this.Noise = (function() {
+    function Noise(ctx) {
+      var _this = this;
+      this.ctx = ctx;
+      this.node = this.ctx.createScriptProcessor(STREAM_LENGTH);
+      this.node.onaudioprocess = function(event) {
+        var data_L, data_R, i, _i, _ref, _results;
+        data_L = event.outputBuffer.getChannelData(0);
+        data_R = event.outputBuffer.getChannelData(1);
+        _results = [];
+        for (i = _i = 0, _ref = data_L.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          _results.push(data_L[i] = data_R[i] = Math.random());
+        }
+        return _results;
+      };
+    }
+
+    Noise.prototype.connect = function(dst) {
+      return this.node.connect(dst);
+    };
+
+    Noise.prototype.setOctave = function(_) {
+      return null;
+    };
+
+    Noise.prototype.setFine = function(_) {
+      return null;
+    };
+
+    Noise.prototype.setNote = function() {
+      return null;
+    };
+
+    Noise.prototype.setInterval = function(_) {
+      return null;
+    };
+
+    Noise.prototype.setFreq = function() {
+      return null;
+    };
+
+    Noise.prototype.setKey = function() {
+      return null;
+    };
+
+    Noise.prototype.setShape = function(shape) {};
+
+    return Noise;
+
+  })();
+
   this.VCO = (function() {
-    function VCO() {
+    function VCO(ctx) {
+      this.ctx = ctx;
       this.freq_key = 55;
-      this.shape = "SINE";
       this.octave = 4;
       this.interval = 0;
       this.fine = 0;
       this.note = 0;
       this.freq = Math.pow(2, this.octave) * this.freq_key;
-      this.period_sample = SAMPLE_RATE / this.freq;
-      this.phase = 0;
-      this.d_phase = (2.0 * Math.PI) / this.period_sample;
+      this.node = this.ctx.createOscillator();
+      this.node.type = 'sine';
+      this.setFreq();
+      this.node.start(0);
     }
-
-    VCO.prototype.setShape = function(shape) {
-      this.shape = shape;
-    };
 
     VCO.prototype.setOctave = function(octave) {
       this.octave = octave;
     };
 
-    VCO.prototype.setInterval = function(interval) {
-      this.interval = interval;
-    };
-
     VCO.prototype.setFine = function(fine) {
       this.fine = fine;
+      return this.node.detune.value = this.fine;
     };
 
     VCO.prototype.setNote = function(note) {
@@ -160,72 +211,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.freq_key = freq_key;
     };
 
+    VCO.prototype.setInterval = function(interval) {
+      this.interval = interval;
+    };
+
+    VCO.prototype.setShape = function(shape) {
+      return this.node.type = OSC_TYPE[shape];
+    };
+
     VCO.prototype.setFreq = function() {
       this.freq = (Math.pow(2, this.octave) * Math.pow(SEMITONE, this.interval + this.note) * this.freq_key) + this.fine;
-      this.period_sample = SAMPLE_RATE / this.freq;
-      return this.d_phase = (2.0 * Math.PI) / this.period_sample;
+      return this.node.frequency.setValueAtTime(this.freq, 0);
     };
 
-    VCO.prototype.sine = function() {
-      return Math.cos(this.phase * this.d_phase);
-    };
-
-    VCO.prototype.triangle = function() {
-      var saw2;
-      saw2 = this.saw() * 2.0;
-      switch (false) {
-        case !(saw2 < -1.0):
-          return saw2 + 2.0;
-        case !(saw2 < 1.0):
-          return saw2 + 2.0;
-        default:
-          return saw2 - 2.0;
-      }
-    };
-
-    VCO.prototype.saw = function() {
-      var p;
-      p = this.phase % this.period_sample;
-      return 1.99 * (p / this.period_sample) - 1.0;
-    };
-
-    VCO.prototype.rect = function() {
-      if (this.sine() > 0) {
-        return -1.0;
-      } else {
-        return 1.0;
-      }
-    };
-
-    VCO.prototype.noise = function() {
-      return Math.random();
-    };
-
-    VCO.prototype.nextSample = function() {
-      this.phase++;
-      switch (this.shape) {
-        case "SINE":
-          return this.sine();
-        case "TRIANGLE":
-          return this.triangle();
-        case "SAW":
-          return this.saw();
-        case "RECT":
-          return this.rect();
-        case "NOISE":
-          return this.noise();
-        default:
-          return this.sine();
-      }
-    };
-
-    VCO.prototype.nextStream = function() {
-      var i, _i, _results;
-      _results = [];
-      for (i = _i = 0; 0 <= STREAM_LENGTH ? _i < STREAM_LENGTH : _i > STREAM_LENGTH; i = 0 <= STREAM_LENGTH ? ++_i : --_i) {
-        _results.push(this.nextSample());
-      }
-      return _results;
+    VCO.prototype.connect = function(dst) {
+      return this.node.connect(dst);
     };
 
     return VCO;
@@ -233,61 +233,47 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   })();
 
   this.EG = (function() {
-    function EG() {
-      this.time = 0;
-      this.on = false;
-      this.envelope = 0.0;
+    function EG(target, min, max) {
+      this.target = target;
+      this.min = min;
+      this.max = max;
       this.attack = 0;
       this.decay = 0;
       this.sustain = 0.0;
       this.release = 0;
     }
 
-    EG.prototype.setParam = function(attack, decay, sustain, release) {
-      this.attack = attack;
-      this.decay = decay;
-      this.release = release;
-      return this.sustain = sustain / 100.0;
-    };
-
     EG.prototype.getParam = function() {
       return [this.attack, this.decay, this.sustain, this.release];
     };
 
-    EG.prototype.noteOn = function() {
-      this.time = 0;
-      return this.on = true;
+    EG.prototype.setParam = function(attack, decay, sustain, release) {
+      this.attack = attack / 50000.0;
+      this.decay = decay / 50000.0;
+      this.sustain = sustain / 100.0;
+      return this.release = release / 50000.0;
     };
 
-    EG.prototype.noteOff = function() {
-      this.time = 0;
-      this.on = false;
-      return this.envelope_released = this.envelope;
+    EG.prototype.setRange = function(min, max) {
+      this.min = min;
+      this.max = max;
     };
 
-    EG.prototype.step = function() {
-      return this.time++;
+    EG.prototype.getRange = function() {
+      return [this.min, this.max];
     };
 
-    EG.prototype.getEnvelope = function() {
-      var e;
-      if (this.on) {
-        if (this.time < this.attack) {
-          this.envelope = 1.0 * (this.time / this.attack);
-        } else if (this.time < (this.attack + this.decay)) {
-          e = ((this.time - this.attack) / this.decay) * (1.0 - this.sustain);
-          this.envelope = 1.0 - e;
-        } else {
-          this.envelope = this.sustain;
-        }
-      } else {
-        if (this.time < this.release) {
-          this.envelope = this.envelope_released * (this.release - this.time) / this.release;
-        } else {
-          this.envelope = 0.0;
-        }
-      }
-      return this.envelope;
+    EG.prototype.noteOn = function(time) {
+      this.target.cancelScheduledValues(time);
+      this.target.setValueAtTime(this.min, time);
+      this.target.linearRampToValueAtTime(this.max, time + this.attack);
+      return this.target.linearRampToValueAtTime(this.sustain * (this.max - this.min) + this.min, time + this.attack + this.decay);
+    };
+
+    EG.prototype.noteOff = function(time) {
+      this.target.cancelScheduledValues(time);
+      this.target.setValueAtTime(this.sustain * (this.max - this.min) + this.min, time);
+      return this.target.linearRampToValueAtTime(this.min, time + this.release);
     };
 
     return EG;
@@ -296,41 +282,22 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   this.ResFilter = (function() {
     function ResFilter(ctx) {
-      this.lpf = ctx.createBiquadFilter();
-      this.lpf.type = 0;
-      this.freq_min = 80;
-      this.freq = 5000;
-      this.resonance = 10;
-      this.Q = 10;
+      this.ctx = ctx;
+      this.lpf = this.ctx.createBiquadFilter();
+      this.lpf.type = 'lowpass';
+      this.lpf.gain.value = 1.0;
     }
 
     ResFilter.prototype.connect = function(dst) {
       return this.lpf.connect(dst);
     };
 
-    ResFilter.prototype.connectFEG = function(feg) {
-      this.feg = feg;
-    };
-
-    ResFilter.prototype.getNode = function() {
-      return this.lpf;
-    };
-
     ResFilter.prototype.getResonance = function() {
-      return this.Q;
+      return this.lpf.Q.value;
     };
 
-    ResFilter.prototype.setFreq = function(freq) {
-      return this.freq = Math.pow(freq / 1000, 2.0) * 25000;
-    };
-
-    ResFilter.prototype.setQ = function(q) {
-      this.q = q;
-      return this.lpf.Q.value = this.Q;
-    };
-
-    ResFilter.prototype.update = function() {
-      return this.lpf.frequency.value = this.freq * this.feg.getEnvelope() + this.freq_min;
+    ResFilter.prototype.setQ = function(Q) {
+      return this.lpf.Q.value = Q;
     };
 
     return ResFilter;
@@ -339,22 +306,26 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   this.SynthCore = (function() {
     function SynthCore(parent, ctx, id) {
+      var i, _i;
       this.parent = parent;
       this.ctx = ctx;
       this.id = id;
-      this.node = this.ctx.createJavaScriptNode(STREAM_LENGTH, 1, 2);
-      this.is_initialized = false;
-      this.vco = [new VCO(), new VCO(), new VCO()];
-      this.gain = [1.0, 1.0, 1.0];
-      this.eg = new EG();
-      this.feg = new EG();
+      this.node = this.ctx.createGain();
+      this.node.gain.value = 0;
+      this.vco = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
+      this.gain = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
+      for (i = _i = 0; _i < 3; i = ++_i) {
+        this.vco[i].connect(this.gain[i]);
+        this.gain[i].gain.value = 0;
+        this.gain[i].connect(this.node);
+      }
       this.filter = new ResFilter(this.ctx);
-      this.filter.connectFEG(this.feg);
-      this.vco_res = new VCO();
-      this.vco_res.setShape("NOISE");
-      this.ratio = 1.0;
-      this.freq_key = 0;
-      this.is_playing = false;
+      this.eg = new EG(this.node.gain, 0.0, 1.0);
+      this.feg = new EG(this.filter.lpf.frequency, 0, 0);
+      this.gain_res = this.ctx.createGain();
+      this.gain_res.gain.value = 0;
+      this.vco[2].connect(this.gain_res);
+      this.gain_res.connect(this.node);
       this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.core'));
     }
 
@@ -375,84 +346,38 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SynthCore.prototype.setFilterParam = function(freq, q) {
-      this.filter.setFreq(freq);
-      return this.filter.setQ(q);
+      this.feg.setRange(80, Math.pow(freq / 1000, 2.0) * 25000 + 80);
+      this.filter.setQ(q);
+      if (q > 1) {
+        return this.gain_res.value = 0.1 * (q / 1000.0);
+      }
     };
 
     SynthCore.prototype.setGain = function(i, gain) {
-      return this.gain[i] = gain / 100.0;
-    };
-
-    SynthCore.prototype.nextStream = function() {
-      var env, i, j, res, s_res, s_vco, stream, _i, _j, _ref;
-      res = this.filter.getResonance();
-      s_vco = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.vco;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          j = _ref[_i];
-          _results.push(j.nextStream());
-        }
-        return _results;
-      }).call(this);
-      s_res = this.vco_res.nextStream();
-      stream = [];
-      for (i = _i = 0; 0 <= STREAM_LENGTH ? _i < STREAM_LENGTH : _i > STREAM_LENGTH; i = 0 <= STREAM_LENGTH ? ++_i : --_i) {
-        this.eg.step();
-        this.feg.step();
-        this.filter.update();
-        env = this.eg.getEnvelope();
-        stream[i] = 0;
-        for (j = _j = 0, _ref = this.vco.length; 0 <= _ref ? _j < _ref : _j > _ref; j = 0 <= _ref ? ++_j : --_j) {
-          stream[i] += s_vco[j][i] * this.gain[j] * 0.3 * env;
-        }
-        if (res > 1) {
-          stream[i] += s_res[i] * 0.1 * (res / 1000.0);
-        }
-      }
-      return stream;
+      return this.gain[i].gain.value = (gain / 100.0) * 0.3;
     };
 
     SynthCore.prototype.noteOn = function() {
-      this.is_playing = true;
-      this.eg.noteOn();
-      this.feg.noteOn();
-      if (!this.is_initialized) {
-        return this.initNode();
-      }
+      var t0;
+      t0 = this.ctx.currentTime;
+      this.eg.noteOn(t0);
+      return this.feg.noteOn(t0);
     };
 
     SynthCore.prototype.noteOff = function() {
-      this.is_playing = false;
-      this.eg.noteOff();
-      return this.feg.noteOff();
-    };
-
-    SynthCore.prototype.initNode = function() {
-      var _this = this;
-      this.is_initialized = true;
-      return this.node.onaudioprocess = function(event) {
-        var data_L, data_R, i, s, _i, _ref, _results;
-        data_L = event.outputBuffer.getChannelData(0);
-        data_R = event.outputBuffer.getChannelData(1);
-        s = _this.nextStream();
-        _results = [];
-        for (i = _i = 0, _ref = data_L.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          _results.push(data_L[i] = data_R[i] = s[i]);
-        }
-        return _results;
-      };
+      var t0;
+      t0 = this.ctx.currentTime;
+      this.eg.noteOff(t0);
+      return this.feg.noteOff(t0);
     };
 
     SynthCore.prototype.setKey = function(freq_key) {
       var v, _i, _len, _ref, _results;
-      this.freq_key = freq_key;
       _ref = this.vco;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         v = _ref[_i];
-        _results.push(v.setKey(this.freq_key));
+        _results.push(v.setKey(freq_key));
       }
       return _results;
     };
@@ -461,12 +386,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.scale = scale;
     };
 
-    SynthCore.prototype.isPlaying = function() {
-      return this.is_playing;
-    };
-
     SynthCore.prototype.connect = function(dst) {
-      this.node.connect(this.filter.getNode());
+      this.node.connect(this.filter.lpf);
       return this.filter.connect(dst);
     };
 
@@ -542,11 +463,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       w4 = w / 4;
       context.clearRect(0, 0, w, h);
       context.beginPath();
-      context.moveTo(w4 * (1.0 - adsr[0] / 50000.0), h);
+      context.moveTo(w4 * (1.0 - adsr[0]), h);
       context.lineTo(w / 4, 0);
-      context.lineTo(w4 + w4 * (adsr[1] / 50000.0), h * (1.0 - adsr[2]));
+      context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));
       context.lineTo(w4 * 3, h * (1.0 - adsr[2]));
-      context.lineTo(w4 * 3 + w4 * (adsr[3] / 50000.0), h);
+      context.lineTo(w4 * (adsr[3] + 3), h);
       context.strokeStyle = 'rgb(0, 220, 255)';
       return context.stroke();
     };
@@ -570,17 +491,17 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SynthCoreView.prototype.setEGParam = function() {
-      this.model.setEGParam(parseInt(this.EG_inputs.eq(0).val()), parseInt(this.EG_inputs.eq(1).val()), parseInt(this.EG_inputs.eq(2).val()), parseInt(this.EG_inputs.eq(3).val()));
+      this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
       return this.updateCanvas("EG");
     };
 
     SynthCoreView.prototype.setFEGParam = function() {
-      this.model.setFEGParam(parseInt(this.FEG_inputs.eq(0).val()), parseInt(this.FEG_inputs.eq(1).val()), parseInt(this.FEG_inputs.eq(2).val()), parseInt(this.FEG_inputs.eq(3).val()));
+      this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
       return this.updateCanvas("FEG");
     };
 
     SynthCoreView.prototype.setFilterParam = function() {
-      return this.model.setFilterParam(parseInt(this.filter_inputs.eq(0).val()), parseInt(this.filter_inputs.eq(1).val()));
+      return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
     };
 
     SynthCoreView.prototype.setGain = function() {
@@ -781,8 +702,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   })();
 
 }).call(this);
-
-(function() {
+;(function() {
   var CONTEXT, KEYCODE_TO_NOTE, KEY_LIST, SAMPLE_RATE, SCALE_LIST, SEMITONE, T;
 
   SEMITONE = 1.05946309;
@@ -953,7 +873,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.scene = scene;
       patterns = this.scene.patterns;
       while (patterns.length > this.synth.length) {
-        this.synth.push(new Synth());
+        this.synth.push(new Synth(this.context, Math.floor(Math.random() * 100)));
       }
       if (this.scene.bpm != null) {
         this.setBPM(this.scene.bpm);
@@ -1026,7 +946,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   })();
 
   $(function() {
-    var is_key_pressed, player, scn1, scn2, scn3, scn8;
+    var is_key_pressed, player, scn1, scn2, scn3, scn55, scn8;
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
@@ -1054,6 +974,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       is_key_pressed = false;
       return player.noteOff();
     });
+    scn55 = {
+      size: 32,
+      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
+    };
     scn1 = {
       size: 32,
       patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
@@ -1071,7 +995,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       size: 256,
       patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
     };
-    return player.readScene(scn8);
+    return player.readScene(scn1);
   });
 
   KEYCODE_TO_NOTE = {
@@ -1118,1019 +1042,3 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
 }).call(this);
-;// Generated by CoffeeScript 1.6.3
-(function() {
-  var SAMPLE_RATE, SEMITONE, STREAM_LENGTH, T;
-
-  SEMITONE = 1.05946309;
-
-  STREAM_LENGTH = 1024;
-
-  SAMPLE_RATE = 48000;
-
-  T = new MutekiTimer();
-
-  this.VCO = (function() {
-    function VCO() {
-      this.freq_key = 55;
-      this.shape = "SINE";
-      this.octave = 4;
-      this.interval = 0;
-      this.fine = 0;
-      this.note = 0;
-      this.freq = Math.pow(2, this.octave) * this.freq_key;
-      this.period_sample = SAMPLE_RATE / this.freq;
-      this.phase = 0;
-      this.d_phase = (2.0 * Math.PI) / this.period_sample;
-    }
-
-    VCO.prototype.setShape = function(shape) {
-      this.shape = shape;
-    };
-
-    VCO.prototype.setOctave = function(octave) {
-      this.octave = octave;
-    };
-
-    VCO.prototype.setInterval = function(interval) {
-      this.interval = interval;
-    };
-
-    VCO.prototype.setFine = function(fine) {
-      this.fine = fine;
-    };
-
-    VCO.prototype.setNote = function(note) {
-      this.note = note;
-    };
-
-    VCO.prototype.setKey = function(freq_key) {
-      this.freq_key = freq_key;
-    };
-
-    VCO.prototype.setFreq = function() {
-      this.freq = (Math.pow(2, this.octave) * Math.pow(SEMITONE, this.interval + this.note) * this.freq_key) + this.fine;
-      this.period_sample = SAMPLE_RATE / this.freq;
-      return this.d_phase = (2.0 * Math.PI) / this.period_sample;
-    };
-
-    VCO.prototype.sine = function() {
-      return Math.cos(this.phase * this.d_phase);
-    };
-
-    VCO.prototype.triangle = function() {
-      var saw2;
-      saw2 = this.saw() * 2.0;
-      switch (false) {
-        case !(saw2 < -1.0):
-          return saw2 + 2.0;
-        case !(saw2 < 1.0):
-          return saw2 + 2.0;
-        default:
-          return saw2 - 2.0;
-      }
-    };
-
-    VCO.prototype.saw = function() {
-      var p;
-      p = this.phase % this.period_sample;
-      return 1.99 * (p / this.period_sample) - 1.0;
-    };
-
-    VCO.prototype.rect = function() {
-      if (this.sine() > 0) {
-        return -1.0;
-      } else {
-        return 1.0;
-      }
-    };
-
-    VCO.prototype.noise = function() {
-      return Math.random();
-    };
-
-    VCO.prototype.nextSample = function() {
-      this.phase++;
-      switch (this.shape) {
-        case "SINE":
-          return this.sine();
-        case "TRIANGLE":
-          return this.triangle();
-        case "SAW":
-          return this.saw();
-        case "RECT":
-          return this.rect();
-        case "NOISE":
-          return this.noise();
-        default:
-          return this.sine();
-      }
-    };
-
-    VCO.prototype.nextStream = function() {
-      var i, _i, _results;
-      _results = [];
-      for (i = _i = 0; 0 <= STREAM_LENGTH ? _i < STREAM_LENGTH : _i > STREAM_LENGTH; i = 0 <= STREAM_LENGTH ? ++_i : --_i) {
-        _results.push(this.nextSample());
-      }
-      return _results;
-    };
-
-    return VCO;
-
-  })();
-
-  this.EG = (function() {
-    function EG() {
-      this.time = 0;
-      this.on = false;
-      this.envelope = 0.0;
-      this.attack = 0;
-      this.decay = 0;
-      this.sustain = 0.0;
-      this.release = 0;
-    }
-
-    EG.prototype.setParam = function(attack, decay, sustain, release) {
-      this.attack = attack;
-      this.decay = decay;
-      this.release = release;
-      return this.sustain = sustain / 100.0;
-    };
-
-    EG.prototype.getParam = function() {
-      return [this.attack, this.decay, this.sustain, this.release];
-    };
-
-    EG.prototype.noteOn = function() {
-      this.time = 0;
-      return this.on = true;
-    };
-
-    EG.prototype.noteOff = function() {
-      this.time = 0;
-      this.on = false;
-      return this.envelope_released = this.envelope;
-    };
-
-    EG.prototype.step = function() {
-      return this.time++;
-    };
-
-    EG.prototype.getEnvelope = function() {
-      var e;
-      if (this.on) {
-        if (this.time < this.attack) {
-          this.envelope = 1.0 * (this.time / this.attack);
-        } else if (this.time < (this.attack + this.decay)) {
-          e = ((this.time - this.attack) / this.decay) * (1.0 - this.sustain);
-          this.envelope = 1.0 - e;
-        } else {
-          this.envelope = this.sustain;
-        }
-      } else {
-        if (this.time < this.release) {
-          this.envelope = this.envelope_released * (this.release - this.time) / this.release;
-        } else {
-          this.envelope = 0.0;
-        }
-      }
-      return this.envelope;
-    };
-
-    return EG;
-
-  })();
-
-  this.ResFilter = (function() {
-    function ResFilter(ctx) {
-      this.lpf = ctx.createBiquadFilter();
-      this.lpf.type = 0;
-      this.freq_min = 80;
-      this.freq = 5000;
-      this.resonance = 10;
-      this.Q = 10;
-    }
-
-    ResFilter.prototype.connect = function(dst) {
-      return this.lpf.connect(dst);
-    };
-
-    ResFilter.prototype.connectFEG = function(feg) {
-      this.feg = feg;
-    };
-
-    ResFilter.prototype.getNode = function() {
-      return this.lpf;
-    };
-
-    ResFilter.prototype.getResonance = function() {
-      return this.Q;
-    };
-
-    ResFilter.prototype.setFreq = function(freq) {
-      return this.freq = Math.pow(freq / 1000, 2.0) * 25000;
-    };
-
-    ResFilter.prototype.setQ = function(q) {
-      this.q = q;
-      return this.lpf.Q.value = this.Q;
-    };
-
-    ResFilter.prototype.update = function() {
-      return this.lpf.frequency.value = this.freq * this.feg.getEnvelope() + this.freq_min;
-    };
-
-    return ResFilter;
-
-  })();
-
-  this.SynthCore = (function() {
-    function SynthCore(parent, ctx, id) {
-      this.parent = parent;
-      this.ctx = ctx;
-      this.id = id;
-      this.node = this.ctx.createJavaScriptNode(STREAM_LENGTH, 1, 2);
-      this.is_initialized = false;
-      this.vco = [new VCO(), new VCO(), new VCO()];
-      this.gain = [1.0, 1.0, 1.0];
-      this.eg = new EG();
-      this.feg = new EG();
-      this.filter = new ResFilter(this.ctx);
-      this.filter.connectFEG(this.feg);
-      this.vco_res = new VCO();
-      this.vco_res.setShape("NOISE");
-      this.ratio = 1.0;
-      this.freq_key = 0;
-      this.is_playing = false;
-      this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.core'));
-    }
-
-    SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
-      this.vco[i].setShape(shape);
-      this.vco[i].setOctave(oct);
-      this.vco[i].setInterval(interval);
-      this.vco[i].setFine(fine);
-      return this.vco[i].setFreq();
-    };
-
-    SynthCore.prototype.setEGParam = function(a, d, s, r) {
-      return this.eg.setParam(a, d, s, r);
-    };
-
-    SynthCore.prototype.setFEGParam = function(a, d, s, r) {
-      return this.feg.setParam(a, d, s, r);
-    };
-
-    SynthCore.prototype.setFilterParam = function(freq, q) {
-      this.filter.setFreq(freq);
-      return this.filter.setQ(q);
-    };
-
-    SynthCore.prototype.setGain = function(i, gain) {
-      return this.gain[i] = gain / 100.0;
-    };
-
-    SynthCore.prototype.nextStream = function() {
-      var env, i, j, res, s_res, s_vco, stream, _i, _j, _ref;
-      res = this.filter.getResonance();
-      s_vco = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.vco;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          j = _ref[_i];
-          _results.push(j.nextStream());
-        }
-        return _results;
-      }).call(this);
-      s_res = this.vco_res.nextStream();
-      stream = [];
-      for (i = _i = 0; 0 <= STREAM_LENGTH ? _i < STREAM_LENGTH : _i > STREAM_LENGTH; i = 0 <= STREAM_LENGTH ? ++_i : --_i) {
-        this.eg.step();
-        this.feg.step();
-        this.filter.update();
-        env = this.eg.getEnvelope();
-        stream[i] = 0;
-        for (j = _j = 0, _ref = this.vco.length; 0 <= _ref ? _j < _ref : _j > _ref; j = 0 <= _ref ? ++_j : --_j) {
-          stream[i] += s_vco[j][i] * this.gain[j] * 0.3 * env;
-        }
-        if (res > 1) {
-          stream[i] += s_res[i] * 0.1 * (res / 1000.0);
-        }
-      }
-      return stream;
-    };
-
-    SynthCore.prototype.noteOn = function() {
-      this.is_playing = true;
-      this.eg.noteOn();
-      this.feg.noteOn();
-      if (!this.is_initialized) {
-        return this.initNode();
-      }
-    };
-
-    SynthCore.prototype.noteOff = function() {
-      this.is_playing = false;
-      this.eg.noteOff();
-      return this.feg.noteOff();
-    };
-
-    SynthCore.prototype.initNode = function() {
-      var _this = this;
-      this.is_initialized = true;
-      return this.node.onaudioprocess = function(event) {
-        var data_L, data_R, i, s, _i, _ref, _results;
-        data_L = event.outputBuffer.getChannelData(0);
-        data_R = event.outputBuffer.getChannelData(1);
-        s = _this.nextStream();
-        _results = [];
-        for (i = _i = 0, _ref = data_L.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          _results.push(data_L[i] = data_R[i] = s[i]);
-        }
-        return _results;
-      };
-    };
-
-    SynthCore.prototype.setKey = function(freq_key) {
-      var v, _i, _len, _ref, _results;
-      this.freq_key = freq_key;
-      _ref = this.vco;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        v = _ref[_i];
-        _results.push(v.setKey(this.freq_key));
-      }
-      return _results;
-    };
-
-    SynthCore.prototype.setScale = function(scale) {
-      this.scale = scale;
-    };
-
-    SynthCore.prototype.isPlaying = function() {
-      return this.is_playing;
-    };
-
-    SynthCore.prototype.connect = function(dst) {
-      this.node.connect(this.filter.getNode());
-      return this.filter.connect(dst);
-    };
-
-    SynthCore.prototype.setNote = function(note) {
-      var v, _i, _len, _ref, _results;
-      _ref = this.vco;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        v = _ref[_i];
-        v.setNote(note);
-        _results.push(v.setFreq());
-      }
-      return _results;
-    };
-
-    return SynthCore;
-
-  })();
-
-  this.SynthCoreView = (function() {
-    function SynthCoreView(model, id, dom) {
-      this.model = model;
-      this.id = id;
-      this.dom = dom;
-      this.vcos = $(this.dom.find('.vco'));
-      this.EG_inputs = this.dom.find('.EG > input');
-      this.FEG_inputs = this.dom.find('.FEG > input');
-      this.filter_inputs = this.dom.find(".filter input");
-      this.gain_inputs = this.dom.find('.gain > input');
-      this.canvasEG = this.dom.find(".canvasEG").get()[0];
-      this.canvasFEG = this.dom.find(".canvasFEG").get()[0];
-      this.contextEG = this.canvasEG.getContext('2d');
-      this.contextFEG = this.canvasFEG.getContext('2d');
-      this.initEvent();
-    }
-
-    SynthCoreView.prototype.initEvent = function() {
-      var _this = this;
-      this.vcos.on("change", function() {
-        return _this.setVCOParam();
-      });
-      this.gain_inputs.on("change", function() {
-        return _this.setGain();
-      });
-      this.filter_inputs.on("change", function() {
-        return _this.setFilterParam();
-      });
-      this.EG_inputs.on("change", function() {
-        return _this.setEGParam();
-      });
-      this.FEG_inputs.on("change", function() {
-        return _this.setFEGParam();
-      });
-      return this.setParam();
-    };
-
-    SynthCoreView.prototype.updateCanvas = function(name) {
-      var adsr, canvas, context, h, w, w4;
-      canvas = null;
-      context = null;
-      adsr = null;
-      if (name === "EG") {
-        canvas = this.canvasEG;
-        context = this.contextEG;
-        adsr = this.model.eg.getParam();
-      } else {
-        canvas = this.canvasFEG;
-        context = this.contextFEG;
-        adsr = this.model.feg.getParam();
-      }
-      w = canvas.width = 180;
-      h = canvas.height = 50;
-      w4 = w / 4;
-      context.clearRect(0, 0, w, h);
-      context.beginPath();
-      context.moveTo(w4 * (1.0 - adsr[0] / 50000.0), h);
-      context.lineTo(w / 4, 0);
-      context.lineTo(w4 + w4 * (adsr[1] / 50000.0), h * (1.0 - adsr[2]));
-      context.lineTo(w4 * 3, h * (1.0 - adsr[2]));
-      context.lineTo(w4 * 3 + w4 * (adsr[3] / 50000.0), h);
-      context.strokeStyle = 'rgb(0, 220, 255)';
-      return context.stroke();
-    };
-
-    SynthCoreView.prototype.setParam = function() {
-      this.setVCOParam();
-      this.setEGParam();
-      this.setFEGParam();
-      this.setFilterParam();
-      return this.setGain();
-    };
-
-    SynthCoreView.prototype.setVCOParam = function() {
-      var i, vco, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        vco = this.vcos.eq(i);
-        _results.push(this.model.setVCOParam(i, vco.find('.shape').val(), parseInt(vco.find('.octave').val()), parseInt(vco.find('.interval').val()), parseInt(vco.find('.fine').val())));
-      }
-      return _results;
-    };
-
-    SynthCoreView.prototype.setEGParam = function() {
-      this.model.setEGParam(parseInt(this.EG_inputs.eq(0).val()), parseInt(this.EG_inputs.eq(1).val()), parseInt(this.EG_inputs.eq(2).val()), parseInt(this.EG_inputs.eq(3).val()));
-      return this.updateCanvas("EG");
-    };
-
-    SynthCoreView.prototype.setFEGParam = function() {
-      this.model.setFEGParam(parseInt(this.FEG_inputs.eq(0).val()), parseInt(this.FEG_inputs.eq(1).val()), parseInt(this.FEG_inputs.eq(2).val()), parseInt(this.FEG_inputs.eq(3).val()));
-      return this.updateCanvas("FEG");
-    };
-
-    SynthCoreView.prototype.setFilterParam = function() {
-      return this.model.setFilterParam(parseInt(this.filter_inputs.eq(0).val()), parseInt(this.filter_inputs.eq(1).val()));
-    };
-
-    SynthCoreView.prototype.setGain = function() {
-      var i, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.model.setGain(i, parseInt(this.gain_inputs.eq(i).val())));
-      }
-      return _results;
-    };
-
-    return SynthCoreView;
-
-  })();
-
-  this.Synth = (function() {
-    function Synth(ctx, id) {
-      this.ctx = ctx;
-      this.id = id;
-      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      this.time = 0;
-      this.scale = [];
-      this.view = new SynthView(this);
-      this.core = new SynthCore(this, this.ctx, this.id);
-    }
-
-    Synth.prototype.connect = function(dst) {
-      return this.core.connect(dst);
-    };
-
-    Synth.prototype.setDuration = function(duration) {
-      this.duration = duration;
-    };
-
-    Synth.prototype.setKey = function(key) {
-      return this.core.setKey(key);
-    };
-
-    Synth.prototype.setScale = function(scale) {
-      this.scale = scale;
-    };
-
-    Synth.prototype.setNote = function(note) {
-      return this.core.setNote(note);
-    };
-
-    Synth.prototype.noteToSemitone = function(ival) {
-      return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
-    };
-
-    Synth.prototype.noteOn = function(note) {
-      this.core.setNote(this.noteToSemitone(note));
-      return this.core.noteOn();
-    };
-
-    Synth.prototype.noteOff = function() {
-      return this.core.noteOff();
-    };
-
-    Synth.prototype.playAt = function(time) {
-      var _this = this;
-      this.time = time;
-      this.view.playAt(this.time);
-      if (this.pattern[this.time] !== 0) {
-        this.core.setNote(this.noteToSemitone(this.pattern[this.time]));
-        this.core.noteOn();
-        return T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
-      }
-    };
-
-    Synth.prototype.play = function() {
-      return this.view.play();
-    };
-
-    Synth.prototype.stop = function() {
-      this.core.noteOff();
-      return this.view.stop();
-    };
-
-    Synth.prototype.pause = function(time) {
-      return this.core.noteOff();
-    };
-
-    Synth.prototype.readPattern = function(pattern) {
-      this.pattern = pattern;
-      return this.view.readPattern(this.pattern);
-    };
-
-    Synth.prototype.addNote = function(time, note) {
-      return this.pattern[time] = note;
-    };
-
-    Synth.prototype.removeNote = function(time) {
-      return this.pattern[time] = 0;
-    };
-
-    return Synth;
-
-  })();
-
-  this.SynthView = (function() {
-    function SynthView(model, id) {
-      this.model = model;
-      this.id = id;
-      this.dom = $('#tmpl_synth').clone();
-      this.dom.attr('id', 'synth' + id);
-      $("#instruments").append(this.dom);
-      this.indicator = this.dom.find('.indicator');
-      this.table = this.dom.find('.table').eq(0);
-      this.rows = this.dom.find('tr').filter(function() {
-        return $(this).find('td').length > 0;
-      });
-      this.cells = this.dom.find('td');
-      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      this.control_total = this.table.find('.pattern-total');
-      this.initEvent();
-    }
-
-    SynthView.prototype.initEvent = function() {
-      var self;
-      this.dom.find("td").each(function() {
-        return $(this).addClass("off");
-      });
-      this.dom.find("tr").on("mouseenter", function(event) {
-        return this.mouse_note = $(this).attr("note");
-      });
-      self = this;
-      this.dom.find("td").on('mousedown', function() {
-        var mouse_note, mouse_time;
-        self.mouse_pressed = true;
-        mouse_time = +($(this).data('x'));
-        mouse_note = +($(this).data('y'));
-        if ($(this).hasClass("on")) {
-          $(this).removeClass();
-          return self.removeNote($(this).text());
-        } else {
-          self.rows.each(function() {
-            return $(this).find('td').eq(mouse_time).removeClass();
-          });
-          $(this).addClass("on");
-          return self.model.addNote(mouse_time, mouse_note);
-        }
-      }).on('mouseenter', function() {
-        var mouse_note, mouse_time;
-        if (self.mouse_pressed) {
-          mouse_time = +($(this).data('x'));
-          mouse_note = +($(this).data('y'));
-          self.rows.each(function() {
-            return $(this).find('td').eq(mouse_time).removeClass();
-          });
-          $(this).addClass("on");
-          return self.model.addNote(mouse_time, mouse_note);
-        }
-      }).on('mouseup', function() {
-        return self.mouse_pressed = false;
-      });
-      return this.rows.on('mouseup', (function() {
-        return self.mouse_pressed = false;
-      }));
-    };
-
-    SynthView.prototype.readPattern = function(pattern) {
-      var i, y, _i, _ref;
-      this.pattern = pattern;
-      this.cells.removeClass();
-      for (i = _i = 0, _ref = this.pattern.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        y = 10 - this.pattern[i];
-        if (this.pattern[i] !== 0) {
-          this.rows.eq(y).find('td').eq(i).addClass('on');
-        }
-      }
-      this.page_total = this.pattern.length / 32;
-      return this.control_total.text(' ' + this.page_total);
-    };
-
-    SynthView.prototype.playAt = function(time) {
-      var page;
-      this.indicator.css('left', (26 * (time % 32)) + 'px');
-      if (this.pattern.length % 32 === 0) {
-        page = Math.floor((time % this.pattern.length) / 32);
-        return this.table.css('left', page * (-832) + 'px');
-      }
-    };
-
-    SynthView.prototype.play = function() {
-      return this.indicator.css("display", "block");
-    };
-
-    SynthView.prototype.stop = function() {
-      this.indicator.css("display", "none");
-      return this.table.css('left', '0px');
-    };
-
-    return SynthView;
-
-  })();
-
-}).call(this);
-
-/*
-//@ sourceMappingURL=synth.map
-*/
-;// Generated by CoffeeScript 1.6.3
-(function() {
-  var CONTEXT, KEYCODE_TO_NOTE, KEY_LIST, SAMPLE_RATE, SCALE_LIST, SEMITONE, T;
-
-  SEMITONE = 1.05946309;
-
-  KEY_LIST = {
-    A: 55,
-    Bb: 58.27047018976124,
-    B: 61.7354126570155,
-    C: 32.70319566257483,
-    Db: 34.64782887210901,
-    D: 36.70809598967594,
-    Eb: 38.890872965260115,
-    E: 41.20344461410875,
-    F: 43.653528929125486,
-    Gb: 46.2493028389543,
-    G: 48.999429497718666,
-    Ab: 51.91308719749314
-  };
-
-  SCALE_LIST = {
-    IONIAN: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16],
-    DORIAN: [0, 2, 3, 5, 7, 9, 10, 12, 14, 15],
-    PHRYGIAN: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15],
-    LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
-    MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
-    AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
-    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15]
-  };
-
-  CONTEXT = new webkitAudioContext();
-
-  SAMPLE_RATE = CONTEXT.sampleRate;
-
-  T = new MutekiTimer();
-
-  this.Player = (function() {
-    function Player() {
-      var s, _i, _len, _ref;
-      this.bpm = 120;
-      this.duration = 500;
-      this.freq_key = 55;
-      this.scale = [];
-      this.is_playing = false;
-      this.is_loop = false;
-      this.time = 0;
-      this.scene_position = 0;
-      this.scenes = [];
-      this.scene = null;
-      this.context = CONTEXT;
-      this.synth = [new Synth(this.context, 42)];
-      this.synth_now = this.synth[0];
-      _ref = this.synth;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        s.connect(this.context.destination);
-      }
-      this.view = new PlayerView(this);
-    }
-
-    Player.prototype.setBPM = function(bpm) {
-      var s, _i, _len, _ref, _results;
-      this.bpm = bpm;
-      this.duration = 15.0 / this.bpm * 1000;
-      _ref = this.synth;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        _results.push(s.setDuration(this.duration));
-      }
-      return _results;
-    };
-
-    Player.prototype.setKey = function(key) {
-      var s, _i, _len, _ref, _results;
-      this.freq_key = KEY_LIST[key];
-      _ref = this.synth;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        _results.push(s.setKey(this.freq_key));
-      }
-      return _results;
-    };
-
-    Player.prototype.setScale = function(scale) {
-      var s, _i, _len, _ref, _results;
-      this.scale = SCALE_LIST[scale];
-      _ref = this.synth;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        _results.push(s.setScale(this.scale));
-      }
-      return _results;
-    };
-
-    Player.prototype.isPlaying = function() {
-      return this.is_playing;
-    };
-
-    Player.prototype.play = function() {
-      var _this = this;
-      this.is_playing = true;
-      return T.setTimeout((function() {
-        var s, _i, _len, _ref;
-        _ref = _this.synth;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          s = _ref[_i];
-          s.play();
-        }
-        return _this.playNext();
-      }), 150);
-    };
-
-    Player.prototype.playNext = function() {
-      var s, _i, _len, _ref,
-        _this = this;
-      if (this.is_playing) {
-        if (this.time >= this.scene.size) {
-          this.time = 0;
-        }
-        _ref = this.synth;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          s = _ref[_i];
-          s.playAt(this.time++);
-        }
-        return T.setTimeout((function() {
-          return _this.playNext();
-        }), this.duration);
-      }
-    };
-
-    Player.prototype.stop = function() {
-      var s, _i, _len, _ref;
-      _ref = this.synth;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        s.stop();
-      }
-      this.is_playing = false;
-      return this.time = this.scene.size;
-    };
-
-    Player.prototype.pause = function() {
-      var s, _i, _len, _ref;
-      _ref = this.synth;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        s.pause(this.time);
-      }
-      return this.is_playing = false;
-    };
-
-    Player.prototype.noteOn = function(note) {
-      return this.synth_now.noteOn(note);
-    };
-
-    Player.prototype.noteOff = function() {
-      return this.synth_now.noteOff();
-    };
-
-    Player.prototype.readSong = function(song) {
-      return null;
-    };
-
-    Player.prototype.readScene = function(scene) {
-      var i, patterns, _i, _ref, _results;
-      this.scene = scene;
-      patterns = this.scene.patterns;
-      while (patterns.length > this.synth.length) {
-        this.synth.push(new Synth());
-      }
-      if (this.scene.bpm != null) {
-        this.setBPM(this.scene.bpm);
-      }
-      if (this.scene.scale != null) {
-        this.setScale(this.scene.scale);
-      }
-      _results = [];
-      for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.synth[i].readPattern(patterns[i]));
-      }
-      return _results;
-    };
-
-    return Player;
-
-  })();
-
-  this.PlayerView = (function() {
-    function PlayerView(model) {
-      this.model = model;
-      this.dom = $("#control");
-      this.play = this.dom.find('[name=play]');
-      this.stop = this.dom.find('[name=stop]');
-      this.bpm = this.dom.find("[name=bpm]");
-      this.key = this.dom.find("[name=key]");
-      this.scale = this.dom.find("[name=mode]");
-      this.setBPM();
-      this.setKey();
-      this.setScale();
-      this.initEvent();
-    }
-
-    PlayerView.prototype.initEvent = function() {
-      var _this = this;
-      this.dom.on("change", function() {
-        _this.setBPM();
-        _this.setKey();
-        return _this.setScale();
-      });
-      this.play.on('mousedown', function() {
-        if (_this.model.isPlaying()) {
-          _this.model.pause();
-          return _this.play.attr("value", "play");
-        } else {
-          _this.model.play();
-          return _this.play.attr("value", "pause");
-        }
-      });
-      return this.stop.on('mousedown', function() {
-        _this.model.stop();
-        return _this.play.attr("value", "play");
-      });
-    };
-
-    PlayerView.prototype.setBPM = function() {
-      return this.model.setBPM(parseInt(this.bpm.val()));
-    };
-
-    PlayerView.prototype.setKey = function() {
-      return this.model.setKey(this.key.val());
-    };
-
-    PlayerView.prototype.setScale = function() {
-      return this.model.setScale(this.scale.val());
-    };
-
-    return PlayerView;
-
-  })();
-
-  $(function() {
-    var is_key_pressed, player, scn1, scn2, scn3, scn8;
-    $("#twitter").socialbutton('twitter', {
-      button: 'horizontal',
-      text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
-    });
-    $("#hatena").socialbutton('hatena');
-    $("#facebook").socialbutton('facebook_like', {
-      button: 'button_count'
-    });
-    player = new Player();
-    is_key_pressed = false;
-    $(window).keydown(function(e) {
-      var n;
-      if (is_key_pressed === false) {
-        is_key_pressed = true;
-        if (player.isPlaying()) {
-          player.noteOff();
-        }
-        n = KEYCODE_TO_NOTE[e.keyCode];
-        if (n != null) {
-          return player.noteOn(n);
-        }
-      }
-    });
-    $(window).keyup(function() {
-      is_key_pressed = false;
-      return player.noteOff();
-    });
-    scn1 = {
-      size: 32,
-      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
-    };
-    scn2 = {
-      size: 64,
-      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
-    };
-    scn3 = {
-      size: 96,
-      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1]]
-    };
-    scn8 = {
-      bpm: 240,
-      size: 256,
-      patterns: [[10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
-    };
-    return player.readScene(scn8);
-  });
-
-  KEYCODE_TO_NOTE = {
-    90: 1,
-    88: 2,
-    67: 3,
-    86: 4,
-    66: 5,
-    78: 6,
-    77: 7,
-    65: 8,
-    83: 9,
-    68: 10,
-    188: 8,
-    190: 9,
-    192: 10,
-    70: 11,
-    71: 12,
-    72: 13,
-    74: 14,
-    75: 15,
-    76: 16,
-    187: 17,
-    81: 15,
-    87: 16,
-    69: 17,
-    82: 18,
-    84: 19,
-    89: 20,
-    85: 21,
-    73: 22,
-    79: 23,
-    80: 24,
-    49: 22,
-    50: 23,
-    51: 24,
-    52: 25,
-    53: 26,
-    54: 27,
-    55: 28,
-    56: 29,
-    57: 30,
-    48: 31
-  };
-
-}).call(this);
-
-/*
-//@ sourceMappingURL=webapi.map
-*/

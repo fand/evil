@@ -43,6 +43,7 @@ class @Player
 
         @context = CONTEXT
         @synth = [new Synth(@context, 42)]
+#        @synth = [new Synth(@context, 42), new Synth(@context, 101), new Synth(@context, 1)]
         @synth_now = @synth[0]
         for s in @synth
             s.connect(@context.destination)
@@ -79,12 +80,12 @@ class @Player
     stop: ->
         s.stop() for s in @synth
         @is_playing = false
-        @time = @scene.size
+        @time = @scene.size        
 
     pause: ->
         s.pause(@time) for s in @synth
         @is_playing = false
-        
+                
     noteOn: (note) -> @synth_now.noteOn(note)
     noteOff: ()    -> @synth_now.noteOff()
 
@@ -93,7 +94,7 @@ class @Player
     readScene: (@scene) ->
         patterns = @scene.patterns
         while patterns.length > @synth.length
-            @synth.push(new Synth())
+            @synth.push(new Synth(@context, Math.floor(Math.random() * 100)))
         @setBPM(@scene.bpm) if @scene.bpm?
         @setScale(@scene.scale) if @scene.scale?
         for i in [0...patterns.length]
@@ -168,6 +169,15 @@ $(() ->
         player.noteOff()
     )
     
+    scn55 =
+        size: 32
+        patterns: [
+            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],            
+            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]
+            ]
     scn1 =
         size: 32
         patterns: [
@@ -199,7 +209,7 @@ $(() ->
              1,2,3,5,8,3,5,8,2,3,4,6,9,4,6,9,3,4,5,7,10,5,7,10,7,8,1,3,5,8,1,1,
              1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8]
             ]
-    player.readScene(scn8)
+    player.readScene(scn1)
 )
 
 

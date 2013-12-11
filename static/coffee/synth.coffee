@@ -3,153 +3,128 @@ STREAM_LENGTH = 1024
 SAMPLE_RATE = 48000
 T = new MutekiTimer()
 
+OSC_TYPE = 
+    SINE:     0
+    RECT:     1
+    SAW:      2
+    TRIANGLE: 3
+
+
+
+class @Noise
+    constructor: (@ctx) ->
+        @node = @ctx.createScriptProcessor(STREAM_LENGTH)
+        @node.onaudioprocess = (event) =>
+            data_L = event.outputBuffer.getChannelData(0);
+            data_R = event.outputBuffer.getChannelData(1);
+            for i in [0...data_L.length]
+                data_L[i] = data_R[i] = Math.random()
+
+    connect: (dst) -> @node.connect(dst)
+    setOctave: (_) -> null
+    setFine: (_) -> null     
+    setNote: -> null
+    setInterval: (_) -> null
+    setFreq: -> null
+    setKey:  -> null
+    setShape: (shape) ->
+        
+
 
 class @VCO
-    constructor: ->
+    constructor: (@ctx) ->
         @freq_key = 55
-        @shape = "SINE"
         @octave = 4
         @interval = 0
         @fine = 0
         @note = 0
         @freq = Math.pow(2, @octave) * @freq_key
-
-        # 48000 / freq = 1周期当りのサンプル数
-        @period_sample = SAMPLE_RATE / @freq;
-        @phase = 0;
-        @d_phase = (2.0 * Math.PI) / @period_sample;
         
-    setShape: (@shape) ->
+        @node = @ctx.createOscillator()
+        @node.type = 'sine'
+        @setFreq()
+        @node.start(0)
+        
     setOctave: (@octave) ->
-    setInterval: (@interval) ->
-    setFine: (@fine) ->
+    setFine: (@fine) -> @node.detune.value = @fine
     setNote: (@note) ->
     setKey: (@freq_key) ->
-        
+    setInterval: (@interval) ->
+    setShape: (shape) ->
+        @node.type = OSC_TYPE[shape]
+
     setFreq: ->
         @freq = (Math.pow(2, @octave) * Math.pow(SEMITONE, @interval + @note) * @freq_key) + @fine
-        @period_sample = SAMPLE_RATE / @freq
-        @d_phase = (2.0 * Math.PI) / @period_sample
-        
-    sine: ->
-        Math.cos(@phase * @d_phase)
-    triangle: ->
-        saw2 = @saw() * 2.0;
-        switch
-            when saw2 < -1.0 then saw2 + 2.0
-            when saw2 <  1.0 then saw2 + 2.0
-            else saw2 - 2.0
-    saw: ->
-        p = @phase % @period_sample
-        1.99 * (p / @period_sample) - 1.0
-    rect: ->
-        if @sine() > 0 then -1.0 else 1.0
-    noise: -> Math.random()
+        @node.frequency.setValueAtTime(@freq, 0)
 
-    nextSample: ->
-        @phase++
-        switch @shape
-            when "SINE"     then @sine()
-            when "TRIANGLE" then @triangle()
-            when "SAW"      then @saw()
-            when "RECT"     then @rect()
-            when "NOISE"    then @noise()
-            else                 @sine()
+    connect: (dst) -> @node.connect(dst)
         
-    nextStream: ->
-        (@nextSample() for i in [0...STREAM_LENGTH])
-
 
 
 class @EG
-    constructor: ->
-        @time = 0
-        @on = false
-        @envelope = 0.0
-
-        @attack = 0
-        @decay = 0
+    constructor: (@target, @min, @max) ->
+        @attack  = 0
+        @decay   = 0
         @sustain = 0.0
         @release = 0
 
-    setParam: (@attack, @decay, sustain, @release) ->
-        @sustain = sustain / 100.0
     getParam: -> [@attack, @decay, @sustain, @release]
+    setParam: (attack, decay, sustain, release) ->
+        @attack  = attack  / 50000.0
+        @decay   = decay   / 50000.0
+        @sustain = sustain / 100.0
+        @release = release / 50000.0
+
+    setRange: (@min, @max) ->
+    getRange: -> [@min, @max]    
     
-    noteOn: ->
-        @time = 0
-        @on = true
-    noteOff: ->
-        @time = 0
-        @on = false
-        @envelope_released = @envelope
-
-    step: -> @time++
-
-    getEnvelope: ->
-        if @on 
-            if @time < @attack
-                @envelope = 1.0 * (@time / @attack)
-            else if @time < (@attack + @decay)
-                e = ((@time - @attack) / @decay) * (1.0 - @sustain)
-                @envelope = 1.0 - e
-            else 
-               @envelope = @sustain
-        else
-            if @time < @release
-                @envelope = @envelope_released * (@release-@time) / @release
-            else
-                @envelope = 0.0
-        @envelope
+    noteOn: (time) ->
+        @target.cancelScheduledValues(time)        
+        @target.setValueAtTime(@min, time)
+        @target.linearRampToValueAtTime(@max, time + @attack)
+        @target.linearRampToValueAtTime(@sustain * (@max - @min) + @min, (time + @attack + @decay))
+        
+    noteOff: (time) ->
+        @target.cancelScheduledValues(time)
+        @target.setValueAtTime(@sustain * (@max - @min) + @min, time)
+        @target.linearRampToValueAtTime(@min, time + @release)
 
 
 
 class @ResFilter
-    constructor: (ctx) ->
-        @lpf = ctx.createBiquadFilter()
-        @lpf.type = 0  # lowpass == 0
-        @freq_min  = 80
-        @freq      = 5000
-        @resonance = 10
-        @Q         = 10
+    constructor: (@ctx) ->
+        @lpf = @ctx.createBiquadFilter()
+        @lpf.type = 'lowpass'  # lowpass == 0
+        @lpf.gain.value = 1.0
         
     connect:    (dst)  -> @lpf.connect(dst)
-    connectFEG: (@feg) ->        
-    getNode:           -> @lpf
-    getResonance:      -> @Q
-    
-    setFreq: (freq) ->
-        @freq = Math.pow(freq/1000, 2.0) * 25000
+    getResonance:      -> @lpf.Q.value
+    setQ: (Q) -> @lpf.Q.value = Q
         
-    setQ: (@q) ->
-          @lpf.Q.value = @Q
         
-    update: ->
-        @lpf.frequency.value = @freq * @feg.getEnvelope() + @freq_min
-
-
 
 class @SynthCore
     constructor: (@parent, @ctx, @id) ->
-        @node = @ctx.createJavaScriptNode(STREAM_LENGTH, 1, 2)
-        @is_initialized = false
-        @vco  = [new VCO(), new VCO(), new VCO()]
-        @gain = [1.0, 1.0, 1.0]
-        
-        @eg  = new EG()
-        @feg = new EG()
-        
+        @node = @ctx.createGain()
+        @node.gain.value = 0
+        @vco  = [new VCO(@ctx), new VCO(@ctx), new Noise(@ctx)]
+        @gain = [@ctx.createGain(), @ctx.createGain(), @ctx.createGain()]
+        for i in [0...3]
+            @vco[i].connect(@gain[i])
+            @gain[i].gain.value = 0
+            @gain[i].connect(@node)
+
         @filter = new ResFilter(@ctx)
-        @filter.connectFEG(@feg);
+
+        @eg  = new EG(@node.gain, 0.0, 1.0)
+        @feg = new EG(@filter.lpf.frequency, 0, 0)
 
         # resonance用ノイズ生成
-        @vco_res = new VCO()
-        @vco_res.setShape("NOISE")
+        @gain_res = @ctx.createGain()
+        @gain_res.gain.value = 0
+        @vco[2].connect(@gain_res)
+        @gain_res.connect(@node)        
 
-        @ratio      = 1.0
-        @freq_key   = 0
-        @is_playing = false
-    
         @view = new SynthCoreView(this, id, @parent.view.dom.find('.core'))
 
     setVCOParam: (i, shape, oct, interval, fine) ->
@@ -159,65 +134,37 @@ class @SynthCore
         @vco[i].setFine(fine)
         @vco[i].setFreq()
         
-    setEGParam:  (a, d, s, r) -> @eg.setParam(a, d, s, r)
-    
+    setEGParam:  (a, d, s, r) -> @eg.setParam(a, d, s, r)    
     setFEGParam: (a, d, s, r) -> @feg.setParam(a, d, s, r)
     
     setFilterParam: (freq, q) ->
-        @filter.setFreq(freq)
+        @feg.setRange(80, Math.pow(freq/1000, 2.0) * 25000 + 80)
         @filter.setQ(q)
+        @gain_res.value = 0.1 * (q / 1000.0) if q > 1
         
-    setGain: (i, gain) -> @gain[i] = gain / 100.0
-
-    nextStream: ->
-        res    = @filter.getResonance()
-
-        s_vco = (j.nextStream() for j in @vco)
-        s_res = @vco_res.nextStream()
-        
-        stream = []
-        for i in [0...STREAM_LENGTH]
-            @eg.step()
-            @feg.step()
-            @filter.update()
-            
-            env = @eg.getEnvelope()
-            stream[i] = 0
-            for j in [0...@vco.length]
-                stream[i] += s_vco[j][i] * @gain[j] *0.3 * env
-            if res > 1
-                stream[i] += s_res[i] * 0.1 * (res/1000.0)
-        stream
+    setGain: (i, gain) ->
+        ## Keep total gain <= 0.9
+        @gain[i].gain.value = (gain / 100.0) * 0.3
 
     noteOn: ->
-        @is_playing = true
-        @eg.noteOn()
-        @feg.noteOn()
-        @initNode() unless @is_initialized
+        t0 = @ctx.currentTime
+        @eg.noteOn(t0)
+        @feg.noteOn(t0)
 
     noteOff: ->
-        @is_playing = false
-        @eg.noteOff()
-        @feg.noteOff()
+        t0 = @ctx.currentTime
+        @eg.noteOff(t0)
+        @feg.noteOff(t0)
 
-    initNode: ->
-        @is_initialized = true
-        @node.onaudioprocess = (event) =>
-            data_L = event.outputBuffer.getChannelData(0);
-            data_R = event.outputBuffer.getChannelData(1);
-            s = @nextStream()
-            for i in [0...data_L.length]
-                data_L[i] = data_R[i] = s[i]
-
-    setKey: (@freq_key) ->
-        v.setKey(@freq_key) for v in @vco
+    setKey: (freq_key) ->
+        v.setKey(freq_key) for v in @vco
+        
     setScale: (@scale) ->
 
-    isPlaying: -> @is_playing
-
     connect: (dst) ->
-        @node.connect(@filter.getNode())
+        @node.connect(@filter.lpf)
         @filter.connect(dst)
+        
     setNote: (note) ->
         for v in @vco
             v.setNote(note)
@@ -268,11 +215,11 @@ class @SynthCoreView
         w4 = w/4
         context.clearRect(0,0,w,h)
         context.beginPath();
-        context.moveTo(w4 * (1.0- adsr[0]/50000.0), h);
-        context.lineTo(w/4,0);                                        # attack
-        context.lineTo(w4 + (w4)*(adsr[1]/50000.0), h*(1.0-adsr[2]));  # decay
-        context.lineTo(w4 * 3, h*(1.0-adsr[2]));                      # sustain
-        context.lineTo(w4 * 3 + (w4)*(adsr[3]/50000.0), h);           # release
+        context.moveTo(w4 * (1.0 - adsr[0]), h)
+        context.lineTo(w / 4,0)                                  # attack
+        context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]))  # decay
+        context.lineTo(w4 * 3, h * (1.0 - adsr[2]))              # sustain
+        context.lineTo(w4 * (adsr[3] + 3), h)                    # release
         context.strokeStyle = 'rgb(0, 220, 255)'
         context.stroke()
 
@@ -296,26 +243,26 @@ class @SynthCoreView
 
     setEGParam: ->
         @model.setEGParam(
-            parseInt(@EG_inputs.eq(0).val()),
-            parseInt(@EG_inputs.eq(1).val()),
-            parseInt(@EG_inputs.eq(2).val()),
-            parseInt(@EG_inputs.eq(3).val())
+            parseFloat(@EG_inputs.eq(0).val()),
+            parseFloat(@EG_inputs.eq(1).val()),
+            parseFloat(@EG_inputs.eq(2).val()),
+            parseFloat(@EG_inputs.eq(3).val())
         )
         @updateCanvas("EG");
 
     setFEGParam: ->
         @model.setFEGParam(
-            parseInt(@FEG_inputs.eq(0).val()),
-            parseInt(@FEG_inputs.eq(1).val()),
-            parseInt(@FEG_inputs.eq(2).val()),
-            parseInt(@FEG_inputs.eq(3).val())
+            parseFloat(@FEG_inputs.eq(0).val()),
+            parseFloat(@FEG_inputs.eq(1).val()),
+            parseFloat(@FEG_inputs.eq(2).val()),
+            parseFloat(@FEG_inputs.eq(3).val())
         );
         @updateCanvas("FEG");
 
     setFilterParam: ->
         @model.setFilterParam(
-            parseInt(@filter_inputs.eq(0).val()),
-            parseInt(@filter_inputs.eq(1).val())
+            parseFloat(@filter_inputs.eq(0).val()),
+            parseFloat(@filter_inputs.eq(1).val())
         )
 
     setGain: ->
@@ -329,7 +276,6 @@ class @Synth
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @time = 0
         @scale = []
-        
         @view = new SynthView(this)
         @core = new SynthCore(this, @ctx, @id)
 

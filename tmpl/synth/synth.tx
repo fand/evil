@@ -36,7 +36,6 @@
         <option>TRIANGLE</option>
         <option>SAW</option>
         <option selected="selected">RECT</option>
-        <option>NOISE</option>
       </select><br>
       OCT   <input id="octave0_<: $id :>"   class="octave" type="number" min="0" max="5" value="1"><br>
       SHIFT <input id="interval0_<: $id :>" class="interval" type="number" min="-12" max="12" value="0"><br>
@@ -50,7 +49,6 @@
         <option>TRIANGLE</option>
         <option selected="selected">SAW</option>
         <option>RECT</option>
-        <option>NOISE</option>
       </select><br>
       OCT   <input id="octave1_<: $id :>"   class="octave"   type="number" min="0" max="5" value="1"><br>
       SHIFT <input id="interval1_<: $id :>" class="interval" type="number" min="-12" max="12" value="7"><br>
