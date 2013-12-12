@@ -4,15 +4,21 @@
     <div class="sequencer-table">
       <div class="indicator"></div>
 
+      <i class="fa fa-minus pattern-minus"></i>
+      <i class="fa fa-plus pattern-plus"></i>
+
       <table class="table">
         <thead>
           <tr class="header">
-            <: for [0..8] -> $pos { :>
-              <th class="position clearfix">
-                <input type="button" class="pattern-plus" value="＋" />
-                <input type="button" class="pattern-minus" value="ー" />
-                <span class="pattern-total">1</span>
-                <span><: $pos + 1 :> / </span>
+            <: for [0..7] -> $pos { :>
+              <th>
+              <div class="position">
+                <: for [0..($pos-1)] -> $_ { :><i class="fa fa-circle marker"></i>
+                <: } :>
+                <i class="fa fa-circle marker marker-now"></i>
+                <: for [($pos+1)..7] -> $_ { :><i class="fa fa-circle marker"></i>
+                <: } :>
+              </div>
               </th>
             <: } :>
           </tr>

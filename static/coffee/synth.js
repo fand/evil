@@ -533,9 +533,13 @@
       });
       this.cells = this.dom.find('td');
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      this.control_total = this.table.find('.pattern-total');
-      this.plus = this.table.find('.pattern-plus');
-      this.minus = this.table.find('.pattern-minus');
+      this.page_total = 1;
+      this.pos_markers = this.table.find('.position').map(function() {
+        return $(this).find('.marker');
+      });
+      this.plus = this.dom.find('.pattern-plus');
+      this.minus = this.dom.find('.pattern-minus');
+      this.setMarker();
       this.initEvent();
     }
 
@@ -602,17 +606,20 @@
         }
       }
       this.page_total = this.pattern.length / 32;
-      return this.control_total.text(' ' + this.page_total);
+      return this.setMarker();
     };
 
     SynthView.prototype.plusPattern = function() {
       this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
       this.page_total = this.pattern.length / 32;
-      return this.control_total.text(' ' + this.page_total);
+      return this.setMarker();
     };
 
     SynthView.prototype.minusPattern = function() {
       var i, y, _i, _j;
+      if (this.pattern.length === 32) {
+        return;
+      }
       for (_i = _j = 0; _j < 32; _i = ++_j) {
         i = this.pattern.length - _i - 1;
         y = 10 - this.pattern[i];
@@ -622,7 +629,20 @@
       }
       this.pattern = this.pattern.slice(0, this.pattern.length - 32);
       this.page_total = this.pattern.length / 32;
-      return this.control_total.text(' ' + this.page_total);
+      return this.setMarker();
+    };
+
+    SynthView.prototype.setMarker = function() {
+      var pt;
+      pt = this.page_total;
+      return this.pos_markers.each(function(i) {
+        $(this).filter(function(j) {
+          return j < pt;
+        }).show();
+        return $(this).filter(function(j) {
+          return pt <= j;
+        }).hide();
+      });
     };
 
     SynthView.prototype.playAt = function(time) {

@@ -353,10 +353,12 @@ class @SynthView
         @cells = @dom.find('td')
 
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @page_total = 1
 
-        @control_total = @table.find('.pattern-total')
-        @plus  = @table.find('.pattern-plus')
-        @minus = @table.find('.pattern-minus')
+        @pos_markers = (@table.find('.position').map( -> $(this).find('.marker')))  # list of list of markers
+        @plus  = @dom.find('.pattern-plus')
+        @minus = @dom.find('.pattern-minus')
+        @setMarker()
 
         @initEvent()
 
@@ -411,21 +413,29 @@ class @SynthView
             y = 10 - @pattern[i]
             @rows.eq(y).find('td').eq(i).addClass('on') if @pattern[i] != 0
         @page_total = @pattern.length / 32
-        @control_total.text(' ' + @page_total)
+        @setMarker()
 
     plusPattern: ->
         @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
         @page_total = @pattern.length / 32
-        @control_total.text(' ' + @page_total)
+        @setMarker()
 
     minusPattern: ->
+        return if @pattern.length == 32
         for _i in [0...32]
             i = @pattern.length - _i - 1
             y = 10 - @pattern[i]
             @rows.eq(y).find('td').eq(i).removeClass() if @pattern[i] != 0
         @pattern = @pattern.slice(0, @pattern.length - 32)
         @page_total = @pattern.length / 32
-        @control_total.text(' ' + @page_total)
+        @setMarker()
+
+    setMarker: ->
+        pt = @page_total
+        @pos_markers.each((i) ->
+            $(this).filter((j) -> j  < pt).show()
+            $(this).filter((j) -> pt <= j).hide()
+        )
 
     playAt: (time) ->
         @indicator.css('left', (26 * (time % 32)) + 'px')

@@ -44,7 +44,7 @@ html, body {
 }
 .instrument {
     position: relative;
-    display: box;
+    display: block;
     float: left;
 
     width: 910px;
@@ -118,7 +118,7 @@ html, body {
     float: left;
     width: 24px;
     height: 261px;
-    top: 43px;
+    top: 39px;
 
     background-color: #dff;
     border: 1px solid #dFF;
@@ -128,22 +128,71 @@ html, body {
 
     box-shadow: 0px 0px 5px #0FF;
 }
-.table > thead .position {
-    width: 820px;
+.table .position {
+    width: 830px;
     height: 25px;
     margin: 0px;
-    padding: 5px 5px 5px 5px;
-    color: #aaefff;
+    padding: 5px 0px;
+    color: #bbefff;
     font-size: 16px;
-    text-align: right;
+    text-align: center;
 }
-.table > thead .position > * {
-    float: right;
+.marker {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    text-align: center;
+    margin: 2px 5px;
+    color: #9ef;
 }
-.table > thead .position > span {
-    font-size: 16px;
-    margin-right: 10px;
+.marker:hover {
+    cursor: pointer;
+    text-shadow: 0px 0px 4px #088;
 }
+.marker {
+    color: #9ef;
+    text-align: center;
+}
+.marker-now {
+    color: #fff;
+    text-shadow: 0px 0px 10px #0df;
+}
+.marker-now:hover {
+    cursor: default;
+    text-shadow: 0px 0px 10px #0df;
+}
+
+.pattern-plus {
+    position: absolute;
+    width: 25px;
+    margin: 5px;
+    top: 0px;
+    left: 770px;
+    color: #9ef;
+    font-size: 25px;
+    z-index: 2;
+}
+.pattern-plus:hover {
+    color: #fff;
+    text-shadow: 0px 0px 10px #0df;
+}
+.pattern-minus {
+    position: absolute;
+    width: 25px;
+    margin: 5px;
+    top: 0px;
+    left: 800px;
+    color: #9ef;
+    font-size: 25px;
+    z-index: 2;
+}
+.pattern-minus:hover {
+    color: #fff;
+    text-shadow: 0px 0px 10px #0df;
+}
+
+
+
 .table > thead > tr.header {
   margin:0px;
   padding:0px;
@@ -318,6 +367,7 @@ footer {
 }
 #control-play:hover {
     color: #ffffff;
+    cursor: pointer;
     text-shadow: 0px 0px 9px rgba(100, 255, 255, 0.8), 0px 0px 10px rgba(0, 200, 255, 1.0);
 }
 #control-play:active {
@@ -326,6 +376,7 @@ footer {
 }
 #control-forward:hover {
     color: #ffffff;
+    cursor: pointer;
     text-shadow: 0px 0px 9px rgba(100, 255, 255, 0.8), 0px 0px 10px rgba(0, 200, 255, 1.0);
 }
 #control-forward:active {
@@ -334,6 +385,7 @@ footer {
 }
 #control-backward:hover {
     color: #ffffff;
+    cursor: pointer;
     text-shadow: 0px 0px 9px rgba(100, 255, 255, 0.8), 0px 0px 10px rgba(0, 200, 255, 1.0);
 }
 #control-backward:active {
