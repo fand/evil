@@ -49,7 +49,7 @@
       this.scene = null;
       this.num_id = 0;
       this.context = CONTEXT;
-      this.synth = [new Synth(this.context, this.num_id++)];
+      this.synth = [new Synth(this.context, this.num_id++, this)];
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
       _ref = this.synth;
@@ -158,6 +158,20 @@
       return this.is_playing = false;
     };
 
+    Player.prototype.forward = function() {
+      this.time = (this.time + 32) % this.scene_size;
+      return this.synth_now.redraw(this.time);
+    };
+
+    Player.prototype.backward = function() {
+      if (this.time % 32 < 3 && this.time >= 32) {
+        this.time = (this.time - 32 - (this.time % 32)) % this.scene_size;
+      } else {
+        this.time = this.time - (this.time % 32);
+      }
+      return this.synth_now.redraw(this.time);
+    };
+
     Player.prototype.noteOn = function(note) {
       return this.synth_now.noteOn(note);
     };
@@ -166,9 +180,9 @@
       return this.synth_now.noteOff();
     };
 
-    Player.prototype.addSynth = function(callback) {
+    Player.prototype.addSynth = function() {
       var s;
-      s = new Synth(this.context, this.num_id++);
+      s = new Synth(this.context, this.num_id++, this);
       s.setScale(this.scale);
       s.setKey(this.freq_key);
       s.connect(this.context.destination);
@@ -256,6 +270,20 @@
       return this.view.synth_total = this.synth.length;
     };
 
+    Player.prototype.setSceneSize = function() {
+      var s;
+      return this.scene_size = Math.max.apply(null, (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.synth;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          _results.push(s.pattern.length);
+        }
+        return _results;
+      }).call(this));
+    };
+
     Player.prototype.showSuccess = function(url) {
       console.log("success!");
       return console.log(url);
@@ -273,17 +301,19 @@
     function PlayerView(model) {
       this.model = model;
       this.dom = $("#control");
-      this.play = this.dom.find('[name=play]');
-      this.stop = this.dom.find('[name=stop]');
       this.bpm = this.dom.find("[name=bpm]");
       this.key = this.dom.find("[name=key]");
       this.scale = this.dom.find("[name=mode]");
       this.setBPM();
       this.setKey();
       this.setScale();
+      this.play = $('#control-play');
+      this.stop = $('#control-stop');
+      this.forward = $('#control-forward');
+      this.backward = $('#control-backward');
       this.instruments = $('#instruments');
-      this.btn_left = this.dom.find('#btn-left');
-      this.btn_right = this.dom.find('#btn-right');
+      this.btn_left = $('#btn-left');
+      this.btn_right = $('#btn-right');
       this.synth_now = 0;
       this.synth_total = 1;
       this.btn_save = $('#btn-save');
@@ -300,15 +330,21 @@
       this.play.on('mousedown', function() {
         if (_this.model.isPlaying()) {
           _this.model.pause();
-          return _this.play.attr("value", "play");
+          return _this.play.removeClass("fa-pause").addClass("fa-play");
         } else {
           _this.model.play();
-          return _this.play.attr("value", "pause");
+          return _this.play.removeClass("fa-play").addClass("fa-pause");
         }
       });
       this.stop.on('mousedown', function() {
         _this.model.stop();
-        return _this.play.attr("value", "play");
+        return _this.play.removeClass("fa-pause").addClass("fa-play");
+      });
+      this.forward.on('mousedown', function() {
+        return _this.model.forward();
+      });
+      this.backward.on('mousedown', function() {
+        return _this.model.backward();
       });
       this.btn_left.on('mousedown', function() {
         return _this.moveLeft();
@@ -356,7 +392,7 @@
   })();
 
   $(function() {
-    var is_key_pressed, player, scn1, scn2, scn22, scn3, scn55, scn8;
+    var footer_size, is_key_pressed, player, scn1, scn2, scn22, scn3, scn55, scn8;
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
@@ -384,6 +420,8 @@
       is_key_pressed = false;
       return player.noteOff();
     });
+    footer_size = $(window).height() / 2 - 300;
+    $('footer').css('height', footer_size + 'px');
     scn55 = {
       size: 32,
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
@@ -409,7 +447,7 @@
       size: 256,
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
     };
-    return player.readSong(scn22);
+    return player.readSong(scn3);
   });
 
   KEYCODE_TO_NOTE = {

@@ -43,22 +43,22 @@ class @Player
 
         @num_id = 0
         @context = CONTEXT
-        @synth = [new Synth(@context, @num_id++)]
+        @synth = [new Synth(@context, @num_id++, this)]
         @synth_now = @synth[0]
         @synth_pos = 0
         for s in @synth
             s.connect(@context.destination)
-        
+
         @view = new PlayerView(this)
 
     setBPM: (@bpm) ->
         @duration = 15.0 / @bpm * 1000  # msec
         s.setDuration(@duration) for s in @synth
-        
+
     setKey: (key)->
         @freq_key = KEY_LIST[key]
         s.setKey(@freq_key) for s in @synth
-            
+
     setScale: (@scale) ->
         if ! Array.isArray(@scale)
             @scale = SCALE_LIST[@scale]
@@ -74,26 +74,37 @@ class @Player
          ), 150)
 
     playNext: ->
-        if @is_playing            
+        if @is_playing
             @time = 0 if @time >= @scene_size
             s.playAt(@time) for s in @synth
             @time++
             T.setTimeout(( => @playNext()), @duration)
-            
+
     stop: ->
         s.stop() for s in @synth
         @is_playing = false
-        @time = @scene_size        
+        @time = @scene_size
 
     pause: ->
         s.pause(@time) for s in @synth
         @is_playing = false
-                
+
+    forward: ->
+        @time = (@time + 32) % @scene_size
+        @synth_now.redraw(@time)
+
+    backward: ->
+        if @time % 32  < 3 && @time >= 32
+            @time = (@time - 32 - (@time % 32)) % @scene_size
+        else
+            @time = @time - (@time % 32)
+        @synth_now.redraw(@time)
+
     noteOn: (note) -> @synth_now.noteOn(note)
     noteOff: ()    -> @synth_now.noteOff()
 
-    addSynth: (callback) ->
-        s = new Synth(@context, @num_id++)
+    addSynth: ->
+        s = new Synth(@context, @num_id++, this)
         s.setScale(@scale)
         s.setKey(@freq_key)
         s.connect(@context.destination)
@@ -103,7 +114,7 @@ class @Player
         @synth[next_idx - 1].inactivate()
         @synth_now = @synth[next_idx]
         @synth_now.activate()
-        
+
     moveLeft: (next_idx) ->
         @synth[next_idx + 1].inactivate()
         @synth_now = @synth[next_idx]
@@ -134,12 +145,12 @@ class @Player
         )
 
     readSong: (scn) ->
-        if song_read?        
+        if song_read?
             @scenes = song_read
         else
             @scenes = [scn]
         @readScene(@scenes[0])
-                        
+
     readScene: (@scene) ->
         #@scenes = [@scene]
         @scene_size = @scene.size
@@ -147,28 +158,28 @@ class @Player
         while patterns.length > @synth.length
             @addSynth()
         @setBPM(@scene.bpm) if @scene.bpm?
-        @setKey(@scene.key) if @scene.key?        
+        @setKey(@scene.key) if @scene.key?
         @setScale(@scene.scale) if @scene.scale?
         for i in [0...patterns.length]
             @synth[i].readPattern(patterns[i])
         @view.synth_total = @synth.length
 
+    setSceneSize: ->
+        @scene_size = Math.max.apply(null, (s.pattern.length for s in @synth))
+
     showSuccess: (url) ->
         console.log("success!")
         console.log(url)
-        
+
     showError: (error) ->
         console.log(error)
-        
-        
+
+
 
 class @PlayerView
     constructor: (@model) ->
         @dom = $("#control")
 
-        @play  = @dom.find('[name=play]')
-        @stop  = @dom.find('[name=stop]')        
-                
         @bpm   = @dom.find("[name=bpm]")
         @key   = @dom.find("[name=key]")
         @scale = @dom.find("[name=mode]")
@@ -177,9 +188,14 @@ class @PlayerView
         @setKey()
         @setScale()
 
+        @play  = $('#control-play')
+        @stop  = $('#control-stop')
+        @forward = $('#control-forward')
+        @backward = $('#control-backward')
+
         @instruments = $('#instruments')
-        @btn_left  = @dom.find('#btn-left')
-        @btn_right = @dom.find('#btn-right')
+        @btn_left  = $('#btn-left')
+        @btn_right = $('#btn-right')
         @synth_now = 0
         @synth_total = 1
 
@@ -196,21 +212,26 @@ class @PlayerView
         @play.on('mousedown', () =>
             if @model.isPlaying()
                 @model.pause()
-                @play.attr("value", "play")
-            else 
+                @play.removeClass("fa-pause").addClass("fa-play")
+            else
                 @model.play()
-                @play.attr("value", "pause")
+                @play.removeClass("fa-play").addClass("fa-pause")
         )
         @stop.on('mousedown', () =>
             @model.stop()
-            @play.attr("value", "play")
+            @play.removeClass("fa-pause").addClass("fa-play")
         )
+        @forward.on('mousedown', () =>
+            @model.forward()
+        )
+        @backward.on('mousedown', () =>
+            @model.backward()
+        )
+
         @btn_left.on('mousedown',  () => @moveLeft())
         @btn_right.on('mousedown', () => @moveRight())
-
         @btn_save.on('click', () => @model.saveSong())
-        
-        
+
     setBPM:   ->  @model.setBPM(parseInt(@bpm.val()))
     setKey:   ->  @model.setKey(@key.val())
     setScale: ->  @model.setScale(@scale.val())
@@ -222,12 +243,13 @@ class @PlayerView
         @synth_now++
         @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
         @model.moveRight(@synth_now)
-        
+
     moveLeft: ->
         if @synth_now != 0
             @synth_now--
             @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
             @model.moveLeft(@synth_now)
+
 
 
 
@@ -240,14 +262,15 @@ $(() ->
     $("#facebook").socialbutton('facebook_like', {
         button: 'button_count'
     })
-    
+
+
     player = new Player()
 
     is_key_pressed = false
     $(window).keydown((e) ->
         if is_key_pressed == false
-            is_key_pressed = true            
-            player.noteOff() if player.isPlaying() 
+            is_key_pressed = true
+            player.noteOff() if player.isPlaying()
 
             n = KEYCODE_TO_NOTE[e.keyCode]
             player.noteOn(n) if n?
@@ -256,13 +279,16 @@ $(() ->
         is_key_pressed = false
         player.noteOff()
     )
-    
+
+    footer_size = $(window).height()/2 - 300
+    $('footer').css('height', footer_size + 'px')
+
     scn55 =
         size: 32
         patterns: [
             [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
             [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],            
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
             [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
             [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]
             ]
@@ -304,7 +330,7 @@ $(() ->
              1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8]
             ]
     #player.readScene(scn22)
-    player.readSong(scn22)
+    player.readSong(scn3)
 )
 
 
@@ -349,4 +375,3 @@ KEYCODE_TO_NOTE =
     56:  29
     57:  30
     48:  31
-    

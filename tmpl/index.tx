@@ -20,38 +20,44 @@
   </div>
 </div>
 
-<div name="control" id="control" class="module">
-  key: <select name="key">
-    <option selected="selected">A</option>
-    <option>D</option>
-    <option>G</option>
-    <option>C</option>
-    <option>F</option>
-    <option>Bb</option>
-    <option>Eb</option>
-    <option>Ab</option>
-    <option>Db</option>
-    <option>Gb</option>
-    <option>B</option>
-    <option>E</option>
-  </select>
-  mode: <select name="mode">
-    <option selected="selected">IONIAN</option>
-    <option>DORIAN</option>
-    <option>PHRYGIAN</option>
-    <option>LYDIAN</option>
-    <option>MIXOLYDIAN</option>
-    <option>AEOLIAN</option>
-    <option>LOCRIAN</option>
-  </select>
-  bpm: <input name="bpm" min="60" max="240" value="70" type="number">
-  <input type="button" name="play" value="play" style="width:80px;"/>
-  <input type="button" name="stop" value="stop" />
+
+<footer>
+
+  <div name="control" id="control" class="module">
+    key: <select name="key">
+      <option selected="selected">A</option>
+      <option>D</option>
+      <option>G</option>
+      <option>C</option>
+      <option>F</option>
+      <option>Bb</option>
+      <option>Eb</option>
+      <option>Ab</option>
+      <option>Db</option>
+      <option>Gb</option>
+      <option>B</option>
+      <option>E</option>
+    </select>
+    mode: <select name="mode">
+      <option selected="selected">IONIAN</option>
+      <option>DORIAN</option>
+      <option>PHRYGIAN</option>
+      <option>LYDIAN</option>
+      <option>MIXOLYDIAN</option>
+      <option>AEOLIAN</option>
+      <option>LOCRIAN</option>
+    </select>
+    bpm: <input name="bpm" min="60" max="240" value="70" type="number">
+  </div>
+
+  <i id="control-play"      class="fa fa-play"></i>
+  <i id="control-forward"   class="fa fa-forward"></i>
+  <i id="control-backward"  class="fa fa-backward"></i>    
 
   <div id="btn-left"></div>
-  <div id="btn-right"></div>
-  
-</div>
+  <div id="btn-right"></div>    
+
+</footer>
 
 
 <input type="button" id="btn-save" value="save" />

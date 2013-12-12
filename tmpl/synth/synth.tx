@@ -3,13 +3,15 @@
   <div class="sequencer">
     <div class="sequencer-table">
       <div class="indicator"></div>
-      
+
       <table class="table">
         <thead>
           <tr class="header">
             <: for [0..8] -> $pos { :>
               <th class="position clearfix">
-                <span class="pattern-total"></span>
+                <input type="button" class="pattern-plus" value="＋" />
+                <input type="button" class="pattern-minus" value="ー" />
+                <span class="pattern-total">1</span>
                 <span><: $pos + 1 :> / </span>
               </th>
             <: } :>
@@ -24,7 +26,7 @@
           <: } :>
         </tbody>
       </table>
-      
+
     </div>
   </div>
 
@@ -95,7 +97,7 @@
       </div>
     </fieldset>
 
-    <fieldset id="FEG_<: $id :>" class="RS_module RS_FEG FEG"> 
+    <fieldset id="FEG_<: $id :>" class="RS_module RS_FEG FEG">
       <legend>FilterEnvelope</legend>
       <canvas id="canvasFEG_<: $id :>" class="canvasFEG"></canvas>
       ATTACK  <input name="attack"  type="range" min="0" max="50000" value="0"><br>

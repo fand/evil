@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
     <meta name="format-detection" content="telephone=no" />
     <link href="<: static_file('/static/css/main.css') :>" rel="stylesheet" type="text/css" media="screen" />
-    <link href="<: static_file('/static/css/riff.css') :>" rel="stylesheet" type="text/css" media="screen" />    
-    
+    <link href="<: static_file('/static/css/riff.css') :>" rel="stylesheet" type="text/css" media="screen" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" media="screen" />    
     <script src="<: uri_for('/static/js/Wasynth2.min.js') :>"></script>
     
   </head>
