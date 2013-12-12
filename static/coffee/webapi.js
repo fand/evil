@@ -42,9 +42,9 @@
       this.freq_key = 55;
       this.scale = [];
       this.is_playing = false;
-      this.is_loop = false;
+      this.is_loop = true;
       this.time = 0;
-      this.scene_position = 0;
+      this.scene_pos = 0;
       this.scenes = [];
       this.scene = null;
       this.num_id = 0;
@@ -118,25 +118,6 @@
       }), 150);
     };
 
-    Player.prototype.playNext = function() {
-      var s, _i, _len, _ref,
-        _this = this;
-      if (this.is_playing) {
-        if (this.time >= this.scene_size) {
-          this.time = 0;
-        }
-        _ref = this.synth;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          s = _ref[_i];
-          s.playAt(this.time);
-        }
-        this.time++;
-        return T.setTimeout((function() {
-          return _this.playNext();
-        }), this.duration);
-      }
-    };
-
     Player.prototype.stop = function() {
       var s, _i, _len, _ref;
       _ref = this.synth;
@@ -172,12 +153,51 @@
       return this.synth_now.redraw(this.time);
     };
 
+    Player.prototype.toggleLoop = function() {
+      return this.is_loop = !this.is_loop;
+    };
+
     Player.prototype.noteOn = function(note) {
       return this.synth_now.noteOn(note);
     };
 
     Player.prototype.noteOff = function() {
       return this.synth_now.noteOff();
+    };
+
+    Player.prototype.playNext = function() {
+      var s, _i, _len, _ref,
+        _this = this;
+      if (this.is_playing) {
+        if ((!this.is_loop) && this.time >= this.scene_size) {
+          if (this.scene_pos === this.scenes.length - 1) {
+            this.is_playing = false;
+            this.view.viewStop();
+            this.time = 0;
+            this.scene_pos = 0;
+            this.scene = this.scenes[0];
+            this.readScene(this.scene);
+            return;
+          } else {
+            this.time = 0;
+            this.scene_pos++;
+            this.scene = this.scenes[this.scene_pos];
+            this.readScene(this.scene);
+          }
+        }
+        if (this.time >= this.scene_size) {
+          this.time = 0;
+        }
+        _ref = this.synth;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          s.playAt(this.time);
+        }
+        this.time++;
+        return T.setTimeout((function() {
+          return _this.playNext();
+        }), this.duration);
+      }
     };
 
     Player.prototype.addSynth = function() {
@@ -238,11 +258,20 @@
       });
     };
 
-    Player.prototype.readSong = function(scn) {
+    Player.prototype.readSong = function(song) {
+      var o;
       if (typeof song_read !== "undefined" && song_read !== null) {
         this.scenes = song_read;
       } else {
-        this.scenes = [scn];
+        this.scenes = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = song.length; _i < _len; _i++) {
+            o = song[_i];
+            _results.push(o);
+          }
+          return _results;
+        })();
       }
       return this.readScene(this.scenes[0]);
     };
@@ -250,7 +279,6 @@
     Player.prototype.readScene = function(scene) {
       var i, patterns, _i, _ref;
       this.scene = scene;
-      this.scene_size = this.scene.size;
       patterns = this.scene.patterns;
       while (patterns.length > this.synth.length) {
         this.addSynth();
@@ -268,7 +296,8 @@
       for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         this.synth[i].readPattern(patterns[i]);
       }
-      return this.view.synth_total = this.synth.length;
+      this.view.synth_total = this.synth.length;
+      return this.setSceneSize();
     };
 
     Player.prototype.setSceneSize = function() {
@@ -308,17 +337,23 @@
       this.setBPM();
       this.setKey();
       this.setScale();
+      this.footer = $('footer');
       this.play = $('#control-play');
       this.stop = $('#control-stop');
       this.forward = $('#control-forward');
       this.backward = $('#control-backward');
+      this.loop = $('#control-loop');
       this.instruments = $('#instruments');
+      this.mixer = $('#mixer');
       this.btn_left = $('#btn-left');
       this.btn_right = $('#btn-right');
+      this.btn_top = $('#btn-top');
+      this.btn_bottom = $('#btn-bottom');
       this.synth_now = 0;
       this.synth_total = 1;
       this.btn_save = $('#btn-save');
       this.initEvent();
+      this.resize();
     }
 
     PlayerView.prototype.initEvent = function() {
@@ -329,17 +364,10 @@
         return _this.setScale();
       });
       this.play.on('mousedown', function() {
-        if (_this.model.isPlaying()) {
-          _this.model.pause();
-          return _this.play.removeClass("fa-pause").addClass("fa-play");
-        } else {
-          _this.model.play();
-          return _this.play.removeClass("fa-play").addClass("fa-pause");
-        }
+        return _this.viewPlay();
       });
       this.stop.on('mousedown', function() {
-        _this.model.stop();
-        return _this.play.removeClass("fa-pause").addClass("fa-play");
+        return _this.viewStop();
       });
       this.forward.on('mousedown', function() {
         return _this.model.forward();
@@ -347,15 +375,46 @@
       this.backward.on('mousedown', function() {
         return _this.model.backward();
       });
+      this.loop.on('mousedown', function() {
+        if (_this.model.toggleLoop()) {
+          return _this.loop.removeClass('control-off').addClass('control-on');
+        } else {
+          return _this.loop.removeClass('control-on').addClass('control-off');
+        }
+      });
       this.btn_left.on('mousedown', function() {
         return _this.moveLeft();
       });
       this.btn_right.on('mousedown', function() {
         return _this.moveRight();
       });
-      return this.btn_save.on('click', function() {
+      this.btn_top.on('mousedown', function() {
+        return _this.moveTop();
+      });
+      this.btn_bottom.on('mousedown', function() {
+        return _this.moveBottom();
+      });
+      this.btn_save.on('click', function() {
         return _this.model.saveSong();
       });
+      return $(window).on('resize', function() {
+        return _this.resize();
+      });
+    };
+
+    PlayerView.prototype.viewPlay = function() {
+      if (this.model.isPlaying()) {
+        this.model.pause();
+        this.play.removeClass("fa-pause").addClass("fa-play");
+      } else {
+        this.model.play();
+      }
+      return this.play.removeClass("fa-play").addClass("fa-pause");
+    };
+
+    PlayerView.prototype.viewStop = function() {
+      this.model.stop();
+      return this.play.removeClass("fa-pause").addClass("fa-play");
     };
 
     PlayerView.prototype.setBPM = function() {
@@ -400,15 +459,65 @@
       }
       this.synth_now++;
       this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
-      return this.model.moveRight(this.synth_now);
+      this.model.moveRight(this.synth_now);
+      return this.btn_left.show();
     };
 
     PlayerView.prototype.moveLeft = function() {
       if (this.synth_now !== 0) {
         this.synth_now--;
         this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
-        return this.model.moveLeft(this.synth_now);
+        this.model.moveLeft(this.synth_now);
       }
+      if (this.synth_now === 0) {
+        return this.btn_left.hide();
+      }
+    };
+
+    PlayerView.prototype.moveTop = function() {
+      this.btn_left.hide();
+      this.btn_right.hide();
+      this.btn_top.hide();
+      this.btn_bottom.show();
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 700px, 0px)');
+      return this.mixer.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
+    };
+
+    PlayerView.prototype.moveBottom = function() {
+      this.btn_left.show();
+      this.btn_right.show();
+      this.btn_top.show();
+      this.btn_bottom.hide();
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+      return this.mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+    };
+
+    PlayerView.prototype.resize = function() {
+      var h, ph, pw, space_h, space_w, w;
+      w = $(window).width();
+      h = $(window).height();
+      space_w = (w - 910) / 2;
+      space_h = (h - 600) / 2;
+      pw = space_w / 2 - 50;
+      ph = space_h / 2 - 50;
+      this.btn_left.css({
+        width: space_w + 'px',
+        padding: '250px ' + (pw + 5) + 'px'
+      });
+      this.btn_right.css({
+        width: space_w + 'px',
+        padding: '250px ' + (pw + 15) + 'px'
+      });
+      this.btn_top.css({
+        height: space_h + 'px'
+      });
+      this.btn_bottom.css({
+        bottom: space_h + 'px',
+        height: space_h + 'px'
+      });
+      return this.footer.css({
+        height: space_h + 'px'
+      });
     };
 
     return PlayerView;
@@ -416,7 +525,7 @@
   })();
 
   $(function() {
-    var footer_size, is_key_pressed, player, scn1, scn2, scn22, scn3, scn55, scn8;
+    var footer_size, is_key_pressed, player, s1, s2, scn1, scn2, scn55, song1;
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
@@ -446,14 +555,6 @@
     });
     footer_size = $(window).height() / 2 - 300;
     $('footer').css('height', footer_size + 'px');
-    scn55 = {
-      size: 32,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
-    };
-    scn22 = {
-      size: 32,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [1, 1, 8, 1, 8, 1, 7, 1, 1, 1, 8, 1, 8, 1, 7, 1, 3, 1, 3, 1, 1, 2, 3, 5, 8, 1, 8, 7, 5, 1, 3, 2]]
-    };
     scn1 = {
       size: 32,
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
@@ -462,17 +563,22 @@
       size: 64,
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
     };
-    scn3 = {
-      size: 96,
-      bpm: 240,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1]]
+    scn55 = {
+      size: 32,
+      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
     };
-    scn8 = {
-      bpm: 240,
-      size: 256,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
+    s1 = {
+      bpm: 80,
+      size: 32,
+      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [1, 1, 8, 1, 8, 1, 7, 1, 1, 1, 8, 1, 8, 1, 7, 1, 3, 3, 8, 3, 8, 3, 7, 3, 5, 5, 8, 5, 8, 5, 9, 5]]
     };
-    return player.readSong(scn3);
+    s2 = {
+      bpm: 80,
+      size: 32,
+      patterns: [[1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10]]
+    };
+    song1 = [s1, s2];
+    return player.readSong(song1);
   });
 
   KEYCODE_TO_NOTE = {

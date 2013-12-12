@@ -9,14 +9,18 @@
     <div id="twitter" class="social"></div>
     <div id="hatena" class="social"></div>
   </div>
-  
+
   <div id="env"></div>
 
   <div id="instruments" class="clearfix">
   </div>
-  
+
+  <div id="mixer">
+    s
+  </div>
+
   <div id="templates">
-    <: include 'synth/synth.tx' { id => 0 } :>
+    <: include 'synth/synth.tx' :>
   </div>
 </div>
 
@@ -52,15 +56,18 @@
 
   <i id="control-play"      class="fa fa-play"></i>
   <i id="control-forward"   class="fa fa-forward"></i>
-  <i id="control-backward"  class="fa fa-backward"></i>    
-
-  <div id="btn-left"></div>
-  <div id="btn-right"></div>    
+  <i id="control-backward"  class="fa fa-backward"></i>
+  <i id="control-loop"      class="fa fa-repeat control-on"></i>
 
 </footer>
 
+  <i id="btn-left"   class="fa fa-angle-left"></i>
+  <i id="btn-right"  class="fa fa-angle-right"></i>
+  <i id="btn-top"    class="fa fa-angle-up"></i>
+  <i id="btn-bottom" class="fa fa-angle-down"></i>
 
-<input type="button" id="btn-save" value="save" />
+
+<i class="fa fa-save" id="btn-save">
 <form id="ajax-form" method="POST" />
 <script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
 
