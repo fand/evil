@@ -183,8 +183,8 @@ html, body {
     margin: 5px;
     padding: 0;
     top: 0px;
-    left: 62px;
-    width: 834px;
+    left: 65px;
+    width: 832px;
     height: 320px;
     overflow: hidden;
 }
@@ -197,7 +197,8 @@ html, body {
     left: 0;
     min-width: 8000px;
     height: 320px;
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
+    overflow-y: scroll;
 }
 .indicator {
     display: none;
@@ -219,10 +220,17 @@ html, body {
     width: 775px;
     height: 25px;
     margin: 0px;
-    padding: 5px 55px 5px 0px;
+    padding: 0px 55px 0px 0px;
     color: #bbefff;
     font-size: 16px;
     text-align: center;
+}
+.table .header {
+    height: 25px;
+}
+.table .header > th {
+    margin: 0px;
+    padding: 0px;
 }
 .marker {
     width: 20px;
@@ -230,6 +238,7 @@ html, body {
     font-size: 12px;
     text-align: center;
     margin: 2px 5px;
+    padding: 4px;
     color: #8ef;
 }
 .marker:hover {
@@ -251,12 +260,13 @@ html, body {
 
 .pattern-plus {
     position: absolute;
-    width: 25px;
+    width: 16px;
     margin: 5px;
+    padding: 2px;
     top: 0px;
-    left: 800px;
+    left: 805px;
     color: #8ef;
-    font-size: 25px;
+    font-size: 12px;
     z-index: 2;
 }
 .pattern-plus:hover {
@@ -265,12 +275,13 @@ html, body {
 }
 .pattern-minus {
     position: absolute;
-    width: 25px;
+    width: 16px;
     margin: 5px;
+    padding: 2px;
     top: 0px;
-    left: 770px;
+    left: 780px;
     color: #8ef;
-    font-size: 25px;
+    font-size: 12px;
     z-index: 2;
 }
 .pattern-minus:hover {
@@ -485,6 +496,12 @@ footer {
     position: fixed;
     bottom: 20px;
     right: 20px;
+    width: 20px;
+    heiht: 20px;
+    font-size: 20px;
+    text-align: center;
+    color: #aaa;
+    z-index: 10;
 }
 
 

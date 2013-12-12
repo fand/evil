@@ -118,38 +118,6 @@
       }), 150);
     };
 
-    Player.prototype.playNext = function() {
-      var s, _i, _len, _ref,
-        _this = this;
-      if (this.is_playing) {
-        if ((!this.is_loop) && this.time >= this.scene_size) {
-          if (this.scene_pos === this.scenes.length - 1) {
-            this.is_playing = false;
-            this.view.viewStop();
-            this.time = 0;
-            return;
-          } else {
-            this.time = 0;
-            this.scene_pos++;
-            this.scene = this.scenes[this.scene_pos];
-            this.readScene(this.scene);
-          }
-        }
-        if (this.time >= this.scene_size) {
-          this.time = 0;
-        }
-        _ref = this.synth;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          s = _ref[_i];
-          s.playAt(this.time);
-        }
-        this.time++;
-        return T.setTimeout((function() {
-          return _this.playNext();
-        }), this.duration);
-      }
-    };
-
     Player.prototype.stop = function() {
       var s, _i, _len, _ref;
       _ref = this.synth;
@@ -195,6 +163,41 @@
 
     Player.prototype.noteOff = function() {
       return this.synth_now.noteOff();
+    };
+
+    Player.prototype.playNext = function() {
+      var s, _i, _len, _ref,
+        _this = this;
+      if (this.is_playing) {
+        if ((!this.is_loop) && this.time >= this.scene_size) {
+          if (this.scene_pos === this.scenes.length - 1) {
+            this.is_playing = false;
+            this.view.viewStop();
+            this.time = 0;
+            this.scene_pos = 0;
+            this.scene = this.scenes[0];
+            this.readScene(this.scene);
+            return;
+          } else {
+            this.time = 0;
+            this.scene_pos++;
+            this.scene = this.scenes[this.scene_pos];
+            this.readScene(this.scene);
+          }
+        }
+        if (this.time >= this.scene_size) {
+          this.time = 0;
+        }
+        _ref = this.synth;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          s.playAt(this.time);
+        }
+        this.time++;
+        return T.setTimeout((function() {
+          return _this.playNext();
+        }), this.duration);
+      }
     };
 
     Player.prototype.addSynth = function() {

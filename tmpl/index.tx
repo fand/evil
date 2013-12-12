@@ -67,7 +67,7 @@
   <i id="btn-bottom" class="fa fa-angle-down"></i>
 
 
-<i class="fa fa-save" id="btn-save" value="save"></i>
+<i class="fa fa-save" id="btn-save">
 <form id="ajax-form" method="POST" />
 <script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
 

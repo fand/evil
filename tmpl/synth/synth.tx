@@ -7,7 +7,7 @@
       <i class="fa fa-minus pattern-minus"></i>
       <i class="fa fa-plus pattern-plus"></i>
 
-      <table class="table">
+      <table class="table" border="0" cellspacing="0">
         <thead>
           <tr class="header">
             <: for [0..7] -> $pos { :>

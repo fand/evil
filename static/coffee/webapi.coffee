@@ -73,25 +73,6 @@ class @Player
             @playNext()
          ), 150)
 
-    playNext: ->
-        if @is_playing
-            if (not @is_loop) and @time >= @scene_size
-                if @scene_pos == @scenes.length - 1
-                    @is_playing = false
-                    @view.viewStop()
-                    @time = 0
-                    return
-                else
-                    @time = 0
-                    @scene_pos++
-                    @scene = @scenes[@scene_pos]
-                    @readScene(@scene)
-
-            @time = 0 if @time >= @scene_size
-            s.playAt(@time) for s in @synth
-            @time++
-            T.setTimeout(( => @playNext()), @duration)
-
     stop: ->
         s.stop() for s in @synth
         @is_playing = false
@@ -118,6 +99,28 @@ class @Player
     noteOn: (note) -> @synth_now.noteOn(note)
     noteOff: ()    -> @synth_now.noteOff()
 
+    playNext: ->
+        if @is_playing
+            if (not @is_loop) and @time >= @scene_size
+                if @scene_pos == @scenes.length - 1
+                    @is_playing = false
+                    @view.viewStop()
+                    @time = 0
+                    @scene_pos = 0
+                    @scene = @scenes[0]
+                    @readScene(@scene)
+                    return
+                else
+                    @time = 0
+                    @scene_pos++
+                    @scene = @scenes[@scene_pos]
+                    @readScene(@scene)
+
+            @time = 0 if @time >= @scene_size
+            s.playAt(@time) for s in @synth
+            @time++
+            T.setTimeout(( => @playNext()), @duration)
+
     addSynth: ->
         s = new Synth(@context, @num_id++, this)
         s.setScale(@scale)
@@ -136,6 +139,7 @@ class @Player
         @synth_now.activate()
 
     saveSong: () ->
+        for s in @scenes
         @scene =
             size:     @scene_size
             patterns: (s.pattern for s in @synth)
