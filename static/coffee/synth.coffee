@@ -401,7 +401,12 @@ class @SynthView
         @rows.on('mouseup', ( => @mouse_pressed = false))
 
         @plus.on('click', ( => @model.plusPattern(); @plusPattern()))
-        @minus.on('click', ( => @model.minusPattern(); @minusPattern()))
+        @minus.on('click', ( =>
+            if @pattern.length > 32
+                @model.minusPattern()
+                @minusPattern()
+        ))
+
 
         # @dom.find('th')
         #     .on('mousedown', ( -> self.model.noteOn(self.model.noteToSemitone($(this).data('y')))))
@@ -421,7 +426,6 @@ class @SynthView
         @setMarker()
 
     minusPattern: ->
-        return if @pattern.length == 32
         for _i in [0...32]
             i = @pattern.length - _i - 1
             y = 10 - @pattern[i]

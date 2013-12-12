@@ -702,8 +702,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.plusPattern();
       }));
       return this.minus.on('click', (function() {
-        _this.model.minusPattern();
-        return _this.minusPattern();
+        if (_this.pattern.length > 32) {
+          _this.model.minusPattern();
+          return _this.minusPattern();
+        }
       }));
     };
 
@@ -729,9 +731,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SynthView.prototype.minusPattern = function() {
       var i, y, _i, _j;
-      if (this.pattern.length === 32) {
-        return;
-      }
       for (_i = _j = 0; _j < 32; _i = ++_j) {
         i = this.pattern.length - _i - 1;
         y = 10 - this.pattern[i];
@@ -1232,6 +1231,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
     scn3 = {
       size: 96,
+      bpm: 240,
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1]]
     };
     scn8 = {

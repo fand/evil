@@ -590,8 +590,10 @@
         return _this.plusPattern();
       }));
       return this.minus.on('click', (function() {
-        _this.model.minusPattern();
-        return _this.minusPattern();
+        if (_this.pattern.length > 32) {
+          _this.model.minusPattern();
+          return _this.minusPattern();
+        }
       }));
     };
 
@@ -617,9 +619,6 @@
 
     SynthView.prototype.minusPattern = function() {
       var i, y, _i, _j;
-      if (this.pattern.length === 32) {
-        return;
-      }
       for (_i = _j = 0; _j < 32; _i = ++_j) {
         i = this.pattern.length - _i - 1;
         y = 10 - this.pattern[i];
