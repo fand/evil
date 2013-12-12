@@ -1,4 +1,5 @@
-CREATE TABLE IF NOT EXISTS member (
+CREATE TABLE IF NOT EXISTS songs (
     id           INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    name         VARCHAR(255)
-);
+    json         TEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

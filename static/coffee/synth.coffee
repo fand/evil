@@ -3,7 +3,7 @@ STREAM_LENGTH = 1024
 SAMPLE_RATE = 48000
 T = new MutekiTimer()
 
-OSC_TYPE = 
+OSC_TYPE =
     SINE:     0
     RECT:     1
     SAW:      2
@@ -22,13 +22,13 @@ class @Noise
 
     connect: (dst) -> @node.connect(dst)
     setOctave: (_) -> null
-    setFine: (_) -> null     
+    setFine: (_) -> null
     setNote: -> null
     setInterval: (_) -> null
     setFreq: -> null
     setKey:  -> null
     setShape: (shape) ->
-        
+
 
 
 class @VCO
@@ -39,12 +39,12 @@ class @VCO
         @fine = 0
         @note = 0
         @freq = Math.pow(2, @octave) * @freq_key
-        
+
         @node = @ctx.createOscillator()
         @node.type = 'sine'
         @setFreq()
         @node.start(0)
-        
+
     setOctave: (@octave) ->
     setFine: (@fine) -> @node.detune.value = @fine
     setNote: (@note) ->
@@ -58,7 +58,7 @@ class @VCO
         @node.frequency.setValueAtTime(@freq, 0)
 
     connect: (dst) -> @node.connect(dst)
-        
+
 
 
 class @EG
@@ -76,17 +76,16 @@ class @EG
         @release = release / 50000.0
 
     setRange: (@min, @max) ->
-    getRange: -> [@min, @max]    
-    
+    getRange: -> [@min, @max]
+
     noteOn: (time) ->
-        @target.cancelScheduledValues(time)        
+        @target.cancelScheduledValues(time)
         @target.setValueAtTime(@min, time)
         @target.linearRampToValueAtTime(@max, time + @attack)
         @target.linearRampToValueAtTime(@sustain * (@max - @min) + @min, (time + @attack + @decay))
-        
+
     noteOff: (time) ->
         @target.cancelScheduledValues(time)
-        @target.setValueAtTime(@sustain * (@max - @min) + @min, time)
         @target.linearRampToValueAtTime(@min, time + @release)
 
 
@@ -96,12 +95,12 @@ class @ResFilter
         @lpf = @ctx.createBiquadFilter()
         @lpf.type = 'lowpass'  # lowpass == 0
         @lpf.gain.value = 1.0
-        
+
     connect:    (dst)  -> @lpf.connect(dst)
     getResonance:      -> @lpf.Q.value
     setQ: (Q) -> @lpf.Q.value = Q
-        
-        
+
+
 
 class @SynthCore
     constructor: (@parent, @ctx, @id) ->
@@ -123,7 +122,7 @@ class @SynthCore
         @gain_res = @ctx.createGain()
         @gain_res.gain.value = 0
         @vco[2].connect(@gain_res)
-        @gain_res.connect(@node)        
+        @gain_res.connect(@node)
 
         @view = new SynthCoreView(this, id, @parent.view.dom.find('.core'))
 
@@ -133,15 +132,15 @@ class @SynthCore
         @vco[i].setInterval(interval)
         @vco[i].setFine(fine)
         @vco[i].setFreq()
-        
-    setEGParam:  (a, d, s, r) -> @eg.setParam(a, d, s, r)    
+
+    setEGParam:  (a, d, s, r) -> @eg.setParam(a, d, s, r)
     setFEGParam: (a, d, s, r) -> @feg.setParam(a, d, s, r)
-    
+
     setFilterParam: (freq, q) ->
         @feg.setRange(80, Math.pow(freq/1000, 2.0) * 25000 + 80)
         @filter.setQ(q)
         @gain_res.value = 0.1 * (q / 1000.0) if q > 1
-        
+
     setGain: (i, gain) ->
         ## Keep total gain <= 0.9
         @gain[i].gain.value = (gain / 100.0) * 0.3
@@ -158,13 +157,13 @@ class @SynthCore
 
     setKey: (freq_key) ->
         v.setKey(freq_key) for v in @vco
-        
+
     setScale: (@scale) ->
 
     connect: (dst) ->
         @node.connect(@filter.lpf)
         @filter.connect(dst)
-        
+
     setNote: (note) ->
         for v in @vco
             v.setNote(note)
@@ -174,11 +173,11 @@ class @SynthCore
 
 class @SynthCoreView
     constructor: (@model, @id, @dom) ->
-             
+
         @vcos = $(@dom.find('.vco'))
-        
+
         @EG_inputs     = @dom.find('.EG > input')
-        @FEG_inputs    = @dom.find('.FEG > input')    
+        @FEG_inputs    = @dom.find('.FEG > input')
         @filter_inputs = @dom.find(".filter input")
         @gain_inputs   = @dom.find('.gain > input')
 
@@ -186,7 +185,7 @@ class @SynthCoreView
         @canvasFEG  = @dom.find(".canvasFEG").get()[0]
         @contextEG  = @canvasEG.getContext('2d')
         @contextFEG = @canvasFEG.getContext('2d')
-        
+
         @initEvent()
 
     initEvent: ->
@@ -230,11 +229,11 @@ class @SynthCoreView
         @setFilterParam()
         @setGain()
 
-    setVCOParam: ->        
+    setVCOParam: ->
         for i in [0...@vcos.length]
             vco = @vcos.eq(i)
             @model.setVCOParam(
-                i, 
+                i,
                 vco.find('.shape').val(),
                 parseInt(vco.find('.octave').val()),
                 parseInt(vco.find('.interval').val()),
@@ -272,7 +271,7 @@ class @SynthCoreView
 
 
 class @Synth
-    constructor: (@ctx, @id) ->
+    constructor: (@ctx, @id, @player) ->
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @time = 0
         @scale = []
@@ -280,33 +279,36 @@ class @Synth
         @core = new SynthCore(this, @ctx, @id)
 
     connect: (dst) -> @core.connect(dst)
-    
+
     setDuration: (@duration) ->
     setKey:  (key) -> @core.setKey(key)
     setScale: (@scale) ->
     setNote: (note) -> @core.setNote(note)
-    
+
     noteToSemitone: (ival) ->
         Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]
 
     noteOn: (note) ->
         @core.setNote(@noteToSemitone(note))
         @core.noteOn()
-        
+
     noteOff: -> @core.noteOff()
 
     playAt: (@time) ->
         @view.playAt(@time)
-        if @pattern[@time] != 0
-            @core.setNote(@noteToSemitone(@pattern[@time]))
+        mytime = @time % @pattern.length
+        if @pattern[mytime] == 0
+            @core.noteOff()
+        else
+            @core.setNote(@noteToSemitone(@pattern[mytime]))
             @core.noteOn()
             T.setTimeout(( =>
                 @core.noteOff()
                 ), @duration - 10)
-                
+
     play: () ->
         @view.play()
-        
+
     stop: () ->
         @core.noteOff()
         @view.stop()
@@ -315,16 +317,27 @@ class @Synth
         @core.noteOff()
 
     readPattern: (@pattern) ->
-        @view.readPattern(@pattern)        
+        @view.readPattern(@pattern)
+
+    plusPattern: ->
+        @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        @player.setSceneSize()
+
+    minusPattern: ->
+        @pattern = @pattern.slice(0, @pattern.length - 32)
+        @player.setSceneSize()
 
     addNote: (time, note) ->
         @pattern[time] = note
-        
+
     removeNote: (time) ->
         @pattern[time] = 0
 
     activate: -> @view.activate()
     inactivate: -> @view.inactivate()
+
+    redraw: (@time) ->
+        @view.playAt(@time)
 
 
 class @SynthView
@@ -333,21 +346,25 @@ class @SynthView
         @dom = $('#tmpl_synth').clone()
         @dom.attr('id', 'synth' + id)
         $("#instruments").append(@dom)
-                
+
         @indicator = @dom.find('.indicator')
         @table = @dom.find('.table').eq(0)
         @rows  = @dom.find('tr').filter(-> $(this).find('td').length > 0)
         @cells = @dom.find('td')
 
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @page_total = 1
 
-        @control_total = @table.find('.pattern-total')
+        @pos_markers = (@table.find('.position').map( -> $(this).find('.marker')))  # list of list of markers
+        @plus  = @dom.find('.pattern-plus')
+        @minus = @dom.find('.pattern-minus')
+        @setMarker()
 
         @initEvent()
 
     initEvent: ->
         @dom.find("td").each(() -> $(this).addClass("off"))
-    
+
         @dom.find("tr").on("mouseenter", (event) ->
             @mouse_note = $(this).attr("note")
         )
@@ -360,7 +377,7 @@ class @SynthView
 
             if $(this).hasClass("on")
                 $(this).removeClass()
-                self.removeNote($(this).text())
+                self.model.removeNote(parseInt($(this).text()))
             else
                 self.rows.each( ->
                     $(this).find('td').eq(mouse_time).removeClass()
@@ -381,11 +398,19 @@ class @SynthView
             self.mouse_pressed = false
         )
 
-        @rows.on('mouseup', ( -> self.mouse_pressed = false))
+        @rows.on('mouseup', ( => @mouse_pressed = false))
+
+        @plus.on('click', ( => @model.plusPattern(); @plusPattern()))
+        @minus.on('click', ( =>
+            if @pattern.length > 32
+                @model.minusPattern()
+                @minusPattern()
+        ))
+
 
         # @dom.find('th')
         #     .on('mousedown', ( -> self.model.noteOn(self.model.noteToSemitone($(this).data('y')))))
-        #     .on("mouseup", ( -> self.model.noteOff()))        
+        #     .on("mouseup", ( -> self.model.noteOff()))
 
     readPattern: (@pattern) ->
         @cells.removeClass()
@@ -393,10 +418,30 @@ class @SynthView
             y = 10 - @pattern[i]
             @rows.eq(y).find('td').eq(i).addClass('on') if @pattern[i] != 0
         @page_total = @pattern.length / 32
-        @control_total.text(' ' + @page_total)
-        console.log(@pattern)
+        @setMarker()
 
-    playAt: (time) ->        
+    plusPattern: ->
+        @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        @page_total = @pattern.length / 32
+        @setMarker()
+
+    minusPattern: ->
+        for _i in [0...32]
+            i = @pattern.length - _i - 1
+            y = 10 - @pattern[i]
+            @rows.eq(y).find('td').eq(i).removeClass() if @pattern[i] != 0
+        @pattern = @pattern.slice(0, @pattern.length - 32)
+        @page_total = @pattern.length / 32
+        @setMarker()
+
+    setMarker: ->
+        pt = @page_total
+        @pos_markers.each((i) ->
+            $(this).filter((j) -> j  < pt).show()
+            $(this).filter((j) -> pt <= j).hide()
+        )
+
+    playAt: (time) ->
         @indicator.css('left', (26 * (time % 32)) + 'px')
         if @pattern.length % 32 == 0
             page = Math.floor((time % @pattern.length) / 32)
@@ -410,7 +455,7 @@ class @SynthView
     activate: ->
         @indicator.show()
         @table.show()
-        
+
     inactivate: ->
         @indicator.hide()
         @table.hide()

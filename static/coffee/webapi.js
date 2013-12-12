@@ -49,7 +49,7 @@
       this.scene = null;
       this.num_id = 0;
       this.context = CONTEXT;
-      this.synth = [new Synth(this.context, this.num_id++)];
+      this.synth = [new Synth(this.context, this.num_id++, this)];
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
       _ref = this.synth;
@@ -61,15 +61,16 @@
     }
 
     Player.prototype.setBPM = function(bpm) {
-      var s, _i, _len, _ref;
+      var s, _i, _len, _ref, _results;
       this.bpm = bpm;
       this.duration = 15.0 / this.bpm * 1000;
       _ref = this.synth;
+      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        s.setDuration(this.duration);
+        _results.push(s.setDuration(this.duration));
       }
-      return console.log('bpm: ' + this.bpm);
+      return _results;
     };
 
     Player.prototype.setKey = function(key) {
@@ -86,7 +87,10 @@
 
     Player.prototype.setScale = function(scale) {
       var s, _i, _len, _ref, _results;
-      this.scale = SCALE_LIST[scale];
+      this.scale = scale;
+      if (!Array.isArray(this.scale)) {
+        this.scale = SCALE_LIST[this.scale];
+      }
       _ref = this.synth;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -118,7 +122,7 @@
       var s, _i, _len, _ref,
         _this = this;
       if (this.is_playing) {
-        if (this.time >= this.scene.size) {
+        if (this.time >= this.scene_size) {
           this.time = 0;
         }
         _ref = this.synth;
@@ -141,7 +145,7 @@
         s.stop();
       }
       this.is_playing = false;
-      return this.time = this.scene.size;
+      return this.time = this.scene_size;
     };
 
     Player.prototype.pause = function() {
@@ -154,6 +158,20 @@
       return this.is_playing = false;
     };
 
+    Player.prototype.forward = function() {
+      this.time = (this.time + 32) % this.scene_size;
+      return this.synth_now.redraw(this.time);
+    };
+
+    Player.prototype.backward = function() {
+      if (this.time % 32 < 3 && this.time >= 32) {
+        this.time = (this.time - 32 - (this.time % 32)) % this.scene_size;
+      } else {
+        this.time = this.time - (this.time % 32);
+      }
+      return this.synth_now.redraw(this.time);
+    };
+
     Player.prototype.noteOn = function(note) {
       return this.synth_now.noteOn(note);
     };
@@ -162,39 +180,13 @@
       return this.synth_now.noteOff();
     };
 
-    Player.prototype.readSong = function(song) {
-      return null;
-    };
-
-    Player.prototype.readScene = function(scene) {
-      var i, patterns, _i, _ref;
-      this.scene = scene;
-      patterns = this.scene.patterns;
-      while (patterns.length > this.synth.length) {
-        this.addSynth();
-      }
-      if (this.scene.bpm != null) {
-        this.setBPM(this.scene.bpm);
-      }
-      if (this.scene.scale != null) {
-        this.setScale(this.scene.scale);
-      }
-      for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.synth[i].readPattern(patterns[i]);
-      }
-      return this.view.synth_total = this.synth.length;
-    };
-
-    Player.prototype.addSynth = function(callback) {
+    Player.prototype.addSynth = function() {
       var s;
-      s = new Synth(this.context, this.num_id++);
+      s = new Synth(this.context, this.num_id++, this);
       s.setScale(this.scale);
       s.setKey(this.freq_key);
       s.connect(this.context.destination);
-      this.synth.push(s);
-      if (callback != null) {
-        return callback();
-      }
+      return this.synth.push(s);
     };
 
     Player.prototype.moveRight = function(next_idx) {
@@ -209,6 +201,99 @@
       return this.synth_now.activate();
     };
 
+    Player.prototype.saveSong = function() {
+      var csrf_token, s, song_json,
+        _this = this;
+      this.scene = {
+        size: this.scene_size,
+        patterns: (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.synth;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            s = _ref[_i];
+            _results.push(s.pattern);
+          }
+          return _results;
+        }).call(this),
+        bpm: this.bpm,
+        scale: this.scale,
+        key: this.key
+      };
+      this.scenes = [this.scene];
+      song_json = JSON.stringify(this.scenes);
+      csrf_token = $('#ajax-form > input[name=csrf_token]').val();
+      return $.ajax({
+        url: '/',
+        type: 'POST',
+        dataType: 'text',
+        data: {
+          json: song_json,
+          csrf_token: csrf_token
+        }
+      }).done(function(d) {
+        return _this.showSuccess(d);
+      }).fail(function(err) {
+        return _this.showError(err);
+      });
+    };
+
+    Player.prototype.readSong = function(scn) {
+      if (typeof song_read !== "undefined" && song_read !== null) {
+        this.scenes = song_read;
+      } else {
+        this.scenes = [scn];
+      }
+      return this.readScene(this.scenes[0]);
+    };
+
+    Player.prototype.readScene = function(scene) {
+      var i, patterns, _i, _ref;
+      this.scene = scene;
+      this.scene_size = this.scene.size;
+      patterns = this.scene.patterns;
+      while (patterns.length > this.synth.length) {
+        this.addSynth();
+      }
+      if (this.scene.bpm != null) {
+        this.setBPM(this.scene.bpm);
+      }
+      if (this.scene.key != null) {
+        this.setKey(this.scene.key);
+      }
+      if (this.scene.scale != null) {
+        this.setScale(this.scene.scale);
+      }
+      this.view.readParam(this.bpm, this.freq_key, this.scale);
+      for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.synth[i].readPattern(patterns[i]);
+      }
+      return this.view.synth_total = this.synth.length;
+    };
+
+    Player.prototype.setSceneSize = function() {
+      var s;
+      return this.scene_size = Math.max.apply(null, (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.synth;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          _results.push(s.pattern.length);
+        }
+        return _results;
+      }).call(this));
+    };
+
+    Player.prototype.showSuccess = function(url) {
+      console.log("success!");
+      return console.log(url);
+    };
+
+    Player.prototype.showError = function(error) {
+      return console.log(error);
+    };
+
     return Player;
 
   })();
@@ -217,19 +302,22 @@
     function PlayerView(model) {
       this.model = model;
       this.dom = $("#control");
-      this.play = this.dom.find('[name=play]');
-      this.stop = this.dom.find('[name=stop]');
       this.bpm = this.dom.find("[name=bpm]");
       this.key = this.dom.find("[name=key]");
       this.scale = this.dom.find("[name=mode]");
       this.setBPM();
       this.setKey();
       this.setScale();
+      this.play = $('#control-play');
+      this.stop = $('#control-stop');
+      this.forward = $('#control-forward');
+      this.backward = $('#control-backward');
       this.instruments = $('#instruments');
-      this.btn_left = this.dom.find('#btn-left');
-      this.btn_right = this.dom.find('#btn-right');
+      this.btn_left = $('#btn-left');
+      this.btn_right = $('#btn-right');
       this.synth_now = 0;
       this.synth_total = 1;
+      this.btn_save = $('#btn-save');
       this.initEvent();
     }
 
@@ -243,21 +331,30 @@
       this.play.on('mousedown', function() {
         if (_this.model.isPlaying()) {
           _this.model.pause();
-          return _this.play.attr("value", "play");
+          return _this.play.removeClass("fa-pause").addClass("fa-play");
         } else {
           _this.model.play();
-          return _this.play.attr("value", "pause");
+          return _this.play.removeClass("fa-play").addClass("fa-pause");
         }
       });
       this.stop.on('mousedown', function() {
         _this.model.stop();
-        return _this.play.attr("value", "play");
+        return _this.play.removeClass("fa-pause").addClass("fa-play");
+      });
+      this.forward.on('mousedown', function() {
+        return _this.model.forward();
+      });
+      this.backward.on('mousedown', function() {
+        return _this.model.backward();
       });
       this.btn_left.on('mousedown', function() {
         return _this.moveLeft();
       });
-      return this.btn_right.on('mousedown', function() {
+      this.btn_right.on('mousedown', function() {
         return _this.moveRight();
+      });
+      return this.btn_save.on('click', function() {
+        return _this.model.saveSong();
       });
     };
 
@@ -271,6 +368,29 @@
 
     PlayerView.prototype.setScale = function() {
       return this.model.setScale(this.scale.val());
+    };
+
+    PlayerView.prototype.readParam = function(bpm, key, scale) {
+      var k, v, _results;
+      this.bpm.val(bpm);
+      for (k in SCALE_LIST) {
+        v = SCALE_LIST[k];
+        if (v = scale) {
+          this.scale.val(k);
+          break;
+        }
+      }
+      _results = [];
+      for (k in KEY_LIST) {
+        v = KEY_LIST[k];
+        if (v = key) {
+          this.key.val(k);
+          break;
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
     };
 
     PlayerView.prototype.moveRight = function() {
@@ -296,7 +416,7 @@
   })();
 
   $(function() {
-    var is_key_pressed, player, scn1, scn2, scn22, scn3, scn55, scn8;
+    var footer_size, is_key_pressed, player, scn1, scn2, scn22, scn3, scn55, scn8;
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
@@ -324,6 +444,8 @@
       is_key_pressed = false;
       return player.noteOff();
     });
+    footer_size = $(window).height() / 2 - 300;
+    $('footer').css('height', footer_size + 'px');
     scn55 = {
       size: 32,
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
@@ -342,6 +464,7 @@
     };
     scn3 = {
       size: 96,
+      bpm: 240,
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1]]
     };
     scn8 = {
@@ -349,7 +472,7 @@
       size: 256,
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 10, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 5, 8, 3, 5, 8, 2, 3, 4, 6, 9, 4, 6, 9, 3, 4, 5, 7, 10, 5, 7, 10, 7, 8, 1, 3, 5, 8, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
     };
-    return player.readScene(scn22);
+    return player.readSong(scn3);
   });
 
   KEYCODE_TO_NOTE = {

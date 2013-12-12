@@ -3,9 +3,10 @@
     -webkit-user-select:none;
 }
 
-body {
-    max-width: 100%;
-    max-height: 100%;
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
     overflow: hidden;
 }
 
@@ -43,9 +44,9 @@ body {
 }
 .instrument {
     position: relative;
-    display: box;
+    display: block;
     float: left;
-    
+
     width: 910px;
     height: 590px;
     margin: 0px;
@@ -84,7 +85,7 @@ body {
     margin-right: 550px;
     opacity: 0.1;
 }
-    
+
 
 
 /* Sequencer */
@@ -117,33 +118,84 @@ body {
     float: left;
     width: 24px;
     height: 261px;
-    top: 43px;
-    
+    top: 39px;
+
     background-color: #dff;
     border: 1px solid #dFF;
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
     border-radius: 2px;
-    
+
     box-shadow: 0px 0px 5px #0FF;
 }
-.table > thead .position{
-    width: 810px;
-    height: 30px;
+.table .position {
+    width: 830px;
+    height: 25px;
     margin: 0px;
-    padding: 5px 15px 5px 5px;    
-    color: #aaefff;
+    padding: 5px 0px;
+    color: #bbefff;
     font-size: 16px;
-    text-align: right;
+    text-align: center;
 }
-.table > thead .position > span {
-    font-size: 16px;
-    float: right;
+.marker {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    text-align: center;
+    margin: 2px 5px;
+    color: #9ef;
 }
+.marker:hover {
+    cursor: pointer;
+    text-shadow: 0px 0px 4px #088;
+}
+.marker {
+    color: #9ef;
+    text-align: center;
+}
+.marker-now {
+    color: #fff;
+    text-shadow: 0px 0px 10px #0df;
+}
+.marker-now:hover {
+    cursor: default;
+    text-shadow: 0px 0px 10px #0df;
+}
+
+.pattern-plus {
+    position: absolute;
+    width: 25px;
+    margin: 5px;
+    top: 0px;
+    left: 800px;
+    color: #9ef;
+    font-size: 25px;
+    z-index: 2;
+}
+.pattern-plus:hover {
+    color: #fff;
+    text-shadow: 0px 0px 10px #0df;
+}
+.pattern-minus {
+    position: absolute;
+    width: 25px;
+    margin: 5px;
+    top: 0px;
+    left: 770px;
+    color: #9ef;
+    font-size: 25px;
+    z-index: 2;
+}
+.pattern-minus:hover {
+    color: #fff;
+    text-shadow: 0px 0px 10px #0df;
+}
+
+
 .table > thead > tr.header {
   margin:0px;
   padding:0px;
-  max-height:40px;
+  max-height:35px;
   width: 8000px;
 }
 tr {
@@ -232,12 +284,12 @@ td:hover {
         from(rgba(128,192,255,0.5)),
         to(rgba(128,192,255,1))
     );
-    
+
     border:1px solid #9ff;
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
     border-radius: 2px;
-    
+
     box-shadow:1px 1px 2px rgba(0,0,0,0.3),
                0px 1px 0px rgba(255,255,255,0.8) inset,
                0px -1px 0px rgba(255,255,255,0.3) inset;
@@ -245,22 +297,99 @@ td:hover {
 
 
 
-/* Controll */
+/* Footer */
+
+footer {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+
+}
 
 #control {
     position: absolute;
-    margin:0px auto;
+
+    width: 930px;
+    height: 60px;
+
+    margin: 0px auto;
     padding: 10px 30px;
+    top: 0px;
+    left: 0px;
+
+    text-align: left;
+    font-size: 16px;
+    color: #88e0ff;
+    background-color: #fff;
+}
+#control-play {
+    position: absolute;
+    width: 40px;
+    height: 40px;
     top: 50%;
     left: 50%;
-    margin-top: 300px;
-    margin-left: -480px;
-    width: 850px;
-    height: 20px;
-
-    font-size: 22px;
-    color: #88e0ff;    
-    background-color: #fff;
+    margin: 0px;
+    padding:0px;
+    margin-left: -35px;
+    margin-top: -30px;
+    font-size:40px;
+    text-align: center;
+    color: #9ef;
+}
+#control-forward {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    top: 50%;
+    left: 50%;
+    margin: 0px;
+    padding:0px;
+    margin-left: 65px;
+    margin-top: -30px;
+    font-size:40px;
+    text-align: center;
+    color: #9ef;
+}
+#control-backward {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    top: 50%;
+    right: 50%;
+    margin: 0px;
+    padding:0px;
+    margin-right: 100px;
+    margin-top: -30px;
+    font-size:40px;
+    text-align: center;
+    color: #9ef;
+}
+#control-play:hover {
+    color: #ffffff;
+    cursor: pointer;
+    text-shadow: 0px 0px 9px rgba(100, 255, 255, 0.8), 0px 0px 10px rgba(0, 200, 255, 1.0);
+}
+#control-play:active {
+    color: #9ef;
+    text-shadow: none;
+}
+#control-forward:hover {
+    color: #ffffff;
+    cursor: pointer;
+    text-shadow: 0px 0px 9px rgba(100, 255, 255, 0.8), 0px 0px 10px rgba(0, 200, 255, 1.0);
+}
+#control-forward:active {
+    color: #9ef;
+    text-shadow: none;
+}
+#control-backward:hover {
+    color: #ffffff;
+    cursor: pointer;
+    text-shadow: 0px 0px 9px rgba(100, 255, 255, 0.8), 0px 0px 10px rgba(0, 200, 255, 1.0);
+}
+#control-backward:active {
+    color: #9ef;
+    text-shadow: none;
 }
 
 
@@ -284,7 +413,7 @@ td:hover {
     text-align: center;
     vertical-align: top;
     line-height: 26px;
-    
+
     border: 1px solid #0df;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;

@@ -1,5 +1,5 @@
 requires 'Amon2', '5.16';
-requires 'DBD::SQLite', '1.33';
+requires 'DBD::mysql', '4.025';
 requires 'HTML::FillInForm::Lite', '1.11';
 requires 'JSON', '2.50';
 requires 'Module::Functions', '2';

@@ -160,7 +160,6 @@
 
     EG.prototype.noteOff = function(time) {
       this.target.cancelScheduledValues(time);
-      this.target.setValueAtTime(this.sustain * (this.max - this.min) + this.min, time);
       return this.target.linearRampToValueAtTime(this.min, time + this.release);
     };
 
@@ -406,9 +405,10 @@
   })();
 
   this.Synth = (function() {
-    function Synth(ctx, id) {
+    function Synth(ctx, id, player) {
       this.ctx = ctx;
       this.id = id;
+      this.player = player;
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.time = 0;
       this.scale = [];
@@ -450,11 +450,15 @@
     };
 
     Synth.prototype.playAt = function(time) {
-      var _this = this;
+      var mytime,
+        _this = this;
       this.time = time;
       this.view.playAt(this.time);
-      if (this.pattern[this.time] !== 0) {
-        this.core.setNote(this.noteToSemitone(this.pattern[this.time]));
+      mytime = this.time % this.pattern.length;
+      if (this.pattern[mytime] === 0) {
+        return this.core.noteOff();
+      } else {
+        this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
         this.core.noteOn();
         return T.setTimeout((function() {
           return _this.core.noteOff();
@@ -480,6 +484,16 @@
       return this.view.readPattern(this.pattern);
     };
 
+    Synth.prototype.plusPattern = function() {
+      this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      return this.player.setSceneSize();
+    };
+
+    Synth.prototype.minusPattern = function() {
+      this.pattern = this.pattern.slice(0, this.pattern.length - 32);
+      return this.player.setSceneSize();
+    };
+
     Synth.prototype.addNote = function(time, note) {
       return this.pattern[time] = note;
     };
@@ -494,6 +508,11 @@
 
     Synth.prototype.inactivate = function() {
       return this.view.inactivate();
+    };
+
+    Synth.prototype.redraw = function(time) {
+      this.time = time;
+      return this.view.playAt(this.time);
     };
 
     return Synth;
@@ -514,12 +533,19 @@
       });
       this.cells = this.dom.find('td');
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      this.control_total = this.table.find('.pattern-total');
+      this.page_total = 1;
+      this.pos_markers = this.table.find('.position').map(function() {
+        return $(this).find('.marker');
+      });
+      this.plus = this.dom.find('.pattern-plus');
+      this.minus = this.dom.find('.pattern-minus');
+      this.setMarker();
       this.initEvent();
     }
 
     SynthView.prototype.initEvent = function() {
-      var self;
+      var self,
+        _this = this;
       this.dom.find("td").each(function() {
         return $(this).addClass("off");
       });
@@ -534,7 +560,7 @@
         mouse_note = +($(this).data('y'));
         if ($(this).hasClass("on")) {
           $(this).removeClass();
-          return self.removeNote($(this).text());
+          return self.model.removeNote(parseInt($(this).text()));
         } else {
           self.rows.each(function() {
             return $(this).find('td').eq(mouse_time).removeClass();
@@ -556,8 +582,18 @@
       }).on('mouseup', function() {
         return self.mouse_pressed = false;
       });
-      return this.rows.on('mouseup', (function() {
-        return self.mouse_pressed = false;
+      this.rows.on('mouseup', (function() {
+        return _this.mouse_pressed = false;
+      }));
+      this.plus.on('click', (function() {
+        _this.model.plusPattern();
+        return _this.plusPattern();
+      }));
+      return this.minus.on('click', (function() {
+        if (_this.pattern.length > 32) {
+          _this.model.minusPattern();
+          return _this.minusPattern();
+        }
       }));
     };
 
@@ -572,8 +608,40 @@
         }
       }
       this.page_total = this.pattern.length / 32;
-      this.control_total.text(' ' + this.page_total);
-      return console.log(this.pattern);
+      return this.setMarker();
+    };
+
+    SynthView.prototype.plusPattern = function() {
+      this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      this.page_total = this.pattern.length / 32;
+      return this.setMarker();
+    };
+
+    SynthView.prototype.minusPattern = function() {
+      var i, y, _i, _j;
+      for (_i = _j = 0; _j < 32; _i = ++_j) {
+        i = this.pattern.length - _i - 1;
+        y = 10 - this.pattern[i];
+        if (this.pattern[i] !== 0) {
+          this.rows.eq(y).find('td').eq(i).removeClass();
+        }
+      }
+      this.pattern = this.pattern.slice(0, this.pattern.length - 32);
+      this.page_total = this.pattern.length / 32;
+      return this.setMarker();
+    };
+
+    SynthView.prototype.setMarker = function() {
+      var pt;
+      pt = this.page_total;
+      return this.pos_markers.each(function(i) {
+        $(this).filter(function(j) {
+          return j < pt;
+        }).show();
+        return $(this).filter(function(j) {
+          return pt <= j;
+        }).hide();
+      });
     };
 
     SynthView.prototype.playAt = function(time) {
