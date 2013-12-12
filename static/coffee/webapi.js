@@ -264,6 +264,7 @@
       if (this.scene.scale != null) {
         this.setScale(this.scene.scale);
       }
+      this.view.readParam(this.bpm, this.freq_key, this.scale);
       for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         this.synth[i].readPattern(patterns[i]);
       }
@@ -367,6 +368,29 @@
 
     PlayerView.prototype.setScale = function() {
       return this.model.setScale(this.scale.val());
+    };
+
+    PlayerView.prototype.readParam = function(bpm, key, scale) {
+      var k, v, _results;
+      this.bpm.val(bpm);
+      for (k in SCALE_LIST) {
+        v = SCALE_LIST[k];
+        if (v = scale) {
+          this.scale.val(k);
+          break;
+        }
+      }
+      _results = [];
+      for (k in KEY_LIST) {
+        v = KEY_LIST[k];
+        if (v = key) {
+          this.key.val(k);
+          break;
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
     };
 
     PlayerView.prototype.moveRight = function() {

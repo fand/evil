@@ -160,6 +160,7 @@ class @Player
         @setBPM(@scene.bpm) if @scene.bpm?
         @setKey(@scene.key) if @scene.key?
         @setScale(@scene.scale) if @scene.scale?
+        @view.readParam(@bpm, @freq_key, @scale)
         for i in [0...patterns.length]
             @synth[i].readPattern(patterns[i])
         @view.synth_total = @synth.length
@@ -235,6 +236,17 @@ class @PlayerView
     setBPM:   ->  @model.setBPM(parseInt(@bpm.val()))
     setKey:   ->  @model.setKey(@key.val())
     setScale: ->  @model.setScale(@scale.val())
+
+    readParam: (bpm, key, scale) ->
+        @bpm.val(bpm)
+        for k, v of SCALE_LIST
+            if v = scale
+                @scale.val(k)
+                break
+        for k, v of KEY_LIST
+            if v = key
+                @key.val(k)
+                break
 
     moveRight: ->
         if @synth_now == (@synth_total - 1)
