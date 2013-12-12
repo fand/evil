@@ -26,10 +26,29 @@ html, body {
 
 #wrapper {
 }
+#mixer {
+    position: absolute;
+    width: 910px;
+    height: 500px;
+    margin: 0px;
+    padding: 0px;
+    top: 50%;
+    left: 50%;
+    margin-top: -1000px;
+    margin-left: -470px;
+    overflow-y: hidden;
+
+    background-color: #fff;
+    border: 1px solid #0df;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+
+    transition: all 0.2s ease 0s;
+}
 #instruments {
     position: absolute;
 
-    /* width: 910px; */
     width: 800000px;
     max-height: 600px;
     margin: 0px;
@@ -61,31 +80,99 @@ html, body {
 }
 #btn-right {
     position: fixed;
-
     width: 800px;
-    min-height: 600px;
-    margin: 0px;
-    padding: 0px;
+    height: 600px;
     top: 50%;
     left: 50%;
     margin-top: -300px;
-    margin-left: 520px;
-    opacity: 0.1;
+    margin-left: 450px;
+
+    text-align: left;
+    padding: 250px 150px;
+    font-size: 100px;
+
+    background: -webkit-gradient(
+        linear,
+        left top,
+        right top,
+        from(rgba(255,255,255,0)),
+        color-stop(0.5, rgba(255,255,255,0.9)),
+        to(rgba(255,255,255,1.0))
+    );
+    color: #fafafa;
 }
 #btn-left {
-    position: fixed;
+    display: none;
 
+    position: fixed;
     width: 800px;
-    min-height: 600px;
-    margin: 0px;
-    padding: 0px;
+    height: 600px;
     top: 50%;
     right: 50%;
     margin-top: -300px;
-    margin-right: 550px;
-    opacity: 0.1;
-}
+    margin-right: 480px;
 
+    text-align: right;
+    padding: 250px 150px;
+    font-size: 100px;
+
+    background: -webkit-gradient(
+        linear,
+        right top,
+        left top,
+        from(rgba(255,255,255,0)),
+        color-stop(0.5, rgba(255,255,255,0.9)),
+        to(rgba(255,255,255,1.0))
+    );
+    color: #fafafa;
+}
+#btn-top {
+    position: fixed;
+    width: 100%;
+    height: 600px;
+    top: 0px;
+    left: -10px;
+
+    text-align: center;
+    font-size: 100px;
+
+    background: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        from(rgba(255,255,255,0)),
+        color-stop(0.5, rgba(255,255,255,0.9)),
+        to(rgba(255,255,255,1.0))
+    );
+    color: #fafafa;
+}
+#btn-bottom {
+    display: none;
+
+    position: fixed;
+    width: 100%;
+    height: 600px;
+    left: -10px;
+    bottom: 0px;
+
+    text-align: center;
+    padding: 0px;
+    font-size: 100px;
+
+    background: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        from(rgba(255,255,255,0)),
+        color-stop(0.5, rgba(255,255,255,0.9)),
+        to(rgba(255,255,255,1.0))
+    );
+    color: #fafafa;
+}
+#btn-right:hover, #btn-left:hover, #btn-top:hover, #btn-bottom:hover {
+    cursor: default;
+    color: #def;
+}
 
 
 /* Sequencer */
@@ -129,10 +216,10 @@ html, body {
     box-shadow: 0px 0px 5px #0FF;
 }
 .table .position {
-    width: 830px;
+    width: 775px;
     height: 25px;
     margin: 0px;
-    padding: 5px 0px;
+    padding: 5px 55px 5px 0px;
     color: #bbefff;
     font-size: 16px;
     text-align: center;
@@ -143,14 +230,14 @@ html, body {
     font-size: 12px;
     text-align: center;
     margin: 2px 5px;
-    color: #9ef;
+    color: #8ef;
 }
 .marker:hover {
     cursor: pointer;
     text-shadow: 0px 0px 4px #088;
 }
 .marker {
-    color: #9ef;
+    color: #8ef;
     text-align: center;
 }
 .marker-now {
@@ -168,7 +255,7 @@ html, body {
     margin: 5px;
     top: 0px;
     left: 800px;
-    color: #9ef;
+    color: #8ef;
     font-size: 25px;
     z-index: 2;
 }
@@ -182,7 +269,7 @@ html, body {
     margin: 5px;
     top: 0px;
     left: 770px;
-    color: #9ef;
+    color: #8ef;
     font-size: 25px;
     z-index: 2;
 }
@@ -303,24 +390,22 @@ footer {
     position: fixed;
     bottom: 0px;
     width: 100%;
-
 }
-
 #control {
     position: absolute;
+    width: 400px;
+    height: 20px;
+    top: 50%;
+    right: 50%;
+    margin-top: -20px;
+    margin-right: 190px;
 
-    width: 930px;
-    height: 60px;
-
-    margin: 0px auto;
-    padding: 10px 30px;
-    top: 0px;
-    left: 0px;
-
-    text-align: left;
+    text-align: right;
     font-size: 16px;
-    color: #88e0ff;
-    background-color: #fff;
+    color: #0df;
+}
+#control > input, #control > select {
+    margin-right: 10px;
 }
 #control-play {
     position: absolute;
@@ -334,7 +419,7 @@ footer {
     margin-top: -30px;
     font-size:40px;
     text-align: center;
-    color: #9ef;
+    color: #8ef;
 }
 #control-forward {
     position: absolute;
@@ -348,7 +433,7 @@ footer {
     margin-top: -30px;
     font-size:40px;
     text-align: center;
-    color: #9ef;
+    color: #8ef;
 }
 #control-backward {
     position: absolute;
@@ -362,34 +447,44 @@ footer {
     margin-top: -30px;
     font-size:40px;
     text-align: center;
-    color: #9ef;
+    color: #8ef;
 }
-#control-play:hover {
+#control-loop {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top: 50%;
+    left: 50%;
+    margin: 0px;
+    padding:0px;
+    margin-left: 180px;
+    margin-top: -25px;
+    font-size: 30px;
+    text-align: center;
+}
+#control-play:hover, #control-forward:hover, #control-backward:hover, #control-loop:hover {
     color: #ffffff;
     cursor: pointer;
     text-shadow: 0px 0px 9px rgba(100, 255, 255, 0.8), 0px 0px 10px rgba(0, 200, 255, 1.0);
 }
-#control-play:active {
-    color: #9ef;
+#control-play:active, #control-forward:active, #control-backward:active, #control-loop:active {
+    color: #8ef;
     text-shadow: none;
 }
-#control-forward:hover {
-    color: #ffffff;
-    cursor: pointer;
-    text-shadow: 0px 0px 9px rgba(100, 255, 255, 0.8), 0px 0px 10px rgba(0, 200, 255, 1.0);
-}
-#control-forward:active {
-    color: #9ef;
+.control-on {
+    color: #8ef;
     text-shadow: none;
 }
-#control-backward:hover {
-    color: #ffffff;
-    cursor: pointer;
-    text-shadow: 0px 0px 9px rgba(100, 255, 255, 0.8), 0px 0px 10px rgba(0, 200, 255, 1.0);
-}
-#control-backward:active {
-    color: #9ef;
+.control-off {
+    color: #ddd;
     text-shadow: none;
+}
+
+
+#btn-save {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
 }
 
 

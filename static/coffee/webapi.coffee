@@ -35,9 +35,9 @@ class @Player
         @freq_key = 55
         @scale = []
         @is_playing = false
-        @is_loop = false
+        @is_loop = true
         @time = 0
-        @scene_position = 0
+        @scene_pos = 0
         @scenes = []
         @scene = null
 
@@ -75,6 +75,18 @@ class @Player
 
     playNext: ->
         if @is_playing
+            if (not @is_loop) and @time >= @scene_size
+                if @scene_pos == @scenes.length - 1
+                    @is_playing = false
+                    @view.viewStop()
+                    @time = 0
+                    return
+                else
+                    @time = 0
+                    @scene_pos++
+                    @scene = @scenes[@scene_pos]
+                    @readScene(@scene)
+
             @time = 0 if @time >= @scene_size
             s.playAt(@time) for s in @synth
             @time++
@@ -99,6 +111,9 @@ class @Player
         else
             @time = @time - (@time % 32)
         @synth_now.redraw(@time)
+
+    toggleLoop: ->
+        @is_loop = !@is_loop
 
     noteOn: (note) -> @synth_now.noteOn(note)
     noteOff: ()    -> @synth_now.noteOff()
@@ -144,16 +159,14 @@ class @Player
             @showError(err)
         )
 
-    readSong: (scn) ->
+    readSong: (song) ->
         if song_read?
             @scenes = song_read
         else
-            @scenes = [scn]
+            @scenes = (o for o in song)
         @readScene(@scenes[0])
 
     readScene: (@scene) ->
-        #@scenes = [@scene]
-        @scene_size = @scene.size
         patterns = @scene.patterns
         while patterns.length > @synth.length
             @addSynth()
@@ -164,6 +177,7 @@ class @Player
         for i in [0...patterns.length]
             @synth[i].readPattern(patterns[i])
         @view.synth_total = @synth.length
+        @setSceneSize()
 
     setSceneSize: ->
         @scene_size = Math.max.apply(null, (s.pattern.length for s in @synth))
@@ -189,20 +203,28 @@ class @PlayerView
         @setKey()
         @setScale()
 
+        @footer = $('footer')
+
         @play  = $('#control-play')
         @stop  = $('#control-stop')
         @forward = $('#control-forward')
         @backward = $('#control-backward')
+        @loop = $('#control-loop')
 
         @instruments = $('#instruments')
-        @btn_left  = $('#btn-left')
-        @btn_right = $('#btn-right')
+        @mixer = $('#mixer')
+
+        @btn_left   = $('#btn-left')
+        @btn_right  = $('#btn-right')
+        @btn_top    = $('#btn-top')
+        @btn_bottom = $('#btn-bottom')
         @synth_now = 0
         @synth_total = 1
 
         @btn_save = $('#btn-save')
 
         @initEvent()
+        @resize()
 
     initEvent: ->
         @dom.on("change", () =>
@@ -210,28 +232,40 @@ class @PlayerView
             @setKey()
             @setScale()
         )
-        @play.on('mousedown', () =>
-            if @model.isPlaying()
-                @model.pause()
-                @play.removeClass("fa-pause").addClass("fa-play")
+        @play.on('mousedown', () => @viewPlay())
+        @stop.on('mousedown', () => @viewStop())
+        @forward.on('mousedown', () => @model.forward())
+        @backward.on('mousedown', () => @model.backward())
+        @loop.on('mousedown', () =>
+            if @model.toggleLoop()
+                @loop.removeClass('control-off').addClass('control-on')
             else
-                @model.play()
-                @play.removeClass("fa-play").addClass("fa-pause")
-        )
-        @stop.on('mousedown', () =>
-            @model.stop()
-            @play.removeClass("fa-pause").addClass("fa-play")
-        )
-        @forward.on('mousedown', () =>
-            @model.forward()
-        )
-        @backward.on('mousedown', () =>
-            @model.backward()
+                @loop.removeClass('control-on').addClass('control-off')
+
         )
 
         @btn_left.on('mousedown',  () => @moveLeft())
         @btn_right.on('mousedown', () => @moveRight())
+        @btn_top.on('mousedown', () => @moveTop())
+        @btn_bottom.on('mousedown', () => @moveBottom())
+
         @btn_save.on('click', () => @model.saveSong())
+
+        $(window).on('resize', () => @resize())
+
+
+    viewPlay: ->
+        if @model.isPlaying()
+            @model.pause()
+            @play.removeClass("fa-pause").addClass("fa-play")
+        else
+            @model.play()
+        @play.removeClass("fa-play").addClass("fa-pause")
+
+    viewStop: ->
+        @model.stop()
+        @play.removeClass("fa-pause").addClass("fa-play")
+
 
     setBPM:   ->  @model.setBPM(parseInt(@bpm.val()))
     setKey:   ->  @model.setKey(@key.val())
@@ -255,13 +289,61 @@ class @PlayerView
         @synth_now++
         @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
         @model.moveRight(@synth_now)
+        @btn_left.show()
 
     moveLeft: ->
         if @synth_now != 0
             @synth_now--
             @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
             @model.moveLeft(@synth_now)
+        if @synth_now == 0
+            @btn_left.hide()
 
+
+    moveTop: ->
+        @btn_left.hide()
+        @btn_right.hide()
+        @btn_top.hide()
+        @btn_bottom.show()
+        @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 700px, 0px)')
+        @mixer.css('-webkit-transform', 'translate3d(0px, 700px, 0px)')
+
+    moveBottom: ->
+        @btn_left.show()
+        @btn_right.show()
+        @btn_top.show()
+        @btn_bottom.hide()
+        @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
+        @mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)')
+
+
+    resize: ->
+        w = $(window).width()
+        h = $(window).height()
+        space_w = (w - 910) / 2
+        space_h = (h - 600) / 2
+
+        pw = space_w/2 - 50
+        ph = space_h/2 - 50
+
+        @btn_left.css(
+            width: space_w + 'px'
+            padding: '250px ' + (pw + 5) + 'px'
+        )
+        @btn_right.css(
+            width: space_w + 'px'
+            padding: '250px ' + (pw + 15) + 'px'
+        )
+        @btn_top.css(
+            height: space_h + 'px'
+        )
+        @btn_bottom.css(
+            bottom: space_h + 'px'
+            height: space_h + 'px'
+        )
+        @footer.css(
+            height: space_h + 'px'
+        )
 
 
 
@@ -295,21 +377,6 @@ $(() ->
     footer_size = $(window).height()/2 - 300
     $('footer').css('height', footer_size + 'px')
 
-    scn55 =
-        size: 32
-        patterns: [
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]
-            ]
-    scn22 =
-        size: 32
-        patterns: [
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [1,1,8,1,8,1,7,1,1,1,8,1,8,1,7,1,3,1,3,1,1,2,3,5,8,1,8,7,5,1,3,2]
-        ]
     scn1 =
         size: 32
         patterns: [
@@ -321,29 +388,33 @@ $(() ->
             [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
              1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8]
             ]
-    scn3 =
-        size: 96
-        bpm: 240
+    scn55 =
+        size: 32
         patterns: [
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
-             1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,
-             1,2,3,5,8,3,5,8,2,3,4,6,9,4,6,9,3,4,5,7,10,5,7,10,7,8,1,3,5,8,1,1]
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2]
             ]
-    scn8 =
-        bpm: 240
-        size: 256
+
+    s1 =
+        bpm: 80
+        size: 32
         patterns: [
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
-             1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,
-             1,2,3,5,8,3,5,8,2,3,4,6,9,4,6,9,3,4,5,7,10,5,7,10,7,8,1,3,5,8,1,1,
-             1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,
-             10,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2,
-             1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,
-             1,2,3,5,8,3,5,8,2,3,4,6,9,4,6,9,3,4,5,7,10,5,7,10,7,8,1,3,5,8,1,1,
-             1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8]
-            ]
+            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
+            [1,1,8,1,8,1,7,1,1,1,8,1,8,1,7,1,3,3,8,3,8,3,7,3,5,5,8,5,8,5,9,5]]
+    s2 =
+        bpm: 80
+        size: 32
+        patterns: [
+            [1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8],
+            [3,4,5,6,7,8,9,10,3,4,5,6,7,8,9,10,3,4,5,6,7,8,9,10,3,4,5,6,7,8,9,10]]
+
+    song1 = [s1, s2]
+
     #player.readScene(scn22)
-    player.readSong(scn3)
+    player.readSong(song1)
 )
 
 
