@@ -39,7 +39,7 @@ class @Player
         @time = 0
         @scene_pos = 0
         @scenes = []
-        @scene = null
+        @scene = {}
 
         @num_id = 0
         @context = CONTEXT
@@ -52,16 +52,19 @@ class @Player
         @view = new PlayerView(this)
 
     setBPM: (@bpm) ->
+        @scene.bpm = @bpm
         @duration = 15.0 / @bpm * 1000  # msec
         s.setDuration(@duration) for s in @synth
 
     setKey: (key)->
+        @scene.key = key
         @freq_key = KEY_LIST[key]
         s.setKey(@freq_key) for s in @synth
 
     setScale: (@scale) ->
         if ! Array.isArray(@scale)
             @scale = SCALE_LIST[@scale]
+        @scene.scale = @scale
         s.setScale(@scale) for s in @synth
 
     isPlaying: -> @is_playing
@@ -76,7 +79,11 @@ class @Player
     stop: ->
         s.stop() for s in @synth
         @is_playing = false
-        @time = @scene_size
+        @view.viewStop()
+        @time = 0
+        @scene_pos = 0
+        @scene = @scenes[0]
+        @readScene(@scene)
 
     pause: ->
         s.pause(@time) for s in @synth
@@ -103,12 +110,7 @@ class @Player
         if @is_playing
             if (not @is_loop) and @time >= @scene_size
                 if @scene_pos == @scenes.length - 1
-                    @is_playing = false
-                    @view.viewStop()
-                    @time = 0
-                    @scene_pos = 0
-                    @scene = @scenes[0]
-                    @readScene(@scene)
+                    @stop()
                     return
                 else
                     @time = 0
@@ -170,6 +172,7 @@ class @Player
         @readScene(@scenes[0])
 
     readScene: (@scene) ->
+        console.log(@scene)
         patterns = @scene.patterns
         while patterns.length > @synth.length
             @addSynth()
@@ -236,7 +239,7 @@ class @PlayerView
             @setScale()
         )
         @play.on('mousedown', () => @viewPlay())
-        @stop.on('mousedown', () => @viewStop())
+        @stop.on('mousedown', () => @viewStop(@model))
         @forward.on('mousedown', () => @model.forward())
         @backward.on('mousedown', () => @model.backward())
         @loop.on('mousedown', () =>
@@ -265,8 +268,8 @@ class @PlayerView
             @model.play()
         @play.removeClass("fa-play").addClass("fa-pause")
 
-    viewStop: ->
-        @model.stop()
+    viewStop: (receiver) ->
+        receiver.stop() if receiver?
         @play.removeClass("fa-pause").addClass("fa-play")
 
 
@@ -407,7 +410,6 @@ $(() ->
             [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
             [1,1,8,1,8,1,7,1,1,1,8,1,8,1,7,1,3,3,8,3,8,3,7,3,5,5,8,5,8,5,9,5]]
     s2 =
-        bpm: 80
         size: 32
         patterns: [
             [1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8],

@@ -426,6 +426,11 @@ class @SynthView
                 @addNote(pos.x, pos.y)
         ).on('mouseup', (e) =>
             @is_clicked = false
+        ).on('mouseout', (e) =>
+            @ctx_hover.clearRect(
+                @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
+            )
+            @hover_pos = x: -1, y: -1
         )
 
         @plus.on('click', ( => @plusPattern()))
@@ -502,6 +507,12 @@ class @SynthView
 
     play: ->
     stop: ->
+        for i in [0...10]
+            @ctx_off.drawImage(@cell,
+                0, 0, 26, 26,
+                (@last_time % 32) * 26, i * 26, 26, 26
+            )
+
 
     activate: (i) ->
         @is_active = true

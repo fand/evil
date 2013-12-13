@@ -613,6 +613,12 @@
         }
       }).on('mouseup', function(e) {
         return _this.is_clicked = false;
+      }).on('mouseout', function(e) {
+        _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
+        return _this.hover_pos = {
+          x: -1,
+          y: -1
+        };
       });
       this.plus.on('click', (function() {
         return _this.plusPattern();
@@ -706,7 +712,14 @@
 
     SynthView.prototype.play = function() {};
 
-    SynthView.prototype.stop = function() {};
+    SynthView.prototype.stop = function() {
+      var i, _i, _results;
+      _results = [];
+      for (i = _i = 0; _i < 10; i = ++_i) {
+        _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % 32) * 26, i * 26, 26, 26));
+      }
+      return _results;
+    };
 
     SynthView.prototype.activate = function(i) {
       this.is_active = true;
