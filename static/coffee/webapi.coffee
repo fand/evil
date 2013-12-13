@@ -302,7 +302,6 @@ class @PlayerView
         if @synth_now == 0
             @btn_left.hide()
 
-
     moveTop: ->
         @btn_left.hide()
         @btn_right.hide()

@@ -337,6 +337,7 @@ class @Synth
     inactivate: (i) -> @view.inactivate(i)
 
     redraw: (@time) ->
+        @view.drawPattern(@time)
         @view.playAt(@time)
 
 
@@ -350,6 +351,9 @@ class @SynthView
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @page = 0
         @page_total = 1
+
+        @last_time = 0
+        @last_page = 0
 
         @pos_markers = @dom.find('.marker')  # list of list of markers
         @plus  = @dom.find('.pattern-plus')
@@ -382,22 +386,23 @@ class @SynthView
         @canvas_hover.width  = @canvas_on.width  = @canvas_off.width  = 832
         @canvas_hover.height = @canvas_on.height = @canvas_off.height = 260
         @rect = @canvas_off.getBoundingClientRect()
-        console.log(@rect.left)
+        @offset = x: @rect.left, y: @rect.top
         for i in [0...10]
             for j in [0...32]
                 @ctx_off.drawImage(@cell,
                     0, 0, 26, 26,           # src (x, y, w, h)
                     j * 26, i * 26, 26, 26  # dst (x, y, w, h)
                 )
+        @readPattern(@pattern)
 
-    getMouse: (e) =>
+    getPos: (e) ->
+        @rect = @canvas_off.getBoundingClientRect()
         x: Math.floor((e.clientX - @rect.left) / 26)
         y: Math.floor((e.clientY - @rect.top) / 26)
 
     initEvent: ->
         @canvas_hover_dom.on('mousemove', (e) =>
-            pos = @getMouse(e)
-#            console.log(pos)
+            pos = @getPos(e)
             if pos != @hover_pos
                 @ctx_hover.clearRect(
                     @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
@@ -414,7 +419,7 @@ class @SynthView
 
         ).on('mousedown', (e) =>
             @is_clicked = true
-            pos = @getMouse(e)
+            pos = @getPos(e)
             if @pattern[pos.x] == pos.y
                 @removeNote(pos.x)
             else
@@ -423,10 +428,9 @@ class @SynthView
             @is_clicked = false
         )
 
-        @plus.on('click', ( => @model.plusPattern(); @plusPattern()))
+        @plus.on('click', ( => @plusPattern()))
         @minus.on('click', ( =>
             if @pattern.length > 32
-                @model.minusPattern()
                 @minusPattern()
         ))
 
@@ -444,42 +448,51 @@ class @SynthView
         @pattern[x] = 0
         @model.removeNote(x)
 
-    playAt: (time) ->
+    playAt: (@time) ->
+        if @time % 32 == 0
+            @drawPattern(@time)
         for i in [0...10]
             @ctx_off.drawImage(@cell,
                 0, 0, 26, 26,
-                ((time + 31) % 32) * 26, i * 26, 26, 26
+                (@last_time % 32) * 26, i * 26, 26, 26
             )
             @ctx_off.drawImage(@cell,
                 78, 0, 26, 26,
                 (time % 32) * 26, i * 26, 26, 26
             )
+        @last_time = time
 
     readPattern: (@pattern) ->
-        for i in [0...@pattern.length]
-            y = 10 - @pattern[i]
+        @page = 0
+        @page_total = @pattern.length / 32
+        @drawPattern(0)
+
+    drawPattern: (time) ->
+        @time = time if time?
+        @page = Math.floor(@time / 32)
+        console.log('page: ' + @page)
+        for i in [0...32]
+            y = 10 - @pattern[@page * 32 + i]
             @ctx_on.drawImage(
                 @cell,
                 26, 0, 26, 26,
                 i * 26, y * 26, 26, 26
             )
-
-        @page_total = @pattern.length / 32
         @setMarker()
 
     plusPattern: ->
+        return if @page_total == 8
         @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-        @page_total = @pattern.length / 32
-        @setMarker()
+        @page_total++
+        @model.plusPattern()
+        @drawPattern()
 
     minusPattern: ->
-        for _i in [0...32]
-            i = @pattern.length - _i - 1
-            y = 10 - @pattern[i]
-            @rows.eq(y).find('td').eq(i).removeClass() if @pattern[i] != 0
+        return if @page_total == 1
         @pattern = @pattern.slice(0, @pattern.length - 32)
-        @page_total = @pattern.length / 32
-        @setMarker()
+        @page_total--
+        @model.minusPattern()
+        @drawPattern()
 
     setMarker: ->
         pt = @page_total

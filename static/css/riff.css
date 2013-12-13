@@ -100,6 +100,8 @@ html, body {
         to(rgba(255,255,255,1.0))
     );
     color: #fafafa;
+
+    z-index: 100;
 }
 #btn-left {
     display: none;
@@ -125,6 +127,8 @@ html, body {
         to(rgba(255,255,255,1.0))
     );
     color: #fafafa;
+
+    z-index: 100;
 }
 #btn-top {
     position: fixed;
@@ -145,6 +149,8 @@ html, body {
         to(rgba(255,255,255,1.0))
     );
     color: #fafafa;
+
+    z-index: 100;
 }
 #btn-bottom {
     display: none;
@@ -168,6 +174,8 @@ html, body {
         to(rgba(255,255,255,1.0))
     );
     color: #fafafa;
+
+    z-index: 100;
 }
 #btn-right:hover, #btn-left:hover, #btn-top:hover, #btn-bottom:hover {
     cursor: default;
