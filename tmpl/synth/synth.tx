@@ -7,32 +7,14 @@
       <i class="fa fa-minus pattern-minus"></i>
       <i class="fa fa-plus pattern-plus"></i>
 
-      <table class="table" border="0" cellspacing="0">
-        <thead>
-          <tr class="header">
-            <: for [0..7] -> $pos { :>
-              <th>
-              <div class="position">
-                <: for [0..($pos-1)] -> $_ { :><i class="fa fa-circle marker"></i>
-                <: } :>
-                <i class="fa fa-circle marker marker-now"></i>
-                <: for [($pos+1)..7] -> $_ { :><i class="fa fa-circle marker"></i>
-                <: } :>
-              </div>
-              </th>
-            <: } :>
-          </tr>
-        </thead>
+      <div class="markers">
+        <: for [0..7] -> $_ { :><i class="fa fa-circle marker"></i>
+        <: } :>
+      </div>
 
-        <tbody>
-          <: for [0..9] -> $i { :>
-            <tr note="<: 10 - $i :>">
-              <: for [0..255] -> $j { :><td data-x="<: $j :>" data-y="<: 10 - $i :>"></td><: } :>
-            </tr>
-          <: } :>
-        </tbody>
-      </table>
-
+      <canvas class="table table-hover"></canvas>
+      <canvas class="table table-on"></canvas>
+      <canvas class="table table-off"></canvas>
     </div>
   </div>
 

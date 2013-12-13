@@ -46,7 +46,7 @@
       this.time = 0;
       this.scene_pos = 0;
       this.scenes = [];
-      this.scene = null;
+      this.scene = {};
       this.num_id = 0;
       this.context = CONTEXT;
       this.synth = [new Synth(this.context, this.num_id++, this)];
@@ -63,6 +63,7 @@
     Player.prototype.setBPM = function(bpm) {
       var s, _i, _len, _ref, _results;
       this.bpm = bpm;
+      this.scene.bpm = this.bpm;
       this.duration = 15.0 / this.bpm * 1000;
       _ref = this.synth;
       _results = [];
@@ -75,6 +76,7 @@
 
     Player.prototype.setKey = function(key) {
       var s, _i, _len, _ref, _results;
+      this.scene.key = key;
       this.freq_key = KEY_LIST[key];
       _ref = this.synth;
       _results = [];
@@ -91,6 +93,7 @@
       if (!Array.isArray(this.scale)) {
         this.scale = SCALE_LIST[this.scale];
       }
+      this.scene.scale = this.scale;
       _ref = this.synth;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -126,7 +129,11 @@
         s.stop();
       }
       this.is_playing = false;
-      return this.time = this.scene_size;
+      this.view.viewStop();
+      this.time = 0;
+      this.scene_pos = 0;
+      this.scene = this.scenes[0];
+      return this.readScene(this.scene);
     };
 
     Player.prototype.pause = function() {
@@ -171,12 +178,7 @@
       if (this.is_playing) {
         if ((!this.is_loop) && this.time >= this.scene_size) {
           if (this.scene_pos === this.scenes.length - 1) {
-            this.is_playing = false;
-            this.view.viewStop();
-            this.time = 0;
-            this.scene_pos = 0;
-            this.scene = this.scenes[0];
-            this.readScene(this.scene);
+            this.stop();
             return;
           } else {
             this.time = 0;
@@ -212,13 +214,13 @@
     Player.prototype.moveRight = function(next_idx) {
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
-      return this.synth_now.activate();
+      return this.synth_now.activate(next_idx);
     };
 
     Player.prototype.moveLeft = function(next_idx) {
       this.synth[next_idx + 1].inactivate();
       this.synth_now = this.synth[next_idx];
-      return this.synth_now.activate();
+      return this.synth_now.activate(next_idx);
     };
 
     Player.prototype.saveSong = function() {
@@ -367,7 +369,7 @@
         return _this.viewPlay();
       });
       this.stop.on('mousedown', function() {
-        return _this.viewStop();
+        return _this.viewStop(_this.model);
       });
       this.forward.on('mousedown', function() {
         return _this.model.forward();
@@ -412,8 +414,10 @@
       return this.play.removeClass("fa-play").addClass("fa-pause");
     };
 
-    PlayerView.prototype.viewStop = function() {
-      this.model.stop();
+    PlayerView.prototype.viewStop = function(receiver) {
+      if (receiver != null) {
+        receiver.stop();
+      }
       return this.play.removeClass("fa-pause").addClass("fa-play");
     };
 
@@ -573,7 +577,6 @@
       patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [1, 1, 8, 1, 8, 1, 7, 1, 1, 1, 8, 1, 8, 1, 7, 1, 3, 3, 8, 3, 8, 3, 7, 3, 5, 5, 8, 5, 8, 5, 9, 5]]
     };
     s2 = {
-      bpm: 80,
       size: 32,
       patterns: [[1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10]]
     };

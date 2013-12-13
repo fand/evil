@@ -100,6 +100,8 @@ html, body {
         to(rgba(255,255,255,1.0))
     );
     color: #fafafa;
+
+    z-index: 100;
 }
 #btn-left {
     display: none;
@@ -125,6 +127,8 @@ html, body {
         to(rgba(255,255,255,1.0))
     );
     color: #fafafa;
+
+    z-index: 100;
 }
 #btn-top {
     position: fixed;
@@ -145,6 +149,8 @@ html, body {
         to(rgba(255,255,255,1.0))
     );
     color: #fafafa;
+
+    z-index: 100;
 }
 #btn-bottom {
     display: none;
@@ -168,6 +174,8 @@ html, body {
         to(rgba(255,255,255,1.0))
     );
     color: #fafafa;
+
+    z-index: 100;
 }
 #btn-right:hover, #btn-left:hover, #btn-top:hover, #btn-bottom:hover {
     cursor: default;
@@ -180,25 +188,32 @@ html, body {
 .sequencer-table {
     display: block;
     position: absolute;
-    margin: 5px;
-    padding: 0;
+    margin: 0px;
+    padding: 0px;
     top: 0px;
-    left: 65px;
-    width: 832px;
+    left: 0px;
+    width: 100%;
     height: 320px;
     overflow: hidden;
 }
+
 .table {
-    display: block;
     position: absolute;
-    margin: 0;
-    padding: 0;
-    top: 0;
-    left: 0;
-    min-width: 8000px;
-    height: 320px;
+    margin: 10px;
+    padding: 0px;
+    top: 25px;
+    left: 0px;
     /* overflow-y: hidden; */
     overflow-y: scroll;
+}
+.table-hover {
+    z-index: 100;
+}
+.table-on {
+    z-index: 10;
+}
+.table-off {
+    z-index: 1;
 }
 .indicator {
     display: none;
@@ -216,21 +231,12 @@ html, body {
 
     box-shadow: 0px 0px 5px #0FF;
 }
-.table .position {
-    width: 775px;
+.markers {
+    width: 100%;
     height: 25px;
     margin: 0px;
-    padding: 0px 55px 0px 0px;
-    color: #bbefff;
-    font-size: 16px;
+    padding: 2px 0px;
     text-align: center;
-}
-.table .header {
-    height: 25px;
-}
-.table .header > th {
-    margin: 0px;
-    padding: 0px;
 }
 .marker {
     width: 20px;
@@ -245,10 +251,6 @@ html, body {
     cursor: pointer;
     text-shadow: 0px 0px 4px #088;
 }
-.marker {
-    color: #8ef;
-    text-align: center;
-}
 .marker-now {
     color: #fff;
     text-shadow: 0px 0px 10px #0df;
@@ -261,10 +263,10 @@ html, body {
 .pattern-plus {
     position: absolute;
     width: 16px;
-    margin: 5px;
+    margin: 10px;
     padding: 2px;
     top: 0px;
-    left: 805px;
+    right: 0px;
     color: #8ef;
     font-size: 12px;
     z-index: 2;
@@ -276,10 +278,10 @@ html, body {
 .pattern-minus {
     position: absolute;
     width: 16px;
-    margin: 5px;
+    margin: 10px;
     padding: 2px;
     top: 0px;
-    left: 780px;
+    right: 30px;
     color: #8ef;
     font-size: 12px;
     z-index: 2;
@@ -307,92 +309,6 @@ tr {
   overflow-y: hidden;
   width: 840px;
 }
-td {
-  display: block;
-  float: left;
-  font-size: 0px;
-  margin: 2px 4px 2px 0px;
-  padding: 0px;
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  min-height: 20px;
-
-      background:-moz-radial-gradient(
-        center -20%,
-        circle,
-        rgba(255,255,255,0.8),
-        rgba(255,255,255,0.3) 58%,
-        rgba(255,255,255,0) 60%
-    ),
-    -moz-linear-gradient(
-        rgba(230,230,230,0.5),
-        rgba(230,230,230,1)
-    );
-    background:-webkit-radial-gradient(
-        center -20%,
-        circle,
-        rgba(255,255,255,0.8),
-        rgba(255,255,255,0.3) 58%,
-        rgba(255,255,255,0) 60%
-    ),
-    -webkit-gradient(
-        linear,
-        100% 0%,
-        100% 100%,
-        from(rgba(230,230,230,0.5)),
-        to(rgba(230,230,230,1))
-    );
-
-    border:1px solid #fff;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-    border-radius: 2px;
-
-    box-shadow:1px 1px 2px rgba(0,0,0,0.3),
-    0px 1px 0px rgba(255,255,255,0.8) inset,
-    0px -1px 0px rgba(255,255,255,0.3) inset;
-}
-td:hover {
-    box-shadow:0px 0px 5px rgb(0,255,255);
-}
-.on {
-    background:-moz-radial-gradient(
-        center -20%,
-        circle,
-        rgba(255,255,255,0.8),
-        rgba(255,255,255,0.3) 58%,
-        rgba(255,255,255,0) 60%
-    ),
-    -moz-linear-gradient(
-        rgba(128,160,255,0.5),
-        rgba(128,160,255,1)
-    );
-    background:-webkit-radial-gradient(
-        center -20%,
-        circle,
-        rgba(255,255,255,0.8),
-        rgba(255,255,255,0.3) 58%,
-        rgba(255,255,255,0) 60%
-    ),
-    -webkit-gradient(
-        linear,
-        100% 0%,
-        100% 100%,
-        from(rgba(128,192,255,0.5)),
-        to(rgba(128,192,255,1))
-    );
-
-    border:1px solid #9ff;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-    border-radius: 2px;
-
-    box-shadow:1px 1px 2px rgba(0,0,0,0.3),
-               0px 1px 0px rgba(255,255,255,0.8) inset,
-               0px -1px 0px rgba(255,255,255,0.3) inset;
-}
-
 
 
 /* Footer */
@@ -497,7 +413,7 @@ footer {
     bottom: 20px;
     right: 20px;
     width: 20px;
-    heiht: 20px;
+    height: 20px;
     font-size: 20px;
     text-align: center;
     color: #aaa;
