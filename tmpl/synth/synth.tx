@@ -10,7 +10,6 @@
       <div class="markers">
         <: for [0..7] -> $_ { :><i class="fa fa-circle marker"></i>
         <: } :>
-        <i class="fa fa-circle marker marker-now"></i>
       </div>
 
       <canvas class="table table-hover"></canvas>

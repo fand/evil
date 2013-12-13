@@ -295,8 +295,8 @@ class @Synth
     noteOff: -> @core.noteOff()
 
     playAt: (@time) ->
-        @view.playAt(@time)
         mytime = @time % @pattern.length
+        @view.playAt(mytime)
         if @pattern[mytime] == 0
             @core.noteOff()
         else
@@ -436,8 +436,8 @@ class @SynthView
 
     addNote: (x, y) ->
         note = 10 - y
-        @pattern[x] = note
-        @model.addNote(x, note)
+        @pattern[@page * 32 + x] = note
+        @model.addNote(@page * 32 + x, note)
         @ctx_on.clearRect(x * 26, 0, 26, 1000)
         @ctx_on.drawImage(@cell,
             26, 0, 26, 26,
@@ -445,8 +445,8 @@ class @SynthView
         )
 
     removeNote: (x) ->
-        @pattern[x] = 0
-        @model.removeNote(x)
+        @pattern[@page * 32 + x] = 0
+        @model.removeNote(@page * 32 + x)
 
     playAt: (@time) ->
         if @time % 32 == 0
@@ -466,11 +466,12 @@ class @SynthView
         @page = 0
         @page_total = @pattern.length / 32
         @drawPattern(0)
+        @setMarker()
 
     drawPattern: (time) ->
         @time = time if time?
         @page = Math.floor(@time / 32)
-        console.log('page: ' + @page)
+        @ctx_on.clearRect(0, 0, 832, 260)
         for i in [0...32]
             y = 10 - @pattern[@page * 32 + i]
             @ctx_on.drawImage(
@@ -495,11 +496,9 @@ class @SynthView
         @drawPattern()
 
     setMarker: ->
-        pt = @page_total
-        @pos_markers.each((i) ->
-            $(this).filter((j) -> j  < pt).show()
-            $(this).filter((j) -> pt <= j).hide()
-        )
+        @pos_markers.filter((i) => i  < @page_total).show()
+        @pos_markers.filter((i) => @page_total <= i).hide()
+        @pos_markers.removeClass('marker-now').eq(@page).addClass('marker-now')
 
     play: ->
     stop: ->

@@ -565,8 +565,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var mytime,
         _this = this;
       this.time = time;
-      this.view.playAt(this.time);
       mytime = this.time % this.pattern.length;
+      this.view.playAt(mytime);
       if (this.pattern[mytime] === 0) {
         return this.core.noteOff();
       } else {
@@ -739,15 +739,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SynthView.prototype.addNote = function(x, y) {
       var note;
       note = 10 - y;
-      this.pattern[x] = note;
-      this.model.addNote(x, note);
+      this.pattern[this.page * 32 + x] = note;
+      this.model.addNote(this.page * 32 + x, note);
       this.ctx_on.clearRect(x * 26, 0, 26, 1000);
       return this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, x * 26, y * 26, 26, 26);
     };
 
     SynthView.prototype.removeNote = function(x) {
-      this.pattern[x] = 0;
-      return this.model.removeNote(x);
+      this.pattern[this.page * 32 + x] = 0;
+      return this.model.removeNote(this.page * 32 + x);
     };
 
     SynthView.prototype.playAt = function(time) {
@@ -767,7 +767,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.pattern = pattern;
       this.page = 0;
       this.page_total = this.pattern.length / 32;
-      return this.drawPattern(0);
+      this.drawPattern(0);
+      return this.setMarker();
     };
 
     SynthView.prototype.drawPattern = function(time) {
@@ -776,7 +777,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.time = time;
       }
       this.page = Math.floor(this.time / 32);
-      console.log('page: ' + this.page);
+      this.ctx_on.clearRect(0, 0, 832, 260);
       for (i = _i = 0; _i < 32; i = ++_i) {
         y = 10 - this.pattern[this.page * 32 + i];
         this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
@@ -805,16 +806,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SynthView.prototype.setMarker = function() {
-      var pt;
-      pt = this.page_total;
-      return this.pos_markers.each(function(i) {
-        $(this).filter(function(j) {
-          return j < pt;
-        }).show();
-        return $(this).filter(function(j) {
-          return pt <= j;
-        }).hide();
-      });
+      var _this = this;
+      this.pos_markers.filter(function(i) {
+        return i < _this.page_total;
+      }).show();
+      this.pos_markers.filter(function(i) {
+        return _this.page_total <= i;
+      }).hide();
+      return this.pos_markers.removeClass('marker-now').eq(this.page).addClass('marker-now');
     };
 
     SynthView.prototype.play = function() {};
