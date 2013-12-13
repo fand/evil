@@ -281,7 +281,6 @@
     Player.prototype.readScene = function(scene) {
       var i, patterns, _i, _ref;
       this.scene = scene;
-      console.log(this.scene);
       patterns = this.scene.patterns;
       while (patterns.length > this.synth.length) {
         this.addSynth();

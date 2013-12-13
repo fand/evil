@@ -397,12 +397,17 @@ class @SynthView
 
     getPos: (e) ->
         @rect = @canvas_off.getBoundingClientRect()
-        x: Math.floor((e.clientX - @rect.left) / 26)
-        y: Math.floor((e.clientY - @rect.top) / 26)
+        _x = Math.floor((e.clientX - @rect.left) / 26)
+        _y = Math.floor((e.clientY - @rect.top) / 26)
+        x: _x
+        y: _y
+        x_abs: @page * 32 + _x
+        y_abs: _y
 
     initEvent: ->
         @canvas_hover_dom.on('mousemove', (e) =>
             pos = @getPos(e)
+
             if pos != @hover_pos
                 @ctx_hover.clearRect(
                     @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
@@ -414,18 +419,23 @@ class @SynthView
                 @hover_pos = pos
 
             if @is_clicked and @click_pos != pos
-                @addNote(pos.x, pos.y)
+                if @is_adding
+                    @addNote(pos)
+                else
+                    @removeNote(pos)
                 @click_pos = pos
 
         ).on('mousedown', (e) =>
             @is_clicked = true
             pos = @getPos(e)
-            if @pattern[pos.x] == pos.y
-                @removeNote(pos.x)
+            if @pattern[pos.x_abs] == 10 - pos.y
+                @removeNote(pos)
             else
-                @addNote(pos.x, pos.y)
+                @is_adding = true
+                @addNote(pos)
         ).on('mouseup', (e) =>
             @is_clicked = false
+            @is_adding = false
         ).on('mouseout', (e) =>
             @ctx_hover.clearRect(
                 @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
@@ -439,19 +449,20 @@ class @SynthView
                 @minusPattern()
         ))
 
-    addNote: (x, y) ->
-        note = 10 - y
-        @pattern[@page * 32 + x] = note
-        @model.addNote(@page * 32 + x, note)
-        @ctx_on.clearRect(x * 26, 0, 26, 1000)
+    addNote: (pos) ->
+        note = 10 - pos.y
+        @pattern[pos.x_abs] = note
+        @model.addNote(pos.x_abs, note)
+        @ctx_on.clearRect(pos.x * 26, 0, 26, 1000)
         @ctx_on.drawImage(@cell,
             26, 0, 26, 26,
-            x * 26, y * 26, 26, 26
+            pos.x * 26, pos.y * 26, 26, 26
         )
 
-    removeNote: (x) ->
-        @pattern[@page * 32 + x] = 0
-        @model.removeNote(@page * 32 + x)
+    removeNote: (pos) ->
+        @pattern[pos.x_abs] = 0
+        @ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26)
+        @model.removeNote(pos.x_abs)
 
     playAt: (@time) ->
         if @time % 32 == 0

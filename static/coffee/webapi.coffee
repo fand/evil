@@ -172,7 +172,6 @@ class @Player
         @readScene(@scenes[0])
 
     readScene: (@scene) ->
-        console.log(@scene)
         patterns = @scene.patterns
         while patterns.length > @synth.length
             @addSynth()

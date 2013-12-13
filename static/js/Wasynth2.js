@@ -693,10 +693,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SynthView.prototype.getPos = function(e) {
+      var _x, _y;
       this.rect = this.canvas_off.getBoundingClientRect();
+      _x = Math.floor((e.clientX - this.rect.left) / 26);
+      _y = Math.floor((e.clientY - this.rect.top) / 26);
       return {
-        x: Math.floor((e.clientX - this.rect.left) / 26),
-        y: Math.floor((e.clientY - this.rect.top) / 26)
+        x: _x,
+        y: _y,
+        x_abs: this.page * 32 + _x,
+        y_abs: _y
       };
     };
 
@@ -711,20 +716,26 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           _this.hover_pos = pos;
         }
         if (_this.is_clicked && _this.click_pos !== pos) {
-          _this.addNote(pos.x, pos.y);
+          if (_this.is_adding) {
+            _this.addNote(pos);
+          } else {
+            _this.removeNote(pos);
+          }
           return _this.click_pos = pos;
         }
       }).on('mousedown', function(e) {
         var pos;
         _this.is_clicked = true;
         pos = _this.getPos(e);
-        if (_this.pattern[pos.x] === pos.y) {
-          return _this.removeNote(pos.x);
+        if (_this.pattern[pos.x_abs] === 10 - pos.y) {
+          return _this.removeNote(pos);
         } else {
-          return _this.addNote(pos.x, pos.y);
+          _this.is_adding = true;
+          return _this.addNote(pos);
         }
       }).on('mouseup', function(e) {
-        return _this.is_clicked = false;
+        _this.is_clicked = false;
+        return _this.is_adding = false;
       }).on('mouseout', function(e) {
         _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
         return _this.hover_pos = {
@@ -742,18 +753,19 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }));
     };
 
-    SynthView.prototype.addNote = function(x, y) {
+    SynthView.prototype.addNote = function(pos) {
       var note;
-      note = 10 - y;
-      this.pattern[this.page * 32 + x] = note;
-      this.model.addNote(this.page * 32 + x, note);
-      this.ctx_on.clearRect(x * 26, 0, 26, 1000);
-      return this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, x * 26, y * 26, 26, 26);
+      note = 10 - pos.y;
+      this.pattern[pos.x_abs] = note;
+      this.model.addNote(pos.x_abs, note);
+      this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
+      return this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
     };
 
-    SynthView.prototype.removeNote = function(x) {
-      this.pattern[this.page * 32 + x] = 0;
-      return this.model.removeNote(this.page * 32 + x);
+    SynthView.prototype.removeNote = function(pos) {
+      this.pattern[pos.x_abs] = 0;
+      this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
+      return this.model.removeNote(pos.x_abs);
     };
 
     SynthView.prototype.playAt = function(time) {
@@ -1130,7 +1142,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Player.prototype.readScene = function(scene) {
       var i, patterns, _i, _ref;
       this.scene = scene;
-      console.log(this.scene);
       patterns = this.scene.patterns;
       while (patterns.length > this.synth.length) {
         this.addSynth();
