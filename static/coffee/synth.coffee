@@ -333,8 +333,8 @@ class @Synth
     removeNote: (time) ->
         @pattern[time] = 0
 
-    activate: -> @view.activate()
-    inactivate: -> @view.inactivate()
+    activate: (i) -> @view.activate(i)
+    inactivate: (i) -> @view.inactivate(i)
 
     redraw: (@time) ->
         @view.playAt(@time)
@@ -347,58 +347,81 @@ class @SynthView
         @dom.attr('id', 'synth' + id)
         $("#instruments").append(@dom)
 
-        @indicator = @dom.find('.indicator')
-        @table = @dom.find('.table').eq(0)
-        @rows  = @dom.find('tr').filter(-> $(this).find('td').length > 0)
-        @cells = @dom.find('td')
-
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @page = 0
         @page_total = 1
 
-        @pos_markers = (@table.find('.position').map( -> $(this).find('.marker')))  # list of list of markers
+        @pos_markers = @dom.find('.marker')  # list of list of markers
         @plus  = @dom.find('.pattern-plus')
         @minus = @dom.find('.pattern-minus')
         @setMarker()
 
+        @canvas_hover_dom = @dom.find('.table-hover')
+        @canvas_on_dom    = @dom.find('.table-on')
+        @canvas_off_dom   = @dom.find('.table-off')
+
+        @canvas_hover = @canvas_hover_dom[0]
+        @canvas_on    = @canvas_on_dom[0]
+        @canvas_off   = @canvas_off_dom[0]
+
+        @ctx_hover = @canvas_hover.getContext('2d')
+        @ctx_on    = @canvas_on.getContext('2d')
+        @ctx_off   = @canvas_off.getContext('2d')
+
+        @cell = new Image()
+        @cell.src = 'static/img/sequencer_cell.png'
+        @cell.onload = () => @initCanvas()
+
+        @is_clicked = false
+        @hover_pos = x:0, y:0
+        @click_pos = x:0, y:0
+
         @initEvent()
 
+    initCanvas: ->
+        @canvas_hover.width  = @canvas_on.width  = @canvas_off.width  = 832
+        @canvas_hover.height = @canvas_on.height = @canvas_off.height = 260
+        @rect = @canvas_off.getBoundingClientRect()
+        console.log(@rect.left)
+        for i in [0...10]
+            for j in [0...32]
+                @ctx_off.drawImage(@cell,
+                    0, 0, 26, 26,           # src (x, y, w, h)
+                    j * 26, i * 26, 26, 26  # dst (x, y, w, h)
+                )
+
+    getMouse: (e) =>
+        x: Math.floor((e.clientX - @rect.left) / 26)
+        y: Math.floor((e.clientY - @rect.top) / 26)
+
     initEvent: ->
-        @dom.find("td").each(() -> $(this).addClass("off"))
+        @canvas_hover_dom.on('mousemove', (e) =>
+            pos = @getMouse(e)
+#            console.log(pos)
+            if pos != @hover_pos
+                @ctx_hover.clearRect(
+                    @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
+                )
+                @ctx_hover.drawImage(@cell,
+                    52, 0, 26, 26,
+                    pos.x * 26, pos.y * 26, 26, 26
+                )
+                @hover_pos = pos
 
-        @dom.find("tr").on("mouseenter", (event) ->
-            @mouse_note = $(this).attr("note")
-        )
+            if @is_clicked and @click_pos != pos
+                @addNote(pos.x, pos.y)
+                @click_pos = pos
 
-        self = this
-        @dom.find("td").on('mousedown', () ->
-            self.mouse_pressed = true
-            mouse_time = +($(this).data('x'))
-            mouse_note = +($(this).data('y'))
-
-            if $(this).hasClass("on")
-                $(this).removeClass()
-                self.model.removeNote(parseInt($(this).text()))
+        ).on('mousedown', (e) =>
+            @is_clicked = true
+            pos = @getMouse(e)
+            if @pattern[pos.x] == pos.y
+                @removeNote(pos.x)
             else
-                self.rows.each( ->
-                    $(this).find('td').eq(mouse_time).removeClass()
-                )
-                $(this).addClass("on")
-                self.model.addNote(mouse_time, mouse_note)
-        ).on('mouseenter', () ->
-            if self.mouse_pressed
-                mouse_time = +($(this).data('x'))
-                mouse_note = +($(this).data('y'))
-
-                self.rows.each( ->
-                    $(this).find('td').eq(mouse_time).removeClass()
-                )
-                $(this).addClass("on")
-                self.model.addNote(mouse_time, mouse_note)
-        ).on('mouseup', () ->
-            self.mouse_pressed = false
+                @addNote(pos.x, pos.y)
+        ).on('mouseup', (e) =>
+            @is_clicked = false
         )
-
-        @rows.on('mouseup', ( => @mouse_pressed = false))
 
         @plus.on('click', ( => @model.plusPattern(); @plusPattern()))
         @minus.on('click', ( =>
@@ -407,16 +430,40 @@ class @SynthView
                 @minusPattern()
         ))
 
+    addNote: (x, y) ->
+        note = 10 - y
+        @pattern[x] = note
+        @model.addNote(x, note)
+        @ctx_on.clearRect(x * 26, 0, 26, 1000)
+        @ctx_on.drawImage(@cell,
+            26, 0, 26, 26,
+            x * 26, y * 26, 26, 26
+        )
 
-        # @dom.find('th')
-        #     .on('mousedown', ( -> self.model.noteOn(self.model.noteToSemitone($(this).data('y')))))
-        #     .on("mouseup", ( -> self.model.noteOff()))
+    removeNote: (x) ->
+        @pattern[x] = 0
+        @model.removeNote(x)
+
+    playAt: (time) ->
+        for i in [0...10]
+            @ctx_off.drawImage(@cell,
+                0, 0, 26, 26,
+                ((time + 31) % 32) * 26, i * 26, 26, 26
+            )
+            @ctx_off.drawImage(@cell,
+                78, 0, 26, 26,
+                (time % 32) * 26, i * 26, 26, 26
+            )
 
     readPattern: (@pattern) ->
-        @cells.removeClass()
         for i in [0...@pattern.length]
             y = 10 - @pattern[i]
-            @rows.eq(y).find('td').eq(i).addClass('on') if @pattern[i] != 0
+            @ctx_on.drawImage(
+                @cell,
+                26, 0, 26, 26,
+                i * 26, y * 26, 26, 26
+            )
+
         @page_total = @pattern.length / 32
         @setMarker()
 
@@ -441,21 +488,11 @@ class @SynthView
             $(this).filter((j) -> pt <= j).hide()
         )
 
-    playAt: (time) ->
-        @indicator.css('left', (26 * (time % 32)) + 'px')
-        if @pattern.length % 32 == 0
-            page = Math.floor((time % @pattern.length) / 32)
-            @table.css('left', page * (-832) + 'px')
-
-    play: -> @indicator.css("display", "block")
+    play: ->
     stop: ->
-        @indicator.css("display", "none")
-        @table.css('left', '0px')
 
-    activate: ->
-        @indicator.show()
-        @table.show()
+    activate: (i) ->
+        @is_active = true
+        @initCanvas()
 
-    inactivate: ->
-        @indicator.hide()
-        @table.hide()
+    inactivate: -> @is_active = false

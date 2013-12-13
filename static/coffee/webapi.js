@@ -212,13 +212,13 @@
     Player.prototype.moveRight = function(next_idx) {
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
-      return this.synth_now.activate();
+      return this.synth_now.activate(next_idx);
     };
 
     Player.prototype.moveLeft = function(next_idx) {
       this.synth[next_idx + 1].inactivate();
       this.synth_now = this.synth[next_idx];
-      return this.synth_now.activate();
+      return this.synth_now.activate(next_idx);
     };
 
     Player.prototype.saveSong = function() {

@@ -131,15 +131,14 @@ class @Player
     moveRight: (next_idx) ->
         @synth[next_idx - 1].inactivate()
         @synth_now = @synth[next_idx]
-        @synth_now.activate()
+        @synth_now.activate(next_idx)
 
     moveLeft: (next_idx) ->
         @synth[next_idx + 1].inactivate()
         @synth_now = @synth[next_idx]
-        @synth_now.activate()
+        @synth_now.activate(next_idx)
 
     saveSong: () ->
-        for s in @scenes
         @scene =
             size:     @scene_size
             patterns: (s.pattern for s in @synth)
