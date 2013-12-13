@@ -16,7 +16,8 @@
   </div>
 
   <div id="mixer">
-    s
+    <canvas id="mixer-session">
+    <canvas id="mixer-mixier">
   </div>
 
   <div id="templates">
