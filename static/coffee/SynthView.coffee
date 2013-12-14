@@ -5,6 +5,9 @@ class @SynthView
         @dom.attr('id', 'synth' + id)
         $("#instruments").append(@dom)
 
+        @synth_name = @dom.find('.synth-name')
+        @synth_name.html('Synth #' + @id)
+
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @page = 0
         @page_total = 1

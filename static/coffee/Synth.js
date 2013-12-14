@@ -412,7 +412,7 @@
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.time = 0;
       this.scale = [];
-      this.view = new SynthView(this);
+      this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
     }
 

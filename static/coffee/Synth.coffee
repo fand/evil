@@ -275,7 +275,7 @@ class @Synth
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @time = 0
         @scale = []
-        @view = new SynthView(this)
+        @view = new SynthView(this, @id)
         @core = new SynthCore(this, @ctx, @id)
 
     connect: (dst) -> @core.connect(dst)

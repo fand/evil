@@ -1,5 +1,7 @@
 <div id="tmpl_synth" class="instrument clearfix">
 
+  <div class="synth-name"></div>
+
   <div class="sequencer">
     <div class="sequencer-table">
       <div class="indicator"></div>

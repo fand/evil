@@ -1,6 +1,10 @@
 * {
     font-size:10px;
     -webkit-user-select:none;
+    text-shadow: 0px 0px 1px #cde;
+}
+input, select {
+    text-shadow: none;
 }
 
 html, body {
@@ -61,6 +65,17 @@ html, body {
 
     transition: all 0.2s ease 0s;
 }
+
+.synth-name{
+    position: absolute;
+    color: #0df;
+    font-size: 16px;
+    top: 0px;
+    left: 0px;
+    width: 200px;
+    height: 30px;
+    z-index: 100;
+}
 .instrument {
     position: relative;
     display: block;
@@ -77,6 +92,10 @@ html, body {
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
+
+    /* -webkit-font-smoothing: subpixel-antialiased; */
+    /* -webkit-text-stroke: 0px; */
+    /* -webkit-backface-visibility: hidden; */
 }
 #btn-right {
     position: fixed;

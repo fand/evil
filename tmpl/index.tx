@@ -16,8 +16,9 @@
   </div>
 
   <div id="mixer">
-    <canvas id="mixer-session">
-    <canvas id="mixer-mixier">
+    <div id="mixer-table"></div>
+    <canvas id="mixer-session"></canvas>
+    <canvas id="mixer-mixier"></canvas>
   </div>
 
   <div id="templates">

@@ -19,6 +19,52 @@ e(this).html(d);break;case "hatena_oldstyle":d=a.button||"http://d.hatena.ne.jp/
 b+'" style="border: none; vertical-align: text-bottom" /></a></span>');break;case "google_plusone":j=a;if(!(e.browser.msie&&8>parseInt(e.browser.version,10))){c=j.size||j.button||"";f=j.href||j.url||"";b=j.lang||"";h=j.parsetags||"";l=j.callback||"";j=void 0!=j.count?j.count:!0;switch(c){case "small":case "standard":case "medium":break;case "tall":j=!0;break;default:c="standard",j=!0}c=e("<div>").attr({"data-callback":l,"data-count":j?"true":"false","data-href":f,"data-size":c}).addClass("g-plusone");
 e(this).append(c);d==m&&(d="",""!=b&&(d+='lang: "'+k(b)+'"'),""!=h&&(d=d+(""!=d?",":"")+('parsetags: "'+k(h)+"'")),""!=d&&(d="{"+d+"}"),"undefined"===typeof gapi||"undefined"===typeof gapi.plusone?e("body").append('<script type="text/javascript" src="https://apis.google.com/js/plusone.js">'+d+"<\/script>"):gapi.plusone.go())}break;case "pinterest":b=a.url||t,h=a.button||"horizontal",c=void 0!=a.media?a.media:"",f=void 0!=a.description?a.description:"",b=o(decodeURIComponent(b)),c=o(decodeURIComponent(c)),
 f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p({url:b,media:c,description:f})+'" class="pin-it-button" count-layout="'+h+'"><img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" /></a>',e(this).html(b),d==m&&e("body").append('<script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"><\/script>')}return!0})}})(jQuery);;(function() {
+  var Mixer;
+
+  Mixer = (function() {
+    function Mixer(ctx) {
+      this.ctx = ctx;
+      this.view = new MixerView(this);
+    }
+
+    return Mixer;
+
+  })();
+
+}).call(this);
+;(function() {
+  var MixerView;
+
+  MixerView = (function() {
+    function MixerView() {
+      this.dom = $('#mixer');
+      this.canvas_session_dom = $('#mixer-session');
+      this.canvas_mixer_dom = $('#mixer-mixer');
+      this.canvas_session = this.canvas_session_dom[0];
+      this.canvas_mixer = this.canvas_mixer_dom[0];
+      this.ctx_session = this.canvas_session.getContext('2d');
+      this.ctx_mixer = this.canvas_mixer.getContext('2d');
+    }
+
+    MixerView.prototype.initCanvas = function() {
+      var i, j, _i, _j;
+      this.canvas_session.width = this.canvas_mixer.width = 832;
+      this.canvas_session.height = this.canvas_mixer.height = 260;
+      this.rect = this.canvas_session.getBoundingClientRect();
+      for (i = _i = 0; _i < 10; i = ++_i) {
+        for (j = _j = 0; _j < 32; j = ++_j) {
+          this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
+        }
+      }
+      return this.readPattern(this.pattern);
+    };
+
+    return MixerView;
+
+  })();
+
+}).call(this);
+;(function() {
   'use strict';
   var MutekiTimer, SOURCE, TIMER_PATH, clearTimeout, e, pool, setTimeout, tid, _clearTimeout, _ref, _ref1, _setTimeout,
     _this = this;
@@ -1060,7 +1106,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.time = 0;
       this.scale = [];
-      this.view = new SynthView(this);
+      this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
     }
 
@@ -1178,6 +1224,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.dom = $('#tmpl_synth').clone();
       this.dom.attr('id', 'synth' + id);
       $("#instruments").append(this.dom);
+      this.synth_name = this.dom.find('.synth-name');
+      this.synth_name.html('Synth #' + this.id);
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.page = 0;
       this.page_total = 1;
@@ -1457,6 +1505,23 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         n = KEYCODE_TO_NOTE[e.keyCode];
         if (n != null) {
           return player.noteOn(n);
+        } else {
+          switch (e.keyCode) {
+            case 37:
+              player.view.moveLeft();
+              return console.log('eleft');
+            case 38:
+              player.view.moveTop();
+              return console.log('top');
+            case 39:
+              return player.view.moveRight();
+            case 40:
+              return player.view.moveBottom();
+            case 32:
+              return player.view.viewPlay();
+            case 13:
+              return player.view.viewPlay();
+          }
         }
       }
     });

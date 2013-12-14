@@ -59,7 +59,16 @@ $(() ->
             player.noteOff() if player.isPlaying()
 
             n = KEYCODE_TO_NOTE[e.keyCode]
-            player.noteOn(n) if n?
+            if n?
+                player.noteOn(n)
+            else
+                switch e.keyCode
+                    when 37 then player.view.moveLeft() ;console.log('eleft')
+                    when 38 then player.view.moveTop()  ;console.log('top')
+                    when 39 then player.view.moveRight()
+                    when 40 then player.view.moveBottom()
+                    when 32 then player.view.viewPlay()
+                    when 13 then player.view.viewPlay()
     )
     $(window).keyup( ->
         is_key_pressed = false

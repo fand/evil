@@ -7,6 +7,8 @@
       this.dom = $('#tmpl_synth').clone();
       this.dom.attr('id', 'synth' + id);
       $("#instruments").append(this.dom);
+      this.synth_name = this.dom.find('.synth-name');
+      this.synth_name.html('Synth #' + this.id);
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.page = 0;
       this.page_total = 1;

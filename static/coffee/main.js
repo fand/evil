@@ -58,6 +58,23 @@
         n = KEYCODE_TO_NOTE[e.keyCode];
         if (n != null) {
           return player.noteOn(n);
+        } else {
+          switch (e.keyCode) {
+            case 37:
+              player.view.moveLeft();
+              return console.log('eleft');
+            case 38:
+              player.view.moveTop();
+              return console.log('top');
+            case 39:
+              return player.view.moveRight();
+            case 40:
+              return player.view.moveBottom();
+            case 32:
+              return player.view.viewPlay();
+            case 13:
+              return player.view.viewPlay();
+          }
         }
       }
     });
