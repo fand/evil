@@ -1,7 +1,14 @@
 # ------------------------------------------------------------------------------
 # CONSTANT
 
-KEYCODE_TO_NOTE =
+@CONTEXT = new webkitAudioContext()
+@STREAM_LENGTH = 1024
+@SAMPLE_RATE = 48000
+@SEMITONE = 1.05946309
+@T = new MutekiTimer()
+
+
+@KEYCODE_TO_NOTE =
     90:   1
     88:   2
     67:   3

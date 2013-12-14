@@ -97,8 +97,11 @@ class @PlayerView
         @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
         @model.moveRight(@synth_now)
         @btn_left.show()
+        if @synth_now == (@synth_total - 1)
+            @btn_right.attr('data-line1', 'new')
 
     moveLeft: ->
+        @btn_right.attr('data-line1', 'next')
         if @synth_now != 0
             @synth_now--
             @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')

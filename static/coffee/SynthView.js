@@ -87,7 +87,7 @@
         if (_this.is_clicked && _this.click_pos !== pos) {
           if (_this.is_adding) {
             _this.addNote(pos);
-          } else {
+          } else if (_this.pattern[pos.x_abs] === 10 - pos.y) {
             _this.removeNote(pos);
           }
           return _this.click_pos = pos;

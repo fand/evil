@@ -81,7 +81,7 @@ class @SynthView
             if @is_clicked and @click_pos != pos
                 if @is_adding
                     @addNote(pos)
-                else
+                else if @pattern[pos.x_abs] == 10 - pos.y
                     @removeNote(pos)
                 @click_pos = pos
 

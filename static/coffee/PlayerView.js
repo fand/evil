@@ -134,10 +134,14 @@
       this.synth_now++;
       this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
       this.model.moveRight(this.synth_now);
-      return this.btn_left.show();
+      this.btn_left.show();
+      if (this.synth_now === (this.synth_total - 1)) {
+        return this.btn_right.attr('data-line1', 'new');
+      }
     };
 
     PlayerView.prototype.moveLeft = function() {
+      this.btn_right.attr('data-line1', 'next');
       if (this.synth_now !== 0) {
         this.synth_now--;
         this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');

@@ -1,7 +1,15 @@
 (function() {
-  var KEYCODE_TO_NOTE;
+  this.CONTEXT = new webkitAudioContext();
 
-  KEYCODE_TO_NOTE = {
+  this.STREAM_LENGTH = 1024;
+
+  this.SAMPLE_RATE = 48000;
+
+  this.SEMITONE = 1.05946309;
+
+  this.T = new MutekiTimer();
+
+  this.KEYCODE_TO_NOTE = {
     90: 1,
     88: 2,
     67: 3,

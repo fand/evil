@@ -1,5 +1,4 @@
-SEMITONE = 1.05946309
-KEY_LIST =
+@KEY_LIST =
     A:  55
     Bb: 58.27047018976124
     B:  61.7354126570155
@@ -13,7 +12,7 @@ KEY_LIST =
     G:  48.999429497718666
     Ab: 51.91308719749314
 
-SCALE_LIST =
+@SCALE_LIST =
     IONIAN:     [0,2,4,5,7,9,11,12,14,16]
     DORIAN:     [0,2,3,5,7,9,10,12,14,15]
     PHRYGIAN:   [0,1,3,5,7,8,10,12,13,15]
@@ -22,9 +21,6 @@ SCALE_LIST =
     AEOLIAN:    [0,2,3,5,7,8,10,12,14,15]
     LOCRIAN:    [0,1,3,5,6,8,10,12,13,15]
 
-CONTEXT = new webkitAudioContext()
-SAMPLE_RATE = CONTEXT.sampleRate
-T = new MutekiTimer()
 
 
 
@@ -173,9 +169,6 @@ class @Player
 
     readScene: (@scene) ->
         patterns = @scene.patterns
-        console.log('reeeeeding')
-        console.log('@synth.length: ' + @synth.length)
-        console.log('pattern.length: ' + pattern.length)
         while patterns.length > @synth.length
             @addSynth()
         @setBPM(@scene.bpm) if @scene.bpm?

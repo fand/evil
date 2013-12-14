@@ -12,7 +12,6 @@ class MixerView
         @ctx_mixer   = @canvas_mixer.getContext('2d')
 
 
-
     initCanvas: ->
         @canvas_session.width  = @canvas_mixer.width  = 832
         @canvas_session.height = @canvas_mixer.height = 260

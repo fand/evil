@@ -1,13 +1,5 @@
 (function() {
-  var OSC_TYPE, SAMPLE_RATE, SEMITONE, STREAM_LENGTH, T;
-
-  SEMITONE = 1.05946309;
-
-  STREAM_LENGTH = 1024;
-
-  SAMPLE_RATE = 48000;
-
-  T = new MutekiTimer();
+  var OSC_TYPE;
 
   OSC_TYPE = {
     RECT: 1,

@@ -1,8 +1,3 @@
-SEMITONE = 1.05946309
-STREAM_LENGTH = 1024
-SAMPLE_RATE = 48000
-T = new MutekiTimer()
-
 OSC_TYPE =
     RECT:     1
     SINE:     0

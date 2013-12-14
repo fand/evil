@@ -63,10 +63,10 @@
 
 </footer>
 
-  <i id="btn-left"   class="fa fa-angle-left"></i>
-  <i id="btn-right"  class="fa fa-angle-right"></i>
-  <i id="btn-top"    class="fa fa-angle-up"></i>
-  <i id="btn-bottom" class="fa fa-angle-down"></i>
+  <i id="btn-left"   class="btn fa fa-angle-left"  data-line1="prev" data-line2="synth"></i>
+  <i id="btn-right"  class="btn fa fa-angle-right" data-line1="new"  data-line2="synth"></i>
+  <i id="btn-top"    class="btn fa fa-angle-up"    data-line1="mixer"></i>
+  <i id="btn-bottom" class="btn fa fa-angle-down"  data-line1="synths"></i>
 
 
 <i class="fa fa-save" id="btn-save">
