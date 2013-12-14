@@ -6,7 +6,6 @@
 input, select {
     text-shadow: none;
 }
-
 html, body {
     width: 100%;
     height: 100%;
@@ -22,6 +21,26 @@ html, body {
 }
 .social {
     float: left;
+}
+
+
+
+/* ScrollBar */
+
+*::-webkit-scrollbar {
+    width: 6px;
+    padding: 2px;  /* total 10px */
+}
+*::-webkit-scrollbar-button {
+    width: 6px;
+    background-color: #9ef;
+    -webkit-border-radius: 2px;
+}
+*::-webkit-scrollbar-thumb {
+    width: 6px;
+    padding: 0px 2px;
+    -webkit-border-radius: 3px;
+    background-color: #9ef;
 }
 
 
@@ -69,7 +88,7 @@ html, body {
 .synth-name{
     position: absolute;
     color: #0df;
-    font-size: 16px;
+    font-size: 20px;
     top: 0px;
     left: 0px;
     width: 200px;
@@ -234,6 +253,39 @@ html, body {
 }
 
 
+
+/* mixer */
+#mixer-session {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 360px;
+    background-color: #fafafa;
+}
+#mixer-mixer {
+    position: absolute;
+    width: 100%;
+    height: 140px;
+    top: 360px;
+    left: 0px;
+}
+.mixer-gain {
+    float: left;
+    width: 100px;
+    margin: 10px;
+}
+.mixer-gain-master {
+    float: right;
+    width: 100px;
+    margin: 10px;
+}
+
+
+
+
+
+
 /* Sequencer */
 
 .sequencer-table {
@@ -247,15 +299,23 @@ html, body {
     height: 320px;
     overflow: hidden;
 }
-
-.table {
+.sequencer-table-wrapper {
     position: absolute;
-    margin: 10px;
+    margin: 0px;
     padding: 0px;
     top: 25px;
     left: 0px;
-    /* overflow-y: hidden; */
+    width: 100%;
+    height: 270px;
     overflow-y: scroll;
+}
+.table {
+    position: absolute;
+    margin: 0px;
+    padding: 10px;
+    top: 0px;
+    left: 0px;
+    overflow-y: hidden;
 }
 .table-hover {
     z-index: 100;

@@ -17,6 +17,7 @@
       this.loop = $('#control-loop');
       this.instruments = $('#instruments');
       this.mixer = $('#mixer');
+      this.is_mixer = false;
       this.btn_left = $('#btn-left');
       this.btn_right = $('#btn-right');
       this.btn_top = $('#btn-top');
@@ -127,6 +128,9 @@
     };
 
     PlayerView.prototype.moveRight = function() {
+      if (this.is_mixer) {
+        return;
+      }
       if (this.synth_now === (this.synth_total - 1)) {
         this.model.addSynth();
         this.synth_total++;
@@ -141,6 +145,9 @@
     };
 
     PlayerView.prototype.moveLeft = function() {
+      if (this.is_mixer) {
+        return;
+      }
       this.btn_right.attr('data-line1', 'next');
       if (this.synth_now !== 0) {
         this.synth_now--;
@@ -153,6 +160,7 @@
     };
 
     PlayerView.prototype.moveTop = function() {
+      this.is_mixer = true;
       this.btn_left.hide();
       this.btn_right.hide();
       this.btn_top.hide();
@@ -162,6 +170,7 @@
     };
 
     PlayerView.prototype.moveBottom = function() {
+      this.is_mixer = false;
       this.btn_left.show();
       this.btn_right.show();
       this.btn_top.show();

@@ -47,13 +47,13 @@
     SynthView.prototype.initCanvas = function() {
       var i, j, _i, _j;
       this.canvas_hover.width = this.canvas_on.width = this.canvas_off.width = 832;
-      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 260;
+      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 520;
       this.rect = this.canvas_off.getBoundingClientRect();
       this.offset = {
         x: this.rect.left,
         y: this.rect.top
       };
-      for (i = _i = 0; _i < 10; i = ++_i) {
+      for (i = _i = 0; _i < 20; i = ++_i) {
         for (j = _j = 0; _j < 32; j = ++_j) {
           this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
         }
@@ -87,7 +87,7 @@
         if (_this.is_clicked && _this.click_pos !== pos) {
           if (_this.is_adding) {
             _this.addNote(pos);
-          } else if (_this.pattern[pos.x_abs] === 10 - pos.y) {
+          } else if (_this.pattern[pos.x_abs] === 20 - pos.y) {
             _this.removeNote(pos);
           }
           return _this.click_pos = pos;
@@ -96,7 +96,7 @@
         var pos;
         _this.is_clicked = true;
         pos = _this.getPos(e);
-        if (_this.pattern[pos.x_abs] === 10 - pos.y) {
+        if (_this.pattern[pos.x_abs] === 20 - pos.y) {
           return _this.removeNote(pos);
         } else {
           _this.is_adding = true;
@@ -124,7 +124,7 @@
 
     SynthView.prototype.addNote = function(pos) {
       var note;
-      note = 10 - pos.y;
+      note = 20 - pos.y;
       this.pattern[pos.x_abs] = note;
       this.model.addNote(pos.x_abs, note);
       this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
@@ -143,7 +143,7 @@
       if (this.time % 32 === 0) {
         this.drawPattern(this.time);
       }
-      for (i = _i = 0; _i < 10; i = ++_i) {
+      for (i = _i = 0; _i < 20; i = ++_i) {
         this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % 32) * 26, i * 26, 26, 26);
         this.ctx_off.drawImage(this.cell, 78, 0, 26, 26, (time % 32) * 26, i * 26, 26, 26);
       }
@@ -166,7 +166,7 @@
       this.page = Math.floor(this.time / 32);
       this.ctx_on.clearRect(0, 0, 832, 260);
       for (i = _i = 0; _i < 32; i = ++_i) {
-        y = 10 - this.pattern[this.page * 32 + i];
+        y = 20 - this.pattern[this.page * 32 + i];
         this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
       }
       return this.setMarker();
@@ -208,7 +208,7 @@
     SynthView.prototype.stop = function() {
       var i, _i, _results;
       _results = [];
-      for (i = _i = 0; _i < 10; i = ++_i) {
+      for (i = _i = 0; _i < 20; i = ++_i) {
         _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % 32) * 26, i * 26, 26, 26));
       }
       return _results;

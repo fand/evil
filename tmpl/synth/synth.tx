@@ -14,9 +14,11 @@
         <: } :>
       </div>
 
-      <canvas class="table table-hover"></canvas>
-      <canvas class="table table-on"></canvas>
-      <canvas class="table table-off"></canvas>
+      <div class="sequencer-table-wrapper">
+        <canvas class="table table-hover"></canvas>
+        <canvas class="table table-on"></canvas>
+        <canvas class="table table-off"></canvas>
+      </div>
     </div>
   </div>
 

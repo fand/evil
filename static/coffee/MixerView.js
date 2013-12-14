@@ -1,15 +1,16 @@
 (function() {
-  var MixerView;
-
-  MixerView = (function() {
-    function MixerView() {
+  this.MixerView = (function() {
+    function MixerView(model) {
+      this.model = model;
       this.dom = $('#mixer');
+      this.canvas_bank_dom = $('#mixer-bank');
       this.canvas_session_dom = $('#mixer-session');
-      this.canvas_mixer_dom = $('#mixer-mixer');
+      this.session_wrapper = $('#mixer-session-wrapper');
+      this.mixer = $('#mixer-mixer');
+      this.gains = [];
       this.canvas_session = this.canvas_session_dom[0];
-      this.canvas_mixer = this.canvas_mixer_dom[0];
       this.ctx_session = this.canvas_session.getContext('2d');
-      this.ctx_mixer = this.canvas_mixer.getContext('2d');
+      this.initEvent();
     }
 
     MixerView.prototype.initCanvas = function() {
@@ -24,6 +25,54 @@
       }
       return this.readPattern(this.pattern);
     };
+
+    MixerView.prototype.initEvent = function() {
+      var _this = this;
+      return this.mixer.on('change', function() {
+        return _this.setGains();
+      });
+    };
+
+    MixerView.prototype.redraw = function(synth) {
+      var dom, s, _i, _len, _ref, _results;
+      this.mixer.remove('mixer-gain');
+      _ref = this.synth;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        dom = $('<div class="mixer-gain"><input type="range" min="0" max="100" value="100" width="100px" /></div>');
+        _results.push(this.mixer.append(dom));
+      }
+      return _results;
+    };
+
+    MixerView.prototype.addSynth = function(synth) {
+      var dom,
+        _this = this;
+      dom = $('<div class="mixer-gain"><input type="range" min="0" max="100" value="100" width="100px" /></div>');
+      this.mixer.append(dom);
+      return this.mixer.on('change', function() {
+        return _this.setGains();
+      });
+    };
+
+    MixerView.prototype.setGains = function() {
+      var g, gain_master, gains;
+      gains = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.gains;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          g = _ref[_i];
+          _results.push(parseFloat(g.val()) / 100.0);
+        }
+        return _results;
+      }).call(this);
+      gain_master = parseFloat(this.gain_master.val() / 100.0);
+      return this.model.setGains(gains, gain_master);
+    };
+
+    MixerView.prototype.displayGains = function(gains) {};
 
     return MixerView;
 

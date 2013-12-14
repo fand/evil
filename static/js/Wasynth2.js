@@ -19,13 +19,43 @@ e(this).html(d);break;case "hatena_oldstyle":d=a.button||"http://d.hatena.ne.jp/
 b+'" style="border: none; vertical-align: text-bottom" /></a></span>');break;case "google_plusone":j=a;if(!(e.browser.msie&&8>parseInt(e.browser.version,10))){c=j.size||j.button||"";f=j.href||j.url||"";b=j.lang||"";h=j.parsetags||"";l=j.callback||"";j=void 0!=j.count?j.count:!0;switch(c){case "small":case "standard":case "medium":break;case "tall":j=!0;break;default:c="standard",j=!0}c=e("<div>").attr({"data-callback":l,"data-count":j?"true":"false","data-href":f,"data-size":c}).addClass("g-plusone");
 e(this).append(c);d==m&&(d="",""!=b&&(d+='lang: "'+k(b)+'"'),""!=h&&(d=d+(""!=d?",":"")+('parsetags: "'+k(h)+"'")),""!=d&&(d="{"+d+"}"),"undefined"===typeof gapi||"undefined"===typeof gapi.plusone?e("body").append('<script type="text/javascript" src="https://apis.google.com/js/plusone.js">'+d+"<\/script>"):gapi.plusone.go())}break;case "pinterest":b=a.url||t,h=a.button||"horizontal",c=void 0!=a.media?a.media:"",f=void 0!=a.description?a.description:"",b=o(decodeURIComponent(b)),c=o(decodeURIComponent(c)),
 f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p({url:b,media:c,description:f})+'" class="pin-it-button" count-layout="'+h+'"><img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" /></a>',e(this).html(b),d==m&&e("body").append('<script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"><\/script>')}return!0})}})(jQuery);;(function() {
-  var Mixer;
-
-  Mixer = (function() {
-    function Mixer(ctx) {
+  this.Mixer = (function() {
+    function Mixer(ctx, player) {
+      var s;
       this.ctx = ctx;
+      this.player = player;
+      this.gain_master = 1.0;
+      this.gains = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.player.synth;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          _results.push(s.getGain());
+        }
+        return _results;
+      }).call(this);
+      this.node = this.ctx.createGain();
+      this.node.gain.value = this.gain_master;
+      this.node.connect(this.ctx.destination);
       this.view = new MixerView(this);
     }
+
+    Mixer.prototype.addSynth = function(synth) {
+      synth.connect(this.node);
+      return this.view.addSynth(synth);
+    };
+
+    Mixer.prototype.setGains = function(gains, gain_master) {
+      var i, _i, _ref;
+      this.gains = gains;
+      this.gain_master = gain_master;
+      for (i = _i = 0, _ref = this.gains.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.player.synth[i].setGain(this.gains[i]);
+      }
+      this.node.gain.value = this.gain_master;
+      return console.log(this.gain_master);
+    };
 
     return Mixer;
 
@@ -33,17 +63,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
-  var MixerView;
-
-  MixerView = (function() {
-    function MixerView() {
+  this.MixerView = (function() {
+    function MixerView(model) {
+      this.model = model;
       this.dom = $('#mixer');
+      this.canvas_bank_dom = $('#mixer-bank');
       this.canvas_session_dom = $('#mixer-session');
-      this.canvas_mixer_dom = $('#mixer-mixer');
+      this.session_wrapper = $('#mixer-session-wrapper');
+      this.mixer = $('#mixer-mixer');
+      this.gains = [];
       this.canvas_session = this.canvas_session_dom[0];
-      this.canvas_mixer = this.canvas_mixer_dom[0];
       this.ctx_session = this.canvas_session.getContext('2d');
-      this.ctx_mixer = this.canvas_mixer.getContext('2d');
+      this.initEvent();
     }
 
     MixerView.prototype.initCanvas = function() {
@@ -58,6 +89,54 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
       return this.readPattern(this.pattern);
     };
+
+    MixerView.prototype.initEvent = function() {
+      var _this = this;
+      return this.mixer.on('change', function() {
+        return _this.setGains();
+      });
+    };
+
+    MixerView.prototype.redraw = function(synth) {
+      var dom, s, _i, _len, _ref, _results;
+      this.mixer.remove('mixer-gain');
+      _ref = this.synth;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        dom = $('<div class="mixer-gain"><input type="range" min="0" max="100" value="100" width="100px" /></div>');
+        _results.push(this.mixer.append(dom));
+      }
+      return _results;
+    };
+
+    MixerView.prototype.addSynth = function(synth) {
+      var dom,
+        _this = this;
+      dom = $('<div class="mixer-gain"><input type="range" min="0" max="100" value="100" width="100px" /></div>');
+      this.mixer.append(dom);
+      return this.mixer.on('change', function() {
+        return _this.setGains();
+      });
+    };
+
+    MixerView.prototype.setGains = function() {
+      var g, gain_master, gains;
+      gains = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.gains;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          g = _ref[_i];
+          _results.push(parseFloat(g.val()) / 100.0);
+        }
+        return _results;
+      }).call(this);
+      gain_master = parseFloat(this.gain_master.val() / 100.0);
+      return this.model.setGains(gains, gain_master);
+    };
+
+    MixerView.prototype.displayGains = function(gains) {};
 
     return MixerView;
 
@@ -200,10 +279,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth = [new Synth(this.context, this.num_id++, this)];
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
+      this.mixer = new Mixer(this.context, this);
       _ref = this.synth;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        s.connect(this.context.destination);
+        this.mixer.addSynth(s);
       }
       this.view = new PlayerView(this);
     }
@@ -355,8 +435,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       s = new Synth(this.context, this.num_id++, this);
       s.setScale(this.scale);
       s.setKey(this.freq_key);
-      s.connect(this.context.destination);
-      return this.synth.push(s);
+      this.synth.push(s);
+      return this.mixer.addSynth(s);
     };
 
     Player.prototype.moveRight = function(next_idx) {
@@ -432,6 +512,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       patterns = this.scene.patterns;
       while (patterns.length > this.synth.length) {
         this.addSynth();
+        this.view.btn_right.attr('data-line1', 'next');
       }
       if (this.scene.bpm != null) {
         this.setBPM(this.scene.bpm);
@@ -497,6 +578,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.loop = $('#control-loop');
       this.instruments = $('#instruments');
       this.mixer = $('#mixer');
+      this.is_mixer = false;
       this.btn_left = $('#btn-left');
       this.btn_right = $('#btn-right');
       this.btn_top = $('#btn-top');
@@ -607,6 +689,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     PlayerView.prototype.moveRight = function() {
+      if (this.is_mixer) {
+        return;
+      }
       if (this.synth_now === (this.synth_total - 1)) {
         this.model.addSynth();
         this.synth_total++;
@@ -621,6 +706,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     PlayerView.prototype.moveLeft = function() {
+      if (this.is_mixer) {
+        return;
+      }
       this.btn_right.attr('data-line1', 'next');
       if (this.synth_now !== 0) {
         this.synth_now--;
@@ -633,6 +721,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     PlayerView.prototype.moveTop = function() {
+      this.is_mixer = true;
       this.btn_left.hide();
       this.btn_right.hide();
       this.btn_top.hide();
@@ -642,6 +731,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     PlayerView.prototype.moveBottom = function() {
+      this.is_mixer = false;
       this.btn_left.show();
       this.btn_right.show();
       this.btn_top.show();
@@ -876,29 +966,30 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.id = id;
       this.node = this.ctx.createGain();
       this.node.gain.value = 0;
-      this.vco = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
-      this.gain = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
+      this.gain = 1.0;
+      this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
+      this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
       for (i = _i = 0; _i < 3; i = ++_i) {
-        this.vco[i].connect(this.gain[i]);
-        this.gain[i].gain.value = 0;
-        this.gain[i].connect(this.node);
+        this.vcos[i].connect(this.gains[i]);
+        this.gains[i].gain.value = 0;
+        this.gains[i].connect(this.node);
       }
       this.filter = new ResFilter(this.ctx);
-      this.eg = new EG(this.node.gain, 0.0, 1.0);
+      this.eg = new EG(this.node.gain, 0.0, this.gain);
       this.feg = new EG(this.filter.lpf.frequency, 0, 0);
       this.gain_res = this.ctx.createGain();
       this.gain_res.gain.value = 0;
-      this.vco[2].connect(this.gain_res);
+      this.vcos[2].connect(this.gain_res);
       this.gain_res.connect(this.node);
       this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.core'));
     }
 
     SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
-      this.vco[i].setShape(shape);
-      this.vco[i].setOctave(oct);
-      this.vco[i].setInterval(interval);
-      this.vco[i].setFine(fine);
-      return this.vco[i].setFreq();
+      this.vcos[i].setShape(shape);
+      this.vcos[i].setOctave(oct);
+      this.vcos[i].setInterval(interval);
+      this.vcos[i].setFine(fine);
+      return this.vcos[i].setFreq();
     };
 
     SynthCore.prototype.setEGParam = function(a, d, s, r) {
@@ -917,8 +1008,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
-    SynthCore.prototype.setGain = function(i, gain) {
-      return this.gain[i].gain.value = (gain / 100.0) * 0.3;
+    SynthCore.prototype.setVCOGain = function(i, gain) {
+      return this.gains[i].gain.value = (gain / 100.0) * 0.3;
+    };
+
+    SynthCore.prototype.setGain = function(gain) {
+      this.gain = gain;
+      return this.eg.setRange(0.0, this.gain);
     };
 
     SynthCore.prototype.noteOn = function() {
@@ -937,7 +1033,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SynthCore.prototype.setKey = function(freq_key) {
       var v, _i, _len, _ref, _results;
-      _ref = this.vco;
+      _ref = this.vcos;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         v = _ref[_i];
@@ -957,7 +1053,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SynthCore.prototype.setNote = function(note) {
       var v, _i, _len, _ref, _results;
-      _ref = this.vco;
+      _ref = this.vcos;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         v = _ref[_i];
@@ -994,7 +1090,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.setVCOParam();
       });
       this.gain_inputs.on("change", function() {
-        return _this.setGain();
+        return _this.setGains();
       });
       this.filter_inputs.on("change", function() {
         return _this.setFilterParam();
@@ -1041,7 +1137,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.setEGParam();
       this.setFEGParam();
       this.setFilterParam();
-      return this.setGain();
+      return this.setGains();
     };
 
     SynthCoreView.prototype.setVCOParam = function() {
@@ -1068,11 +1164,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
     };
 
-    SynthCoreView.prototype.setGain = function() {
+    SynthCoreView.prototype.setGains = function() {
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.model.setGain(i, parseInt(this.gain_inputs.eq(i).val())));
+        _results.push(this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
       }
       return _results;
     };
@@ -1111,6 +1207,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Synth.prototype.setNote = function(note) {
       return this.core.setNote(note);
+    };
+
+    Synth.prototype.setGain = function(gain) {
+      return this.core.setGain(gain);
+    };
+
+    Synth.prototype.getGain = function() {
+      return this.core.gain;
     };
 
     Synth.prototype.noteToSemitone = function(ival) {
@@ -1247,13 +1351,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SynthView.prototype.initCanvas = function() {
       var i, j, _i, _j;
       this.canvas_hover.width = this.canvas_on.width = this.canvas_off.width = 832;
-      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 260;
+      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 520;
       this.rect = this.canvas_off.getBoundingClientRect();
       this.offset = {
         x: this.rect.left,
         y: this.rect.top
       };
-      for (i = _i = 0; _i < 10; i = ++_i) {
+      for (i = _i = 0; _i < 20; i = ++_i) {
         for (j = _j = 0; _j < 32; j = ++_j) {
           this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
         }
@@ -1287,7 +1391,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         if (_this.is_clicked && _this.click_pos !== pos) {
           if (_this.is_adding) {
             _this.addNote(pos);
-          } else if (_this.pattern[pos.x_abs] === 10 - pos.y) {
+          } else if (_this.pattern[pos.x_abs] === 20 - pos.y) {
             _this.removeNote(pos);
           }
           return _this.click_pos = pos;
@@ -1296,7 +1400,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         var pos;
         _this.is_clicked = true;
         pos = _this.getPos(e);
-        if (_this.pattern[pos.x_abs] === 10 - pos.y) {
+        if (_this.pattern[pos.x_abs] === 20 - pos.y) {
           return _this.removeNote(pos);
         } else {
           _this.is_adding = true;
@@ -1324,7 +1428,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SynthView.prototype.addNote = function(pos) {
       var note;
-      note = 10 - pos.y;
+      note = 20 - pos.y;
       this.pattern[pos.x_abs] = note;
       this.model.addNote(pos.x_abs, note);
       this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
@@ -1343,7 +1447,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.time % 32 === 0) {
         this.drawPattern(this.time);
       }
-      for (i = _i = 0; _i < 10; i = ++_i) {
+      for (i = _i = 0; _i < 20; i = ++_i) {
         this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % 32) * 26, i * 26, 26, 26);
         this.ctx_off.drawImage(this.cell, 78, 0, 26, 26, (time % 32) * 26, i * 26, 26, 26);
       }
@@ -1366,7 +1470,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.page = Math.floor(this.time / 32);
       this.ctx_on.clearRect(0, 0, 832, 260);
       for (i = _i = 0; _i < 32; i = ++_i) {
-        y = 10 - this.pattern[this.page * 32 + i];
+        y = 20 - this.pattern[this.page * 32 + i];
         this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
       }
       return this.setMarker();
@@ -1408,7 +1512,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SynthView.prototype.stop = function() {
       var i, _i, _results;
       _results = [];
-      for (i = _i = 0; _i < 10; i = ++_i) {
+      for (i = _i = 0; _i < 20; i = ++_i) {
         _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % 32) * 26, i * 26, 26, 26));
       }
       return _results;
@@ -1499,11 +1603,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         } else {
           switch (e.keyCode) {
             case 37:
-              player.view.moveLeft();
-              return console.log('eleft');
+              return player.view.moveLeft();
             case 38:
-              player.view.moveTop();
-              return console.log('top');
+              return player.view.moveTop();
             case 39:
               return player.view.moveRight();
             case 40:

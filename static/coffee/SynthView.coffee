@@ -44,10 +44,10 @@ class @SynthView
 
     initCanvas: ->
         @canvas_hover.width  = @canvas_on.width  = @canvas_off.width  = 832
-        @canvas_hover.height = @canvas_on.height = @canvas_off.height = 260
+        @canvas_hover.height = @canvas_on.height = @canvas_off.height = 520
         @rect = @canvas_off.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top
-        for i in [0...10]
+        for i in [0...20]
             for j in [0...32]
                 @ctx_off.drawImage(@cell,
                     0, 0, 26, 26,           # src (x, y, w, h)
@@ -81,14 +81,14 @@ class @SynthView
             if @is_clicked and @click_pos != pos
                 if @is_adding
                     @addNote(pos)
-                else if @pattern[pos.x_abs] == 10 - pos.y
+                else if @pattern[pos.x_abs] == 20 - pos.y
                     @removeNote(pos)
                 @click_pos = pos
 
         ).on('mousedown', (e) =>
             @is_clicked = true
             pos = @getPos(e)
-            if @pattern[pos.x_abs] == 10 - pos.y
+            if @pattern[pos.x_abs] == 20 - pos.y
                 @removeNote(pos)
             else
                 @is_adding = true
@@ -110,7 +110,7 @@ class @SynthView
         ))
 
     addNote: (pos) ->
-        note = 10 - pos.y
+        note = 20 - pos.y
         @pattern[pos.x_abs] = note
         @model.addNote(pos.x_abs, note)
         @ctx_on.clearRect(pos.x * 26, 0, 26, 1000)
@@ -127,7 +127,7 @@ class @SynthView
     playAt: (@time) ->
         if @time % 32 == 0
             @drawPattern(@time)
-        for i in [0...10]
+        for i in [0...20]
             @ctx_off.drawImage(@cell,
                 0, 0, 26, 26,
                 (@last_time % 32) * 26, i * 26, 26, 26
@@ -149,7 +149,7 @@ class @SynthView
         @page = Math.floor(@time / 32)
         @ctx_on.clearRect(0, 0, 832, 260)
         for i in [0...32]
-            y = 10 - @pattern[@page * 32 + i]
+            y = 20 - @pattern[@page * 32 + i]
             @ctx_on.drawImage(
                 @cell,
                 26, 0, 26, 26,
@@ -178,7 +178,7 @@ class @SynthView
 
     play: ->
     stop: ->
-        for i in [0...10]
+        for i in [0...20]
             @ctx_off.drawImage(@cell,
                 0, 0, 26, 26,
                 (@last_time % 32) * 26, i * 26, 26, 26

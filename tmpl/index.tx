@@ -16,9 +16,13 @@
   </div>
 
   <div id="mixer">
-    <div id="mixer-table"></div>
-    <canvas id="mixer-session"></canvas>
-    <canvas id="mixer-mixier"></canvas>
+    <canvas id="mixer-bank"></canvas>
+    <div id="mixer-sesiion-wrapper">
+      <canvas id="mixer-session"></canvas>
+    </div>
+    <div id="mixer-mixer" class="clearfix">
+      <div class="mixer-gain-master"><input type="range" min="0" max="100" value="100" width="100px" /></div>
+    </div>
   </div>
 
   <div id="templates">

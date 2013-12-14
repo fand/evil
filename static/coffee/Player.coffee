@@ -42,8 +42,9 @@ class @Player
         @synth = [new Synth(@context, @num_id++, this)]
         @synth_now = @synth[0]
         @synth_pos = 0
-        for s in @synth
-            s.connect(@context.destination)
+
+        @mixer = new Mixer(@context, this)
+        @mixer.addSynth(s) for s in @synth
 
         @view = new PlayerView(this)
 
@@ -123,8 +124,8 @@ class @Player
         s = new Synth(@context, @num_id++, this)
         s.setScale(@scale)
         s.setKey(@freq_key)
-        s.connect(@context.destination)
         @synth.push(s)
+        @mixer.addSynth(s)
 
     moveRight: (next_idx) ->
         @synth[next_idx - 1].inactivate()
@@ -171,6 +172,7 @@ class @Player
         patterns = @scene.patterns
         while patterns.length > @synth.length
             @addSynth()
+            @view.btn_right.attr('data-line1', 'next')
         @setBPM(@scene.bpm) if @scene.bpm?
         @setKey(@scene.key) if @scene.key?
         @setScale(@scene.scale) if @scene.scale?

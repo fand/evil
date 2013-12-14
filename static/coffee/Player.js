@@ -42,10 +42,11 @@
       this.synth = [new Synth(this.context, this.num_id++, this)];
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
+      this.mixer = new Mixer(this.context, this);
       _ref = this.synth;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        s.connect(this.context.destination);
+        this.mixer.addSynth(s);
       }
       this.view = new PlayerView(this);
     }
@@ -197,8 +198,8 @@
       s = new Synth(this.context, this.num_id++, this);
       s.setScale(this.scale);
       s.setKey(this.freq_key);
-      s.connect(this.context.destination);
-      return this.synth.push(s);
+      this.synth.push(s);
+      return this.mixer.addSynth(s);
     };
 
     Player.prototype.moveRight = function(next_idx) {
@@ -274,6 +275,7 @@
       patterns = this.scene.patterns;
       while (patterns.length > this.synth.length) {
         this.addSynth();
+        this.view.btn_right.attr('data-line1', 'next');
       }
       if (this.scene.bpm != null) {
         this.setBPM(this.scene.bpm);

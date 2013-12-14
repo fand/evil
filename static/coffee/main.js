@@ -69,11 +69,9 @@
         } else {
           switch (e.keyCode) {
             case 37:
-              player.view.moveLeft();
-              return console.log('eleft');
+              return player.view.moveLeft();
             case 38:
-              player.view.moveTop();
-              return console.log('top');
+              return player.view.moveTop();
             case 39:
               return player.view.moveRight();
             case 40:
