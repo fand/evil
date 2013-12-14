@@ -43,7 +43,7 @@ class @MixerView
         @mixer.on('change', () => @setGains())
 
     setGains: ->
-        gains = (parseFloat(g.val()) / 100.0 for g in @gains)
+        gains = (parseFloat(g.val()) / 100.0 for g in @mixer.find('.mixer-gain'))
         gain_master = parseFloat(@gain_master.val() / 100.0)
         @model.setGains(gains, gain_master)
 

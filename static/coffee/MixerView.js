@@ -60,7 +60,7 @@
       var g, gain_master, gains;
       gains = (function() {
         var _i, _len, _ref, _results;
-        _ref = this.gains;
+        _ref = this.mixer.find('.mixer-gain');
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           g = _ref[_i];

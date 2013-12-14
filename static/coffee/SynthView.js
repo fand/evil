@@ -8,12 +8,8 @@
       this.dom.attr('id', 'synth' + id);
       $("#instruments").append(this.dom);
       this.synth_name = this.dom.find('.synth-name');
-      this.synth_name.html('Synth #' + this.id);
-      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      this.page = 0;
-      this.page_total = 1;
-      this.last_time = 0;
-      this.last_page = 0;
+      this.synth_name.html('SYNTH #' + this.id);
+      this.header = this.dom.find('.header');
       this.pos_markers = this.dom.find('.marker');
       this.plus = this.dom.find('.pattern-plus');
       this.minus = this.dom.find('.pattern-minus');
@@ -32,14 +28,20 @@
       this.cell.onload = function() {
         return _this.initCanvas();
       };
+      this.keyboard = new KeyboardView(this);
+      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.page = 0;
+      this.page_total = 1;
+      this.last_time = 0;
+      this.last_page = 0;
       this.is_clicked = false;
       this.hover_pos = {
-        x: 0,
-        y: 0
+        x: -1,
+        y: -1
       };
       this.click_pos = {
-        x: 0,
-        y: 0
+        x: -1,
+        y: -1
       };
       this.initEvent();
     }
@@ -164,7 +166,7 @@
         this.time = time;
       }
       this.page = Math.floor(this.time / 32);
-      this.ctx_on.clearRect(0, 0, 832, 260);
+      this.ctx_on.clearRect(0, 0, 832, 520);
       for (i = _i = 0; _i < 32; i = ++_i) {
         y = 20 - this.pattern[this.page * 32 + i];
         this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
@@ -224,6 +226,139 @@
     };
 
     return SynthView;
+
+  })();
+
+  this.KeyboardView = (function() {
+    function KeyboardView(sequencer) {
+      this.sequencer = sequencer;
+      this.dom = this.sequencer.dom.find('.keyboard');
+      this.canvas = this.dom[0];
+      this.ctx = this.canvas.getContext('2d');
+      this.w = 48;
+      this.h = 26;
+      this.num = 20;
+      this.color = ['rgba(230, 230, 230, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
+      this.is_clicked = false;
+      this.hover_pos = {
+        x: -1,
+        y: -1
+      };
+      this.click_pos = {
+        x: -1,
+        y: -1
+      };
+      this.initCanvas();
+      this.initEvent();
+    }
+
+    KeyboardView.prototype.initCanvas = function() {
+      var i, _i, _ref, _results;
+      this.canvas.width = this.w;
+      this.canvas.height = this.h * this.num;
+      this.rect = this.canvas.getBoundingClientRect();
+      this.offset = {
+        x: this.rect.left,
+        y: this.rect.top
+      };
+      this.ctx.fillStyle = this.color[0];
+      _results = [];
+      for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.drawNormal(i);
+        _results.push(this.drawText(i));
+      }
+      return _results;
+    };
+
+    KeyboardView.prototype.getPos = function(e) {
+      this.rect = this.canvas.getBoundingClientRect();
+      return Math.floor((e.clientY - this.rect.top) / this.h);
+    };
+
+    KeyboardView.prototype.initEvent = function() {
+      var _this = this;
+      return this.dom.on('mousemove', function(e) {
+        var pos;
+        pos = _this.getPos(e);
+        if (pos !== _this.hover_pos) {
+          _this.drawNormal(_this.hover_pos);
+          _this.drawHover(pos);
+          _this.hover_pos = pos;
+        }
+        if (_this.is_clicked && _this.click_pos !== pos) {
+          _this.clearActive(_this.click_pos);
+          _this.drawActive(pos);
+          _this.sequencer.model.noteOff();
+          _this.sequencer.model.noteOn(_this.num - pos);
+          return _this.click_pos = pos;
+        }
+      }).on('mousedown', function(e) {
+        var pos;
+        _this.is_clicked = true;
+        pos = _this.getPos(e);
+        _this.drawActive(pos);
+        _this.sequencer.model.noteOn(_this.num - pos);
+        return _this.click_pos = pos;
+      }).on('mouseup', function(e) {
+        _this.is_clicked = false;
+        _this.clearActive(_this.click_pos);
+        _this.sequencer.model.noteOff();
+        return _this.click_pos = {
+          x: -1,
+          y: -1
+        };
+      }).on('mouseout', function(e) {
+        _this.clearActive(_this.hover_pos);
+        _this.sequencer.model.noteOff();
+        _this.hover_pos = {
+          x: -1,
+          y: -1
+        };
+        return _this.click_pos = {
+          x: -1,
+          y: -1
+        };
+      });
+    };
+
+    KeyboardView.prototype.drawNormal = function(i) {
+      this.clearNormal(i);
+      this.ctx.fillStyle = this.color[0];
+      this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
+      this.ctx.fillStyle = this.color[3];
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    KeyboardView.prototype.drawHover = function(i) {
+      this.ctx.fillStyle = this.color[1];
+      this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    KeyboardView.prototype.drawActive = function(i) {
+      this.clearNormal(i);
+      this.ctx.fillStyle = this.color[2];
+      this.ctx.fillRect(0, i * this.h, this.w, this.h);
+      this.ctx.fillStyle = this.color[4];
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    KeyboardView.prototype.clearNormal = function(i) {
+      return this.ctx.clearRect(0, i * this.h, this.w, this.h);
+    };
+
+    KeyboardView.prototype.clearActive = function(i) {
+      this.clearNormal(i);
+      this.drawNormal(i);
+      return this.drawText(i);
+    };
+
+    KeyboardView.prototype.drawText = function(i) {
+      this.ctx.fillStyle = this.color[3];
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    return KeyboardView;
 
   })();
 

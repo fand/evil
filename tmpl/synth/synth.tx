@@ -1,24 +1,24 @@
 <div id="tmpl_synth" class="instrument clearfix">
 
-  <div class="synth-name"></div>
+
 
   <div class="sequencer">
-    <div class="sequencer-table">
-      <div class="indicator"></div>
-
+    <div class="header">
+      <div class="synth-name"></div>
       <i class="fa fa-minus pattern-minus"></i>
       <i class="fa fa-plus pattern-plus"></i>
 
       <div class="markers">
         <: for [0..7] -> $_ { :><i class="fa fa-circle marker"></i>
-        <: } :>
+          <: } :>
       </div>
+    </div>
 
-      <div class="sequencer-table-wrapper">
-        <canvas class="table table-hover"></canvas>
-        <canvas class="table table-on"></canvas>
-        <canvas class="table table-off"></canvas>
-      </div>
+    <div class="sequencer-table">
+      <canvas class="keyboard"></canvas>
+      <canvas class="table table-hover"></canvas>
+      <canvas class="table table-on"></canvas>
+      <canvas class="table table-off"></canvas>
     </div>
   </div>
 
@@ -31,7 +31,7 @@
         <option>SAW</option>
         <option selected="selected">RECT</option>
       </select><br>
-      OCT   <input id="octave0_<: $id :>"   class="octave" type="number" min="0" max="5" value="1"><br>
+      OCT   <input id="octave0_<: $id :>"   class="octave" type="number" min="0" max="5" value="0"><br>
       SHIFT <input id="interval0_<: $id :>" class="interval" type="number" min="-12" max="12" value="0"><br>
       TUNE  <input id="fine0_<: $id :>"     class="fine" type="number" min="-50" max="50" value="0"><br>
     </fieldset>
@@ -44,7 +44,7 @@
         <option selected="selected">SAW</option>
         <option>RECT</option>
       </select><br>
-      OCT   <input id="octave1_<: $id :>"   class="octave"   type="number" min="0" max="5" value="1"><br>
+      OCT   <input id="octave1_<: $id :>"   class="octave"   type="number" min="0" max="5" value="0"><br>
       SHIFT <input id="interval1_<: $id :>" class="interval" type="number" min="-12" max="12" value="7"><br>
       TUNE  <input id="fine1_<: $id :>"     class="fine"     type="number" min="-50" max="50" value="1"><br>
     </fieldset>
