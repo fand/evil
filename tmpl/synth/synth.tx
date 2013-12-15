@@ -1,7 +1,5 @@
 <div id="tmpl_synth" class="instrument clearfix">
 
-
-
   <div class="sequencer">
     <div class="header">
       <div class="synth-name"></div>
@@ -22,7 +20,10 @@
     </div>
   </div>
 
-  <div class="core">
+
+  <div class="synth-core">
+    <i class="fa fa-angle-down btn-fold-core"></i>
+
     <fieldset id="vco0_<: $id :>" class="RS_module RS_vco0 vco">
       <legend>OSC1</legend>
       WAVE <select id="shape0_<: $id :>" class="shape">

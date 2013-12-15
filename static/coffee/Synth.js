@@ -206,7 +206,7 @@
       this.gain_res.gain.value = 0;
       this.vcos[2].connect(this.gain_res);
       this.gain_res.connect(this.node);
-      this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.core'));
+      this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.synth-core'));
     }
 
     SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {

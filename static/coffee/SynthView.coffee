@@ -16,6 +16,7 @@ class @SynthView
         @setMarker()
 
         # table DOM
+        @table_wrapper    = @dom.find('.sequencer-table')
         @canvas_hover_dom = @dom.find('.table-hover')
         @canvas_on_dom    = @dom.find('.table-on')
         @canvas_off_dom   = @dom.find('.table-off')
@@ -31,6 +32,10 @@ class @SynthView
         @cell = new Image()
         @cell.src = 'static/img/sequencer_cell.png'
         @cell.onload = () => @initCanvas()
+
+        @fold = @dom.find('.btn-fold-core')
+        @core = @dom.find('.synth-core')
+        @is_panel_opened = true
 
         @keyboard = new KeyboardView(this)
 
@@ -114,6 +119,20 @@ class @SynthView
             if @pattern.length > 32
                 @minusPattern()
         ))
+
+        @fold.on('mousedown', () =>
+            if @is_panel_opened
+                @core.css('height', '0px')
+                @table_wrapper.css('height', '524px')
+                @fold.css(top: '-22px', padding: '0px 5px 0px 0px').removeClass('fa-angle-down').addClass('fa-angle-up')
+                @is_panel_opened = false
+            else
+                @core.css('height', '280px')
+                @table_wrapper.css('height', '262px')
+                @fold.css(top: '0px', padding: '5px 5px 5px 5px').removeClass('fa-angle-up').addClass('fa-angle-down')
+                @is_panel_opened = true
+        )
+
 
     addNote: (pos) ->
         note = 20 - pos.y

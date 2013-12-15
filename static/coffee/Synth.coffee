@@ -121,7 +121,7 @@ class @SynthCore
         @vcos[2].connect(@gain_res)
         @gain_res.connect(@node)
 
-        @view = new SynthCoreView(this, id, @parent.view.dom.find('.core'))
+        @view = new SynthCoreView(this, id, @parent.view.dom.find('.synth-core'))
 
     setVCOParam: (i, shape, oct, interval, fine) ->
         @vcos[i].setShape(shape)

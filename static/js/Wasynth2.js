@@ -981,7 +981,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.gain_res.gain.value = 0;
       this.vcos[2].connect(this.gain_res);
       this.gain_res.connect(this.node);
-      this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.core'));
+      this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.synth-core'));
     }
 
     SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
@@ -1318,6 +1318,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.plus = this.dom.find('.pattern-plus');
       this.minus = this.dom.find('.pattern-minus');
       this.setMarker();
+      this.table_wrapper = this.dom.find('.sequencer-table');
       this.canvas_hover_dom = this.dom.find('.table-hover');
       this.canvas_on_dom = this.dom.find('.table-on');
       this.canvas_off_dom = this.dom.find('.table-off');
@@ -1332,6 +1333,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.cell.onload = function() {
         return _this.initCanvas();
       };
+      this.fold = this.dom.find('.btn-fold-core');
+      this.core = this.dom.find('.synth-core');
+      this.is_panel_opened = true;
       this.keyboard = new KeyboardView(this);
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.page = 0;
@@ -1421,11 +1425,30 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.plus.on('click', (function() {
         return _this.plusPattern();
       }));
-      return this.minus.on('click', (function() {
+      this.minus.on('click', (function() {
         if (_this.pattern.length > 32) {
           return _this.minusPattern();
         }
       }));
+      return this.fold.on('mousedown', function() {
+        if (_this.is_panel_opened) {
+          _this.core.css('height', '0px');
+          _this.table_wrapper.css('height', '524px');
+          _this.fold.css({
+            top: '-22px',
+            padding: '0px 5px 0px 0px'
+          }).removeClass('fa-angle-down').addClass('fa-angle-up');
+          return _this.is_panel_opened = false;
+        } else {
+          _this.core.css('height', '280px');
+          _this.table_wrapper.css('height', '262px');
+          _this.fold.css({
+            top: '0px',
+            padding: '5px 5px 5px 5px'
+          }).removeClass('fa-angle-up').addClass('fa-angle-down');
+          return _this.is_panel_opened = true;
+        }
+      });
     };
 
     SynthView.prototype.addNote = function(pos) {
