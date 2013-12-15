@@ -63,7 +63,7 @@ html, body {
     left: 50%;
     margin-top: -1000px;
     margin-left: -470px;
-    overflow-y: hidden;
+    overflow: hidden;
 
     background-color: #fff;
     border: 1px solid #0df;
@@ -247,7 +247,7 @@ html, body {
 
 
 
-/* mixer */
+/* Mixer */
 #mixer-session {
     position: absolute;
     top: 0px;
@@ -266,12 +266,35 @@ html, body {
 .mixer-gain {
     float: left;
     width: 100px;
-    margin: 10px;
+    height: 100%;
+    background-color: #def;
 }
 .mixer-gain-master {
     float: right;
     width: 100px;
-    margin: 10px;
+    height: 100%;
+
+    text-align: center;
+    border: 1px solid #0df;
+    border-right: 0px;
+    color: #0df;
+}
+.gain-slider {
+    width: 70px;
+    height: 130px;
+    margin: 0px;
+    -webkit-appearance: slider-vertical;
+}
+.mixer-pan {
+    float: left;
+    width: 100px;
+    height: 100%;
+    background-color: #def;
+}
+.mixer-pan-master {
+    width: 70px;
+    height: 10px;
+    background-color: #def;
 }
 
 
@@ -598,7 +621,7 @@ legend {
     position: absolute;
     top: 0px;
     left: 510px;
-    max-width: 130px;
+    width: 150px;
     height: 270px;
 }
 .RS_EG {
@@ -636,24 +659,21 @@ legend {
     float: left;
     text-align: center;
     left: 0px;
-    margin:0 5%;
-    width:40%;
+    margin: 0px 10px;
+    width: 60px;
 }
 .RS_filter_Q {
     float: left;
     text-align: center;
-    top: 0px;
-    width:50%;
-    margin: 0;
+    width: 60px;
+    margin: 0px;
 }
 
 .filter_slider {
-    width: 200px;
-    height: 70px;
-    margin-top: 13px;
-    margin-left: -50px;
-    -webkit-transform-origin: 60% 100%;
-    -webkit-transform: rotate(270deg);
+    width: 60px;
+    height: 200px;
+    margin: 0px;
+    -webkit-appearance: slider-vertical;
 }
 
 

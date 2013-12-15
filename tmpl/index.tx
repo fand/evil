@@ -21,7 +21,10 @@
       <canvas id="mixer-session"></canvas>
     </div>
     <div id="mixer-mixer" class="clearfix">
-      <div class="mixer-gain-master"><input type="range" min="0" max="100" value="100" width="100px" /></div>
+      <div class="mixer-gain-master">
+        L<input class="mixer-pan-master" type="range" min="0" max="100" value="100" />R
+        <input class="gain-slider" type="range" min="0" max="100" value="100" />
+      </div>
     </div>
   </div>
 

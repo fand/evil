@@ -7,7 +7,7 @@ class @MixerView
 
         @session_wrapper = $('#mixer-session-wrapper')
         @mixer = $('#mixer-mixer')
-        @gains = []
+        @gain_master = @dom.find('.mixer-gain-master > input')
 
         @canvas_session = @canvas_session_dom[0]
         @ctx_session = @canvas_session.getContext('2d')
@@ -34,16 +34,17 @@ class @MixerView
     redraw: (synth) ->
         @mixer.remove('mixer-gain')
         for s in @synth
-            dom = $('<div class="mixer-gain"><input type="range" min="0" max="100" value="100" width="100px" /></div>')
+            dom = $('<div class="mixer-gain"><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>')
             @mixer.append(dom)
 
     addSynth: (synth) ->
-        dom = $('<div class="mixer-gain"><input type="range" min="0" max="100" value="100" width="100px" /></div>')
+        dom = $('<div class="mixer-gain"><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>')
         @mixer.append(dom)
         @mixer.on('change', () => @setGains())
 
     setGains: ->
-        gains = (parseFloat(g.val()) / 100.0 for g in @mixer.find('.mixer-gain'))
+        console.log(@gain_master)
+        gains = (parseFloat(g.value) / 100.0 for g in @mixer.find('.mixer-gain > input'))
         gain_master = parseFloat(@gain_master.val() / 100.0)
         @model.setGains(gains, gain_master)
 

@@ -7,7 +7,7 @@
       this.canvas_session_dom = $('#mixer-session');
       this.session_wrapper = $('#mixer-session-wrapper');
       this.mixer = $('#mixer-mixer');
-      this.gains = [];
+      this.gain_master = this.dom.find('.mixer-gain-master > input');
       this.canvas_session = this.canvas_session_dom[0];
       this.ctx_session = this.canvas_session.getContext('2d');
       this.initEvent();
@@ -40,7 +40,7 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        dom = $('<div class="mixer-gain"><input type="range" min="0" max="100" value="100" width="100px" /></div>');
+        dom = $('<div class="mixer-gain"><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>');
         _results.push(this.mixer.append(dom));
       }
       return _results;
@@ -49,7 +49,7 @@
     MixerView.prototype.addSynth = function(synth) {
       var dom,
         _this = this;
-      dom = $('<div class="mixer-gain"><input type="range" min="0" max="100" value="100" width="100px" /></div>');
+      dom = $('<div class="mixer-gain"><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>');
       this.mixer.append(dom);
       return this.mixer.on('change', function() {
         return _this.setGains();
@@ -58,13 +58,14 @@
 
     MixerView.prototype.setGains = function() {
       var g, gain_master, gains;
+      console.log(this.gain_master);
       gains = (function() {
         var _i, _len, _ref, _results;
-        _ref = this.mixer.find('.mixer-gain');
+        _ref = this.mixer.find('.mixer-gain > input');
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           g = _ref[_i];
-          _results.push(parseFloat(g.val()) / 100.0);
+          _results.push(parseFloat(g.value) / 100.0);
         }
         return _results;
       }).call(this);
