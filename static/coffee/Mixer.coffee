@@ -7,21 +7,27 @@ class @Mixer
         @node.gain.value = @gain_master
         @node.connect(@ctx.destination)
 
+        @panners = []
+
         @view = new MixerView(this)
 
     addSynth: (synth) ->
-        synth.connect(@node)
+        p = @ctx.createPanner()
+        p.panningModel = "equalpower"
+        synth.connect(p)
+        p.connect(@node)
+        @panners.push(p)
         @view.addSynth(synth)
 
-    # removeSynth: () ->
-
-    # setGain: (i, val) ->
-    #     @gains[i] = val
-    #     @player.synth[i].setGain(val)
-    #     console.log(val)
+    removeSynth: (i) ->
+        @panners.splice(i)
 
     setGains: (@gains, @gain_master) ->
         for i in [0...@gains.length]
             @player.synth[i].setGain(@gains[i])
         @node.gain.value = @gain_master
-        console.log(@gain_master)
+
+    setPans: (pans, pan_master) ->
+        for i in [0...pans.length]
+            p = pans[i]
+            @panners[i].setPosition(p[0], p[1], p[2])

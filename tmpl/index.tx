@@ -20,9 +20,14 @@
     <div id="mixer-sesiion-wrapper">
       <canvas id="mixer-session"></canvas>
     </div>
+
+    <div id="mixer-session-master-wrapper">
+      <canvas id="mixer-session-master"></canvas>
+    </div>
+
     <div id="mixer-mixer" class="clearfix">
-      <div class="mixer-gain-master">
-        L<input class="mixer-pan-master" type="range" min="0" max="100" value="100" />R
+      <div class="mixer-track-master">
+        L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
         <input class="gain-slider" type="range" min="0" max="100" value="100" />
       </div>
     </div>
@@ -30,6 +35,11 @@
 
   <div id="templates">
     <: include 'synth/synth.tx' :>
+
+    <div class="mixer-track">
+      L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
+      <input class="gain-slider" type="range" min="0" max="100" value="100" />
+    </div>
   </div>
 </div>
 

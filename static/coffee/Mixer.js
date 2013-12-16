@@ -18,12 +18,22 @@
       this.node = this.ctx.createGain();
       this.node.gain.value = this.gain_master;
       this.node.connect(this.ctx.destination);
+      this.panners = [];
       this.view = new MixerView(this);
     }
 
     Mixer.prototype.addSynth = function(synth) {
-      synth.connect(this.node);
+      var p;
+      p = this.ctx.createPanner();
+      p.panningModel = "equalpower";
+      synth.connect(p);
+      p.connect(this.node);
+      this.panners.push(p);
       return this.view.addSynth(synth);
+    };
+
+    Mixer.prototype.removeSynth = function(i) {
+      return this.panners.splice(i);
     };
 
     Mixer.prototype.setGains = function(gains, gain_master) {
@@ -33,8 +43,17 @@
       for (i = _i = 0, _ref = this.gains.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         this.player.synth[i].setGain(this.gains[i]);
       }
-      this.node.gain.value = this.gain_master;
-      return console.log(this.gain_master);
+      return this.node.gain.value = this.gain_master;
+    };
+
+    Mixer.prototype.setPans = function(pans, pan_master) {
+      var i, p, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = pans.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        p = pans[i];
+        _results.push(this.panners[i].setPosition(p[0], p[1], p[2]));
+      }
+      return _results;
     };
 
     return Mixer;

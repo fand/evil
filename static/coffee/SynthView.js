@@ -113,10 +113,12 @@
         return _this.is_adding = false;
       }).on('mouseout', function(e) {
         _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
-        return _this.hover_pos = {
+        _this.hover_pos = {
           x: -1,
           y: -1
         };
+        _this.is_clicked = false;
+        return _this.is_adding = false;
       });
       this.plus.on('click', (function() {
         return _this.plusPattern();

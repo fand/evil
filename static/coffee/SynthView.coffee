@@ -112,6 +112,8 @@ class @SynthView
                 @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
             )
             @hover_pos = x: -1, y: -1
+            @is_clicked = false
+            @is_adding = false
         )
 
         @plus.on('click', ( => @plusPattern()))

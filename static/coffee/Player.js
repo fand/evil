@@ -26,7 +26,6 @@
 
   this.Player = (function() {
     function Player() {
-      var s, _i, _len, _ref;
       this.bpm = 120;
       this.duration = 500;
       this.freq_key = 55;
@@ -43,11 +42,7 @@
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
       this.mixer = new Mixer(this.context, this);
-      _ref = this.synth;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        this.mixer.addSynth(s);
-      }
+      this.mixer.addSynth(this.synth[0]);
       this.view = new PlayerView(this);
     }
 

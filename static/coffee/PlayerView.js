@@ -136,7 +136,7 @@
         this.synth_total++;
       }
       this.synth_now++;
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
       this.model.moveRight(this.synth_now);
       this.btn_left.show();
       if (this.synth_now === (this.synth_total - 1)) {
@@ -151,7 +151,7 @@
       this.btn_right.attr('data-line1', 'next');
       if (this.synth_now !== 0) {
         this.synth_now--;
-        this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+        this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
         this.model.moveLeft(this.synth_now);
       }
       if (this.synth_now === 0) {
@@ -189,11 +189,11 @@
       ph = space_h / 2 - 50;
       this.btn_left.css({
         width: space_w + 'px',
-        padding: '250px ' + (pw + 5) + 'px'
+        padding: '250px ' + 25 + 'px'
       });
       this.btn_right.css({
         width: space_w + 'px',
-        padding: '250px ' + (pw + 15) + 'px'
+        padding: '250px ' + 35 + 'px'
       });
       this.btn_top.css({
         height: space_h + 'px'

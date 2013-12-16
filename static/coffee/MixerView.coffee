@@ -7,11 +7,17 @@ class @MixerView
 
         @session_wrapper = $('#mixer-session-wrapper')
         @mixer = $('#mixer-mixer')
-        @gain_master = @dom.find('.mixer-gain-master > input')
+
+        @gains = @dom.find('.mixer-track > .gain-slider')
+        @gain_master = @dom.find('.mixer-track-master > .gain-slider')
+
+        @pans = @dom.find('.mixer-track > .pan-slider')
+        @pan_master = @dom.find('.mixer-track-master > .pan-slider')
 
         @canvas_session = @canvas_session_dom[0]
         @ctx_session = @canvas_session.getContext('2d')
 
+        @track_dom = $('#templates > .mixer-track')
         @initEvent()
 
     initCanvas: ->
@@ -29,23 +35,37 @@ class @MixerView
         @readPattern(@pattern)
 
     initEvent: ->
-        @mixer.on('change', () =>    @setGains())
+        @mixer.on('change', () =>    @setParams())
 
     redraw: (synth) ->
-        @mixer.remove('mixer-gain')
+        @mixer.remove('mixer-track')
         for s in @synth
-            dom = $('<div class="mixer-gain"><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>')
-            @mixer.append(dom)
+            @mixer.append(@track_dom.clone())
 
     addSynth: (synth) ->
-        dom = $('<div class="mixer-gain"><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>')
+        dom = @track_dom.clone()
         @mixer.append(dom)
+        @pans.push(dom.find('.pan-slider'))
+        @gains.push(dom.find('.gain-slider'))
         @mixer.on('change', () => @setGains())
+        @setParams()
 
     setGains: ->
-        console.log(@gain_master)
-        gains = (parseFloat(g.value) / 100.0 for g in @mixer.find('.mixer-gain > input'))
-        gain_master = parseFloat(@gain_master.val() / 100.0)
-        @model.setGains(gains, gain_master)
+        g = (parseFloat(_g.val()) / -100.0 for _g in @gains)
+        g_master = parseFloat(@gain_master.val() / 100.0)
+        @model.setGains(g, g_master)
+
+    setPans: ->
+        p = (@pan2pos(1.0 - (parseFloat(_p.val())) / 100.0) for _p in @pans)
+        p_master = @pan2pos(1.0 - parseFloat(@pan_master.val() / 100.0))
+        @model.setPans(p, p_master)
+
+    setParams: ->
+        @setGains()
+        @setPans()
 
     displayGains: (gains) ->
+
+    pan2pos: (v) ->
+        theta = v * Math.PI
+        [Math.cos(theta), 0, -Math.sin(theta)]

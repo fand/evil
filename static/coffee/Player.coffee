@@ -44,7 +44,7 @@ class @Player
         @synth_pos = 0
 
         @mixer = new Mixer(@context, this)
-        @mixer.addSynth(s) for s in @synth
+        @mixer.addSynth(@synth[0])
 
         @view = new PlayerView(this)
 

@@ -38,12 +38,22 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node = this.ctx.createGain();
       this.node.gain.value = this.gain_master;
       this.node.connect(this.ctx.destination);
+      this.panners = [];
       this.view = new MixerView(this);
     }
 
     Mixer.prototype.addSynth = function(synth) {
-      synth.connect(this.node);
+      var p;
+      p = this.ctx.createPanner();
+      p.panningModel = "equalpower";
+      synth.connect(p);
+      p.connect(this.node);
+      this.panners.push(p);
       return this.view.addSynth(synth);
+    };
+
+    Mixer.prototype.removeSynth = function(i) {
+      return this.panners.splice(i);
     };
 
     Mixer.prototype.setGains = function(gains, gain_master) {
@@ -53,8 +63,17 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       for (i = _i = 0, _ref = this.gains.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         this.player.synth[i].setGain(this.gains[i]);
       }
-      this.node.gain.value = this.gain_master;
-      return console.log(this.gain_master);
+      return this.node.gain.value = this.gain_master;
+    };
+
+    Mixer.prototype.setPans = function(pans, pan_master) {
+      var i, p, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = pans.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        p = pans[i];
+        _results.push(this.panners[i].setPosition(p[0], p[1], p[2]));
+      }
+      return _results;
     };
 
     return Mixer;
@@ -71,9 +90,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.canvas_session_dom = $('#mixer-session');
       this.session_wrapper = $('#mixer-session-wrapper');
       this.mixer = $('#mixer-mixer');
-      this.gain_master = this.dom.find('.mixer-gain-master > input');
+      this.gains = this.dom.find('.mixer-track > .gain-slider');
+      this.gain_master = this.dom.find('.mixer-track-master > .gain-slider');
+      this.pans = this.dom.find('.mixer-track > .pan-slider');
+      this.pan_master = this.dom.find('.mixer-track-master > .pan-slider');
       this.canvas_session = this.canvas_session_dom[0];
       this.ctx_session = this.canvas_session.getContext('2d');
+      this.track_dom = $('#templates > .mixer-track');
       this.initEvent();
     }
 
@@ -93,19 +116,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     MixerView.prototype.initEvent = function() {
       var _this = this;
       return this.mixer.on('change', function() {
-        return _this.setGains();
+        return _this.setParams();
       });
     };
 
     MixerView.prototype.redraw = function(synth) {
-      var dom, s, _i, _len, _ref, _results;
-      this.mixer.remove('mixer-gain');
+      var s, _i, _len, _ref, _results;
+      this.mixer.remove('mixer-track');
       _ref = this.synth;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        dom = $('<div class="mixer-gain"><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>');
-        _results.push(this.mixer.append(dom));
+        _results.push(this.mixer.append(this.track_dom.clone()));
       }
       return _results;
     };
@@ -113,31 +135,60 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     MixerView.prototype.addSynth = function(synth) {
       var dom,
         _this = this;
-      dom = $('<div class="mixer-gain"><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>');
+      dom = this.track_dom.clone();
       this.mixer.append(dom);
-      return this.mixer.on('change', function() {
+      this.pans.push(dom.find('.pan-slider'));
+      this.gains.push(dom.find('.gain-slider'));
+      this.mixer.on('change', function() {
         return _this.setGains();
       });
+      return this.setParams();
     };
 
     MixerView.prototype.setGains = function() {
-      var g, gain_master, gains;
-      console.log(this.gain_master);
-      gains = (function() {
+      var g, g_master, _g;
+      g = (function() {
         var _i, _len, _ref, _results;
-        _ref = this.mixer.find('.mixer-gain > input');
+        _ref = this.gains;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          g = _ref[_i];
-          _results.push(parseFloat(g.value) / 100.0);
+          _g = _ref[_i];
+          _results.push(parseFloat(_g.val()) / -100.0);
         }
         return _results;
       }).call(this);
-      gain_master = parseFloat(this.gain_master.val() / 100.0);
-      return this.model.setGains(gains, gain_master);
+      g_master = parseFloat(this.gain_master.val() / 100.0);
+      return this.model.setGains(g, g_master);
+    };
+
+    MixerView.prototype.setPans = function() {
+      var p, p_master, _p;
+      p = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.pans;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          _p = _ref[_i];
+          _results.push(this.pan2pos(1.0 - (parseFloat(_p.val())) / 100.0));
+        }
+        return _results;
+      }).call(this);
+      p_master = this.pan2pos(1.0 - parseFloat(this.pan_master.val() / 100.0));
+      return this.model.setPans(p, p_master);
+    };
+
+    MixerView.prototype.setParams = function() {
+      this.setGains();
+      return this.setPans();
     };
 
     MixerView.prototype.displayGains = function(gains) {};
+
+    MixerView.prototype.pan2pos = function(v) {
+      var theta;
+      theta = v * Math.PI;
+      return [Math.cos(theta), 0, -Math.sin(theta)];
+    };
 
     return MixerView;
 
@@ -264,7 +315,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   this.Player = (function() {
     function Player() {
-      var s, _i, _len, _ref;
       this.bpm = 120;
       this.duration = 500;
       this.freq_key = 55;
@@ -281,11 +331,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
       this.mixer = new Mixer(this.context, this);
-      _ref = this.synth;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        this.mixer.addSynth(s);
-      }
+      this.mixer.addSynth(this.synth[0]);
       this.view = new PlayerView(this);
     }
 
@@ -698,7 +744,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.synth_total++;
       }
       this.synth_now++;
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
       this.model.moveRight(this.synth_now);
       this.btn_left.show();
       if (this.synth_now === (this.synth_total - 1)) {
@@ -713,7 +759,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_right.attr('data-line1', 'next');
       if (this.synth_now !== 0) {
         this.synth_now--;
-        this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+        this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
         this.model.moveLeft(this.synth_now);
       }
       if (this.synth_now === 0) {
@@ -751,11 +797,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       ph = space_h / 2 - 50;
       this.btn_left.css({
         width: space_w + 'px',
-        padding: '250px ' + (pw + 5) + 'px'
+        padding: '250px ' + 25 + 'px'
       });
       this.btn_right.css({
         width: space_w + 'px',
-        padding: '250px ' + (pw + 15) + 'px'
+        padding: '250px ' + 35 + 'px'
       });
       this.btn_top.css({
         height: space_h + 'px'
@@ -1418,10 +1464,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.is_adding = false;
       }).on('mouseout', function(e) {
         _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
-        return _this.hover_pos = {
+        _this.hover_pos = {
           x: -1,
           y: -1
         };
+        _this.is_clicked = false;
+        return _this.is_adding = false;
       });
       this.plus.on('click', (function() {
         return _this.plusPattern();

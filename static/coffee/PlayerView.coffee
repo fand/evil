@@ -96,7 +96,7 @@ class @PlayerView
             @model.addSynth()
             @synth_total++
         @synth_now++
-        @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
+        @instruments.css('-webkit-transform', 'translate3d(' + (-1110 * @synth_now) + 'px, 0px, 0px)')
         @model.moveRight(@synth_now)
         @btn_left.show()
         if @synth_now == (@synth_total - 1)
@@ -107,7 +107,7 @@ class @PlayerView
         @btn_right.attr('data-line1', 'next')
         if @synth_now != 0
             @synth_now--
-            @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
+            @instruments.css('-webkit-transform', 'translate3d(' + (-1110 * @synth_now) + 'px, 0px, 0px)')
             @model.moveLeft(@synth_now)
         if @synth_now == 0
             @btn_left.hide()
@@ -142,11 +142,11 @@ class @PlayerView
 
         @btn_left.css(
             width: space_w + 'px'
-            padding: '250px ' + (pw + 5) + 'px'
+            padding: '250px ' + 25 + 'px'
         )
         @btn_right.css(
             width: space_w + 'px'
-            padding: '250px ' + (pw + 15) + 'px'
+            padding: '250px ' + 35 + 'px'
         )
         @btn_top.css(
             height: space_h + 'px'

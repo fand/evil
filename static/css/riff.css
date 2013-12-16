@@ -52,6 +52,7 @@ html, body {
 /* Wrapper */
 
 #wrapper {
+    overflow: hidden;
 }
 #mixer {
     position: absolute;
@@ -97,7 +98,7 @@ html, body {
     height: 590px;
     margin: 0px;
     padding: 0px;
-    margin-right: 130px;
+    margin-right: 200px;
 
     background-color: #fff;
     border: 1px solid #0df;
@@ -118,7 +119,7 @@ html, body {
     margin-left: 450px;
 
     text-align: left;
-    padding: 250px 150px;
+    padding: 250px 25px;
     font-size: 100px;
 
     background: -webkit-gradient(
@@ -145,7 +146,7 @@ html, body {
     margin-right: 480px;
 
     text-align: right;
-    padding: 250px 150px;
+    padding: 250px 25px;
     font-size: 100px;
 
     background: -webkit-gradient(
@@ -258,44 +259,40 @@ html, body {
 }
 #mixer-mixer {
     position: absolute;
-    width: 100%;
+    width: 720px;
     height: 140px;
     top: 360px;
-    left: 0px;
-}
-.mixer-gain {
-    float: left;
-    width: 100px;
-    height: 100%;
-    background-color: #def;
-}
-.mixer-gain-master {
-    float: right;
-    width: 100px;
-    height: 100%;
-
-    text-align: center;
-    border: 1px solid #0df;
-    border-right: 0px;
+    left: 95px;
+    margin: 0px auto;
     color: #0df;
+    text-align: center;
+}
+.mixer-track {
+    float: left;
+    width: 80px;
+    height: 100%;
+    margin-left: -1px;
+    border: 1px solid #0df;
+    text-align: center;
+}
+.mixer-track-master {
+    float: right;
+    width: 80px;
+    height: 100%;
+    margin: 0px -1px;
+    border: 1px solid #0df;
+    text-align: center;
+}
+.pan-slider {
+    width: 50px;
 }
 .gain-slider {
-    width: 70px;
-    height: 130px;
-    margin: 0px;
+    width: 30px;
+    height: 100px;
+    margin: 5px;
     -webkit-appearance: slider-vertical;
 }
-.mixer-pan {
-    float: left;
-    width: 100px;
-    height: 100%;
-    background-color: #def;
-}
-.mixer-pan-master {
-    width: 70px;
-    height: 10px;
-    background-color: #def;
-}
+
 
 
 
