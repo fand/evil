@@ -773,7 +773,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_right.hide();
       this.btn_top.hide();
       this.btn_bottom.show();
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 700px, 0px)');
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 700px, 0px)');
       return this.mixer.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
     };
 
@@ -783,7 +783,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_right.show();
       this.btn_top.show();
       this.btn_bottom.hide();
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
       return this.mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
     };
 
@@ -1119,13 +1119,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.model = model;
       this.id = id;
       this.dom = dom;
-      this.vcos = $(this.dom.find('.vco'));
-      this.EG_inputs = this.dom.find('.EG > input');
-      this.FEG_inputs = this.dom.find('.FEG > input');
-      this.filter_inputs = this.dom.find(".filter input");
-      this.gain_inputs = this.dom.find('.gain > input');
-      this.canvasEG = this.dom.find(".canvasEG").get()[0];
-      this.canvasFEG = this.dom.find(".canvasFEG").get()[0];
+      this.vcos = $(this.dom.find('.RS_VCO'));
+      this.EG_inputs = this.dom.find('.RS_EG input');
+      this.FEG_inputs = this.dom.find('.RS_FEG input');
+      this.filter_inputs = this.dom.find(".RS_filter input");
+      this.gain_inputs = this.dom.find('.RS_mixer input');
+      this.canvasEG = this.dom.find(".RS_EG .canvasEG").get()[0];
+      this.canvasFEG = this.dom.find(".RS_FEG .canvasFEG").get()[0];
       this.contextEG = this.canvasEG.getContext('2d');
       this.contextFEG = this.canvasFEG.getContext('2d');
       this.initEvent();

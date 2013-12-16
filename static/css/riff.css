@@ -607,20 +607,57 @@ legend {
 .RS_vco2 {
     display: none;
 }
+.RS_VCO > div {
+    margin: 0px 15px;
+}
+.RS_VCO label {
+    float: left;
+    width: 35px;
+    padding-right: 5px;
+    font-size: 12px;
+    text-align: right;
+}
+.RS_VCO select {
+    float: right;
+    width: 55px;
+    font-size: 10px;
+    text-align: left;
+    margin-top: 4px;
+}
+.RS_VCO input {
+    float: right;
+    width: 50px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 4px;
+}
+
 .RS_mixer {
     position: absolute;
     top:140px;
     left:0px;
     width:270px;
-    height: 130px;
+    height: 128px;
+    padding-top: 2px;
 }
-.RS_filter {
-    position: absolute;
-    top: 0px;
-    left: 510px;
-    width: 150px;
-    height: 270px;
+.RS_mixer > div {
+    margin: 4px 20px;
 }
+.RS_mixer label {
+    float: left;
+    width: 35px;
+    padding-right: 5px;
+    font-size: 12px;
+    text-align: right;
+}
+.RS_mixer input {
+    float: right;
+    width: 170px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 3px;
+}
+
 .RS_EG {
     position: absolute;
     top:0px;
@@ -629,13 +666,32 @@ legend {
     height: 270px;
 }
 .RS_EG  canvas {
-    margin:10px;
-    padding-top:20px;
+    margin:11px;
+    padding-top:30px;
+    padding-bottom:2px;
     width: 180px;
     height: 50px;
     border-left:1px solid #0df;
     border-bottom: 1px solid #0df;
 }
+.RS_EG > div {
+    margin: 4px 20px 4px 15px;
+}
+.RS_EG label {
+    float: left;
+    width: 50px;
+    padding-right: 5px;
+    font-size: 12px;
+    text-align: right;
+}
+.RS_EG input {
+    float: right;
+    width: 120px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 3px;
+}
+
 .RS_FEG {
     position: absolute;
     top:0px;
@@ -644,14 +700,39 @@ legend {
     height: 270px;
 }
 .RS_FEG  canvas {
-    margin:10px;
-    padding-top:20px;
+    margin:11px;
+    padding-top:30px;
+    padding-bottom:2px;
     width: 180px;
     height: 50px;
     border-left:1px solid #0df;
     border-bottom: 1px solid #0df;
 }
+.RS_FEG > div {
+    margin: 4px 20px 4px 15px;
+}
+.RS_FEG label {
+    float: left;
+    width: 50px;
+    padding-right: 5px;
+    font-size: 12px;
+    text-align: right;
+}
+.RS_FEG input {
+    float: right;
+    width: 120px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 3px;
+}
 
+.RS_filter {
+    position: absolute;
+    top: 0px;
+    left: 510px;
+    width: 150px;
+    height: 270px;
+}
 .RS_filter_freq {
     float: left;
     text-align: center;
@@ -665,11 +746,10 @@ legend {
     width: 60px;
     margin: 0px;
 }
-
 .filter_slider {
     width: 60px;
-    height: 200px;
-    margin: 0px;
+    height: 195px;
+    margin-top: 7px;
     -webkit-appearance: slider-vertical;
 }
 

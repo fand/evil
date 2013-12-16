@@ -165,7 +165,7 @@
       this.btn_right.hide();
       this.btn_top.hide();
       this.btn_bottom.show();
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 700px, 0px)');
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 700px, 0px)');
       return this.mixer.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
     };
 
@@ -175,7 +175,7 @@
       this.btn_right.show();
       this.btn_top.show();
       this.btn_bottom.hide();
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
       return this.mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
     };
 

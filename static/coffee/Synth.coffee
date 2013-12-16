@@ -174,15 +174,15 @@ class @SynthCore
 class @SynthCoreView
     constructor: (@model, @id, @dom) ->
 
-        @vcos = $(@dom.find('.vco'))
+        @vcos = $(@dom.find('.RS_VCO'))
 
-        @EG_inputs     = @dom.find('.EG > input')
-        @FEG_inputs    = @dom.find('.FEG > input')
-        @filter_inputs = @dom.find(".filter input")
-        @gain_inputs   = @dom.find('.gain > input')
+        @EG_inputs     = @dom.find('.RS_EG input')
+        @FEG_inputs    = @dom.find('.RS_FEG input')
+        @filter_inputs = @dom.find(".RS_filter input")
+        @gain_inputs   = @dom.find('.RS_mixer input')
 
-        @canvasEG   = @dom.find(".canvasEG").get()[0]
-        @canvasFEG  = @dom.find(".canvasFEG").get()[0]
+        @canvasEG   = @dom.find(".RS_EG .canvasEG").get()[0]
+        @canvasFEG  = @dom.find(".RS_FEG .canvasFEG").get()[0]
         @contextEG  = @canvasEG.getContext('2d')
         @contextFEG = @canvasFEG.getContext('2d')
 

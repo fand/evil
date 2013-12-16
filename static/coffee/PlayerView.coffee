@@ -118,7 +118,7 @@ class @PlayerView
         @btn_right.hide()
         @btn_top.hide()
         @btn_bottom.show()
-        @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 700px, 0px)')
+        @instruments.css('-webkit-transform', 'translate3d(' + (-1110 * @synth_now) + 'px, 700px, 0px)')
         @mixer.css('-webkit-transform', 'translate3d(0px, 700px, 0px)')
 
     moveBottom: ->
@@ -127,7 +127,7 @@ class @PlayerView
         @btn_right.show()
         @btn_top.show()
         @btn_bottom.hide()
-        @instruments.css('-webkit-transform', 'translate3d(' + (-1040 * @synth_now) + 'px, 0px, 0px)')
+        @instruments.css('-webkit-transform', 'translate3d(' + (-1110 * @synth_now) + 'px, 0px, 0px)')
         @mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)')
 
 
