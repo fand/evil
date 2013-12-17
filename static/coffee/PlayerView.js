@@ -179,6 +179,13 @@
       return this.mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
     };
 
+    PlayerView.prototype.setSynthNum = function(total, now) {
+      this.synth_total = total;
+      if (now < total - 1) {
+        return this.btn_right.attr('data-line1', 'next');
+      }
+    };
+
     PlayerView.prototype.resize = function() {
       var h, ph, pw, space_h, space_w, w;
       w = $(window).width();

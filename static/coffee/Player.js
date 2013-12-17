@@ -38,11 +38,12 @@
       this.scene = {};
       this.num_id = 0;
       this.context = CONTEXT;
-      this.synth = [new Synth(this.context, this.num_id++, this)];
+      this.synth = [];
+      this.mixer = new Mixer(this.context, this);
+      this.session = new Session(this.synth);
+      this.addSynth();
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
-      this.mixer = new Mixer(this.context, this);
-      this.mixer.addSynth(this.synth[0]);
       this.view = new PlayerView(this);
     }
 
@@ -168,6 +169,7 @@
             return;
           } else {
             this.time = 0;
+            this.session.next();
             this.scene_pos++;
             this.scene = this.scenes[this.scene_pos];
             this.readScene(this.scene);
@@ -194,7 +196,8 @@
       s.setScale(this.scale);
       s.setKey(this.freq_key);
       this.synth.push(s);
-      return this.mixer.addSynth(s);
+      this.mixer.addSynth(s);
+      return this.session.addSynth(s);
     };
 
     Player.prototype.moveRight = function(next_idx) {
@@ -270,7 +273,6 @@
       patterns = this.scene.patterns;
       while (patterns.length > this.synth.length) {
         this.addSynth();
-        this.view.btn_right.attr('data-line1', 'next');
       }
       if (this.scene.bpm != null) {
         this.setBPM(this.scene.bpm);
@@ -285,7 +287,7 @@
       for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         this.synth[i].readPattern(patterns[i]);
       }
-      this.view.synth_total = this.synth.length;
+      this.view.setSynthNum(this.synth.length, this.synth_pos);
       return this.setSceneSize();
     };
 

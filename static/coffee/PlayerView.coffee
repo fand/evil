@@ -130,6 +130,10 @@ class @PlayerView
         @instruments.css('-webkit-transform', 'translate3d(' + (-1110 * @synth_now) + 'px, 0px, 0px)')
         @mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)')
 
+    setSynthNum: (total, now)->
+        @synth_total = total
+        if now < total - 1
+            @btn_right.attr('data-line1', 'next')
 
     resize: ->
         w = $(window).width()

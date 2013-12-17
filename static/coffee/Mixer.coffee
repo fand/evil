@@ -12,11 +12,13 @@ class @Mixer
         @view = new MixerView(this)
 
     addSynth: (synth) ->
+        # Create new panner
         p = @ctx.createPanner()
         p.panningModel = "equalpower"
         synth.connect(p)
         p.connect(@node)
         @panners.push(p)
+
         @view.addSynth(synth)
 
     removeSynth: (i) ->

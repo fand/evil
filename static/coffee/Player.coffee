@@ -39,12 +39,14 @@ class @Player
 
         @num_id = 0
         @context = CONTEXT
-        @synth = [new Synth(@context, @num_id++, this)]
-        @synth_now = @synth[0]
-        @synth_pos = 0
+        @synth = []
 
         @mixer = new Mixer(@context, this)
-        @mixer.addSynth(@synth[0])
+        @session = new Session(@synth)
+
+        @addSynth()
+        @synth_now = @synth[0]
+        @synth_pos = 0
 
         @view = new PlayerView(this)
 
@@ -111,6 +113,7 @@ class @Player
                     return
                 else
                     @time = 0
+                    @session.next()
                     @scene_pos++
                     @scene = @scenes[@scene_pos]
                     @readScene(@scene)
@@ -126,6 +129,7 @@ class @Player
         s.setKey(@freq_key)
         @synth.push(s)
         @mixer.addSynth(s)
+        @session.addSynth(s)
 
     moveRight: (next_idx) ->
         @synth[next_idx - 1].inactivate()
@@ -172,14 +176,14 @@ class @Player
         patterns = @scene.patterns
         while patterns.length > @synth.length
             @addSynth()
-            @view.btn_right.attr('data-line1', 'next')
         @setBPM(@scene.bpm) if @scene.bpm?
         @setKey(@scene.key) if @scene.key?
         @setScale(@scene.scale) if @scene.scale?
         @view.readParam(@bpm, @freq_key, @scale)
+
         for i in [0...patterns.length]
             @synth[i].readPattern(patterns[i])
-        @view.synth_total = @synth.length
+        @view.setSynthNum(@synth.length, @synth_pos)
         @setSceneSize()
 
     setSceneSize: ->
