@@ -601,6 +601,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.forward = $('#control-forward');
       this.backward = $('#control-backward');
       this.loop = $('#control-loop');
+      this.wrapper = $('#wrapper');
       this.instruments = $('#instruments');
       this.mixer = $('#mixer');
       this.is_mixer = false;
@@ -751,8 +752,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_right.hide();
       this.btn_top.hide();
       this.btn_bottom.show();
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 700px, 0px)');
-      return this.mixer.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
+      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
     };
 
     PlayerView.prototype.moveBottom = function() {
@@ -761,8 +761,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_right.show();
       this.btn_top.show();
       this.btn_bottom.hide();
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
-      return this.mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
     };
 
     PlayerView.prototype.setSynthNum = function(total, now) {
@@ -793,7 +792,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
       this.btn_bottom.css({
         bottom: space_h + 'px',
-        height: space_h + 'px'
+        height: 100 + 'px'
       });
       return this.footer.css({
         height: space_h + 'px'

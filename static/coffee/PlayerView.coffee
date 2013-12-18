@@ -18,6 +18,7 @@ class @PlayerView
         @backward = $('#control-backward')
         @loop = $('#control-loop')
 
+        @wrapper = $('#wrapper')
         @instruments = $('#instruments')
         @mixer = $('#mixer')
         @is_mixer = false  # seeing mixer?
@@ -118,8 +119,7 @@ class @PlayerView
         @btn_right.hide()
         @btn_top.hide()
         @btn_bottom.show()
-        @instruments.css('-webkit-transform', 'translate3d(' + (-1110 * @synth_now) + 'px, 700px, 0px)')
-        @mixer.css('-webkit-transform', 'translate3d(0px, 700px, 0px)')
+        @wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)')
 
     moveBottom: ->
         @is_mixer = false
@@ -127,8 +127,7 @@ class @PlayerView
         @btn_right.show()
         @btn_top.show()
         @btn_bottom.hide()
-        @instruments.css('-webkit-transform', 'translate3d(' + (-1110 * @synth_now) + 'px, 0px, 0px)')
-        @mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)')
+        @wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)')
 
     setSynthNum: (total, now)->
         @synth_total = total
@@ -157,7 +156,7 @@ class @PlayerView
         )
         @btn_bottom.css(
             bottom: space_h + 'px'
-            height: space_h + 'px'
+            height: 100 + 'px'
         )
         @footer.css(
             height: space_h + 'px'
