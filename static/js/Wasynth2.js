@@ -88,8 +88,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.dom = $('#mixer');
       this.tracks = $('#mixer-tracks');
       this.master = $('#mixer-master');
-      this.console_tracks = this.tracks.find('.console');
-      this.console_master = this.master.find('.console');
+      this.console_tracks = this.tracks.find('#console-tracks');
+      this.console_master = this.master.find('#console-master');
       this.gains = this.tracks.find('.console-track > .gain-slider');
       this.gain_master = this.master.find('.console-track > .gain-slider');
       this.pans = this.tracks.find('.console-track > .pan-slider');
@@ -877,7 +877,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   this.SessionView = (function() {
     function SessionView(model) {
       this.model = model;
-      this.canvas_tracks_dom = $('#session');
+      this.canvas_tracks_dom = $('#session-tracks');
       this.canvas_master_dom = $('#session-master');
       this.canvas_tracks = this.canvas_tracks_dom[0];
       this.canvas_master = this.canvas_master_dom[0];
@@ -887,9 +887,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }
 
     SessionView.prototype.initCanvas = function() {
-      this.canvas_tracks.width = 720;
-      this.canvas_master.width = 190;
-      this.canvas_tracks.height = this.canvas_master.height = 360;
+      this.canvas_tracks.width = 700;
+      this.canvas_master.width = 100;
+      this.canvas_tracks.height = this.canvas_master.height = 300;
       this.rect = this.canvas_tracks.getBoundingClientRect();
       return this.offset = {
         x: this.rect.left,

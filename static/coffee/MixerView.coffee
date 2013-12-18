@@ -4,8 +4,8 @@ class @MixerView
 
         @tracks = $('#mixer-tracks')
         @master = $('#mixer-master')
-        @console_tracks = @tracks.find('.console')
-        @console_master= @master.find('.console')
+        @console_tracks = @tracks.find('#console-tracks')
+        @console_master= @master.find('#console-master')
 
         @gains = @tracks.find('.console-track > .gain-slider')
         @gain_master = @master.find('.console-track > .gain-slider')

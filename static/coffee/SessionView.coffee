@@ -1,6 +1,6 @@
 class @SessionView
     constructor: (@model) ->
-        @canvas_tracks_dom = $('#session')
+        @canvas_tracks_dom = $('#session-tracks')
         @canvas_master_dom = $('#session-master')
 
         @canvas_tracks = @canvas_tracks_dom[0]
@@ -15,9 +15,9 @@ class @SessionView
         @initCanvas()
 
     initCanvas: ->
-        @canvas_tracks.width = 720
-        @canvas_master.width = 190
-        @canvas_tracks.height = @canvas_master.height = 360
+        @canvas_tracks.width = 700
+        @canvas_master.width = 100
+        @canvas_tracks.height = @canvas_master.height = 300
 
         @rect = @canvas_tracks.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top

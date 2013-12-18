@@ -31,7 +31,7 @@ html, body {
     width: 10px;
     height: 10px;　
     background-color: #8df;
-    -webkit-border-radius: 5px;
+    border-radius: 5px;
 }
 *::-webkit-scrollbar-button {
     height: 0px;
@@ -39,12 +39,12 @@ html, body {
 *::-webkit-scrollbar-track {
     width: 10px;
     background-color: #eee;
-    -webkit-border-radius: 5px;
+    border-radius: 5px;
 }
 *::-webkit-scrollbar-thumb {
     width: 10px;
     background-color: #8df;
-    -webkit-border-radius: 5px;
+    border-radius: 5px;
 }
 
 
@@ -85,8 +85,6 @@ html, body {
 
     background-color: #fff;
     border: 1px solid #0df;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 }
 .btn {
@@ -246,78 +244,118 @@ html, body {
 
     background-color: #fff;
     border: 1px solid #0df;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 
     transition: all 0.2s ease 0s;
 }
-#mixer-tracks {
+#mixer-body {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 751px;
+    height: 491px;
     top: 0px;
     left: 0px;
+    margin: 9px 0px 0px 9px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#mixer-sidebar {
+    position: absolute;
+    width: 139px;
+    height: 480px;
+    top: 0px;
+    right: 0px;
+    margin: 9px 9px 10px 0px;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    background-color: #fff;
+    border-radius: 3px;
+    border: 1px solid #0df;
+}
+#mixer-tracks {
+    position: absolute;
+    width: 641px;
+    height: 484px;
+    top: 0px;
+    left: 0px;
+    margin-bottom: 7px;
     overflow-x: scroll;
     overflow-y: hidden;
 }
 #mixer-master {
     position: absolute;
-    width: 120px;
-    height: 100%;
+    width: 110px;
+    height: 482px;
     top: 0px;
     right: 0px;
+    margin-bottom: 9px;
     overflow-x: hidden;
     overflow-y: auto;
+    z-index: 2;
+    background-color: #fff;
 }
-#mixer-tracks > canvas {
-    position: absolute;
-    width: 0px;
-    height: 350px;
-    top: 0px;
-    left: 0px;
-    padding-right: 120px;
-}
-#mixer-master > canvas {
+#session-tracks-wrapper {
     position: absolute;
     width: 100%;
-    height: 350px;
+    height: 312px;
     top: 0px;
     left: 0px;
+    margin-bottom: 160px;
 }
-#mixer-tracks > .console {
+#session-master-wrapper {
     position: absolute;
-    height: 150px;
-    padding-right: 120px;
+    width: 94px;
+    height: 312px;
+    top: 0px;
+    right: 0px;
+    margin: 0px 7px 0px 9px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+#session-tracks, #session-master {
+    width: 80px;
+    height: 310px;
+}
+#console-tracks {
+    position: absolute;
+    width: 100%;
+    height: 153px;
     bottom: 0px;
     left: 0px;
     border-bottom: 0px;
+    overflow: visible;
 }
-#mixer-master > .console {
+#console-master {
     position: absolute;
     width: 100%;
-    height: 150px;
-    bottom: 10px;
-    border-bottom: 0px;
+    height: 161px;
+    bottom: 0px;
 }
 .console-track {
     float: left;
     width: 79px;
-    height: 100%;
-    margin-top: -1px;
+    height: 153px;
+    /* margin-top: -1px; */
+    margin-bottom: -1px;
     margin-left: -1px;
     border: 1px solid #0df;
     text-align: center;
 }
-#mixer-master .console-track {
-    width: 100%;
-    height: 100%;
-    margin-top: -1px;
-    margin-left: -1px;
+#console-tracks > .console-track:first-child {
+    margin-left: 0px;
+    border-radius: 0px 0px 0px 2px / 0px 0px 0px 2px;
+}
+#console-master .console-track {
+    float: none;
+    bottom: 0px;
+    right: 0px;
+    width: 90px;
+    height: 159px;
+    margin: 0px 9px;
     border: 1px solid #0df;
     text-align: center;
-    border-bottom: 0px;
     background-color: #fff;
+    border-radius: 0px 0px 3px 3px / 0px 0px 3px 3px;
 }
 .pan-slider {
     width: 50px;
@@ -341,7 +379,7 @@ html, body {
     width: 910px;
     height: 35px;
     border-bottom: 1px solid #0df;
-    -webkit-border-radius: 3px;
+    border-radius: 3px;
 }
 .synth-name{
     position: absolute;
@@ -610,8 +648,6 @@ footer {
     line-height: 26px;
 
     border: 1px solid #0df;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 }
 

@@ -5,8 +5,8 @@
       this.dom = $('#mixer');
       this.tracks = $('#mixer-tracks');
       this.master = $('#mixer-master');
-      this.console_tracks = this.tracks.find('.console');
-      this.console_master = this.master.find('.console');
+      this.console_tracks = this.tracks.find('#console-tracks');
+      this.console_master = this.master.find('#console-master');
       this.gains = this.tracks.find('.console-track > .gain-slider');
       this.gain_master = this.master.find('.console-track > .gain-slider');
       this.pans = this.tracks.find('.console-track > .pan-slider');

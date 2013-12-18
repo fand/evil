@@ -6,8 +6,8 @@
 
   <div id="social" class="clearfix">
     <div id="facebook" class="social"></div>
-    <div id="twitter" class="social"></div>
-    <div id="hatena" class="social"></div>
+    <div id="twitter"  class="social"></div>
+    <div id="hatena"   class="social"></div>
   </div>
 
   <div id="env"></div>
@@ -17,21 +17,30 @@
 
   <div id="mixer">
 
-    <div id="mixer-tracks">
-      <canvas id="session"></canvas>
-      <div class="console clearfix"></div>
-    </div>
+    <div id="mixer-body">
+      <div id="mixer-tracks">
+        <div id="session-tracks-wrapper">
+          <canvas id="session-tracks"></canvas>
+        </div>
+        <div id="console-tracks" class="clearfix"></div>
+      </div>
 
-    <div id="mixer-master">
-      <canvas id="session-master"></canvas>
-      <div class="console clearfix">
-        <div class="console-track">
-          L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
-          <input class="gain-slider" type="range" min="0" max="100" value="100" />
+      <div id="mixer-master">
+        <div id="session-master-wrapper">
+          <canvas id="session-master"></canvas>
+        </div>
+        <div id="console-master" class="clearfix">
+          <div class="console-track">
+            L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
+            <input class="gain-slider" type="range" min="0" max="100" value="100" />
+          </div>
         </div>
       </div>
     </div>
 
+    <div id="mixer-sidebar">
+      s
+    </div>
 
   </div>
 
