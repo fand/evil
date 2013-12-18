@@ -242,7 +242,7 @@ html, body {
     left: 50%;
     margin-top: -1000px;
     margin-left: -470px;
-    overflow-y: hidden;
+    overflow: hidden;
 
     background-color: #fff;
     border: 1px solid #0df;
@@ -254,9 +254,8 @@ html, body {
 }
 #mixer-tracks {
     position: absolute;
-    width: 760px;
+    width: 100%;
     height: 100%;
-    padding-right: 150px;
     top: 0px;
     left: 0px;
     overflow-x: scroll;
@@ -264,33 +263,32 @@ html, body {
 }
 #mixer-master {
     position: absolute;
-    width: 150px;
+    width: 120px;
     height: 100%;
     top: 0px;
     right: 0px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 #mixer-tracks > canvas {
     position: absolute;
-    /* width: 720px; */
-    /* height: 360px; */
-    width: 910px;
-    height: 500px;
+    width: 0px;
+    height: 350px;
     top: 0px;
     left: 0px;
+    padding-right: 120px;
 }
 #mixer-master > canvas {
     position: absolute;
     width: 100%;
-    height: 500px;
+    height: 350px;
     top: 0px;
     left: 0px;
 }
 #mixer-tracks > .console {
     position: absolute;
-    width: 720px;
     height: 150px;
+    padding-right: 120px;
     bottom: 0px;
     left: 0px;
     border-bottom: 0px;
@@ -299,14 +297,14 @@ html, body {
     position: absolute;
     width: 100%;
     height: 150px;
-    bottom: 0px;
+    bottom: 10px;
     border-bottom: 0px;
 }
 .console-track {
     float: left;
-    width: 80px;
+    width: 79px;
     height: 100%;
-    top: -1px;
+    margin-top: -1px;
     margin-left: -1px;
     border: 1px solid #0df;
     text-align: center;
@@ -314,18 +312,21 @@ html, body {
 #mixer-master .console-track {
     width: 100%;
     height: 100%;
-    top: -1px;
+    margin-top: -1px;
     margin-left: -1px;
     border: 1px solid #0df;
     text-align: center;
+    border-bottom: 0px;
+    background-color: #fff;
 }
 .pan-slider {
     width: 50px;
+    height: 25px;
 }
 .gain-slider {
     width: 30px;
     height: 100px;
-    margin: 5px;
+    margin: 10px;
     -webkit-appearance: slider-vertical;
 }
 

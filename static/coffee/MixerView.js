@@ -32,6 +32,9 @@
       this.console_tracks.append(dom);
       this.pans.push(dom.find('.pan-slider'));
       this.gains.push(dom.find('.gain-slider'));
+      this.console_tracks.css({
+        width: (this.gains.length * 80 + 2) + 'px'
+      });
       this.console_tracks.on('change', function() {
         return _this.setGains();
       });
