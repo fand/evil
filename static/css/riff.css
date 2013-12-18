@@ -260,17 +260,12 @@ html, body {
 }
 #mixer-sidebar {
     position: absolute;
-    width: 139px;
-    height: 480px;
+    width: 141px;
+    height: 491px;
     top: 0px;
     right: 0px;
-    margin: 9px 9px 10px 0px;
-    overflow-x: hidden;
-    overflow-y: auto;
-
-    background-color: #fff;
-    border-radius: 3px;
-    border: 1px solid #0df;
+    margin: 0px 9px 10px 0px;
+    overflow: hidden;
 }
 #mixer-tracks {
     position: absolute;
@@ -335,11 +330,12 @@ html, body {
     float: left;
     width: 79px;
     height: 153px;
-    /* margin-top: -1px; */
     margin-bottom: -1px;
     margin-left: -1px;
     border: 1px solid #0df;
     text-align: center;
+
+    color: #0df;
 }
 #console-tracks > .console-track:first-child {
     margin-left: 0px;
@@ -368,6 +364,68 @@ html, body {
     -webkit-appearance: slider-vertical;
 }
 
+
+#sidebar-wrapper {
+    position: absolute;
+    width: 200%;
+    height: 100%;
+    top: 0px;
+    right: 0px;
+    margin: 0px;
+    padding: 0px;
+}
+.sidebar {
+    position: absolute;
+    width: 139px;
+    height: 489px;
+    top: 0px;
+    right: 0px;
+    margin: 0px;
+    padding: 0px;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    color: #0df;
+    background-color: #fff;
+    font-size: 12px;
+    text-align: center;
+    vertical-align: top;
+    line-height: 26px;
+
+    border-radius: 3px;
+    border: 1px solid #0df;
+}
+.sidebar > legend {
+    font-size: 12px;
+    text-align: center;
+    height: 26px;
+}
+.sidebar > div {
+    margin: 10px 0px;
+}
+.sidebar label {
+    font-size: 12px;
+    float: left;
+    width: 40px;
+    padding-right: 5px;
+    text-align: right;
+}
+.sidebar select {
+    float: right;
+    width: 70px;
+    font-size: 10px;
+    text-align: left;
+    margin-top: 4px;
+    margin-right: 12px;
+}
+.sidebar input {
+    float: right;
+    width: 65px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 4px;
+    margin-right: 12px;
+}
 
 
 
@@ -608,6 +666,9 @@ footer {
     text-shadow: none;
 }
 
+
+
+/* Share */
 
 #btn-save {
     position: fixed;

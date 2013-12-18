@@ -39,9 +39,51 @@
     </div>
 
     <div id="mixer-sidebar">
-      s
-    </div>
+      <div id="sidebar-wrapper" class="clearfix">
 
+        <fieldset id="sidebar-master" class="sidebar">
+          <legend>Control Change</legend>
+
+          <div class="clearfix">
+            <label>key</label>
+            <select name="key">
+              <option selected="selected">A</option>
+              <option>D</option>
+              <option>G</option>
+              <option>C</option>
+              <option>F</option>
+              <option>Bb</option>
+              <option>Eb</option>
+              <option>Ab</option>
+              <option>Db</option>
+              <option>Gb</option>
+              <option>B</option>
+              <option>E</option>
+            </select>
+          </div>
+
+          <div class="clearfix">
+            <label>mode</label>
+            <select name="mode">
+              <option selected="selected">IONIAN</option>
+              <option>DORIAN</option>
+              <option>PHRYGIAN</option>
+              <option>LYDIAN</option>
+              <option>MIXOLYDIAN</option>
+              <option>AEOLIAN</option>
+              <option>LOCRIAN</option>
+            </select>
+          </div>
+
+          <div class="clearfix">
+            <label>bpm</label>
+            <input name="bpm"   type="number" min="0" max="50000" value="0">
+          </div>
+
+        </fieldset>
+
+      </div>
+    </div>
   </div>
 
   <div id="templates">
@@ -51,13 +93,14 @@
       L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
       <input class="gain-slider" type="range" min="0" max="100" value="100" />
     </div>
+
   </div>
 </div>
 
 
 <footer>
 
-  <div name="control" id="control" class="module">
+  <div id="control">
     key: <select name="key">
       <option selected="selected">A</option>
       <option>D</option>
