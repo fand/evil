@@ -1,13 +1,5 @@
 (function() {
-  var OSC_TYPE, SAMPLE_RATE, SEMITONE, STREAM_LENGTH, T;
-
-  SEMITONE = 1.05946309;
-
-  STREAM_LENGTH = 1024;
-
-  SAMPLE_RATE = 48000;
-
-  T = new MutekiTimer();
+  var OSC_TYPE;
 
   OSC_TYPE = {
     RECT: 1,
@@ -199,29 +191,30 @@
       this.id = id;
       this.node = this.ctx.createGain();
       this.node.gain.value = 0;
-      this.vco = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
-      this.gain = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
+      this.gain = 1.0;
+      this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
+      this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
       for (i = _i = 0; _i < 3; i = ++_i) {
-        this.vco[i].connect(this.gain[i]);
-        this.gain[i].gain.value = 0;
-        this.gain[i].connect(this.node);
+        this.vcos[i].connect(this.gains[i]);
+        this.gains[i].gain.value = 0;
+        this.gains[i].connect(this.node);
       }
       this.filter = new ResFilter(this.ctx);
-      this.eg = new EG(this.node.gain, 0.0, 1.0);
+      this.eg = new EG(this.node.gain, 0.0, this.gain);
       this.feg = new EG(this.filter.lpf.frequency, 0, 0);
       this.gain_res = this.ctx.createGain();
       this.gain_res.gain.value = 0;
-      this.vco[2].connect(this.gain_res);
+      this.vcos[2].connect(this.gain_res);
       this.gain_res.connect(this.node);
-      this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.core'));
+      this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.synth-core'));
     }
 
     SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
-      this.vco[i].setShape(shape);
-      this.vco[i].setOctave(oct);
-      this.vco[i].setInterval(interval);
-      this.vco[i].setFine(fine);
-      return this.vco[i].setFreq();
+      this.vcos[i].setShape(shape);
+      this.vcos[i].setOctave(oct);
+      this.vcos[i].setInterval(interval);
+      this.vcos[i].setFine(fine);
+      return this.vcos[i].setFreq();
     };
 
     SynthCore.prototype.setEGParam = function(a, d, s, r) {
@@ -240,8 +233,13 @@
       }
     };
 
-    SynthCore.prototype.setGain = function(i, gain) {
-      return this.gain[i].gain.value = (gain / 100.0) * 0.3;
+    SynthCore.prototype.setVCOGain = function(i, gain) {
+      return this.gains[i].gain.value = (gain / 100.0) * 0.3;
+    };
+
+    SynthCore.prototype.setGain = function(gain) {
+      this.gain = gain;
+      return this.eg.setRange(0.0, this.gain);
     };
 
     SynthCore.prototype.noteOn = function() {
@@ -260,7 +258,7 @@
 
     SynthCore.prototype.setKey = function(freq_key) {
       var v, _i, _len, _ref, _results;
-      _ref = this.vco;
+      _ref = this.vcos;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         v = _ref[_i];
@@ -280,7 +278,7 @@
 
     SynthCore.prototype.setNote = function(note) {
       var v, _i, _len, _ref, _results;
-      _ref = this.vco;
+      _ref = this.vcos;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         v = _ref[_i];
@@ -299,13 +297,13 @@
       this.model = model;
       this.id = id;
       this.dom = dom;
-      this.vcos = $(this.dom.find('.vco'));
-      this.EG_inputs = this.dom.find('.EG > input');
-      this.FEG_inputs = this.dom.find('.FEG > input');
-      this.filter_inputs = this.dom.find(".filter input");
-      this.gain_inputs = this.dom.find('.gain > input');
-      this.canvasEG = this.dom.find(".canvasEG").get()[0];
-      this.canvasFEG = this.dom.find(".canvasFEG").get()[0];
+      this.vcos = $(this.dom.find('.RS_VCO'));
+      this.EG_inputs = this.dom.find('.RS_EG input');
+      this.FEG_inputs = this.dom.find('.RS_FEG input');
+      this.filter_inputs = this.dom.find(".RS_filter input");
+      this.gain_inputs = this.dom.find('.RS_mixer input');
+      this.canvasEG = this.dom.find(".RS_EG .canvasEG").get()[0];
+      this.canvasFEG = this.dom.find(".RS_FEG .canvasFEG").get()[0];
       this.contextEG = this.canvasEG.getContext('2d');
       this.contextFEG = this.canvasFEG.getContext('2d');
       this.initEvent();
@@ -317,7 +315,7 @@
         return _this.setVCOParam();
       });
       this.gain_inputs.on("change", function() {
-        return _this.setGain();
+        return _this.setGains();
       });
       this.filter_inputs.on("change", function() {
         return _this.setFilterParam();
@@ -364,7 +362,7 @@
       this.setEGParam();
       this.setFEGParam();
       this.setFilterParam();
-      return this.setGain();
+      return this.setGains();
     };
 
     SynthCoreView.prototype.setVCOParam = function() {
@@ -391,11 +389,11 @@
       return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
     };
 
-    SynthCoreView.prototype.setGain = function() {
+    SynthCoreView.prototype.setGains = function() {
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.model.setGain(i, parseInt(this.gain_inputs.eq(i).val())));
+        _results.push(this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
       }
       return _results;
     };
@@ -412,7 +410,7 @@
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.time = 0;
       this.scale = [];
-      this.view = new SynthView(this);
+      this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
     }
 
@@ -434,6 +432,14 @@
 
     Synth.prototype.setNote = function(note) {
       return this.core.setNote(note);
+    };
+
+    Synth.prototype.setGain = function(gain) {
+      return this.core.setGain(gain);
+    };
+
+    Synth.prototype.getGain = function() {
+      return this.core.gain;
     };
 
     Synth.prototype.noteToSemitone = function(ival) {

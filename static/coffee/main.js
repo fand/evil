@@ -1,7 +1,15 @@
 (function() {
-  var KEYCODE_TO_NOTE;
+  this.CONTEXT = new webkitAudioContext();
 
-  KEYCODE_TO_NOTE = {
+  this.STREAM_LENGTH = 1024;
+
+  this.SAMPLE_RATE = 48000;
+
+  this.SEMITONE = 1.05946309;
+
+  this.T = new MutekiTimer();
+
+  this.KEYCODE_TO_NOTE = {
     90: 1,
     88: 2,
     67: 3,
@@ -58,6 +66,21 @@
         n = KEYCODE_TO_NOTE[e.keyCode];
         if (n != null) {
           return player.noteOn(n);
+        } else {
+          switch (e.keyCode) {
+            case 37:
+              return player.view.moveLeft();
+            case 38:
+              return player.view.moveTop();
+            case 39:
+              return player.view.moveRight();
+            case 40:
+              return player.view.moveBottom();
+            case 32:
+              return player.view.viewPlay();
+            case 13:
+              return player.view.viewPlay();
+          }
         }
       }
     });
@@ -82,7 +105,7 @@
     s1 = {
       bpm: 80,
       size: 32,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [1, 1, 8, 1, 8, 1, 7, 1, 1, 1, 8, 1, 8, 1, 7, 1, 3, 3, 8, 3, 8, 3, 7, 3, 5, 5, 8, 5, 8, 5, 9, 5]]
+      patterns: [[10, 10, 17, 10, 17, 10, 16, 10, 10, 10, 17, 10, 17, 10, 16, 10, 8, 8, 17, 8, 17, 8, 16, 8, 9, 9, 17, 9, 17, 9, 16, 9], [8, 8, 15, 8, 15, 8, 14, 8, 8, 8, 15, 8, 15, 8, 14, 8, 6, 6, 15, 6, 15, 6, 14, 6, 7, 7, 15, 7, 15, 7, 14, 7]]
     };
     s2 = {
       size: 32,

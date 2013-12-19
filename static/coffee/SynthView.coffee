@@ -5,18 +5,18 @@ class @SynthView
         @dom.attr('id', 'synth' + id)
         $("#instruments").append(@dom)
 
-        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        @page = 0
-        @page_total = 1
+        @synth_name = @dom.find('.synth-name')
+        @synth_name.html('SYNTH #' + @id)
 
-        @last_time = 0
-        @last_page = 0
-
+        # header DOM
+        @header = @dom.find('.header')
         @pos_markers = @dom.find('.marker')  # list of list of markers
         @plus  = @dom.find('.pattern-plus')
         @minus = @dom.find('.pattern-minus')
         @setMarker()
 
+        # table DOM
+        @table_wrapper    = @dom.find('.sequencer-table')
         @canvas_hover_dom = @dom.find('.table-hover')
         @canvas_on_dom    = @dom.find('.table-on')
         @canvas_off_dom   = @dom.find('.table-off')
@@ -33,18 +33,32 @@ class @SynthView
         @cell.src = 'static/img/sequencer_cell.png'
         @cell.onload = () => @initCanvas()
 
+        @fold = @dom.find('.btn-fold-core')
+        @core = @dom.find('.synth-core')
+        @is_panel_opened = true
+
+        @keyboard = new KeyboardView(this)
+
+        # Flags / Params
+        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @page = 0
+        @page_total = 1
+
+        @last_time = 0
+        @last_page = 0
+
         @is_clicked = false
-        @hover_pos = x:0, y:0
-        @click_pos = x:0, y:0
+        @hover_pos = x:-1, y:-1
+        @click_pos = x:-1, y:-1
 
         @initEvent()
 
     initCanvas: ->
         @canvas_hover.width  = @canvas_on.width  = @canvas_off.width  = 832
-        @canvas_hover.height = @canvas_on.height = @canvas_off.height = 260
+        @canvas_hover.height = @canvas_on.height = @canvas_off.height = 520
         @rect = @canvas_off.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top
-        for i in [0...10]
+        for i in [0...20]
             for j in [0...32]
                 @ctx_off.drawImage(@cell,
                     0, 0, 26, 26,           # src (x, y, w, h)
@@ -78,14 +92,14 @@ class @SynthView
             if @is_clicked and @click_pos != pos
                 if @is_adding
                     @addNote(pos)
-                else
+                else if @pattern[pos.x_abs] == 20 - pos.y
                     @removeNote(pos)
                 @click_pos = pos
 
         ).on('mousedown', (e) =>
             @is_clicked = true
             pos = @getPos(e)
-            if @pattern[pos.x_abs] == 10 - pos.y
+            if @pattern[pos.x_abs] == 20 - pos.y
                 @removeNote(pos)
             else
                 @is_adding = true
@@ -98,6 +112,8 @@ class @SynthView
                 @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
             )
             @hover_pos = x: -1, y: -1
+            @is_clicked = false
+            @is_adding = false
         )
 
         @plus.on('click', ( => @plusPattern()))
@@ -106,8 +122,22 @@ class @SynthView
                 @minusPattern()
         ))
 
+        @fold.on('mousedown', () =>
+            if @is_panel_opened
+                @core.css('height', '0px')
+                @table_wrapper.css('height', '524px')
+                @fold.css(top: '-22px', padding: '0px 5px 0px 0px').removeClass('fa-angle-down').addClass('fa-angle-up')
+                @is_panel_opened = false
+            else
+                @core.css('height', '280px')
+                @table_wrapper.css('height', '262px')
+                @fold.css(top: '0px', padding: '5px 5px 5px 5px').removeClass('fa-angle-up').addClass('fa-angle-down')
+                @is_panel_opened = true
+        )
+
+
     addNote: (pos) ->
-        note = 10 - pos.y
+        note = 20 - pos.y
         @pattern[pos.x_abs] = note
         @model.addNote(pos.x_abs, note)
         @ctx_on.clearRect(pos.x * 26, 0, 26, 1000)
@@ -124,7 +154,7 @@ class @SynthView
     playAt: (@time) ->
         if @time % 32 == 0
             @drawPattern(@time)
-        for i in [0...10]
+        for i in [0...20]
             @ctx_off.drawImage(@cell,
                 0, 0, 26, 26,
                 (@last_time % 32) * 26, i * 26, 26, 26
@@ -144,9 +174,9 @@ class @SynthView
     drawPattern: (time) ->
         @time = time if time?
         @page = Math.floor(@time / 32)
-        @ctx_on.clearRect(0, 0, 832, 260)
+        @ctx_on.clearRect(0, 0, 832, 520)
         for i in [0...32]
-            y = 10 - @pattern[@page * 32 + i]
+            y = 20 - @pattern[@page * 32 + i]
             @ctx_on.drawImage(
                 @cell,
                 26, 0, 26, 26,
@@ -175,15 +205,115 @@ class @SynthView
 
     play: ->
     stop: ->
-        for i in [0...10]
+        for i in [0...20]
             @ctx_off.drawImage(@cell,
                 0, 0, 26, 26,
                 (@last_time % 32) * 26, i * 26, 26, 26
             )
-
 
     activate: (i) ->
         @is_active = true
         @initCanvas()
 
     inactivate: -> @is_active = false
+
+
+
+class @KeyboardView
+    constructor: (@sequencer) ->
+        # Keyboard
+        @dom = @sequencer.dom.find('.keyboard')
+        @canvas = @dom[0]
+        @ctx = @canvas.getContext('2d')
+
+        @w = 48
+        @h = 26
+        @num = 20
+        @color = ['rgba(230, 230, 230, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
+                  'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
+        @is_clicked = false
+        @hover_pos = x: -1, y: -1
+        @click_pos = x: -1, y: -1
+
+        @initCanvas()
+        @initEvent()
+
+    initCanvas: ->
+        @canvas.width = @w;
+        @canvas.height = @h * @num;
+        @rect = @canvas.getBoundingClientRect()
+        @offset = x: @rect.left, y: @rect.top
+
+        @ctx.fillStyle = @color[0]
+        for i in [0...@num]
+            @drawNormal(i)
+            @drawText(i)
+
+    getPos: (e) ->
+        @rect = @canvas.getBoundingClientRect()
+        Math.floor((e.clientY - @rect.top) / @h)
+
+    initEvent: ->
+        @dom.on('mousemove', (e) =>
+            pos = @getPos(e)
+
+            if pos != @hover_pos
+                @drawNormal(@hover_pos)
+                @drawHover(pos)
+                @hover_pos = pos
+
+            if @is_clicked and @click_pos != pos
+                @clearActive(@click_pos)
+                @drawActive(pos)
+                @sequencer.model.noteOff()
+                @sequencer.model.noteOn(@num - pos)
+                @click_pos = pos
+
+        ).on('mousedown', (e) =>
+            @is_clicked = true
+            pos = @getPos(e)
+            @drawActive(pos)
+            @sequencer.model.noteOn(@num - pos)
+            @click_pos = pos
+        ).on('mouseup', (e) =>
+            @is_clicked = false
+            @clearActive(@click_pos)
+            @sequencer.model.noteOff()
+            @click_pos = x: -1, y: -1
+        ).on('mouseout', (e) =>
+            @clearActive(@hover_pos)
+            @sequencer.model.noteOff()
+            @hover_pos = x: -1, y: -1
+            @click_pos = x: -1, y: -1
+        )
+
+    drawNormal: (i) ->
+        @clearNormal(i)
+        @ctx.fillStyle = @color[0]
+        @ctx.fillRect(0, (i+1) * @h - 3, @w, 2)
+        @ctx.fillStyle = @color[3]
+        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+
+    drawHover: (i) ->
+        @ctx.fillStyle = @color[1]
+        @ctx.fillRect(0, (i+1) * @h - 3, @w, 2)
+        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+
+    drawActive: (i) ->
+        @clearNormal(i)
+        @ctx.fillStyle = @color[2]
+        @ctx.fillRect(0, i * @h, @w, @h)
+        @ctx.fillStyle = @color[4]
+        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+
+    clearNormal: (i) ->
+        @ctx.clearRect(0, i * @h, @w, @h)
+
+    clearActive: (i) ->
+        @clearNormal(i)
+        @drawNormal(i)
+        @drawText(i)
+
+    drawText: (i) ->
+        @ctx.fillStyle = @color[3]
+        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)

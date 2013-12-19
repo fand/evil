@@ -1,7 +1,14 @@
 # ------------------------------------------------------------------------------
 # CONSTANT
 
-KEYCODE_TO_NOTE =
+@CONTEXT = new webkitAudioContext()
+@STREAM_LENGTH = 1024
+@SAMPLE_RATE = 48000
+@SEMITONE = 1.05946309
+@T = new MutekiTimer()
+
+
+@KEYCODE_TO_NOTE =
     90:   1
     88:   2
     67:   3
@@ -59,7 +66,16 @@ $(() ->
             player.noteOff() if player.isPlaying()
 
             n = KEYCODE_TO_NOTE[e.keyCode]
-            player.noteOn(n) if n?
+            if n?
+                player.noteOn(n)
+            else
+                switch e.keyCode
+                    when 37 then player.view.moveLeft()
+                    when 38 then player.view.moveTop()
+                    when 39 then player.view.moveRight()
+                    when 40 then player.view.moveBottom()
+                    when 32 then player.view.viewPlay()
+                    when 13 then player.view.viewPlay()
     )
     $(window).keyup( ->
         is_key_pressed = false
@@ -94,8 +110,8 @@ $(() ->
         bpm: 80
         size: 32
         patterns: [
-            [3,3,10,3,10,3,9,3,3,3,10,3,10,3,9,3,1,1,10,1,10,1,9,1,2,2,10,2,10,2,9,2],
-            [1,1,8,1,8,1,7,1,1,1,8,1,8,1,7,1,3,3,8,3,8,3,7,3,5,5,8,5,8,5,9,5]]
+            [10,10,17,10,17,10,16,10,10,10,17,10,17,10,16,10,8,8,17,8,17,8,16,8,9,9,17,9,17,9,16,9],
+            [8,8,15,8,15,8,14,8,8,8,15,8,15,8,14,8,6,6,15,6,15,6,14,6,7,7,15,7,15,7,14,7]]
     s2 =
         size: 32
         patterns: [

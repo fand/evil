@@ -1,97 +1,117 @@
 <div id="tmpl_synth" class="instrument clearfix">
 
   <div class="sequencer">
-    <div class="sequencer-table">
-      <div class="indicator"></div>
-
+    <div class="header">
+      <div class="synth-name"></div>
       <i class="fa fa-minus pattern-minus"></i>
       <i class="fa fa-plus pattern-plus"></i>
 
       <div class="markers">
         <: for [0..7] -> $_ { :><i class="fa fa-circle marker"></i>
-        <: } :>
+          <: } :>
       </div>
+    </div>
 
+    <div class="sequencer-table">
+      <canvas class="keyboard"></canvas>
       <canvas class="table table-hover"></canvas>
       <canvas class="table table-on"></canvas>
       <canvas class="table table-off"></canvas>
     </div>
   </div>
 
-  <div class="core">
-    <fieldset id="vco0_<: $id :>" class="RS_module RS_vco0 vco">
+
+  <div class="synth-core">
+    <i class="fa fa-angle-down btn-fold-core"></i>
+
+    <fieldset class="RS_module RS_vco0 RS_VCO">
       <legend>OSC1</legend>
-      WAVE <select id="shape0_<: $id :>" class="shape">
-        <option>SINE</option>
-        <option>TRIANGLE</option>
-        <option>SAW</option>
-        <option selected="selected">RECT</option>
-      </select><br>
-      OCT   <input id="octave0_<: $id :>"   class="octave" type="number" min="0" max="5" value="1"><br>
-      SHIFT <input id="interval0_<: $id :>" class="interval" type="number" min="-12" max="12" value="0"><br>
-      TUNE  <input id="fine0_<: $id :>"     class="fine" type="number" min="-50" max="50" value="0"><br>
+
+      <div class="clearfix">
+        <label>WAVE</label>
+        <select class="shape">
+          <option>SINE</option>
+          <option>TRIANGLE</option>
+          <option>SAW</option>
+          <option selected="selected">RECT</option>
+        </select>
+      </div>
+
+      <div class="clearfix"><label>OCT</label>   <input class="octave"   type="number" min="0" max="5" value="0"></div>
+      <div class="clearfix"><label>SHIFT</label> <input class="interval" type="number" min="-12" max="12" value="0"></div>
+      <div class="clearfix"><label>TUNE</label>  <input class="fine"     type="number" min="-50" max="50" value="0"></div>
     </fieldset>
 
-    <fieldset id="vco1_<: $id :>" class="RS_module RS_vco1 vco">
+    <fieldset class="RS_module RS_vco1 RS_VCO">
       <legend>OSC2</legend>
-      WAVE <select id="shape1_<: $id :>" class="shape">
-        <option>SINE</option>
-        <option>TRIANGLE</option>
-        <option selected="selected">SAW</option>
-        <option>RECT</option>
-      </select><br>
-      OCT   <input id="octave1_<: $id :>"   class="octave"   type="number" min="0" max="5" value="1"><br>
-      SHIFT <input id="interval1_<: $id :>" class="interval" type="number" min="-12" max="12" value="7"><br>
-      TUNE  <input id="fine1_<: $id :>"     class="fine"     type="number" min="-50" max="50" value="1"><br>
+
+      <div class="clearfix">
+        <label>WAVE</label>
+        <select class="shape">
+          <option>SINE</option>
+          <option>TRIANGLE</option>
+          <option selected="selected">SAW</option>
+          <option>RECT</option>
+        </select>
+      </div>
+
+      <div class="clearfix"><label>OCT</label>   <input class="octave"   type="number" min="0" max="5" value="0"></div>
+      <div class="clearfix"><label>SHIFT</label> <input class="interval" type="number" min="-12" max="12" value="7"></div>
+      <div class="clearfix"><label>TUNE</label>  <input class="fine"     type="number" min="-50" max="50" value="1"></div>
     </fieldset>
 
-    <fieldset name="vco2_<: $id :>" class="RS_module RS_vco2 vco">
+    <fieldset class="RS_module RS_vco2 RS_VCO">
       <legend>OSC3</legend>
-      WAVE <select id="shape2_<: $id :>" class="shape">
-        <option>SINE</option>
-        <option>TRIANGLE</option>
-        <option>SAW</option>
-        <option>RECT</option>
-        <option selected="selected">NOISE</option>
-      </select><br>
-      OCT   <input id="octave2_<: $id :>"   class="octave"   min="0" max="5" value="3" type="number"><br>
-      SHIFT <input id="interval2_<: $id :>" class="interval" type="number" min="-12" max="12" value="0"><br>
-      TUNE  <input id="fine2_<: $id :>"     class="fine"     min="-50" max="50" value="0" type="number"><br>
+
+      <div class="clearfix">
+        <label>WAVE</label>
+        <select class="shape">
+          <option>SINE</option>
+          <option>TRIANGLE</option>
+          <option>SAW</option>
+          <option>RECT</option>
+          <option selected="selected">NOISE</option>
+        </select>
+      </div>
+
+      <div class="clearfix"><label>OCT</label>   <input class="octave"   min="0" max="5" value="3" type="number"></div>
+      <div class="clearfix"><label>SHIFT</label> <input class="interval" type="number" min="-12" max="12" value="0"></div>
+      <div class="clearfix"><label>TUNE</label>  <input class="fine"     min="-50" max="50" value="0" type="number"></div>
     </fieldset>
 
-    <fieldset id="mixer_<: $id :>" class="RS_module RS_mixer gain">
+    <fieldset class="RS_module RS_mixer gain">
       <legend>Mixer</legend>
-      OSC1  <input id="vol0_<: $id :>" type="range" min="0" max="99" value="50"><br>
-      OSC2  <input id="vol1_<: $id :>" type="range" min="0" max="99" value="40"><br>
-      NOISE <input id="vol2_<: $id :>" type="range" min="0" max="99" value="1"><br>
+      <div class="clearfix"><label>OSC1</label>  <input type="range" min="0" max="99" value="50"></div>
+      <div class="clearfix"><label>OSC2</label>  <input type="range" min="0" max="99" value="40"></div>
+      <div class="clearfix"><label>NOISE</label> <input type="range" min="0" max="99" value="1"></div>
     </fieldset>
 
-    <fieldset id="EG_<: $id :>" class="RS_module RS_EG EG">
+    <fieldset class="RS_module RS_EG EG">
       <legend>Envelope</legend>
-      <canvas id="canvasEG_<: $id :>" class="canvasEG"></canvas>
-      ATTACK  <input name="attack"  type="range" min="0" max="50000" value="0"><br>
-      DECAY   <input name="decay"   type="range" min="0" max="50000" value="18000"><br>
-      SUSTAIN <input name="sustain" type="range" min="0" max="100"   value="40"><br>
-      RELEASE <input name="release" type="range" min="0" max="50000" value="10000"><br>
+      <canvas class="canvasEG"></canvas>
+      <div class="clearfix"><label>ATTACK</label>  <input name="attack"  type="range" min="0" max="50000" value="0"></div>
+      <div class="clearfix"><label>DECAY</label>   <input name="decay"   type="range" min="0" max="50000" value="18000"></div>
+      <div class="clearfix"><label>SUSTAIN</label> <input name="sustain" type="range" min="0" max="100"   value="40"></div>
+      <div class="clearfix"><label>RELEASE</label> <input name="release" type="range" min="0" max="50000" value="10000"></div>
     </fieldset>
 
-    <fieldset id="filter_<: $id :>" class="RS_module RS_filter filter clearfix">
+    <fieldset class="RS_module RS_filter filter clearfix">
       <legend>Filter</legend>
       <div class="RS_filter_freq">
-        FREQ <br><input id="freq_<: $id :>" class="filter_slider freq" type="range" min="10" max="1000" value="400"><br>
+        <label>FREQ</label><input class="filter_slider freq" type="range" min="10" max="1000" value="400">
       </div>
       <div class="RS_filter_Q">
-        REZ <br><input id="Q_<: $id :>" class="filter_slider q" type="range" min="0" max="40" value="6"><br>
+        <label>REZ</label><input class="filter_slider q" type="range" min="0" max="40" value="6">
       </div>
     </fieldset>
 
-    <fieldset id="FEG_<: $id :>" class="RS_module RS_FEG FEG">
+    <fieldset class="RS_module RS_FEG FEG">
       <legend>FilterEnvelope</legend>
-      <canvas id="canvasFEG_<: $id :>" class="canvasFEG"></canvas>
-      ATTACK  <input name="attack"  type="range" min="0" max="50000" value="0"><br>
-      DECAY   <input name="decay"   type="range" min="0" max="50000" value="0"><br>
-      SUSTAIN <input name="sustain" type="range" min="0" max="100"   value="100"><br>
-      RELEASE <input name="release" type="range" min="0" max="50000" value="10000"><br>
+      <canvas class="canvasFEG"></canvas>
+      <div class="clearfix"><label>ATTACK</label>  <input name="attack"  type="range" min="0" max="50000" value="0"></div>
+      <div class="clearfix"><label>DECAY</label>   <input name="decay"   type="range" min="0" max="50000" value="0"></div>
+      <div class="clearfix"><label>SUSTAIN</label> <input name="sustain" type="range" min="0" max="100"   value="100"></div>
+      <div class="clearfix"><label>RELEASE</label> <input name="release" type="range" min="0" max="50000" value="10000"></div>
     </fieldset>
 
   </div>

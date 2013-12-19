@@ -15,8 +15,10 @@
       this.forward = $('#control-forward');
       this.backward = $('#control-backward');
       this.loop = $('#control-loop');
+      this.wrapper = $('#wrapper');
       this.instruments = $('#instruments');
       this.mixer = $('#mixer');
+      this.is_mixer = false;
       this.btn_left = $('#btn-left');
       this.btn_right = $('#btn-right');
       this.btn_top = $('#btn-top');
@@ -127,20 +129,30 @@
     };
 
     PlayerView.prototype.moveRight = function() {
+      if (this.is_mixer) {
+        return;
+      }
       if (this.synth_now === (this.synth_total - 1)) {
         this.model.addSynth();
         this.synth_total++;
       }
       this.synth_now++;
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
       this.model.moveRight(this.synth_now);
-      return this.btn_left.show();
+      this.btn_left.show();
+      if (this.synth_now === (this.synth_total - 1)) {
+        return this.btn_right.attr('data-line1', 'new');
+      }
     };
 
     PlayerView.prototype.moveLeft = function() {
+      if (this.is_mixer) {
+        return;
+      }
+      this.btn_right.attr('data-line1', 'next');
       if (this.synth_now !== 0) {
         this.synth_now--;
-        this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
+        this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
         this.model.moveLeft(this.synth_now);
       }
       if (this.synth_now === 0) {
@@ -149,21 +161,28 @@
     };
 
     PlayerView.prototype.moveTop = function() {
+      this.is_mixer = true;
       this.btn_left.hide();
       this.btn_right.hide();
       this.btn_top.hide();
       this.btn_bottom.show();
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 700px, 0px)');
-      return this.mixer.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
+      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
     };
 
     PlayerView.prototype.moveBottom = function() {
+      this.is_mixer = false;
       this.btn_left.show();
       this.btn_right.show();
       this.btn_top.show();
       this.btn_bottom.hide();
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1040 * this.synth_now) + 'px, 0px, 0px)');
-      return this.mixer.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+    };
+
+    PlayerView.prototype.setSynthNum = function(total, now) {
+      this.synth_total = total;
+      if (now < total - 1) {
+        return this.btn_right.attr('data-line1', 'next');
+      }
     };
 
     PlayerView.prototype.resize = function() {
@@ -176,18 +195,18 @@
       ph = space_h / 2 - 50;
       this.btn_left.css({
         width: space_w + 'px',
-        padding: '250px ' + (pw + 5) + 'px'
+        padding: '250px ' + 25 + 'px'
       });
       this.btn_right.css({
         width: space_w + 'px',
-        padding: '250px ' + (pw + 15) + 'px'
+        padding: '250px ' + 35 + 'px'
       });
       this.btn_top.css({
         height: space_h + 'px'
       });
       this.btn_bottom.css({
         bottom: space_h + 'px',
-        height: space_h + 'px'
+        height: 100 + 'px'
       });
       return this.footer.css({
         height: space_h + 'px'

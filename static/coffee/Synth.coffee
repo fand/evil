@@ -1,8 +1,3 @@
-SEMITONE = 1.05946309
-STREAM_LENGTH = 1024
-SAMPLE_RATE = 48000
-T = new MutekiTimer()
-
 OSC_TYPE =
     RECT:     1
     SINE:     0
@@ -106,32 +101,34 @@ class @SynthCore
     constructor: (@parent, @ctx, @id) ->
         @node = @ctx.createGain()
         @node.gain.value = 0
-        @vco  = [new VCO(@ctx), new VCO(@ctx), new Noise(@ctx)]
-        @gain = [@ctx.createGain(), @ctx.createGain(), @ctx.createGain()]
+        @gain = 1.0
+
+        @vcos  = [new VCO(@ctx), new VCO(@ctx), new Noise(@ctx)]
+        @gains = [@ctx.createGain(), @ctx.createGain(), @ctx.createGain()]
         for i in [0...3]
-            @vco[i].connect(@gain[i])
-            @gain[i].gain.value = 0
-            @gain[i].connect(@node)
+            @vcos[i].connect(@gains[i])
+            @gains[i].gain.value = 0
+            @gains[i].connect(@node)
 
         @filter = new ResFilter(@ctx)
 
-        @eg  = new EG(@node.gain, 0.0, 1.0)
+        @eg  = new EG(@node.gain, 0.0, @gain)
         @feg = new EG(@filter.lpf.frequency, 0, 0)
 
         # resonance用ノイズ生成
         @gain_res = @ctx.createGain()
         @gain_res.gain.value = 0
-        @vco[2].connect(@gain_res)
+        @vcos[2].connect(@gain_res)
         @gain_res.connect(@node)
 
-        @view = new SynthCoreView(this, id, @parent.view.dom.find('.core'))
+        @view = new SynthCoreView(this, id, @parent.view.dom.find('.synth-core'))
 
     setVCOParam: (i, shape, oct, interval, fine) ->
-        @vco[i].setShape(shape)
-        @vco[i].setOctave(oct)
-        @vco[i].setInterval(interval)
-        @vco[i].setFine(fine)
-        @vco[i].setFreq()
+        @vcos[i].setShape(shape)
+        @vcos[i].setOctave(oct)
+        @vcos[i].setInterval(interval)
+        @vcos[i].setFine(fine)
+        @vcos[i].setFreq()
 
     setEGParam:  (a, d, s, r) -> @eg.setParam(a, d, s, r)
     setFEGParam: (a, d, s, r) -> @feg.setParam(a, d, s, r)
@@ -141,9 +138,12 @@ class @SynthCore
         @filter.setQ(q)
         @gain_res.value = 0.1 * (q / 1000.0) if q > 1
 
-    setGain: (i, gain) ->
+    setVCOGain: (i, gain) ->
         ## Keep total gain <= 0.9
-        @gain[i].gain.value = (gain / 100.0) * 0.3
+        @gains[i].gain.value = (gain / 100.0) * 0.3
+
+    setGain: (@gain) ->
+        @eg.setRange(0.0, @gain)
 
     noteOn: ->
         t0 = @ctx.currentTime
@@ -156,7 +156,7 @@ class @SynthCore
         @feg.noteOff(t0)
 
     setKey: (freq_key) ->
-        v.setKey(freq_key) for v in @vco
+        v.setKey(freq_key) for v in @vcos
 
     setScale: (@scale) ->
 
@@ -165,7 +165,7 @@ class @SynthCore
         @filter.connect(dst)
 
     setNote: (note) ->
-        for v in @vco
+        for v in @vcos
             v.setNote(note)
             v.setFreq()
 
@@ -174,15 +174,15 @@ class @SynthCore
 class @SynthCoreView
     constructor: (@model, @id, @dom) ->
 
-        @vcos = $(@dom.find('.vco'))
+        @vcos = $(@dom.find('.RS_VCO'))
 
-        @EG_inputs     = @dom.find('.EG > input')
-        @FEG_inputs    = @dom.find('.FEG > input')
-        @filter_inputs = @dom.find(".filter input")
-        @gain_inputs   = @dom.find('.gain > input')
+        @EG_inputs     = @dom.find('.RS_EG input')
+        @FEG_inputs    = @dom.find('.RS_FEG input')
+        @filter_inputs = @dom.find(".RS_filter input")
+        @gain_inputs   = @dom.find('.RS_mixer input')
 
-        @canvasEG   = @dom.find(".canvasEG").get()[0]
-        @canvasFEG  = @dom.find(".canvasFEG").get()[0]
+        @canvasEG   = @dom.find(".RS_EG .canvasEG").get()[0]
+        @canvasFEG  = @dom.find(".RS_FEG .canvasFEG").get()[0]
         @contextEG  = @canvasEG.getContext('2d')
         @contextFEG = @canvasFEG.getContext('2d')
 
@@ -190,7 +190,7 @@ class @SynthCoreView
 
     initEvent: ->
         @vcos.on("change",          () => @setVCOParam())
-        @gain_inputs.on("change",   () => @setGain())
+        @gain_inputs.on("change",   () => @setGains())
         @filter_inputs.on("change", () => @setFilterParam())
         @EG_inputs.on("change",     () => @setEGParam())
         @FEG_inputs.on("change",    () => @setFEGParam())
@@ -227,7 +227,7 @@ class @SynthCoreView
         @setEGParam()
         @setFEGParam()
         @setFilterParam()
-        @setGain()
+        @setGains()
 
     setVCOParam: ->
         for i in [0...@vcos.length]
@@ -264,9 +264,9 @@ class @SynthCoreView
             parseFloat(@filter_inputs.eq(1).val())
         )
 
-    setGain: ->
+    setGains: ->
         for i in [0... @gain_inputs.length]
-            @model.setGain(i, parseInt(@gain_inputs.eq(i).val()))
+            @model.setVCOGain(i, parseInt(@gain_inputs.eq(i).val()))
 
 
 
@@ -275,7 +275,7 @@ class @Synth
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @time = 0
         @scale = []
-        @view = new SynthView(this)
+        @view = new SynthView(this, @id)
         @core = new SynthCore(this, @ctx, @id)
 
     connect: (dst) -> @core.connect(dst)
@@ -284,6 +284,9 @@ class @Synth
     setKey:  (key) -> @core.setKey(key)
     setScale: (@scale) ->
     setNote: (note) -> @core.setNote(note)
+
+    setGain: (gain) -> @core.setGain(gain)
+    getGain: ()     -> @core.gain
 
     noteToSemitone: (ival) ->
         Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]

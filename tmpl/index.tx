@@ -6,8 +6,8 @@
 
   <div id="social" class="clearfix">
     <div id="facebook" class="social"></div>
-    <div id="twitter" class="social"></div>
-    <div id="hatena" class="social"></div>
+    <div id="twitter"  class="social"></div>
+    <div id="hatena"   class="social"></div>
   </div>
 
   <div id="env"></div>
@@ -16,19 +16,91 @@
   </div>
 
   <div id="mixer">
-    <canvas id="mixer-session">
-    <canvas id="mixer-mixier">
+
+    <div id="mixer-body">
+      <div id="mixer-tracks">
+        <div id="session-tracks-wrapper">
+          <canvas id="session-tracks"></canvas>
+        </div>
+        <div id="console-tracks" class="clearfix"></div>
+      </div>
+
+      <div id="mixer-master">
+        <div id="session-master-wrapper">
+          <canvas id="session-master"></canvas>
+        </div>
+        <div id="console-master" class="clearfix">
+          <div class="console-track">
+            L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
+            <input class="gain-slider" type="range" min="0" max="100" value="100" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="mixer-sidebar">
+      <div id="sidebar-wrapper" class="clearfix">
+
+        <fieldset id="sidebar-master" class="sidebar">
+          <legend>Control Change</legend>
+
+          <div class="clearfix">
+            <label>key</label>
+            <select name="key">
+              <option selected="selected">A</option>
+              <option>D</option>
+              <option>G</option>
+              <option>C</option>
+              <option>F</option>
+              <option>Bb</option>
+              <option>Eb</option>
+              <option>Ab</option>
+              <option>Db</option>
+              <option>Gb</option>
+              <option>B</option>
+              <option>E</option>
+            </select>
+          </div>
+
+          <div class="clearfix">
+            <label>mode</label>
+            <select name="mode">
+              <option selected="selected">IONIAN</option>
+              <option>DORIAN</option>
+              <option>PHRYGIAN</option>
+              <option>LYDIAN</option>
+              <option>MIXOLYDIAN</option>
+              <option>AEOLIAN</option>
+              <option>LOCRIAN</option>
+            </select>
+          </div>
+
+          <div class="clearfix">
+            <label>bpm</label>
+            <input name="bpm"   type="number" min="0" max="50000" value="0">
+          </div>
+
+        </fieldset>
+
+      </div>
+    </div>
   </div>
 
   <div id="templates">
     <: include 'synth/synth.tx' :>
+
+    <div class="console-track">
+      L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
+      <input class="gain-slider" type="range" min="0" max="100" value="100" />
+    </div>
+
   </div>
 </div>
 
 
 <footer>
 
-  <div name="control" id="control" class="module">
+  <div id="control">
     key: <select name="key">
       <option selected="selected">A</option>
       <option>D</option>
@@ -62,10 +134,10 @@
 
 </footer>
 
-  <i id="btn-left"   class="fa fa-angle-left"></i>
-  <i id="btn-right"  class="fa fa-angle-right"></i>
-  <i id="btn-top"    class="fa fa-angle-up"></i>
-  <i id="btn-bottom" class="fa fa-angle-down"></i>
+  <i id="btn-left"   class="btn fa fa-angle-left"  data-line1="prev" data-line2="synth"></i>
+  <i id="btn-right"  class="btn fa fa-angle-right" data-line1="new"  data-line2="synth"></i>
+  <i id="btn-top"    class="btn fa fa-angle-up"    data-line1="mixer"></i>
+  <i id="btn-bottom" class="btn fa fa-angle-down"  data-line1="synths"></i>
 
 
 <i class="fa fa-save" id="btn-save">
