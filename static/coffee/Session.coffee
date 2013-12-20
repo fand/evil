@@ -31,6 +31,8 @@ class @Session
                 pat = @song[i][@next_pattern[i]]
                 @synth[i].readPattern(pat)
 
+#        @view.draw()
+
     nextScene: (pos) ->
         if not pos?
             @scene_pos++
@@ -47,6 +49,7 @@ class @Session
 
         @player.readScene(@song.master[@scene_pos])
         @player.setSceneLength(@scene_length)
+        @view.drawScene(@scene_pos)
 
     getScene: (i) -> @song.master[i]
 

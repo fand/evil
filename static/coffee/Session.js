@@ -63,7 +63,8 @@
         }
       }
       this.player.readScene(this.song.master[this.scene_pos]);
-      return this.player.setSceneLength(this.scene_length);
+      this.player.setSceneLength(this.scene_length);
+      return this.view.drawScene(this.scene_pos);
     };
 
     Session.prototype.getScene = function(i) {

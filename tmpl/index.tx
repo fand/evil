@@ -21,6 +21,7 @@
       <div id="mixer-tracks">
         <div id="session-tracks-wrapper">
           <canvas id="session-tracks"></canvas>
+          <canvas id="session-tracks-hover"></canvas>
         </div>
         <div id="console-tracks" class="clearfix"></div>
       </div>
@@ -28,6 +29,7 @@
       <div id="mixer-master">
         <div id="session-master-wrapper">
           <canvas id="session-master"></canvas>
+          <canvas id="session-master-hover"></canvas>
         </div>
         <div id="console-master" class="clearfix">
           <div class="console-track">

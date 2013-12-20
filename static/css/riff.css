@@ -307,11 +307,17 @@ html, body {
     overflow-x: hidden;
     overflow-y: scroll;
 }
-#session-master {
+#session-master, #session-master-hover {
+    position: absolute;
+    top: 0px;
+    left: 0px;
     width: 80px;
     height: 310px;
 }
-#session-tracks {
+#session-tracks, #session-tracks-hover {
+    position: absolute;
+    top: 0px;
+    left: 0px;
     width: 640px;
     height: 310px;
 }

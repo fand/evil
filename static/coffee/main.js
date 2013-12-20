@@ -53,7 +53,7 @@
   };
 
   $(function() {
-    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, s1, s2, scn1, scn2, scn55, song1, song2, t1, t2, tm;
+    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, s1, s2, scn1, scn2, scn55, song1, song2, t1, t2;
     window.player = new Player();
     is_key_pressed = false;
     $(window).keydown(function(e) {
@@ -118,7 +118,7 @@
     };
     p2 = {
       name: 'p2',
-      pattern: [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]
+      pattern: [8, 9, 10, 11, 12, 13, 14, 15, 8, 9, 10, 11, 12, 13, 14, 15, 8, 9, 10, 11, 12, 13, 14, 15, 8, 9, 10, 11, 12, 13, 14, 15]
     };
     p3 = {
       name: 'p3',
@@ -126,7 +126,7 @@
     };
     p4 = {
       name: 'p4',
-      pattern: [3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10]
+      pattern: [10, 11, 12, 13, 14, 15, 16, 17, 10, 11, 12, 13, 14, 15, 16, 17, 10, 11, 12, 13, 14, 15, 16, 17, 10, 11, 12, 13, 14, 15, 16, 17]
     };
     t1 = {
       name: 'lead',
@@ -153,9 +153,6 @@
       bpm: 100,
       key: 'G',
       scale: 'AEOLIAN'
-    };
-    tm = {
-      patterns: [c1, c2]
     };
     song2 = {
       tracks: [t1, t2],
