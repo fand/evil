@@ -1,6 +1,31 @@
 (function() {
   var OSC_TYPE;
 
+  this.KEY_LIST = {
+    A: 55,
+    Bb: 58.27047018976124,
+    B: 61.7354126570155,
+    C: 32.70319566257483,
+    Db: 34.64782887210901,
+    D: 36.70809598967594,
+    Eb: 38.890872965260115,
+    E: 41.20344461410875,
+    F: 43.653528929125486,
+    Gb: 46.2493028389543,
+    G: 48.999429497718666,
+    Ab: 51.91308719749314
+  };
+
+  this.SCALE_LIST = {
+    IONIAN: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16],
+    DORIAN: [0, 2, 3, 5, 7, 9, 10, 12, 14, 15],
+    PHRYGIAN: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15],
+    LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
+    MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
+    AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
+    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15]
+  };
+
   OSC_TYPE = {
     RECT: 1,
     SINE: 0,
@@ -256,8 +281,9 @@
       return this.feg.noteOff(t0);
     };
 
-    SynthCore.prototype.setKey = function(freq_key) {
-      var v, _i, _len, _ref, _results;
+    SynthCore.prototype.setKey = function(key) {
+      var freq_key, v, _i, _len, _ref, _results;
+      freq_key = KEY_LIST[key];
       _ref = this.vcos;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -412,6 +438,7 @@
       this.scale = [];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
+      this.session = this.player.session;
     }
 
     Synth.prototype.connect = function(dst) {
@@ -426,8 +453,8 @@
       return this.core.setKey(key);
     };
 
-    Synth.prototype.setScale = function(scale) {
-      this.scale = scale;
+    Synth.prototype.setScale = function(scale_name) {
+      return this.scale = SCALE_LIST[scale_name];
     };
 
     Synth.prototype.setNote = function(note) {
@@ -492,12 +519,12 @@
 
     Synth.prototype.plusPattern = function() {
       this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-      return this.player.setSceneSize();
+      return this.session.setSceneSize();
     };
 
     Synth.prototype.minusPattern = function() {
       this.pattern = this.pattern.slice(0, this.pattern.length - 32);
-      return this.player.setSceneSize();
+      return this.session.setSceneSize();
     };
 
     Synth.prototype.addNote = function(time, note) {

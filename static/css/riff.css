@@ -307,8 +307,12 @@ html, body {
     overflow-x: hidden;
     overflow-y: scroll;
 }
-#session-tracks, #session-master {
+#session-master {
     width: 80px;
+    height: 310px;
+}
+#session-tracks {
+    width: 640px;
     height: 310px;
 }
 #console-tracks {

@@ -267,48 +267,20 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
-  this.KEY_LIST = {
-    A: 55,
-    Bb: 58.27047018976124,
-    B: 61.7354126570155,
-    C: 32.70319566257483,
-    Db: 34.64782887210901,
-    D: 36.70809598967594,
-    Eb: 38.890872965260115,
-    E: 41.20344461410875,
-    F: 43.653528929125486,
-    Gb: 46.2493028389543,
-    G: 48.999429497718666,
-    Ab: 51.91308719749314
-  };
-
-  this.SCALE_LIST = {
-    IONIAN: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16],
-    DORIAN: [0, 2, 3, 5, 7, 9, 10, 12, 14, 15],
-    PHRYGIAN: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15],
-    LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
-    MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
-    AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
-    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15]
-  };
-
   this.Player = (function() {
     function Player() {
       this.bpm = 120;
       this.duration = 500;
-      this.freq_key = 55;
-      this.scale = [];
+      this.key = 'A';
+      this.scale = 'IONIAN';
       this.is_playing = false;
-      this.is_loop = true;
       this.time = 0;
-      this.scene_pos = 0;
-      this.scenes = [];
       this.scene = {};
       this.num_id = 0;
       this.context = CONTEXT;
       this.synth = [];
       this.mixer = new Mixer(this.context, this);
-      this.session = new Session(this.synth);
+      this.session = new Session(this.context, this);
       this.addSynth();
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
@@ -332,12 +304,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Player.prototype.setKey = function(key) {
       var s, _i, _len, _ref, _results;
       this.scene.key = key;
-      this.freq_key = KEY_LIST[key];
       _ref = this.synth;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        _results.push(s.setKey(this.freq_key));
+        _results.push(s.setKey(key));
       }
       return _results;
     };
@@ -345,9 +316,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Player.prototype.setScale = function(scale) {
       var s, _i, _len, _ref, _results;
       this.scale = scale;
-      if (!Array.isArray(this.scale)) {
-        this.scale = SCALE_LIST[this.scale];
-      }
       this.scene.scale = this.scale;
       _ref = this.synth;
       _results = [];
@@ -386,9 +354,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.is_playing = false;
       this.view.viewStop();
       this.time = 0;
-      this.scene_pos = 0;
-      this.scene = this.scenes[0];
-      return this.readScene(this.scene);
+      return this.readSong(this.song);
     };
 
     Player.prototype.pause = function() {
@@ -402,13 +368,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Player.prototype.forward = function() {
-      this.time = (this.time + 32) % this.scene_size;
+      this.time = (this.time + 32) % this.scene_length;
       return this.synth_now.redraw(this.time);
     };
 
     Player.prototype.backward = function() {
       if (this.time % 32 < 3 && this.time >= 32) {
-        this.time = (this.time - 32 - (this.time % 32)) % this.scene_size;
+        this.time = (this.time - 32 - (this.time % 32)) % this.scene_length;
       } else {
         this.time = this.time - (this.time % 32);
       }
@@ -416,7 +382,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Player.prototype.toggleLoop = function() {
-      return this.is_loop = !this.is_loop;
+      return this.session.toggleLoop();
     };
 
     Player.prototype.noteOn = function(note) {
@@ -431,19 +397,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var s, _i, _len, _ref,
         _this = this;
       if (this.is_playing) {
-        if ((!this.is_loop) && this.time >= this.scene_size) {
-          if (this.scene_pos === this.scenes.length - 1) {
-            this.stop();
-            return;
-          } else {
-            this.time = 0;
-            this.session.next();
-            this.scene_pos++;
-            this.scene = this.scenes[this.scene_pos];
-            this.readScene(this.scene);
-          }
+        if (this.time >= this.scene_length) {
+          this.time = 0;
+          this.session.next();
+          this.readScene(this.scene);
         }
-        if (this.time >= this.scene_size) {
+        if (this.time >= this.scene_length) {
           this.time = 0;
         }
         _ref = this.synth;
@@ -451,10 +410,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           s = _ref[_i];
           s.playAt(this.time);
         }
+        if (this.time % 32 === 31) {
+          this.session.nextMeasure(this.synth);
+        }
         this.time++;
         return T.setTimeout((function() {
           return _this.playNext();
         }), this.duration);
+      } else {
+        return this.stop();
       }
     };
 
@@ -480,68 +444,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.synth_now.activate(next_idx);
     };
 
-    Player.prototype.saveSong = function() {
-      var csrf_token, s, song_json,
-        _this = this;
-      this.scene = {
-        size: this.scene_size,
-        patterns: (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.synth;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            s = _ref[_i];
-            _results.push(s.pattern);
-          }
-          return _results;
-        }).call(this),
-        bpm: this.bpm,
-        scale: this.scale,
-        key: this.key
-      };
-      this.scenes = [this.scene];
-      song_json = JSON.stringify(this.scenes);
-      csrf_token = $('#ajax-form > input[name=csrf_token]').val();
-      return $.ajax({
-        url: '/',
-        type: 'POST',
-        dataType: 'text',
-        data: {
-          json: song_json,
-          csrf_token: csrf_token
-        }
-      }).done(function(d) {
-        return _this.showSuccess(d);
-      }).fail(function(err) {
-        return _this.showError(err);
-      });
-    };
-
     Player.prototype.readSong = function(song) {
-      var o;
-      if (typeof song_read !== "undefined" && song_read !== null) {
-        this.scenes = song_read;
-      } else {
-        this.scenes = (function() {
-          var _i, _len, _results;
-          _results = [];
-          for (_i = 0, _len = song.length; _i < _len; _i++) {
-            o = song[_i];
-            _results.push(o);
-          }
-          return _results;
-        })();
+      this.song = song;
+      while (this.song.tracks.length > this.synth.length) {
+        this.addSynth();
       }
-      return this.readScene(this.scenes[0]);
+      this.session.setSynth(this.synth);
+      this.session.readSong(song);
+      return this.view.setSynthNum(this.synth.length, this.synth_pos);
     };
 
     Player.prototype.readScene = function(scene) {
-      var i, patterns, _i, _ref;
       this.scene = scene;
-      patterns = this.scene.patterns;
-      while (patterns.length > this.synth.length) {
-        this.addSynth();
-      }
       if (this.scene.bpm != null) {
         this.setBPM(this.scene.bpm);
       }
@@ -551,26 +465,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.scene.scale != null) {
         this.setScale(this.scene.scale);
       }
-      this.view.readParam(this.bpm, this.freq_key, this.scale);
-      for (i = _i = 0, _ref = patterns.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.synth[i].readPattern(patterns[i]);
-      }
-      this.view.setSynthNum(this.synth.length, this.synth_pos);
-      return this.setSceneSize();
+      return this.view.readParam(this.bpm, this.freq_key, this.scale);
     };
 
-    Player.prototype.setSceneSize = function() {
-      var s;
-      return this.scene_size = Math.max.apply(null, (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.synth;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          s = _ref[_i];
-          _results.push(s.pattern.length);
-        }
-        return _results;
-      }).call(this));
+    Player.prototype.setSceneLength = function(scene_length) {
+      this.scene_length = scene_length;
     };
 
     Player.prototype.showSuccess = function(url) {
@@ -809,8 +708,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 }).call(this);
 ;(function() {
   this.Session = (function() {
-    function Session(synth) {
-      this.synth = synth;
+    function Session(ctx, player) {
+      this.ctx = ctx;
+      this.player = player;
       this.scenes = [];
       this.scene_pos = 0;
       this.scene = {};
@@ -820,6 +720,23 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.is_waiting_next_scene = false;
       this.view = new SessionView(this);
     }
+
+    Session.prototype.toggleLoop = function() {
+      return this.is_loop = !this.is_loop;
+    };
+
+    Session.prototype.nextMeasure = function(synth) {
+      this.synth = synth;
+      if (this.is_loop) {
+        if (this.is_waiting_next_scene) {
+          return this.nextScene();
+        } else if (this.is_waiting_next_pattern) {
+          return this.nextPattern();
+        }
+      } else {
+        return this.nextScene();
+      }
+    };
 
     Session.prototype.nextPattern = function() {
       var i, pat, _i, _ref, _results;
@@ -837,21 +754,28 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Session.prototype.nextScene = function(pos) {
-      var i, pat, _i, _ref, _results;
+      var i, pat, _i, _ref;
       if (pos == null) {
         this.scene_pos++;
         pos = this.scene_pos;
       }
-      _results = [];
+      if (this.scene_pos >= this.song_length) {
+        this.player.is_playing = false;
+        return;
+      }
       for (i = _i = 0, _ref = this.synth.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        pat = this.song[i][pos];
+        pat = this.song.tracks[i].patterns[pos].pattern;
         if (pat != null) {
-          _results.push(this.synth[i].readPattern(pat));
-        } else {
-          _results.push(void 0);
+          this.synth[i].readPattern(pat);
+          this.scene_length = Math.max(this.scene_length, pat.length);
         }
       }
-      return _results;
+      this.player.readScene(this.song.master[this.scene_pos]);
+      return this.player.setSceneLength(this.scene_length);
+    };
+
+    Session.prototype.getScene = function(i) {
+      return this.song.master[i];
     };
 
     Session.prototype.cue = function(synth_num, pat_num) {
@@ -864,8 +788,60 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.nextPattern();
     };
 
-    Session.prototype.addSynth = function(s) {
-      return this.view.addSynth();
+    Session.prototype.addSynth = function(s) {};
+
+    Session.prototype.setSynth = function(synth) {
+      this.synth = synth;
+    };
+
+    Session.prototype.readSong = function(song) {
+      var i, _i, _ref;
+      this.song = song;
+      this.scene_pos = 0;
+      this.song_length = 0;
+      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.synth[i].readPattern(this.song.tracks[i].patterns[0].pattern);
+        this.song_length = Math.max(this.song_length, song.tracks[i].patterns.length);
+      }
+      this.player.readScene(song.master[0]);
+      return this.view.readSong(song);
+    };
+
+    Session.prototype.saveSong = function() {
+      var csrf_token, s, song_json,
+        _this = this;
+      this.scene = {
+        size: this.scene_size,
+        patterns: (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.synth;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            s = _ref[_i];
+            _results.push(s.pattern);
+          }
+          return _results;
+        }).call(this),
+        bpm: this.bpm,
+        scale: this.scale,
+        key: this.key
+      };
+      this.scenes = [this.scene];
+      song_json = JSON.stringify(this.scenes);
+      csrf_token = $('#ajax-form > input[name=csrf_token]').val();
+      return $.ajax({
+        url: '/',
+        type: 'POST',
+        dataType: 'text',
+        data: {
+          json: song_json,
+          csrf_token: csrf_token
+        }
+      }).done(function(d) {
+        return _this.showSuccess(d);
+      }).fail(function(err) {
+        return _this.showError(err);
+      });
     };
 
     return Session;
@@ -883,13 +859,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.canvas_master = this.canvas_master_dom[0];
       this.ctx_tracks = this.canvas_tracks.getContext('2d');
       this.ctx_master = this.canvas_master.getContext('2d');
+      this.w = 80;
+      this.h = 20;
+      this.color = ['rgba(230, 230, 230, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
       this.initCanvas();
     }
 
     SessionView.prototype.initCanvas = function() {
-      this.canvas_tracks.width = 700;
-      this.canvas_master.width = 100;
-      this.canvas_tracks.height = this.canvas_master.height = 300;
+      this.canvas_tracks.width = this.w * 8;
+      this.canvas_master.width = this.w;
+      this.canvas_tracks.height = this.canvas_master.height = this.h * 15 + 10;
+      this.ctx_tracks.translate(0, 20);
+      this.ctx_master.translate(0, 20);
       this.rect = this.canvas_tracks.getBoundingClientRect();
       return this.offset = {
         x: this.rect.left,
@@ -897,7 +878,54 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       };
     };
 
-    SessionView.prototype.addSynth = function(s) {};
+    SessionView.prototype.readSong = function(song) {
+      var t, x, y, _i, _j, _k, _ref, _ref1, _ref2, _results;
+      for (x = _i = 0, _ref = Math.max(song.tracks.length, 8); 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
+        t = song.tracks[x];
+        if ((t != null) && (t.name != null)) {
+          this.drawTrackName(this.ctx_tracks, t.name, x);
+        }
+        for (y = _j = 0, _ref1 = Math.max(song.length, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
+          if ((t != null) && (t.patterns[y] != null)) {
+            this.drawCell(this.ctx_tracks, t.patterns[y], x, y);
+          } else {
+            this.drawEmpty(this.ctx_tracks, x, y);
+          }
+        }
+      }
+      _results = [];
+      for (y = _k = 0, _ref2 = Math.max(song.master.length, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
+        if (song.master[y] != null) {
+          _results.push(this.drawCell(this.ctx_master, song.master[y], 0, y));
+        } else {
+          _results.push(this.drawEmpty(this.ctx_master, 0, y));
+        }
+      }
+      return _results;
+    };
+
+    SessionView.prototype.drawCell = function(ctx, p, x, y) {
+      this.clearCell(ctx, x, y);
+      ctx.fillStyle = this.color[2];
+      ctx.fillRect(x * this.w, y * this.h, this.w, this.h);
+      ctx.fillStyle = this.color[4];
+      return ctx.fillText(p.name, x * this.w, (y + 1) * this.h - 3);
+    };
+
+    SessionView.prototype.drawEmpty = function(ctx, x, y) {
+      this.clearCell(ctx, x, y);
+      ctx.strokeStyle = this.color[0];
+      return ctx.strokeRect(x * this.w, y * this.h, this.w, this.h);
+    };
+
+    SessionView.prototype.clearCell = function(ctx, x, y) {
+      return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
+    };
+
+    SessionView.prototype.drawTrackName = function(ctx, name, x) {
+      ctx.fillStyle = this.color[2];
+      return ctx.fillText(name, x * this.w + 20, 5);
+    };
 
     return SessionView;
 
@@ -906,6 +934,31 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 }).call(this);
 ;(function() {
   var OSC_TYPE;
+
+  this.KEY_LIST = {
+    A: 55,
+    Bb: 58.27047018976124,
+    B: 61.7354126570155,
+    C: 32.70319566257483,
+    Db: 34.64782887210901,
+    D: 36.70809598967594,
+    Eb: 38.890872965260115,
+    E: 41.20344461410875,
+    F: 43.653528929125486,
+    Gb: 46.2493028389543,
+    G: 48.999429497718666,
+    Ab: 51.91308719749314
+  };
+
+  this.SCALE_LIST = {
+    IONIAN: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16],
+    DORIAN: [0, 2, 3, 5, 7, 9, 10, 12, 14, 15],
+    PHRYGIAN: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15],
+    LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
+    MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
+    AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
+    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15]
+  };
 
   OSC_TYPE = {
     RECT: 1,
@@ -1162,8 +1215,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.feg.noteOff(t0);
     };
 
-    SynthCore.prototype.setKey = function(freq_key) {
-      var v, _i, _len, _ref, _results;
+    SynthCore.prototype.setKey = function(key) {
+      var freq_key, v, _i, _len, _ref, _results;
+      freq_key = KEY_LIST[key];
       _ref = this.vcos;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -1318,6 +1372,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.scale = [];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
+      this.session = this.player.session;
     }
 
     Synth.prototype.connect = function(dst) {
@@ -1332,8 +1387,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.core.setKey(key);
     };
 
-    Synth.prototype.setScale = function(scale) {
-      this.scale = scale;
+    Synth.prototype.setScale = function(scale_name) {
+      return this.scale = SCALE_LIST[scale_name];
     };
 
     Synth.prototype.setNote = function(note) {
@@ -1398,12 +1453,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Synth.prototype.plusPattern = function() {
       this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-      return this.player.setSceneSize();
+      return this.session.setSceneSize();
     };
 
     Synth.prototype.minusPattern = function() {
       this.pattern = this.pattern.slice(0, this.pattern.length - 32);
-      return this.player.setSceneSize();
+      return this.session.setSceneSize();
     };
 
     Synth.prototype.addNote = function(time, note) {
@@ -1878,7 +1933,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
   $(function() {
-    var footer_size, is_key_pressed, s1, s2, scn1, scn2, scn55, song1;
+    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, s1, s2, scn1, scn2, scn55, song1, song2, t1, t2, tm;
     window.player = new Player();
     is_key_pressed = false;
     $(window).keydown(function(e) {
@@ -1937,7 +1992,57 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       patterns: [[1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10]]
     };
     song1 = [s1, s2];
-    player.readSong(song1);
+    p1 = {
+      name: 'p1',
+      pattern: [10, 10, 17, 10, 17, 10, 16, 10, 10, 10, 17, 10, 17, 10, 16, 10, 8, 8, 17, 8, 17, 8, 16, 8, 9, 9, 17, 9, 17, 9, 16, 9]
+    };
+    p2 = {
+      name: 'p2',
+      pattern: [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]
+    };
+    p3 = {
+      name: 'p3',
+      pattern: [8, 8, 15, 8, 15, 8, 14, 8, 8, 8, 15, 8, 15, 8, 14, 8, 6, 6, 15, 6, 15, 6, 14, 6, 7, 7, 15, 7, 15, 7, 14, 7]
+    };
+    p4 = {
+      name: 'p4',
+      pattern: [3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10]
+    };
+    t1 = {
+      name: 'lead',
+      patterns: [p1, p2],
+      params: [],
+      gain: 1.0,
+      pan: -1.0
+    };
+    t2 = {
+      name: 'chorus',
+      patterns: [p3, p4],
+      params: [],
+      gain: 1.0,
+      pan: 1.0
+    };
+    c1 = {
+      name: 'intro',
+      bpm: 80,
+      key: 'A',
+      scale: 'IONIAN'
+    };
+    c2 = {
+      name: 'outro',
+      bpm: 100,
+      key: 'G',
+      scale: 'AEOLIAN'
+    };
+    tm = {
+      patterns: [c1, c2]
+    };
+    song2 = {
+      tracks: [t1, t2],
+      master: [c1, c2],
+      length: 2
+    };
+    player.readSong(song2);
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
