@@ -23,7 +23,7 @@
       var s, _i, _len, _ref, _results;
       this.bpm = bpm;
       this.scene.bpm = this.bpm;
-      this.duration = 15.0 / this.bpm * 1000;
+      this.duration = 7500.0 / this.bpm;
       _ref = this.synth;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -100,6 +100,9 @@
     };
 
     Player.prototype.forward = function() {
+      if ((this.time + 32) > this.scene_length) {
+        this.session.nextMeasure(this.synth);
+      }
       this.time = (this.time + 32) % this.scene_length;
       return this.synth_now.redraw(this.time);
     };
@@ -129,11 +132,6 @@
       var s, _i, _len, _ref,
         _this = this;
       if (this.is_playing) {
-        if (this.time >= this.scene_length) {
-          this.time = 0;
-          this.session.next();
-          this.readScene(this.scene);
-        }
         if (this.time >= this.scene_length) {
           this.time = 0;
         }
@@ -202,6 +200,18 @@
 
     Player.prototype.setSceneLength = function(scene_length) {
       this.scene_length = scene_length;
+    };
+
+    Player.prototype.resetSceneLength = function(l) {
+      var s, _i, _len, _ref, _results;
+      this.scene_length = 0;
+      _ref = this.synth;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        _results.push(this.scene_length = Math.max(this.scene_length, s.pattern.length));
+      }
+      return _results;
     };
 
     Player.prototype.showSuccess = function(url) {

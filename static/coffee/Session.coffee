@@ -4,7 +4,7 @@ class @Session
         @scene_pos = 0
         @scene = {}
 
-        @next_pattern
+        @next_pattern_pos = []
 
         @is_loop = true
         @is_waiting_next_pattern = false
@@ -27,11 +27,11 @@ class @Session
     nextPattern: () ->
         @is_waiting_next_pattern = false
         for i in [0...@synth.length]
-            if @next_pattern[i]?
-                pat = @song[i][@next_pattern[i]]
+            if @next_pattern_pos[i]?
+                pat = @song[i][@next_pattern_pos[i]]
                 @synth[i].readPattern(pat)
-
-#        @view.draw()
+        @view.drawScene(@scene_pos, @next_pattern_pos)
+        @next_pattern_pos = []
 
     nextScene: (pos) ->
         if not pos?
@@ -55,7 +55,7 @@ class @Session
 
     cue: (synth_num, pat_num) ->
         @is_waiting_next_pattern = true
-        @next_pattern[synth_num] = pat_num
+        @next_pattern_pos[synth_num] = pat_num
 
     next: () ->
         @nextScene()
@@ -70,10 +70,13 @@ class @Session
     readSong: (@song) ->
         @scene_pos = 0
         @song_length = 0
+        @scene_length = 0
         for i in [0...@song.tracks.length]
             @synth[i].readPattern(@song.tracks[i].patterns[0].pattern)
             @song_length = Math.max(@song_length, song.tracks[i].patterns.length)
+            @scene_length = Math.max(@scene_length, song.tracks[i].patterns[0].pattern.length)
         @player.readScene(song.master[0])
+        @player.setSceneLength(@scene_length)
         @view.readSong(song)
 
     saveSong: () ->

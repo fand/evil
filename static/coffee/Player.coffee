@@ -57,6 +57,8 @@ class @Player
         @is_playing = false
 
     forward: ->
+        if (@time + 32) > @scene_length
+            @session.nextMeasure(@synth)
         @time = (@time + 32) % @scene_length
         @synth_now.redraw(@time)
 
@@ -76,10 +78,8 @@ class @Player
         if @is_playing
             if @time >= @scene_length
                 @time = 0
-                @session.next()
-                @readScene(@scene)
+                #@readScene(@scene)
 
-            @time = 0 if @time >= @scene_length
             s.playAt(@time) for s in @synth
 
             if @time % 32 == 31
@@ -123,6 +123,11 @@ class @Player
         @view.readParam(@bpm, @freq_key, @scale)
 
     setSceneLength: (@scene_length) ->
+
+    resetSceneLength: (l) ->
+        @scene_length = 0
+        for s in @synth
+            @scene_length = Math.max(@scene_length, s.pattern.length)
 
     showSuccess: (url) ->
         console.log("success!")

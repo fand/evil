@@ -6,7 +6,7 @@
       this.scenes = [];
       this.scene_pos = 0;
       this.scene = {};
-      this.next_pattern;
+      this.next_pattern_pos = [];
       this.is_loop = true;
       this.is_waiting_next_pattern = false;
       this.is_waiting_next_scene = false;
@@ -31,18 +31,16 @@
     };
 
     Session.prototype.nextPattern = function() {
-      var i, pat, _i, _ref, _results;
+      var i, pat, _i, _ref;
       this.is_waiting_next_pattern = false;
-      _results = [];
       for (i = _i = 0, _ref = this.synth.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        if (this.next_pattern[i] != null) {
-          pat = this.song[i][this.next_pattern[i]];
-          _results.push(this.synth[i].readPattern(pat));
-        } else {
-          _results.push(void 0);
+        if (this.next_pattern_pos[i] != null) {
+          pat = this.song[i][this.next_pattern_pos[i]];
+          this.synth[i].readPattern(pat);
         }
       }
-      return _results;
+      this.view.drawScene(this.scene_pos, this.next_pattern_pos);
+      return this.next_pattern_pos = [];
     };
 
     Session.prototype.nextScene = function(pos) {
@@ -73,7 +71,7 @@
 
     Session.prototype.cue = function(synth_num, pat_num) {
       this.is_waiting_next_pattern = true;
-      return this.next_pattern[synth_num] = pat_num;
+      return this.next_pattern_pos[synth_num] = pat_num;
     };
 
     Session.prototype.next = function() {
@@ -92,11 +90,14 @@
       this.song = song;
       this.scene_pos = 0;
       this.song_length = 0;
+      this.scene_length = 0;
       for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         this.synth[i].readPattern(this.song.tracks[i].patterns[0].pattern);
         this.song_length = Math.max(this.song_length, song.tracks[i].patterns.length);
+        this.scene_length = Math.max(this.scene_length, song.tracks[i].patterns[0].pattern.length);
       }
       this.player.readScene(song.master[0]);
+      this.player.setSceneLength(this.scene_length);
       return this.view.readSong(song);
     };
 

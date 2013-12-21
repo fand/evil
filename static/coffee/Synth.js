@@ -519,12 +519,12 @@
 
     Synth.prototype.plusPattern = function() {
       this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-      return this.session.setSceneSize();
+      return this.player.resetSceneLength();
     };
 
     Synth.prototype.minusPattern = function() {
       this.pattern = this.pattern.slice(0, this.pattern.length - 32);
-      return this.session.setSceneSize();
+      return this.player.resetSceneLength();
     };
 
     Synth.prototype.addNote = function(time, note) {

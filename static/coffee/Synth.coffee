@@ -350,11 +350,13 @@ class @Synth
 
     plusPattern: ->
         @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-        @session.setSceneSize()
+#        @session.setSceneLength()
+        @player.resetSceneLength()
 
     minusPattern: ->
         @pattern = @pattern.slice(0, @pattern.length - 32)
-        @session.setSceneSize()
+#        @session.setSceneLength()
+        @player.resetSceneLength()
 
     addNote: (time, note) ->
         @pattern[time] = note
