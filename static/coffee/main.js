@@ -53,7 +53,7 @@
   };
 
   $(function() {
-    var footer_size, is_key_pressed, s1, s2, scn1, scn2, scn55, song1;
+    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, s1, s2, scn1, scn2, scn55, song1, song2, t1, t2;
     window.player = new Player();
     is_key_pressed = false;
     $(window).keydown(function(e) {
@@ -112,7 +112,56 @@
       patterns: [[1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10]]
     };
     song1 = [s1, s2];
-    player.readSong(song1);
+    p1 = {
+      name: 'p1',
+      pattern: [10, 10, 17, 10, 17, 10, 16, 10, 10, 10, 17, 10, 17, 10, 16, 10, 8, 8, 17, 8, 17, 8, 16, 8, 9, 9, 17, 9, 17, 9, 16, 9]
+    };
+    p2 = {
+      name: 'p2',
+      pattern: [8, 9, 10, 11, 12, 13, 14, 15, 8, 9, 10, 11, 12, 13, 14, 15, 8, 9, 10, 11, 12, 13, 14, 15, 8, 9, 10, 11, 12, 13, 14, 15]
+    };
+    p3 = {
+      name: 'p3',
+      pattern: [8, 8, 15, 8, 15, 8, 14, 8, 8, 8, 15, 8, 15, 8, 14, 8, 6, 6, 15, 6, 15, 6, 14, 6, 7, 7, 15, 7, 15, 7, 14, 7]
+    };
+    p4 = {
+      name: 'p4',
+      pattern: [10, 11, 12, 13, 14, 15, 16, 17, 10, 11, 12, 13, 14, 15, 16, 17, 10, 11, 12, 13, 14, 15, 16, 17, 10, 11, 12, 13, 14, 15, 16, 17]
+    };
+    t1 = {
+      id: 1,
+      name: 'lead',
+      patterns: [p1, p2],
+      params: [],
+      gain: 1.0,
+      pan: -1.0
+    };
+    t2 = {
+      id: 2,
+      name: 'chorus',
+      patterns: [p3, p4],
+      params: [],
+      gain: 1.0,
+      pan: 1.0
+    };
+    c1 = {
+      name: 'intro',
+      bpm: 80,
+      key: 'A',
+      scale: 'IONIAN'
+    };
+    c2 = {
+      name: 'outro',
+      bpm: 100,
+      key: 'G',
+      scale: 'AEOLIAN'
+    };
+    song2 = {
+      tracks: [t1, t2],
+      master: [c1, c2],
+      length: 2
+    };
+    player.readSong(song2);
     $("#twitter").socialbutton('twitter', {
       button: 'horizontal',
       text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'

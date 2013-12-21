@@ -69,7 +69,7 @@ class @PlayerView
             @play.removeClass("fa-pause").addClass("fa-play")
         else
             @model.play()
-        @play.removeClass("fa-play").addClass("fa-pause")
+            @play.removeClass("fa-play").addClass("fa-pause")
 
     viewStop: (receiver) ->
         receiver.stop() if receiver?

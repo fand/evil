@@ -79,11 +79,11 @@
     PlayerView.prototype.viewPlay = function() {
       if (this.model.isPlaying()) {
         this.model.pause();
-        this.play.removeClass("fa-pause").addClass("fa-play");
+        return this.play.removeClass("fa-pause").addClass("fa-play");
       } else {
         this.model.play();
+        return this.play.removeClass("fa-play").addClass("fa-pause");
       }
-      return this.play.removeClass("fa-play").addClass("fa-pause");
     };
 
     PlayerView.prototype.viewStop = function(receiver) {

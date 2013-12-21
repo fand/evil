@@ -1,3 +1,26 @@
+@KEY_LIST =
+    A:  55
+    Bb: 58.27047018976124
+    B:  61.7354126570155
+    C:  32.70319566257483
+    Db: 34.64782887210901
+    D:  36.70809598967594
+    Eb: 38.890872965260115
+    E:  41.20344461410875
+    F:  43.653528929125486
+    Gb: 46.2493028389543
+    G:  48.999429497718666
+    Ab: 51.91308719749314
+
+@SCALE_LIST =
+    IONIAN:     [0,2,4,5,7,9,11,12,14,16]
+    DORIAN:     [0,2,3,5,7,9,10,12,14,15]
+    PHRYGIAN:   [0,1,3,5,7,8,10,12,13,15]
+    LYDIAN:     [0,2,4,6,7,9,11,12,14,16]
+    MIXOLYDIAN: [0,2,4,5,7,9,10,12,14,16]
+    AEOLIAN:    [0,2,3,5,7,8,10,12,14,15]
+    LOCRIAN:    [0,1,3,5,6,8,10,12,13,15]
+
 OSC_TYPE =
     RECT:     1
     SINE:     0
@@ -155,7 +178,8 @@ class @SynthCore
         @eg.noteOff(t0)
         @feg.noteOff(t0)
 
-    setKey: (freq_key) ->
+    setKey: (key) ->
+        freq_key = KEY_LIST[key]
         v.setKey(freq_key) for v in @vcos
 
     setScale: (@scale) ->
@@ -278,11 +302,13 @@ class @Synth
         @view = new SynthView(this, @id)
         @core = new SynthCore(this, @ctx, @id)
 
+        @session = @player.session
+
     connect: (dst) -> @core.connect(dst)
 
     setDuration: (@duration) ->
     setKey:  (key) -> @core.setKey(key)
-    setScale: (@scale) ->
+    setScale: (scale_name) -> @scale = SCALE_LIST[scale_name]
     setNote: (note) -> @core.setNote(note)
 
     setGain: (gain) -> @core.setGain(gain)
@@ -324,11 +350,13 @@ class @Synth
 
     plusPattern: ->
         @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-        @player.setSceneSize()
+#        @session.setSceneLength()
+        @player.resetSceneLength()
 
     minusPattern: ->
         @pattern = @pattern.slice(0, @pattern.length - 32)
-        @player.setSceneSize()
+#        @session.setSceneLength()
+        @player.resetSceneLength()
 
     addNote: (time, note) ->
         @pattern[time] = note
@@ -342,3 +370,5 @@ class @Synth
     redraw: (@time) ->
         @view.drawPattern(@time)
         @view.playAt(@time)
+
+    setId: (@id) ->

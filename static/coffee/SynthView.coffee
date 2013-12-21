@@ -58,6 +58,7 @@ class @SynthView
         @canvas_hover.height = @canvas_on.height = @canvas_off.height = 520
         @rect = @canvas_off.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top
+
         for i in [0...20]
             for j in [0...32]
                 @ctx_off.drawImage(@cell,
