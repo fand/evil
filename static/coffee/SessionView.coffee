@@ -31,6 +31,7 @@ class @SessionView
         @img_play.onload = () => @initCanvas()
 
         @last_active = []
+        @current_cells = []
 
         @hover_pos = x:-1, y:-1
         @click_pos = x:-1, y:-1
@@ -65,24 +66,43 @@ class @SessionView
         x: _x
         y: _y
 
+    getPlayPos: (rect, e) ->
+        _x = Math.floor((e.clientX - rect.left) / @w)
+        _y = Math.floor((e.clientY - rect.top - @offset_translate) / @h)
+        if not ((e.clientX - rect.left) - _x * @w < 20 and (e.clientY - rect.top - @offset_translate) - _y * @h < 20)
+            return undefined
+        else
+            x: _x
+            y: _y
+
     initEvent: ->
         @canvas_tracks_hover_dom.on('mousemove', (e) =>
             pos = @getPos(@rect_tracks, e)
-            @drawHover(pos)
+            @drawHover(@ctx_tracks_hover, pos)
         ).on('mouseout', (e) =>
-            @clearHover()
+            @clearHover(@ctx_tracks_hover)
             @hover_pos = x:-1, y:-1
+        ).on('mousedown', (e) =>
+            pos = @getPlayPos(@rect_tracks, e)
+            if pos?
+                @cueTracks(pos.x, pos.y)
         )
-
 
         @canvas_master_hover_dom.on('mousemove', (e) =>
             pos = @getPos(@rect_master, e)
+            @drawHover(@ctx_master_hover, pos)
+        ).on('mouseout', (e) =>
+            @clearHover(@ctx_master_hover)
+        ).on('mousedown', (e) =>
+            pos = @getPlayPos(@rect_master, e)
+            if pos?
+                @cueMaster(pos.x, pos.y)
         )
 
-        @readSong(@song)
+        @readSong(@song, @current_cells)
 
 
-    readSong: (@song) ->
+    readSong: (@song, @current_cells) ->
         for x in [0...Math.max(song.tracks.length + 1, 8)]
             t = song.tracks[x]
             @drawTrackName(@ctx_tracks, t.name, x) if t? and t.name?
@@ -98,7 +118,7 @@ class @SessionView
             else
                 @drawEmpty(@ctx_master, 0, y)
 
-        @drawScene(0)
+        @drawScene(0, @current_cells)
 
     drawCell: (ctx, p, x, y) ->
         @clearCell(ctx, x, y)
@@ -134,13 +154,15 @@ class @SessionView
         ctx.fillText(name, x * @w + dx + 2, -dy-3)
         ctx.shadowBlur  = 0
 
-    drawScene: (pos, next_pos) ->
+    drawScene: (pos, cells) ->
         @ctx_tracks_on.clearRect(0, @scene_pos * @h, @w * 8, @h)
         @ctx_master_on.clearRect(0, @scene_pos * @h, @w, @h)
 
-        for x in [0...@song.tracks.length]
-            y = if next_pos? and next_pos[x]? then next_pos[x] else pos
-            @drawActive(x, y)
+        if cells?
+            @current_cells = cells
+
+        for i in [0...@current_cells.length]
+            @drawActive(i, @current_cells[i])
 
         @drawActiveMaster(pos)
         @scene_pos = pos
@@ -163,22 +185,45 @@ class @SessionView
         # outside cell
         @ctx_master_on.strokeStyle = 'rgba(0, 230, 255, 0.3)'
         @ctx_master_on.lineWidth = 2
-        console.log('y: ' + y)
         @ctx_master_on.strokeRect(4, y*@h + 4, @w-6, @h-6)
 
         # inside cell
         @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  4, y*@h + 4, 15, 16)
 
+    drawHover: (ctx, pos) ->
+        @clearHover(ctx)
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'
+        ctx.fillRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
+        if ctx == @ctx_tracks_hover
+            @hover_pos = pos
 
-    drawHover: (pos) ->
-        @clearHover()
-        @ctx_tracks_hover.fillStyle = 'rgba(255,255,255,0.4)'
-        @ctx_tracks_hover.fillRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
-        @hover_pos = pos
-
-    clearHover: () ->
-        @ctx_tracks_hover.clearRect(@hover_pos.x * @w, -100, @w, 10000)
-        @ctx_tracks_hover.clearRect(0, @hover_pos.y * @h, 10000, @h)
+    clearHover: (ctx) ->
+        if ctx == @ctx_tracks_hover
+            ctx.clearRect(@hover_pos.x * @w, -100, @w, 10000)
+            ctx.clearRect(0, @hover_pos.y * @h, 10000, @h)
+        else
+            ctx.clearRect(0, 0, @w, 1000)
 
     clearActive: (x) ->
         @ctx_tracks_on.clearRect(x*@w, @last_active[x]*@h, @w, @h)
+
+
+    cueTracks: (x, y) ->
+        @model.cuePattern(x, y)
+        @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18, x*@w + 4, y*@h + 4, 15, 16)
+        window.setTimeout(( => @ctx_tracks_on.clearRect(x*@w+4, y*@h+4, 15, 16)), 100)
+
+    cueMaster: (x, y) ->
+        @model.cueScene(y)
+        @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  4, y*@h + 4, 15, 16)
+        window.setTimeout(( => @ctx_master_on.clearRect(4, y*@h + 4, 15, 16)), 100)
+
+    beat: (is_master, cells) ->
+        if is_master
+            c = cells
+            @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18, c[0]*@w + 4, c[1]*@h + 4, 15, 16)
+            window.setTimeout(( => @ctx_master_on.clearRect(c[0]*@w+4, c[1]*@h+4, 15, 16)), 100)
+        else
+            for c in cells
+                @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18, c[0]*@w + 4, c[1]*@h + 4, 15, 16)
+                window.setTimeout(( => @ctx_tracks_on.clearRect(c[0]*@w+4, c[1]*@h+4, 15, 16)), 100)

@@ -78,12 +78,14 @@ class @Player
         if @is_playing
             if @time >= @scene_length
                 @time = 0
-                #@readScene(@scene)
 
             s.playAt(@time) for s in @synth
 
             if @time % 32 == 31
                 @session.nextMeasure(@synth)
+
+            if @time % 8 == 0
+                @session.beat()
 
             @time++
             T.setTimeout(( => @playNext()), @duration)
@@ -111,7 +113,6 @@ class @Player
     readSong: (@song) ->
         while @song.tracks.length > @synth.length
             @addSynth()
-
         @session.setSynth(@synth)
         @session.readSong(song)
         @view.setSynthNum(@synth.length, @synth_pos)

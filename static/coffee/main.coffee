@@ -124,8 +124,8 @@ $(() ->
     p2 = name: 'p2', pattern: [8,9,10,11,12,13,14,15,8,9,10,11,12,13,14,15,8,9,10,11,12,13,14,15,8,9,10,11,12,13,14,15]
     p3 = name: 'p3', pattern: [8,8,15,8,15,8,14,8,8,8,15,8,15,8,14,8,6,6,15,6,15,6,14,6,7,7,15,7,15,7,14,7]
     p4 = name: 'p4', pattern: [10,11,12,13,14,15,16,17,10,11,12,13,14,15,16,17,10,11,12,13,14,15,16,17,10,11,12,13,14,15,16,17]
-    t1 = name: 'lead', patterns: [p1, p2], params: [], gain: 1.0, pan: -1.0
-    t2 = name: 'chorus', patterns: [p3, p4], params: [], gain: 1.0, pan: 1.0
+    t1 = id: 1, name: 'lead', patterns: [p1, p2], params: [], gain: 1.0, pan: -1.0
+    t2 = id: 2, name: 'chorus', patterns: [p3, p4], params: [], gain: 1.0, pan: 1.0
     c1 = name: 'intro', bpm: 80, key: 'A', scale: 'IONIAN'
     c2 = name: 'outro', bpm: 100, key: 'G', scale: 'AEOLIAN'
 

@@ -30,6 +30,7 @@
         return _this.initCanvas();
       };
       this.last_active = [];
+      this.current_cells = [];
       this.hover_pos = {
         x: -1,
         y: -1
@@ -70,29 +71,59 @@
       };
     };
 
+    SessionView.prototype.getPlayPos = function(rect, e) {
+      var _x, _y;
+      _x = Math.floor((e.clientX - rect.left) / this.w);
+      _y = Math.floor((e.clientY - rect.top - this.offset_translate) / this.h);
+      if (!((e.clientX - rect.left) - _x * this.w < 20 && (e.clientY - rect.top - this.offset_translate) - _y * this.h < 20)) {
+        return void 0;
+      } else {
+        return {
+          x: _x,
+          y: _y
+        };
+      }
+    };
+
     SessionView.prototype.initEvent = function() {
       var _this = this;
       this.canvas_tracks_hover_dom.on('mousemove', function(e) {
         var pos;
         pos = _this.getPos(_this.rect_tracks, e);
-        return _this.drawHover(pos);
+        return _this.drawHover(_this.ctx_tracks_hover, pos);
       }).on('mouseout', function(e) {
-        _this.clearHover();
+        _this.clearHover(_this.ctx_tracks_hover);
         return _this.hover_pos = {
           x: -1,
           y: -1
         };
+      }).on('mousedown', function(e) {
+        var pos;
+        pos = _this.getPlayPos(_this.rect_tracks, e);
+        if (pos != null) {
+          return _this.cueTracks(pos.x, pos.y);
+        }
       });
       this.canvas_master_hover_dom.on('mousemove', function(e) {
         var pos;
-        return pos = _this.getPos(_this.rect_master, e);
+        pos = _this.getPos(_this.rect_master, e);
+        return _this.drawHover(_this.ctx_master_hover, pos);
+      }).on('mouseout', function(e) {
+        return _this.clearHover(_this.ctx_master_hover);
+      }).on('mousedown', function(e) {
+        var pos;
+        pos = _this.getPlayPos(_this.rect_master, e);
+        if (pos != null) {
+          return _this.cueMaster(pos.x, pos.y);
+        }
       });
-      return this.readSong(this.song);
+      return this.readSong(this.song, this.current_cells);
     };
 
-    SessionView.prototype.readSong = function(song) {
+    SessionView.prototype.readSong = function(song, current_cells) {
       var t, x, y, _i, _j, _k, _ref, _ref1, _ref2;
       this.song = song;
+      this.current_cells = current_cells;
       for (x = _i = 0, _ref = Math.max(song.tracks.length + 1, 8); 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         t = song.tracks[x];
         if ((t != null) && (t.name != null)) {
@@ -113,7 +144,7 @@
           this.drawEmpty(this.ctx_master, 0, y);
         }
       }
-      return this.drawScene(0);
+      return this.drawScene(0, this.current_cells);
     };
 
     SessionView.prototype.drawCell = function(ctx, p, x, y) {
@@ -151,13 +182,15 @@
       return ctx.shadowBlur = 0;
     };
 
-    SessionView.prototype.drawScene = function(pos, next_pos) {
-      var x, y, _i, _ref;
+    SessionView.prototype.drawScene = function(pos, cells) {
+      var i, _i, _ref;
       this.ctx_tracks_on.clearRect(0, this.scene_pos * this.h, this.w * 8, this.h);
       this.ctx_master_on.clearRect(0, this.scene_pos * this.h, this.w, this.h);
-      for (x = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
-        y = (next_pos != null) && (next_pos[x] != null) ? next_pos[x] : pos;
-        this.drawActive(x, y);
+      if (cells != null) {
+        this.current_cells = cells;
+      }
+      for (i = _i = 0, _ref = this.current_cells.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.drawActive(i, this.current_cells[i]);
       }
       this.drawActiveMaster(pos);
       return this.scene_pos = pos;
@@ -176,25 +209,70 @@
       this.ctx_master_on.clearRect(0, 0, this.w, 10000);
       this.ctx_master_on.strokeStyle = 'rgba(0, 230, 255, 0.3)';
       this.ctx_master_on.lineWidth = 2;
-      console.log('y: ' + y);
       this.ctx_master_on.strokeRect(4, y * this.h + 4, this.w - 6, this.h - 6);
       return this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 4, y * this.h + 4, 15, 16);
     };
 
-    SessionView.prototype.drawHover = function(pos) {
-      this.clearHover();
-      this.ctx_tracks_hover.fillStyle = 'rgba(255,255,255,0.4)';
-      this.ctx_tracks_hover.fillRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
-      return this.hover_pos = pos;
+    SessionView.prototype.drawHover = function(ctx, pos) {
+      this.clearHover(ctx);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
+      if (ctx === this.ctx_tracks_hover) {
+        return this.hover_pos = pos;
+      }
     };
 
-    SessionView.prototype.clearHover = function() {
-      this.ctx_tracks_hover.clearRect(this.hover_pos.x * this.w, -100, this.w, 10000);
-      return this.ctx_tracks_hover.clearRect(0, this.hover_pos.y * this.h, 10000, this.h);
+    SessionView.prototype.clearHover = function(ctx) {
+      if (ctx === this.ctx_tracks_hover) {
+        ctx.clearRect(this.hover_pos.x * this.w, -100, this.w, 10000);
+        return ctx.clearRect(0, this.hover_pos.y * this.h, 10000, this.h);
+      } else {
+        return ctx.clearRect(0, 0, this.w, 1000);
+      }
     };
 
     SessionView.prototype.clearActive = function(x) {
       return this.ctx_tracks_on.clearRect(x * this.w, this.last_active[x] * this.h, this.w, this.h);
+    };
+
+    SessionView.prototype.cueTracks = function(x, y) {
+      var _this = this;
+      this.model.cuePattern(x, y);
+      this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, x * this.w + 4, y * this.h + 4, 15, 16);
+      return window.setTimeout((function() {
+        return _this.ctx_tracks_on.clearRect(x * _this.w + 4, y * _this.h + 4, 15, 16);
+      }), 100);
+    };
+
+    SessionView.prototype.cueMaster = function(x, y) {
+      var _this = this;
+      this.model.cueScene(y);
+      this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 4, y * this.h + 4, 15, 16);
+      return window.setTimeout((function() {
+        return _this.ctx_master_on.clearRect(4, y * _this.h + 4, 15, 16);
+      }), 100);
+    };
+
+    SessionView.prototype.beat = function(is_master, cells) {
+      var c, _i, _len, _results,
+        _this = this;
+      if (is_master) {
+        c = cells;
+        this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, c[0] * this.w + 4, c[1] * this.h + 4, 15, 16);
+        return window.setTimeout((function() {
+          return _this.ctx_master_on.clearRect(c[0] * _this.w + 4, c[1] * _this.h + 4, 15, 16);
+        }), 100);
+      } else {
+        _results = [];
+        for (_i = 0, _len = cells.length; _i < _len; _i++) {
+          c = cells[_i];
+          this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, c[0] * this.w + 4, c[1] * this.h + 4, 15, 16);
+          _results.push(window.setTimeout((function() {
+            return _this.ctx_tracks_on.clearRect(c[0] * _this.w + 4, c[1] * _this.h + 4, 15, 16);
+          }), 100));
+        }
+        return _results;
+      }
     };
 
     return SessionView;

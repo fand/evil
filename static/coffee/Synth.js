@@ -549,6 +549,10 @@
       return this.view.playAt(this.time);
     };
 
+    Synth.prototype.setId = function(id) {
+      this.id = id;
+    };
+
     return Synth;
 
   })();

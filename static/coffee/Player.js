@@ -143,6 +143,9 @@
         if (this.time % 32 === 31) {
           this.session.nextMeasure(this.synth);
         }
+        if (this.time % 8 === 0) {
+          this.session.beat();
+        }
         this.time++;
         return T.setTimeout((function() {
           return _this.playNext();
