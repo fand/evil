@@ -23,7 +23,9 @@ class @Player
 
     setBPM: (@bpm) ->
         @scene.bpm = @bpm
-        @duration = 15.0 / @bpm * 1000  # msec
+
+        # @duration = (60000.0 / @bpm) / 8.0
+        @duration = 7500.0 / @bpm
         s.setDuration(@duration) for s in @synth
 
     setKey: (key)->
