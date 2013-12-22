@@ -165,7 +165,7 @@
       this.current_cells[synth_num] = pat_num;
       this.view.readSong(this.song, this.current_cells);
       this.player.moveTo(synth_num);
-      return this.song.tracks[synth_num].patterns[pat_num].pattern;
+      return [synth_num, pat_num, this.song.tracks[synth_num].patterns[pat_num].pattern];
     };
 
     Session.prototype.savePatterns = function() {

@@ -126,7 +126,7 @@ class @Session
         @view.readSong(@song, @current_cells)
         @player.moveTo(synth_num)
 
-        return @song.tracks[synth_num].patterns[pat_num].pattern
+        return [synth_num, pat_num, @song.tracks[synth_num].patterns[pat_num].pattern]
 
     savePatterns: ->
         for i in [0...@current_cells.length]

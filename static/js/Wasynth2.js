@@ -303,8 +303,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Player.prototype.setKey = function(key) {
       var s, _i, _len, _ref, _results;
-      console.log('key');
-      console.log(key);
       this.scene.key = key;
       _ref = this.synth;
       _results = [];
@@ -910,7 +908,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.current_cells[synth_num] = pat_num;
       this.view.readSong(this.song, this.current_cells);
       this.player.moveTo(synth_num);
-      return this.song.tracks[synth_num].patterns[pat_num].pattern;
+      return [synth_num, pat_num, this.song.tracks[synth_num].patterns[pat_num].pattern];
     };
 
     Session.prototype.savePatterns = function() {
@@ -1098,7 +1096,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         } else {
           pos = _this.getPos(_this.rect_tracks, e);
           now = performance.now();
-          if (now - _this.last_clicked < 500) {
+          if (now - _this.last_clicked < 500 && pos.y !== -1) {
             _this.editPattern(pos);
             return _this.last_clicked = -10000;
           } else {
@@ -1282,7 +1280,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SessionView.prototype.editPattern = function(pos) {
       var pat;
       pat = this.model.editPattern(pos.x, pos.y);
-      return this.drawCell(this.ctx_tracks, pat, pos.x, pos.y);
+      return this.drawCell(this.ctx_tracks, pat[0], pat[1], pat[2]);
     };
 
     SessionView.prototype.addSynth = function(song) {

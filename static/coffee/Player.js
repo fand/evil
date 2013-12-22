@@ -35,8 +35,6 @@
 
     Player.prototype.setKey = function(key) {
       var s, _i, _len, _ref, _results;
-      console.log('key');
-      console.log(key);
       this.scene.key = key;
       _ref = this.synth;
       _results = [];

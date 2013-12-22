@@ -87,9 +87,13 @@ class @SessionView
             else
                 pos = @getPos(@rect_tracks, e)
                 now = performance.now()
-                if now - @last_clicked < 500
+
+                # Double clicked
+                if now - @last_clicked < 500 and pos.y != -1
                     @editPattern(pos)
                     @last_clicked = -10000  # prevent triple-click
+
+                # Clicked
                 else
                     @last_clicked = now
         )
@@ -236,7 +240,7 @@ class @SessionView
 
     editPattern: (pos) ->
         pat = @model.editPattern(pos.x, pos.y)
-        @drawCell(@ctx_tracks, pat, pos.x, pos.y)
+        @drawCell(@ctx_tracks, pat[0], pat[1], pat[2])
 
     addSynth: (@song) ->
         x = @song.tracks.length - 1

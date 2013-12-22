@@ -29,8 +29,6 @@ class @Player
         s.setDuration(@duration) for s in @synth
 
     setKey: (key)->
-        console.log('key')
-        console.log(key)
         @scene.key = key
         s.setKey(key) for s in @synth
 

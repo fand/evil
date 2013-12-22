@@ -106,7 +106,7 @@
         } else {
           pos = _this.getPos(_this.rect_tracks, e);
           now = performance.now();
-          if (now - _this.last_clicked < 500) {
+          if (now - _this.last_clicked < 500 && pos.y !== -1) {
             _this.editPattern(pos);
             return _this.last_clicked = -10000;
           } else {
@@ -290,7 +290,7 @@
     SessionView.prototype.editPattern = function(pos) {
       var pat;
       pat = this.model.editPattern(pos.x, pos.y);
-      return this.drawCell(this.ctx_tracks, pat, pos.x, pos.y);
+      return this.drawCell(this.ctx_tracks, pat[0], pat[1], pat[2]);
     };
 
     SessionView.prototype.addSynth = function(song) {
