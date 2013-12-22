@@ -240,7 +240,8 @@ class @SessionView
     drawHover: (ctx, pos) ->
         @clearHover(ctx)
         ctx.fillStyle = 'rgba(255,255,255,0.4)'
-        ctx.fillRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
+#        ctx.fillRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
+        ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
         if ctx == @ctx_tracks_hover
             @hover_pos = pos
 
@@ -284,11 +285,4 @@ class @SessionView
         @drawCell(@ctx_tracks, pat[0], pat[1], pat[2])
 
     addSynth: (@song) ->
-        x = @song.tracks.length - 1
-        t = @song.tracks[x]
-        @drawTrackName(@ctx_tracks, t.name, x) if t? and t.name?
-        for y in [0...Math.max(@song.length, 10)]
-            if t? and t.patterns[y]?
-                @drawCell(@ctx_tracks, t.patterns[y], x, y)
-            else
-                @drawEmpty(@ctx_tracks, x, y)
+        @readSong(@song, @current_cells)

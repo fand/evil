@@ -55,7 +55,6 @@ class @Session
             @player.is_playing = false
             @view.clearAllActive()
             @scene_pos = @next_scene_pos = 0
-            console.log(@scene_pos)
             return
 
         for i in [0...@synth.length]
@@ -96,11 +95,13 @@ class @Session
         @nextScene()
         @nextPattern()
 
-    addSynth: (s) ->
-        p = name: (s.id + '-' + 0), pattern: s.pattern
-        s_obj = id: s.id, name: 'Synth #' + s.id, patterns: [p], params: [], gain: 1.0, pan: 0.0
+    addSynth: (s, _pos) ->
+        pos = if _pos then _pos else @scene_pos
+        pp = []
+        pp[pos] = name: (s.id + '-' + 0), pattern: s.pattern
+        s_obj = id: s.id, name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
         @song.tracks.push(s_obj)
-        @view.addSynth(@song)
+        @view.readSong(@song, @current_cells)
 
     setSynth: (@synth) ->
 
@@ -117,7 +118,7 @@ class @Session
         synth_num = _synth_num
         if @song.tracks.length <= _synth_num
             synth_num = @song.tracks.length
-            @player.addSynth()
+            @player.addSynth(pat_num)
 
             @song.tracks[synth_num].patterns[pat_num] = @song.tracks[synth_num].patterns[0]
             delete @song.tracks[synth_num].patterns[0]

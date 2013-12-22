@@ -277,7 +277,7 @@
     SessionView.prototype.drawHover = function(ctx, pos) {
       this.clearHover(ctx);
       ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.fillRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
+      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
       if (ctx === this.ctx_tracks_hover) {
         return this.hover_pos = pos;
       }
@@ -350,22 +350,8 @@
     };
 
     SessionView.prototype.addSynth = function(song) {
-      var t, x, y, _i, _ref, _results;
       this.song = song;
-      x = this.song.tracks.length - 1;
-      t = this.song.tracks[x];
-      if ((t != null) && (t.name != null)) {
-        this.drawTrackName(this.ctx_tracks, t.name, x);
-      }
-      _results = [];
-      for (y = _i = 0, _ref = Math.max(this.song.length, 10); 0 <= _ref ? _i < _ref : _i > _ref; y = 0 <= _ref ? ++_i : --_i) {
-        if ((t != null) && (t.patterns[y] != null)) {
-          _results.push(this.drawCell(this.ctx_tracks, t.patterns[y], x, y));
-        } else {
-          _results.push(this.drawEmpty(this.ctx_tracks, x, y));
-        }
-      }
-      return _results;
+      return this.readSong(this.song, this.current_cells);
     };
 
     return SessionView;
