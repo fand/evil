@@ -288,7 +288,9 @@
     };
 
     SessionView.prototype.editPattern = function(pos) {
-      return this.model.editPattern(pos.x, pos.y);
+      var pat;
+      pat = this.model.editPattern(pos.x, pos.y);
+      return this.drawCell(this.ctx_tracks, pat, pos.x, pos.y);
     };
 
     SessionView.prototype.addSynth = function(song) {

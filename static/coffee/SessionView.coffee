@@ -236,7 +236,8 @@ class @SessionView
                 window.setTimeout(( => @ctx_tracks_on.clearRect(c[0]*@w+4, c[1]*@h+4, 15, 16)), 100)
 
     editPattern: (pos) ->
-        @model.editPattern(pos.x, pos.y)
+        pat = @model.editPattern(pos.x, pos.y)
+        @drawCell(@ctx_tracks, pat, pos.x, pos.y)
 
     addSynth: (@song) ->
         x = @song.tracks.length - 1

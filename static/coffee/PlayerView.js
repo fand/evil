@@ -142,9 +142,8 @@
       this.model.moveRight(this.synth_now);
       this.btn_left.show();
       if (this.synth_now === (this.synth_total - 1)) {
-        this.btn_right.attr('data-line1', 'new');
+        return this.btn_right.attr('data-line1', 'new');
       }
-      return console.log(this.synth_total);
     };
 
     PlayerView.prototype.moveLeft = function() {

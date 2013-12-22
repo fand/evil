@@ -102,7 +102,6 @@ class @PlayerView
         @btn_left.show()
         if @synth_now == (@synth_total - 1)
             @btn_right.attr('data-line1', 'new')
-        console.log(@synth_total)
 
     moveLeft: ->
         return if @is_mixer

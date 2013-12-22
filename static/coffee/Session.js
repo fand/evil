@@ -158,18 +158,29 @@
         this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num].pattern);
       } else {
         this.player.synth[synth_num].clearPattern();
+        this.song.tracks[synth_num].patterns[pat_num] = {
+          pattern: this.player.synth[synth_num].pattern
+        };
       }
       this.current_cells[synth_num] = pat_num;
       this.view.readSong(this.song, this.current_cells);
-      return this.player.moveTo(synth_num);
+      this.player.moveTo(synth_num);
+      return this.song.tracks[synth_num].patterns[pat_num].pattern;
     };
 
     Session.prototype.savePatterns = function() {
-      var i, _i, _ref;
+      var i, _i, _ref, _results;
+      _results = [];
       for (i = _i = 0, _ref = this.current_cells.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.song.tracks[i].patterns[this.current_cells[i]].pattern = this.player.synth[i].pattern;
+        if (this.song.tracks[i].patterns[this.current_cells[i]] != null) {
+          _results.push(this.song.tracks[i].patterns[this.current_cells[i]].pattern = this.player.synth[i].pattern);
+        } else {
+          _results.push(this.song.tracks[i].patterns[this.current_cells[i]] = {
+            pattern: this.player.synth[i].pattern
+          });
+        }
       }
-      return console.log(this.song);
+      return _results;
     };
 
     Session.prototype.readSong = function(song) {

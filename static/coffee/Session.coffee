@@ -119,16 +119,21 @@ class @Session
             @player.synth[synth_num].readPattern(@song.tracks[synth_num].patterns[pat_num].pattern)
         else
             @player.synth[synth_num].clearPattern()
+            @song.tracks[synth_num].patterns[pat_num] = pattern: @player.synth[synth_num].pattern
 
         # draw
         @current_cells[synth_num] = pat_num
         @view.readSong(@song, @current_cells)
         @player.moveTo(synth_num)
 
+        return @song.tracks[synth_num].patterns[pat_num].pattern
+
     savePatterns: ->
         for i in [0...@current_cells.length]
-            @song.tracks[i].patterns[@current_cells[i]].pattern = @player.synth[i].pattern
-        console.log(@song)
+            if @song.tracks[i].patterns[@current_cells[i]]?
+                @song.tracks[i].patterns[@current_cells[i]].pattern = @player.synth[i].pattern
+            else
+                @song.tracks[i].patterns[@current_cells[i]] = pattern: @player.synth[i].pattern
 
     readSong: (@song) ->
         @scene_pos = 0

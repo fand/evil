@@ -514,7 +514,6 @@
 
     Synth.prototype.readPattern = function(pattern) {
       this.pattern = pattern;
-      console.log(this.pattern);
       return this.view.readPattern(this.pattern);
     };
 

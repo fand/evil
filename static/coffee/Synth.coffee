@@ -346,7 +346,6 @@ class @Synth
         @core.noteOff()
 
     readPattern: (@pattern) ->
-        console.log(@pattern)
         @view.readPattern(@pattern)
 
     clearPattern: () ->
