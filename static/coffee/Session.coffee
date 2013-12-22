@@ -109,7 +109,9 @@ class @Session
         # add master
         if not @song.master[pat_num]?
             @song.master[pat_num] = name: 'section-' + pat_num
-        @song_length = Math.max(@song_length, pat_num + 1)
+        if pat_num + 2 > @song_length
+            @song_length = pat_num + 2
+            @song.length = pat_num + 2
 
         # add track pattern
         synth_num = _synth_num
