@@ -29,6 +29,8 @@ class @Player
         s.setDuration(@duration) for s in @synth
 
     setKey: (key)->
+        console.log('key')
+        console.log(key)
         @scene.key = key
         s.setKey(key) for s in @synth
 
@@ -94,8 +96,8 @@ class @Player
 
     addSynth: ->
         s = new Synth(@context, @num_id++, this)
-        s.setScale(@scale)
-        s.setKey(@freq_key)
+        s.setScale(@scene.scale)
+        s.setKey(@scene.key)
         @synth.push(s)
         @mixer.addSynth(s)
         @session.addSynth(s)

@@ -128,7 +128,6 @@ class @SessionView
 
     drawCell: (ctx, p, x, y) ->
         @clearCell(ctx, x, y)
-
         ctx.strokeStyle = @color[1]
         ctx.lineWidth = 2
         ctx.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)

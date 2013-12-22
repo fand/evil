@@ -303,6 +303,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Player.prototype.setKey = function(key) {
       var s, _i, _len, _ref, _results;
+      console.log('key');
+      console.log(key);
       this.scene.key = key;
       _ref = this.synth;
       _results = [];
@@ -426,8 +428,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Player.prototype.addSynth = function() {
       var s;
       s = new Synth(this.context, this.num_id++, this);
-      s.setScale(this.scale);
-      s.setKey(this.freq_key);
+      s.setScale(this.scene.scale);
+      s.setKey(this.scene.key);
       this.synth.push(s);
       this.mixer.addSynth(s);
       return this.session.addSynth(s);
