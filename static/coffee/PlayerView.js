@@ -132,6 +132,7 @@
       if (this.is_mixer) {
         return;
       }
+      this.synth_total = this.model.synth.length;
       if (this.synth_now === (this.synth_total - 1)) {
         this.model.addSynth();
         this.synth_total++;
@@ -141,14 +142,16 @@
       this.model.moveRight(this.synth_now);
       this.btn_left.show();
       if (this.synth_now === (this.synth_total - 1)) {
-        return this.btn_right.attr('data-line1', 'new');
+        this.btn_right.attr('data-line1', 'new');
       }
+      return console.log(this.synth_total);
     };
 
     PlayerView.prototype.moveLeft = function() {
       if (this.is_mixer) {
         return;
       }
+      this.synth_total = this.model.synth.length;
       this.btn_right.attr('data-line1', 'next');
       if (this.synth_now !== 0) {
         this.synth_now--;

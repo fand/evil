@@ -13,7 +13,12 @@
       this.is_waiting_next_pattern = false;
       this.is_waiting_next_scene = false;
       this.cue_queue = [];
-      this.view = new SessionView(this);
+      this.song = {
+        tracks: [],
+        master: [],
+        length: 0
+      };
+      this.view = new SessionView(this, this.song);
     }
 
     Session.prototype.toggleLoop = function() {
@@ -35,6 +40,7 @@
 
     Session.prototype.nextPattern = function() {
       var pat, q, _i, _len, _ref;
+      this.savePatterns();
       this.is_waiting_next_pattern = false;
       _ref = this.cue_queue;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -50,6 +56,7 @@
 
     Session.prototype.nextScene = function(pos) {
       var i, pat, _i, _ref;
+      this.savePatterns();
       this.is_waiting_next_scene = false;
       if (pos == null) {
         this.scene_pos++;
@@ -62,6 +69,9 @@
         return;
       }
       for (i = _i = 0, _ref = this.synth.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.song.tracks[i].patterns[pos] == null) {
+          continue;
+        }
         pat = this.song.tracks[i].patterns[pos].pattern;
         if (pat != null) {
           this.synth[i].readPattern(pat);
@@ -69,7 +79,9 @@
           this.current_cells[i] = pos;
         }
       }
-      this.player.readScene(this.song.master[this.scene_pos]);
+      if (this.song.master[this.scene_pos] != null) {
+        this.player.readScene(this.song.master[this.scene_pos]);
+      }
       this.player.setSceneLength(this.scene_length);
       this.view.drawScene(this.scene_pos);
       this.next_pattern_pos = [];
@@ -105,10 +117,59 @@
       return this.nextPattern();
     };
 
-    Session.prototype.addSynth = function(s) {};
+    Session.prototype.addSynth = function(s) {
+      var p, s_obj;
+      p = {
+        name: s.id + '-' + 0,
+        pattern: s.pattern
+      };
+      s_obj = {
+        id: s.id,
+        name: 'Synth #' + s.id,
+        patterns: [p],
+        params: [],
+        gain: 1.0,
+        pan: 0.0
+      };
+      this.song.tracks.push(s_obj);
+      return this.view.addSynth(this.song);
+    };
 
     Session.prototype.setSynth = function(synth) {
       this.synth = synth;
+    };
+
+    Session.prototype.editPattern = function(_synth_num, pat_num) {
+      var synth_num;
+      if (this.song.master[pat_num] == null) {
+        this.song.master[pat_num] = {
+          name: 'section-' + pat_num
+        };
+      }
+      this.song_length = Math.max(this.song_length, pat_num + 1);
+      synth_num = _synth_num;
+      if (this.song.tracks.length <= _synth_num) {
+        synth_num = this.song.tracks.length;
+        this.player.addSynth();
+        this.song.tracks[synth_num].patterns[pat_num] = this.song.tracks[synth_num].patterns[0];
+        delete this.song.tracks[synth_num].patterns[0];
+      }
+      if (this.song.tracks[synth_num].patterns[pat_num] != null) {
+        this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num].pattern);
+      } else {
+        this.player.synth[synth_num].clearPattern();
+      }
+      this.current_cells[synth_num] = pat_num;
+      this.view.readSong(this.song, this.current_cells);
+      return this.player.moveTo(synth_num);
+    };
+
+    Session.prototype.savePatterns = function() {
+      var i, _i, _ref;
+      for (i = _i = 0, _ref = this.current_cells.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.song.tracks[i].patterns[this.current_cells[i]].pattern = this.player.synth[i].pattern;
+      }
+      return console.log(this.song);
     };
 
     Session.prototype.readSong = function(song) {

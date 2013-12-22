@@ -1,5 +1,5 @@
 class @SessionView
-    constructor: (@model) ->
+    constructor: (@model, @song) ->
         @canvas_tracks_dom = $('#session-tracks')
         @canvas_master_dom = $('#session-master')
         @canvas_tracks_on_dom = $('#session-tracks-on')
@@ -25,7 +25,6 @@ class @SessionView
         @h = 22
         @color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
-
         @img_play = new Image()
         @img_play.src = 'static/img/play.png'
         @img_play.onload = () => @initCanvas()
@@ -35,7 +34,7 @@ class @SessionView
 
         @hover_pos = x:-1, y:-1
         @click_pos = x:-1, y:-1
-
+        @last_clicked = performance.now()
 
     initCanvas: ->
         @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = @w * 8 + 1
@@ -70,10 +69,9 @@ class @SessionView
         _x = Math.floor((e.clientX - rect.left) / @w)
         _y = Math.floor((e.clientY - rect.top - @offset_translate) / @h)
         if not ((e.clientX - rect.left) - _x * @w < 20 and (e.clientY - rect.top - @offset_translate) - _y * @h < 20)
-            return undefined
-        else
-            x: _x
-            y: _y
+            _y = -1
+        x: _x
+        y: _y
 
     initEvent: ->
         @canvas_tracks_hover_dom.on('mousemove', (e) =>
@@ -84,8 +82,16 @@ class @SessionView
             @hover_pos = x:-1, y:-1
         ).on('mousedown', (e) =>
             pos = @getPlayPos(@rect_tracks, e)
-            if pos?
+            if pos.y >= 0
                 @cueTracks(pos.x, pos.y)
+            else
+                pos = @getPos(@rect_tracks, e)
+                now = performance.now()
+                if now - @last_clicked < 500
+                    @editPattern(pos)
+                    @last_clicked = -10000  # prevent triple-click
+                else
+                    @last_clicked = now
         )
 
         @canvas_master_hover_dom.on('mousemove', (e) =>
@@ -209,9 +215,10 @@ class @SessionView
 
 
     cueTracks: (x, y) ->
-        @model.cuePattern(x, y)
-        @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18, x*@w + 4, y*@h + 4, 15, 16)
-        window.setTimeout(( => @ctx_tracks_on.clearRect(x*@w+4, y*@h+4, 15, 16)), 100)
+        if @song.tracks[x]? and @song.tracks[x].patterns[y]?
+            @model.cuePattern(x, y)
+            @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18, x*@w + 4, y*@h + 4, 15, 16)
+            window.setTimeout(( => @ctx_tracks_on.clearRect(x*@w+4, y*@h+4, 15, 16)), 100)
 
     cueMaster: (x, y) ->
         @model.cueScene(y)
@@ -227,3 +234,16 @@ class @SessionView
             for c in cells
                 @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18, c[0]*@w + 4, c[1]*@h + 4, 15, 16)
                 window.setTimeout(( => @ctx_tracks_on.clearRect(c[0]*@w+4, c[1]*@h+4, 15, 16)), 100)
+
+    editPattern: (pos) ->
+        @model.editPattern(pos.x, pos.y)
+
+    addSynth: (@song) ->
+        x = @song.tracks.length - 1
+        t = @song.tracks[x]
+        @drawTrackName(@ctx_tracks, t.name, x) if t? and t.name?
+        for y in [0...Math.max(@song.length, 10)]
+            if t? and t.patterns[y]?
+                @drawCell(@ctx_tracks, t.patterns[y], x, y)
+            else
+                @drawEmpty(@ctx_tracks, x, y)

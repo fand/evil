@@ -104,11 +104,22 @@ class @Player
         @synth[next_idx - 1].inactivate()
         @synth_now = @synth[next_idx]
         @synth_now.activate(next_idx)
+        @synth_pos++
 
     moveLeft: (next_idx) ->
         @synth[next_idx + 1].inactivate()
         @synth_now = @synth[next_idx]
         @synth_now.activate(next_idx)
+        @synth_pos--
+
+    moveTo: (synth_num) ->
+        @view.moveBottom()
+        if synth_num < @synth_pos
+            while synth_num != @synth_pos
+                @view.moveLeft()
+        else
+            while synth_num != @synth_pos
+                @view.moveRight()
 
     readSong: (@song) ->
         while @song.tracks.length > @synth.length

@@ -514,6 +514,12 @@
 
     Synth.prototype.readPattern = function(pattern) {
       this.pattern = pattern;
+      console.log(this.pattern);
+      return this.view.readPattern(this.pattern);
+    };
+
+    Synth.prototype.clearPattern = function() {
+      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       return this.view.readPattern(this.pattern);
     };
 

@@ -168,13 +168,33 @@
     Player.prototype.moveRight = function(next_idx) {
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
-      return this.synth_now.activate(next_idx);
+      this.synth_now.activate(next_idx);
+      return this.synth_pos++;
     };
 
     Player.prototype.moveLeft = function(next_idx) {
       this.synth[next_idx + 1].inactivate();
       this.synth_now = this.synth[next_idx];
-      return this.synth_now.activate(next_idx);
+      this.synth_now.activate(next_idx);
+      return this.synth_pos--;
+    };
+
+    Player.prototype.moveTo = function(synth_num) {
+      var _results, _results1;
+      this.view.moveBottom();
+      if (synth_num < this.synth_pos) {
+        _results = [];
+        while (synth_num !== this.synth_pos) {
+          _results.push(this.view.moveLeft());
+        }
+        return _results;
+      } else {
+        _results1 = [];
+        while (synth_num !== this.synth_pos) {
+          _results1.push(this.view.moveRight());
+        }
+        return _results1;
+      }
     };
 
     Player.prototype.readSong = function(song) {

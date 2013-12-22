@@ -1,8 +1,9 @@
 (function() {
   this.SessionView = (function() {
-    function SessionView(model) {
+    function SessionView(model, song) {
       var _this = this;
       this.model = model;
+      this.song = song;
       this.canvas_tracks_dom = $('#session-tracks');
       this.canvas_master_dom = $('#session-master');
       this.canvas_tracks_on_dom = $('#session-tracks-on');
@@ -39,6 +40,7 @@
         x: -1,
         y: -1
       };
+      this.last_clicked = performance.now();
     }
 
     SessionView.prototype.initCanvas = function() {
@@ -76,13 +78,12 @@
       _x = Math.floor((e.clientX - rect.left) / this.w);
       _y = Math.floor((e.clientY - rect.top - this.offset_translate) / this.h);
       if (!((e.clientX - rect.left) - _x * this.w < 20 && (e.clientY - rect.top - this.offset_translate) - _y * this.h < 20)) {
-        return void 0;
-      } else {
-        return {
-          x: _x,
-          y: _y
-        };
+        _y = -1;
       }
+      return {
+        x: _x,
+        y: _y
+      };
     };
 
     SessionView.prototype.initEvent = function() {
@@ -98,10 +99,19 @@
           y: -1
         };
       }).on('mousedown', function(e) {
-        var pos;
+        var now, pos;
         pos = _this.getPlayPos(_this.rect_tracks, e);
-        if (pos != null) {
+        if (pos.y >= 0) {
           return _this.cueTracks(pos.x, pos.y);
+        } else {
+          pos = _this.getPos(_this.rect_tracks, e);
+          now = performance.now();
+          if (now - _this.last_clicked < 500) {
+            _this.editPattern(pos);
+            return _this.last_clicked = -10000;
+          } else {
+            return _this.last_clicked = now;
+          }
         }
       });
       this.canvas_master_hover_dom.on('mousemove', function(e) {
@@ -237,11 +247,13 @@
 
     SessionView.prototype.cueTracks = function(x, y) {
       var _this = this;
-      this.model.cuePattern(x, y);
-      this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, x * this.w + 4, y * this.h + 4, 15, 16);
-      return window.setTimeout((function() {
-        return _this.ctx_tracks_on.clearRect(x * _this.w + 4, y * _this.h + 4, 15, 16);
-      }), 100);
+      if ((this.song.tracks[x] != null) && (this.song.tracks[x].patterns[y] != null)) {
+        this.model.cuePattern(x, y);
+        this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, x * this.w + 4, y * this.h + 4, 15, 16);
+        return window.setTimeout((function() {
+          return _this.ctx_tracks_on.clearRect(x * _this.w + 4, y * _this.h + 4, 15, 16);
+        }), 100);
+      }
     };
 
     SessionView.prototype.cueMaster = function(x, y) {
@@ -273,6 +285,29 @@
         }
         return _results;
       }
+    };
+
+    SessionView.prototype.editPattern = function(pos) {
+      return this.model.editPattern(pos.x, pos.y);
+    };
+
+    SessionView.prototype.addSynth = function(song) {
+      var t, x, y, _i, _ref, _results;
+      this.song = song;
+      x = this.song.tracks.length - 1;
+      t = this.song.tracks[x];
+      if ((t != null) && (t.name != null)) {
+        this.drawTrackName(this.ctx_tracks, t.name, x);
+      }
+      _results = [];
+      for (y = _i = 0, _ref = Math.max(this.song.length, 10); 0 <= _ref ? _i < _ref : _i > _ref; y = 0 <= _ref ? ++_i : --_i) {
+        if ((t != null) && (t.patterns[y] != null)) {
+          _results.push(this.drawCell(this.ctx_tracks, t.patterns[y], x, y));
+        } else {
+          _results.push(this.drawEmpty(this.ctx_tracks, x, y));
+        }
+      }
+      return _results;
     };
 
     return SessionView;
