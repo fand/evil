@@ -37,7 +37,7 @@ class @SessionView
         @last_clicked = performance.now()
 
     initCanvas: ->
-        @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = @w * 8 + 1
+        @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = @w*8 + 1
         @canvas_master.width  = @canvas_master_on.width  = @canvas_master_hover.width  = @w + 1
         @canvas_tracks.height = @canvas_tracks_on.height = @canvas_tracks_hover.height = @h*15 + 10
         @canvas_master.height = @canvas_master_on.height = @canvas_master_hover.height = @h*15 + 10
@@ -58,6 +58,34 @@ class @SessionView
         @offset_translate = 700 + @offset_y
 
         @initEvent()
+
+    resize: () ->
+        @ctx_tracks.translate(0, -@offset_y)
+        @ctx_master.translate(0, -@offset_y)
+        @ctx_tracks_on.translate(0, -@offset_y)
+        @ctx_master_on.translate(0, -@offset_y)
+        @ctx_tracks_hover.translate(0, -@offset_y)
+        @ctx_master_hover.translate(0, -@offset_y)
+
+        w_new = Math.max(@song.tracks.length, 8) * @w + 1
+        h_new = Math.max(@song.length + 1, 15) * @h + 10    # 0th cell is for track name!
+
+        @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = w_new
+        @canvas_tracks.height = @canvas_tracks_on.height = @canvas_tracks_hover.height = h_new
+        @canvas_master.height = @canvas_master_on.height = @canvas_master_hover.height = h_new
+        @canvas_tracks_dom.css(width: w_new + 'px', height: h_new + 'px')
+        @canvas_tracks_on_dom.css(width: w_new + 'px', height: h_new + 'px')
+        @canvas_tracks_hover_dom.css(width: w_new + 'px', height: h_new + 'px')
+        @canvas_master_dom.css(height: h_new + 'px')
+        @canvas_master_on_dom.css(height: h_new + 'px')
+        @canvas_master_hover_dom.css(height: h_new + 'px')
+
+        @ctx_tracks.translate(0, @offset_y)
+        @ctx_master.translate(0, @offset_y)
+        @ctx_tracks_on.translate(0, @offset_y)
+        @ctx_master_on.translate(0, @offset_y)
+        @ctx_tracks_hover.translate(0, @offset_y)
+        @ctx_master_hover.translate(0, @offset_y)
 
     getPos: (rect, e) ->
         _x = Math.floor((e.clientX - rect.left) / @w)
@@ -113,6 +141,8 @@ class @SessionView
 
 
     readSong: (@song, @current_cells) ->
+        @resize()
+
         for x in [0...Math.max(song.tracks.length + 1, 8)]
             t = song.tracks[x]
             @drawTrackName(@ctx_tracks, t.name, x) if t? and t.name?
@@ -122,13 +152,14 @@ class @SessionView
                 else
                     @drawEmpty(@ctx_tracks, x, y)
 
-        for y in [0...Math.max(song.master.length, 10)]
+        for y in [0...Math.max(song.length, 10)]
             if song.master[y]?
                 @drawCell(@ctx_master, song.master[y], 0, y)
             else
                 @drawEmptyMaster(y)
 
         @drawScene(0, @current_cells)
+
 
     drawCell: (ctx, p, x, y) ->
         @clearCell(ctx, x, y)

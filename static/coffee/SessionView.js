@@ -63,6 +63,48 @@
       return this.initEvent();
     };
 
+    SessionView.prototype.resize = function() {
+      var h_new, w_new;
+      this.ctx_tracks.translate(0, -this.offset_y);
+      this.ctx_master.translate(0, -this.offset_y);
+      this.ctx_tracks_on.translate(0, -this.offset_y);
+      this.ctx_master_on.translate(0, -this.offset_y);
+      this.ctx_tracks_hover.translate(0, -this.offset_y);
+      this.ctx_master_hover.translate(0, -this.offset_y);
+      w_new = Math.max(this.song.tracks.length, 8) * this.w + 1;
+      h_new = Math.max(this.song.length + 1, 15) * this.h + 10;
+      this.canvas_tracks.width = this.canvas_tracks_on.width = this.canvas_tracks_hover.width = w_new;
+      this.canvas_tracks.height = this.canvas_tracks_on.height = this.canvas_tracks_hover.height = h_new;
+      this.canvas_master.height = this.canvas_master_on.height = this.canvas_master_hover.height = h_new;
+      this.canvas_tracks_dom.css({
+        width: w_new + 'px',
+        height: h_new + 'px'
+      });
+      this.canvas_tracks_on_dom.css({
+        width: w_new + 'px',
+        height: h_new + 'px'
+      });
+      this.canvas_tracks_hover_dom.css({
+        width: w_new + 'px',
+        height: h_new + 'px'
+      });
+      this.canvas_master_dom.css({
+        height: h_new + 'px'
+      });
+      this.canvas_master_on_dom.css({
+        height: h_new + 'px'
+      });
+      this.canvas_master_hover_dom.css({
+        height: h_new + 'px'
+      });
+      this.ctx_tracks.translate(0, this.offset_y);
+      this.ctx_master.translate(0, this.offset_y);
+      this.ctx_tracks_on.translate(0, this.offset_y);
+      this.ctx_master_on.translate(0, this.offset_y);
+      this.ctx_tracks_hover.translate(0, this.offset_y);
+      return this.ctx_master_hover.translate(0, this.offset_y);
+    };
+
     SessionView.prototype.getPos = function(rect, e) {
       var _x, _y;
       _x = Math.floor((e.clientX - rect.left) / this.w);
@@ -134,6 +176,7 @@
       var t, x, y, _i, _j, _k, _ref, _ref1, _ref2;
       this.song = song;
       this.current_cells = current_cells;
+      this.resize();
       for (x = _i = 0, _ref = Math.max(song.tracks.length + 1, 8); 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         t = song.tracks[x];
         if ((t != null) && (t.name != null)) {
@@ -147,7 +190,7 @@
           }
         }
       }
-      for (y = _k = 0, _ref2 = Math.max(song.master.length, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
+      for (y = _k = 0, _ref2 = Math.max(song.length, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
         if (song.master[y] != null) {
           this.drawCell(this.ctx_master, song.master[y], 0, y);
         } else {

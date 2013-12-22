@@ -153,7 +153,10 @@
           name: 'section-' + pat_num
         };
       }
-      this.song_length = Math.max(this.song_length, pat_num + 1);
+      if (pat_num + 2 > this.song_length) {
+        this.song_length = pat_num + 2;
+        this.song.length = pat_num + 2;
+      }
       synth_num = _synth_num;
       if (this.song.tracks.length <= _synth_num) {
         synth_num = this.song.tracks.length;
