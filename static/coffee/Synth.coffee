@@ -348,6 +348,10 @@ class @Synth
     readPattern: (@pattern) ->
         @view.readPattern(@pattern)
 
+    clearPattern: () ->
+        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @view.readPattern(@pattern)
+
     plusPattern: ->
         @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
 #        @session.setSceneLength()

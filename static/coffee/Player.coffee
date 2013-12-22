@@ -40,6 +40,7 @@ class @Player
 
     play: ->
         @is_playing = true
+        @session.play()
         T.setTimeout(( =>
             s.play() for s in @synth
             @playNext()
@@ -50,7 +51,7 @@ class @Player
         @is_playing = false
         @view.viewStop()
         @time = 0
-        @readSong(@song)
+#        @readSong(@song)
 
     pause: ->
         s.pause(@time) for s in @synth
@@ -94,8 +95,8 @@ class @Player
 
     addSynth: ->
         s = new Synth(@context, @num_id++, this)
-        s.setScale(@scale)
-        s.setKey(@freq_key)
+        s.setScale(@scene.scale)
+        s.setKey(@scene.key)
         @synth.push(s)
         @mixer.addSynth(s)
         @session.addSynth(s)
@@ -104,11 +105,22 @@ class @Player
         @synth[next_idx - 1].inactivate()
         @synth_now = @synth[next_idx]
         @synth_now.activate(next_idx)
+        @synth_pos++
 
     moveLeft: (next_idx) ->
         @synth[next_idx + 1].inactivate()
         @synth_now = @synth[next_idx]
         @synth_now.activate(next_idx)
+        @synth_pos--
+
+    moveTo: (synth_num) ->
+        @view.moveBottom()
+        if synth_num < @synth_pos
+            while synth_num != @synth_pos
+                @view.moveLeft()
+        else
+            while synth_num != @synth_pos
+                @view.moveRight()
 
     readSong: (@song) ->
         while @song.tracks.length > @synth.length

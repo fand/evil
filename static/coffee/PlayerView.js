@@ -132,6 +132,7 @@
       if (this.is_mixer) {
         return;
       }
+      this.synth_total = this.model.synth.length;
       if (this.synth_now === (this.synth_total - 1)) {
         this.model.addSynth();
         this.synth_total++;
@@ -149,6 +150,7 @@
       if (this.is_mixer) {
         return;
       }
+      this.synth_total = this.model.synth.length;
       this.btn_right.attr('data-line1', 'next');
       if (this.synth_now !== 0) {
         this.synth_now--;

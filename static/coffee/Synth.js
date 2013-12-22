@@ -517,6 +517,11 @@
       return this.view.readPattern(this.pattern);
     };
 
+    Synth.prototype.clearPattern = function() {
+      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      return this.view.readPattern(this.pattern);
+    };
+
     Synth.prototype.plusPattern = function() {
       this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
       return this.player.resetSceneLength();

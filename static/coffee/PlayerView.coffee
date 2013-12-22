@@ -62,7 +62,6 @@ class @PlayerView
 
         $(window).on('resize', () => @resize())
 
-
     viewPlay: ->
         if @model.isPlaying()
             @model.pause()
@@ -93,6 +92,7 @@ class @PlayerView
 
     moveRight: ->
         return if @is_mixer
+        @synth_total = @model.synth.length
         if @synth_now == (@synth_total - 1)
             @model.addSynth()
             @synth_total++
@@ -105,6 +105,7 @@ class @PlayerView
 
     moveLeft: ->
         return if @is_mixer
+        @synth_total = @model.synth.length
         @btn_right.attr('data-line1', 'next')
         if @synth_now != 0
             @synth_now--

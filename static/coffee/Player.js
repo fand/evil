@@ -65,6 +65,7 @@
     Player.prototype.play = function() {
       var _this = this;
       this.is_playing = true;
+      this.session.play();
       return T.setTimeout((function() {
         var s, _i, _len, _ref;
         _ref = _this.synth;
@@ -85,8 +86,7 @@
       }
       this.is_playing = false;
       this.view.viewStop();
-      this.time = 0;
-      return this.readSong(this.song);
+      return this.time = 0;
     };
 
     Player.prototype.pause = function() {
@@ -158,8 +158,8 @@
     Player.prototype.addSynth = function() {
       var s;
       s = new Synth(this.context, this.num_id++, this);
-      s.setScale(this.scale);
-      s.setKey(this.freq_key);
+      s.setScale(this.scene.scale);
+      s.setKey(this.scene.key);
       this.synth.push(s);
       this.mixer.addSynth(s);
       return this.session.addSynth(s);
@@ -168,13 +168,33 @@
     Player.prototype.moveRight = function(next_idx) {
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
-      return this.synth_now.activate(next_idx);
+      this.synth_now.activate(next_idx);
+      return this.synth_pos++;
     };
 
     Player.prototype.moveLeft = function(next_idx) {
       this.synth[next_idx + 1].inactivate();
       this.synth_now = this.synth[next_idx];
-      return this.synth_now.activate(next_idx);
+      this.synth_now.activate(next_idx);
+      return this.synth_pos--;
+    };
+
+    Player.prototype.moveTo = function(synth_num) {
+      var _results, _results1;
+      this.view.moveBottom();
+      if (synth_num < this.synth_pos) {
+        _results = [];
+        while (synth_num !== this.synth_pos) {
+          _results.push(this.view.moveLeft());
+        }
+        return _results;
+      } else {
+        _results1 = [];
+        while (synth_num !== this.synth_pos) {
+          _results1.push(this.view.moveRight());
+        }
+        return _results1;
+      }
     };
 
     Player.prototype.readSong = function(song) {
