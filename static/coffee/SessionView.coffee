@@ -1,5 +1,10 @@
 class @SessionView
     constructor: (@model, @song) ->
+        @wrapper_mixer = $('#mixer-tracks')
+        @wrapper_master = $('#session-master-wrapper')
+        @wrapper_tracks = $('#session-tracks-wrapper')
+        @wrapper_tracks_sub = $('#session-tracks-wrapper-sub')
+
         @canvas_tracks_dom = $('#session-tracks')
         @canvas_master_dom = $('#session-master')
         @canvas_tracks_on_dom = $('#session-tracks-on')
@@ -80,6 +85,9 @@ class @SessionView
         @canvas_master_on_dom.css(height: h_new + 'px')
         @canvas_master_hover_dom.css(height: h_new + 'px')
 
+        @wrapper_tracks.css(width: w_new + 'px')
+        @wrapper_tracks_sub.css(width: w_new + 'px')
+
         @ctx_tracks.translate(0, @offset_y)
         @ctx_master.translate(0, @offset_y)
         @ctx_tracks_on.translate(0, @offset_y)
@@ -87,33 +95,33 @@ class @SessionView
         @ctx_tracks_hover.translate(0, @offset_y)
         @ctx_master_hover.translate(0, @offset_y)
 
-    getPos: (rect, e) ->
-        _x = Math.floor((e.clientX - rect.left) / @w)
-        _y = Math.floor((e.clientY - rect.top - @offset_translate) / @h)
+    getPos: (rect, wrapper, e) ->
+        _x = Math.floor((e.clientX - rect.left + @wrapper_mixer.scrollLeft()) / @w)
+        _y = Math.floor((e.clientY - rect.top  + wrapper.scrollTop() - @offset_translate) / @h)
         x: _x
         y: _y
 
-    getPlayPos: (rect, e) ->
-        _x = Math.floor((e.clientX - rect.left) / @w)
-        _y = Math.floor((e.clientY - rect.top - @offset_translate) / @h)
-        if not ((e.clientX - rect.left) - _x * @w < 20 and (e.clientY - rect.top - @offset_translate) - _y * @h < 20)
+    getPlayPos: (rect, wrapper, e) ->
+        _x = Math.floor((e.clientX - rect.left + @wrapper_mixer.scrollLeft()) / @w)
+        _y = Math.floor((e.clientY - rect.top  + wrapper.scrollTop() - @offset_translate) / @h)
+        if not ((e.clientX - rect.left + @wrapper_mixer.scrollLeft()) - _x * @w < 20 and (e.clientY - rect.top + wrapper.scrollTop() - @offset_translate) - _y * @h < 20)
             _y = -1
         x: _x
         y: _y
 
     initEvent: ->
         @canvas_tracks_hover_dom.on('mousemove', (e) =>
-            pos = @getPos(@rect_tracks, e)
+            pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
             @drawHover(@ctx_tracks_hover, pos)
         ).on('mouseout', (e) =>
             @clearHover(@ctx_tracks_hover)
             @hover_pos = x:-1, y:-1
         ).on('mousedown', (e) =>
-            pos = @getPlayPos(@rect_tracks, e)
+            pos = @getPlayPos(@rect_tracks, @wrapper_tracks_sub, e)
             if pos.y >= 0
                 @cueTracks(pos.x, pos.y)
             else
-                pos = @getPos(@rect_tracks, e)
+                pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
                 now = performance.now()
 
                 # Double clicked
@@ -127,15 +135,18 @@ class @SessionView
         )
 
         @canvas_master_hover_dom.on('mousemove', (e) =>
-            pos = @getPos(@rect_master, e)
+            pos = @getPos(@rect_master, @wrapper_master, e)
             @drawHover(@ctx_master_hover, pos)
         ).on('mouseout', (e) =>
             @clearHover(@ctx_master_hover)
         ).on('mousedown', (e) =>
-            pos = @getPlayPos(@rect_master, e)
+            pos = @getPlayPos(@rect_master, @wrapper_master, e)
             if pos?
                 @cueMaster(pos.x, pos.y)
         )
+
+        @wrapper_master.on('scroll', (e) => @wrapper_tracks_sub.scrollTop(@wrapper_master.scrollTop()))
+        @wrapper_tracks_sub.on('scroll', (e) => @wrapper_master.scrollTop(@wrapper_tracks_sub.scrollTop()))
 
         @readSong(@song, @current_cells)
 
@@ -144,6 +155,7 @@ class @SessionView
         @resize()
 
         for x in [0...Math.max(song.tracks.length + 1, 8)]
+#        for x in [0...Math.max(song.tracks.length + 2, 8)]
             t = song.tracks[x]
             @drawTrackName(@ctx_tracks, t.name, x) if t? and t.name?
             for y in [0...Math.max(song.length, 10)]
@@ -240,7 +252,8 @@ class @SessionView
     drawHover: (ctx, pos) ->
         @clearHover(ctx)
         ctx.fillStyle = 'rgba(255,255,255,0.4)'
-        ctx.fillRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
+#        ctx.fillRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
+        ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
         if ctx == @ctx_tracks_hover
             @hover_pos = pos
 
@@ -284,11 +297,4 @@ class @SessionView
         @drawCell(@ctx_tracks, pat[0], pat[1], pat[2])
 
     addSynth: (@song) ->
-        x = @song.tracks.length - 1
-        t = @song.tracks[x]
-        @drawTrackName(@ctx_tracks, t.name, x) if t? and t.name?
-        for y in [0...Math.max(@song.length, 10)]
-            if t? and t.patterns[y]?
-                @drawCell(@ctx_tracks, t.patterns[y], x, y)
-            else
-                @drawEmpty(@ctx_tracks, x, y)
+        @readSong(@song, @current_cells)

@@ -93,13 +93,13 @@ class @Player
         else
             @stop()
 
-    addSynth: ->
+    addSynth: (scene_pos) ->
         s = new Synth(@context, @num_id++, this)
         s.setScale(@scene.scale)
         s.setKey(@scene.key)
         @synth.push(s)
         @mixer.addSynth(s)
-        @session.addSynth(s)
+        @session.addSynth(s, scene_pos)
 
     moveRight: (next_idx) ->
         @synth[next_idx - 1].inactivate()

@@ -20,9 +20,11 @@
     <div id="mixer-body">
       <div id="mixer-tracks">
         <div id="session-tracks-wrapper">
+         <div id="session-tracks-wrapper-sub">
           <canvas id="session-tracks"></canvas>
           <canvas id="session-tracks-on"></canvas>
           <canvas id="session-tracks-hover"></canvas>
+         </div>
         </div>
         <div id="console-tracks" class="clearfix"></div>
       </div>

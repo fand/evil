@@ -68,7 +68,6 @@
         this.player.is_playing = false;
         this.view.clearAllActive();
         this.scene_pos = this.next_scene_pos = 0;
-        console.log(this.scene_pos);
         return;
       }
       for (i = _i = 0, _ref = this.synth.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -124,22 +123,24 @@
       return this.nextPattern();
     };
 
-    Session.prototype.addSynth = function(s) {
-      var p, s_obj;
-      p = {
+    Session.prototype.addSynth = function(s, _pos) {
+      var pos, pp, s_obj;
+      pos = _pos ? _pos : this.scene_pos;
+      pp = [];
+      pp[pos] = {
         name: s.id + '-' + 0,
         pattern: s.pattern
       };
       s_obj = {
         id: s.id,
         name: 'Synth #' + s.id,
-        patterns: [p],
+        patterns: pp,
         params: [],
         gain: 1.0,
         pan: 0.0
       };
       this.song.tracks.push(s_obj);
-      return this.view.addSynth(this.song);
+      return this.view.readSong(this.song, this.current_cells);
     };
 
     Session.prototype.setSynth = function(synth) {
@@ -160,7 +161,7 @@
       synth_num = _synth_num;
       if (this.song.tracks.length <= _synth_num) {
         synth_num = this.song.tracks.length;
-        this.player.addSynth();
+        this.player.addSynth(pat_num);
         this.song.tracks[synth_num].patterns[pat_num] = this.song.tracks[synth_num].patterns[0];
         delete this.song.tracks[synth_num].patterns[0];
       }
