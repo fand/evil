@@ -23,7 +23,7 @@
       this.ctx_tracks_hover = this.canvas_tracks_hover.getContext('2d');
       this.ctx_master_hover = this.canvas_master_hover.getContext('2d');
       this.w = 80;
-      this.h = 22;
+      this.h = 20;
       this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
       this.img_play = new Image();
       this.img_play.src = 'static/img/play.png';
@@ -151,7 +151,7 @@
         if (song.master[y] != null) {
           this.drawCell(this.ctx_master, song.master[y], 0, y);
         } else {
-          this.drawEmpty(this.ctx_master, 0, y);
+          this.drawEmptyMaster(y);
         }
       }
       return this.drawScene(0, this.current_cells);
@@ -162,7 +162,7 @@
       ctx.strokeStyle = this.color[1];
       ctx.lineWidth = 2;
       ctx.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
-      ctx.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 4, y * this.h + 4, 15, 16);
+      ctx.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
       ctx.fillStyle = this.color[1];
       return ctx.fillText(p.name, x * this.w + 24, (y + 1) * this.h - 6);
     };
@@ -172,6 +172,14 @@
       ctx.strokeStyle = this.color[0];
       ctx.lineWidth = 1;
       return ctx.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
+    };
+
+    SessionView.prototype.drawEmptyMaster = function(y) {
+      this.clearCell(this.ctx_master, 0, y);
+      this.ctx_master.strokeStyle = this.color[0];
+      this.ctx_master.lineWidth = 1;
+      this.ctx_master.strokeRect(2, y * this.h + 2, this.w - 2, this.h - 2);
+      return this.ctx_master.drawImage(this.img_play, 0, 0, 18, 18, 3, y * this.h + 3, 16, 15);
     };
 
     SessionView.prototype.clearCell = function(ctx, x, y) {
@@ -211,7 +219,7 @@
       this.ctx_tracks_on.strokeStyle = 'rgba(0, 230, 255, 0.3)';
       this.ctx_tracks_on.lineWidth = 2;
       this.ctx_tracks_on.strokeRect(x * this.w + 4, y * this.h + 4, this.w - 6, this.h - 6);
-      this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, x * this.w + 4, y * this.h + 4, 15, 16);
+      this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
       return this.last_active[x] = y;
     };
 
@@ -220,7 +228,7 @@
       this.ctx_master_on.strokeStyle = 'rgba(0, 230, 255, 0.3)';
       this.ctx_master_on.lineWidth = 2;
       this.ctx_master_on.strokeRect(4, y * this.h + 4, this.w - 6, this.h - 6);
-      return this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 4, y * this.h + 4, 15, 16);
+      return this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 3, y * this.h + 3, 16, 15);
     };
 
     SessionView.prototype.drawHover = function(ctx, pos) {
@@ -243,6 +251,11 @@
 
     SessionView.prototype.clearActive = function(x) {
       return this.ctx_tracks_on.clearRect(x * this.w, this.last_active[x] * this.h, this.w, this.h);
+    };
+
+    SessionView.prototype.clearAllActive = function() {
+      this.ctx_tracks_on.clearRect(0, 0, 10000, 10000);
+      return this.ctx_master_on.clearRect(0, 0, 10000, 10000);
     };
 
     SessionView.prototype.cueTracks = function(x, y) {
@@ -270,17 +283,17 @@
         _this = this;
       if (is_master) {
         c = cells;
-        this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, c[0] * this.w + 4, c[1] * this.h + 4, 15, 16);
+        this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, c[0] * this.w + 3, c[1] * this.h + 3, 16, 15);
         return window.setTimeout((function() {
-          return _this.ctx_master_on.clearRect(c[0] * _this.w + 4, c[1] * _this.h + 4, 15, 16);
+          return _this.ctx_master_on.clearRect(c[0] * _this.w + 3, c[1] * _this.h + 3, 16, 15);
         }), 100);
       } else {
         _results = [];
         for (_i = 0, _len = cells.length; _i < _len; _i++) {
           c = cells[_i];
-          this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, c[0] * this.w + 4, c[1] * this.h + 4, 15, 16);
+          this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, c[0] * this.w + 3, c[1] * this.h + 3, 16, 15);
           _results.push(window.setTimeout((function() {
-            return _this.ctx_tracks_on.clearRect(c[0] * _this.w + 4, c[1] * _this.h + 4, 15, 16);
+            return _this.ctx_tracks_on.clearRect(c[0] * _this.w + 3, c[1] * _this.h + 3, 16, 15);
           }), 100));
         }
         return _results;

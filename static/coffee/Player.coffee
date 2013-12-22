@@ -40,6 +40,7 @@ class @Player
 
     play: ->
         @is_playing = true
+        @session.play()
         T.setTimeout(( =>
             s.play() for s in @synth
             @playNext()
@@ -50,7 +51,7 @@ class @Player
         @is_playing = false
         @view.viewStop()
         @time = 0
-        @readSong(@song)
+#        @readSong(@song)
 
     pause: ->
         s.pause(@time) for s in @synth

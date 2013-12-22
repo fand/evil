@@ -65,6 +65,7 @@
     Player.prototype.play = function() {
       var _this = this;
       this.is_playing = true;
+      this.session.play();
       return T.setTimeout((function() {
         var s, _i, _len, _ref;
         _ref = _this.synth;
@@ -85,8 +86,7 @@
       }
       this.is_playing = false;
       this.view.viewStop();
-      this.time = 0;
-      return this.readSong(this.song);
+      return this.time = 0;
     };
 
     Player.prototype.pause = function() {

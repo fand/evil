@@ -66,6 +66,9 @@
       }
       if (this.scene_pos >= this.song_length) {
         this.player.is_playing = false;
+        this.view.clearAllActive();
+        this.scene_pos = this.next_scene_pos = 0;
+        console.log(this.scene_pos);
         return;
       }
       for (i = _i = 0, _ref = this.synth.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -91,6 +94,10 @@
 
     Session.prototype.getScene = function(i) {
       return this.song.master[i];
+    };
+
+    Session.prototype.play = function() {
+      return this.view.drawScene(this.scene_pos);
     };
 
     Session.prototype.beat = function() {

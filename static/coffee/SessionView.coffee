@@ -22,7 +22,7 @@ class @SessionView
         @ctx_master_hover = @canvas_master_hover.getContext('2d')
 
         @w = 80
-        @h = 22
+        @h = 20
         @color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
         @img_play = new Image()
@@ -126,7 +126,7 @@ class @SessionView
             if song.master[y]?
                 @drawCell(@ctx_master, song.master[y], 0, y)
             else
-                @drawEmpty(@ctx_master, 0, y)
+                @drawEmptyMaster(y)
 
         @drawScene(0, @current_cells)
 
@@ -135,7 +135,7 @@ class @SessionView
         ctx.strokeStyle = @color[1]
         ctx.lineWidth = 2
         ctx.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
-        ctx.drawImage(@img_play, 0, 0, 18, 18,  x*@w + 4, y*@h + 4, 15, 16)
+        ctx.drawImage(@img_play, 0, 0, 18, 18,  x*@w + 3, y*@h + 3, 16, 15)
 
         ctx.fillStyle = @color[1]
         ctx.fillText(p.name, x * @w + 24, (y + 1) * @h - 6)
@@ -145,6 +145,13 @@ class @SessionView
         ctx.strokeStyle = @color[0]
         ctx.lineWidth = 1
         ctx.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
+
+    drawEmptyMaster: (y) ->
+        @clearCell(@ctx_master, 0, y)
+        @ctx_master.strokeStyle = @color[0]
+        @ctx_master.lineWidth = 1
+        @ctx_master.strokeRect(2, y * @h + 2, @w-2, @h-2)
+        @ctx_master.drawImage(@img_play, 0, 0, 18, 18, 3, y*@h + 3, 16, 15)
 
     clearCell: (ctx, x, y) ->
         ctx.clearRect(x * @w, y * @h, @w, @h)
@@ -185,7 +192,7 @@ class @SessionView
         @ctx_tracks_on.strokeRect(x*@w + 4, y*@h + 4, @w-6, @h-6)
 
         # inside cell
-        @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18,  x*@w + 4, y*@h + 4, 15, 16)
+        @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18,  x*@w + 3, y*@h + 3, 16, 15)
         @last_active[x] = y
 
     drawActiveMaster: (y) ->
@@ -197,7 +204,7 @@ class @SessionView
         @ctx_master_on.strokeRect(4, y*@h + 4, @w-6, @h-6)
 
         # inside cell
-        @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  4, y*@h + 4, 15, 16)
+        @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  3, y*@h + 3, 16, 15)
 
     drawHover: (ctx, pos) ->
         @clearHover(ctx)
@@ -216,6 +223,9 @@ class @SessionView
     clearActive: (x) ->
         @ctx_tracks_on.clearRect(x*@w, @last_active[x]*@h, @w, @h)
 
+    clearAllActive: () ->
+        @ctx_tracks_on.clearRect(0, 0, 10000, 10000)
+        @ctx_master_on.clearRect(0, 0, 10000, 10000)
 
     cueTracks: (x, y) ->
         if @song.tracks[x]? and @song.tracks[x].patterns[y]?
@@ -231,12 +241,12 @@ class @SessionView
     beat: (is_master, cells) ->
         if is_master
             c = cells
-            @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18, c[0]*@w + 4, c[1]*@h + 4, 15, 16)
-            window.setTimeout(( => @ctx_master_on.clearRect(c[0]*@w+4, c[1]*@h+4, 15, 16)), 100)
+            @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18, c[0]*@w + 3, c[1]*@h + 3, 16, 15)
+            window.setTimeout(( => @ctx_master_on.clearRect(c[0]*@w+3, c[1]*@h+3, 16, 15)), 100)
         else
             for c in cells
-                @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18, c[0]*@w + 4, c[1]*@h + 4, 15, 16)
-                window.setTimeout(( => @ctx_tracks_on.clearRect(c[0]*@w+4, c[1]*@h+4, 15, 16)), 100)
+                @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18, c[0]*@w + 3, c[1]*@h + 3, 16, 15)
+                window.setTimeout(( => @ctx_tracks_on.clearRect(c[0]*@w+3, c[1]*@h+3, 16, 15)), 100)
 
     editPattern: (pos) ->
         pat = @model.editPattern(pos.x, pos.y)

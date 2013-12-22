@@ -53,6 +53,9 @@ class @Session
 
         if @scene_pos >= @song_length
             @player.is_playing = false
+            @view.clearAllActive()
+            @scene_pos = @next_scene_pos = 0
+            console.log(@scene_pos)
             return
 
         for i in [0...@synth.length]
@@ -71,6 +74,8 @@ class @Session
         @cue_queue = []
 
     getScene: (i) -> @song.master[i]
+
+    play: () -> @view.drawScene(@scene_pos)
 
     beat: () ->
         if @is_waiting_next_scene
