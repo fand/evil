@@ -4,6 +4,10 @@
       var _this = this;
       this.model = model;
       this.song = song;
+      this.wrapper_mixer = $('#mixer-tracks');
+      this.wrapper_master = $('#session-master-wrapper');
+      this.wrapper_tracks = $('#session-tracks-wrapper');
+      this.wrapper_tracks_sub = $('#session-tracks-wrapper-sub');
       this.canvas_tracks_dom = $('#session-tracks');
       this.canvas_master_dom = $('#session-master');
       this.canvas_tracks_on_dom = $('#session-tracks-on');
@@ -97,6 +101,12 @@
       this.canvas_master_hover_dom.css({
         height: h_new + 'px'
       });
+      this.wrapper_tracks.css({
+        width: w_new + 'px'
+      });
+      this.wrapper_tracks_sub.css({
+        width: w_new + 'px'
+      });
       this.ctx_tracks.translate(0, this.offset_y);
       this.ctx_master.translate(0, this.offset_y);
       this.ctx_tracks_on.translate(0, this.offset_y);
@@ -105,21 +115,21 @@
       return this.ctx_master_hover.translate(0, this.offset_y);
     };
 
-    SessionView.prototype.getPos = function(rect, e) {
+    SessionView.prototype.getPos = function(rect, wrapper, e) {
       var _x, _y;
-      _x = Math.floor((e.clientX - rect.left) / this.w);
-      _y = Math.floor((e.clientY - rect.top - this.offset_translate) / this.h);
+      _x = Math.floor((e.clientX - rect.left + this.wrapper_mixer.scrollLeft()) / this.w);
+      _y = Math.floor((e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) / this.h);
       return {
         x: _x,
         y: _y
       };
     };
 
-    SessionView.prototype.getPlayPos = function(rect, e) {
+    SessionView.prototype.getPlayPos = function(rect, wrapper, e) {
       var _x, _y;
-      _x = Math.floor((e.clientX - rect.left) / this.w);
-      _y = Math.floor((e.clientY - rect.top - this.offset_translate) / this.h);
-      if (!((e.clientX - rect.left) - _x * this.w < 20 && (e.clientY - rect.top - this.offset_translate) - _y * this.h < 20)) {
+      _x = Math.floor((e.clientX - rect.left + this.wrapper_mixer.scrollLeft()) / this.w);
+      _y = Math.floor((e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) / this.h);
+      if (!((e.clientX - rect.left + this.wrapper_mixer.scrollLeft()) - _x * this.w < 20 && (e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) - _y * this.h < 20)) {
         _y = -1;
       }
       return {
@@ -132,7 +142,7 @@
       var _this = this;
       this.canvas_tracks_hover_dom.on('mousemove', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_tracks, e);
+        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
         return _this.drawHover(_this.ctx_tracks_hover, pos);
       }).on('mouseout', function(e) {
         _this.clearHover(_this.ctx_tracks_hover);
@@ -142,11 +152,11 @@
         };
       }).on('mousedown', function(e) {
         var now, pos;
-        pos = _this.getPlayPos(_this.rect_tracks, e);
+        pos = _this.getPlayPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
         if (pos.y >= 0) {
           return _this.cueTracks(pos.x, pos.y);
         } else {
-          pos = _this.getPos(_this.rect_tracks, e);
+          pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
           now = performance.now();
           if (now - _this.last_clicked < 500 && pos.y !== -1) {
             _this.editPattern(pos);
@@ -158,16 +168,22 @@
       });
       this.canvas_master_hover_dom.on('mousemove', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_master, e);
+        pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
         return _this.drawHover(_this.ctx_master_hover, pos);
       }).on('mouseout', function(e) {
         return _this.clearHover(_this.ctx_master_hover);
       }).on('mousedown', function(e) {
         var pos;
-        pos = _this.getPlayPos(_this.rect_master, e);
+        pos = _this.getPlayPos(_this.rect_master, _this.wrapper_master, e);
         if (pos != null) {
           return _this.cueMaster(pos.x, pos.y);
         }
+      });
+      this.wrapper_master.on('scroll', function(e) {
+        return _this.wrapper_tracks_sub.scrollTop(_this.wrapper_master.scrollTop());
+      });
+      this.wrapper_tracks_sub.on('scroll', function(e) {
+        return _this.wrapper_master.scrollTop(_this.wrapper_tracks_sub.scrollTop());
       });
       return this.readSong(this.song, this.current_cells);
     };
