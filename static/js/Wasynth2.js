@@ -2004,6 +2004,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth_name.val(this.model.name);
       this.pattern_name = this.dom.find('.pattern-name');
       this.pattern_name.val(this.model.pattern_name);
+      this.pencil = this.dom.find('.sequencer-pencil');
+      this.sustain = this.dom.find('.sequencer-sustain');
       this.header = this.dom.find('.header');
       this.pos_markers = this.dom.find('.marker');
       this.plus = this.dom.find('.pattern-plus');
@@ -2130,6 +2132,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.model.setPatternName(_this.pattern_name.val());
       }));
       this.plus.on('click', (function() {
+        return _this.pencilMode();
+      }));
+      this.minus.on('click', (function() {
+        return _this.sustainMode();
+      }));
+      this.plus.on('click', (function() {
         return _this.plusPattern();
       }));
       this.minus.on('click', (function() {
@@ -2208,6 +2216,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
       }
       return this.setMarker();
+    };
+
+    SynthView.prototype.pencilMode = function() {
+      return this.is_sustain = false;
+    };
+
+    SynthView.prototype.pencilMode = function() {
+      return this.is_sustain = false;
     };
 
     SynthView.prototype.plusPattern = function() {

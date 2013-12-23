@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title><: $title || 'Web Audio API Synthesizer 2' :></title>
+    <title><: $title || 'evil' :></title>
     <meta http-equiv="Content-Style-Type" content="text/css" />
     <meta http-equiv="Content-Script-Type" content="text/javascript" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />

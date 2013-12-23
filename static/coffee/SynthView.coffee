@@ -11,6 +11,9 @@ class @SynthView
         @pattern_name.val(@model.pattern_name)
 
         # header DOM
+        @pencil  = @dom.find('.sequencer-pencil')
+        @sustain = @dom.find('.sequencer-sustain')
+
         @header = @dom.find('.header')
         @pos_markers = @dom.find('.marker')  # list of list of markers
         @plus  = @dom.find('.pattern-plus')
@@ -135,6 +138,8 @@ class @SynthView
         ).on('change',
             ( => @model.setPatternName(@pattern_name.val()))
         )
+        @plus.on('click', ( => @pencilMode()))
+        @minus.on('click', ( => @sustainMode()))
         @plus.on('click', ( => @plusPattern()))
         @minus.on('click', ( =>
             if @pattern.length > 32
@@ -204,6 +209,9 @@ class @SynthView
                 i * 26, y * 26, 26, 26
             )
         @setMarker()
+
+    pencilMode: -> @is_sustain = false
+    pencilMode: -> @is_sustain = false
 
     plusPattern: ->
         return if @page_total == 8
