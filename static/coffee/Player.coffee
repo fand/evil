@@ -93,8 +93,8 @@ class @Player
         else
             @stop()
 
-    addSynth: (scene_pos) ->
-        s = new Synth(@context, @num_id++, this)
+    addSynth: (scene_pos, name) ->
+        s = new Synth(@context, @num_id++, this, name)
         s.setScale(@scene.scale)
         s.setKey(@scene.key)
         @synth.push(s)
@@ -123,11 +123,18 @@ class @Player
                 @view.moveRight()
 
     readSong: (@song) ->
-        while @song.tracks.length > @synth.length
-            @addSynth()
+        for i in [0...@song.tracks.length]
+            if @synth[i]?
+                @synth[i].setSynthName(@song.tracks[i].name)
+            else
+                @addSynth(@song.tracks[i].name)
         @session.setSynth(@synth)
-        @session.readSong(song)
+        @session.readSong(@song)
         @view.setSynthNum(@synth.length, @synth_pos)
+
+    clearSong: () ->
+        @synth = []
+        @num_id = 0
 
     readScene: (@scene) ->
         @setBPM(@scene.bpm) if @scene.bpm?

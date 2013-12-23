@@ -1,8 +1,19 @@
-<div id="tmpl_synth" class="instrument clearfix">
+<div id="tmpl_synth" class="instrument synth clearfix">
 
   <div class="sequencer">
     <div class="header">
-      <div class="synth-name"></div>
+
+      <select class="synth-type">
+        <option selected="selected">SYNTH</option>
+        <option>DRUM</option>
+      </select>
+
+      <div class="names clearfix">
+        <input type="text" class="synth-name" />
+        <span>></span>
+        <input type="text" class="pattern-name" />
+      </div>
+
       <i class="fa fa-minus pattern-minus"></i>
       <i class="fa fa-plus pattern-plus"></i>
 

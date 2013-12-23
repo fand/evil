@@ -6,7 +6,9 @@ class @SynthView
         $("#instruments").append(@dom)
 
         @synth_name = @dom.find('.synth-name')
-        @synth_name.html('SYNTH #' + @id)
+        @synth_name.val(@model.name)
+        @pattern_name = @dom.find('.pattern-name')
+        @pattern_name.val(@model.pattern_name)
 
         # header DOM
         @header = @dom.find('.header')
@@ -65,7 +67,7 @@ class @SynthView
                     0, 0, 26, 26,           # src (x, y, w, h)
                     j * 26, i * 26, 26, 26  # dst (x, y, w, h)
                 )
-        @readPattern(@pattern)
+        @readPattern(@pattern_obj)
 
     getPos: (e) ->
         @rect = @canvas_off.getBoundingClientRect()
@@ -77,6 +79,7 @@ class @SynthView
         y_abs: _y
 
     initEvent: ->
+        # Sequencer
         @canvas_hover_dom.on('mousemove', (e) =>
             pos = @getPos(e)
 
@@ -117,6 +120,21 @@ class @SynthView
             @is_adding = false
         )
 
+        # Headers
+        @synth_name.on('focus',
+            ( => window.is_input_mode = true)
+        ).on('blur',
+            ( => window.is_input_mode = false)
+        ).on('change',
+            ( => @model.setSynthName(@synth_name.val()))
+        )
+        @pattern_name.on('focus',
+            ( => window.is_input_mode = true)
+        ).on('blur',
+            ( => window.is_input_mode = false)
+        ).on('change',
+            ( => @model.setPatternName(@pattern_name.val()))
+        )
         @plus.on('click', ( => @plusPattern()))
         @minus.on('click', ( =>
             if @pattern.length > 32
@@ -166,11 +184,13 @@ class @SynthView
             )
         @last_time = time
 
-    readPattern: (@pattern) ->
+    readPattern: (@pattern_obj) ->
+        @pattern = @pattern_obj.pattern
         @page = 0
         @page_total = @pattern.length / 32
         @drawPattern(0)
         @setMarker()
+        @setPatternName(@pattern_obj.name)
 
     drawPattern: (time) ->
         @time = time if time?
@@ -218,6 +238,8 @@ class @SynthView
 
     inactivate: -> @is_active = false
 
+    setSynthName:   (name) -> @synth_name.val(name)
+    setPatternName: (name) -> @pattern_name.val(name)
 
 
 class @KeyboardView

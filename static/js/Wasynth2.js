@@ -423,9 +423,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
-    Player.prototype.addSynth = function(scene_pos) {
+    Player.prototype.addSynth = function(scene_pos, name) {
       var s;
-      s = new Synth(this.context, this.num_id++, this);
+      s = new Synth(this.context, this.num_id++, this, name);
       s.setScale(this.scene.scale);
       s.setKey(this.scene.key);
       this.synth.push(s);
@@ -466,13 +466,23 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Player.prototype.readSong = function(song) {
+      var i, _i, _ref;
       this.song = song;
-      while (this.song.tracks.length > this.synth.length) {
-        this.addSynth();
+      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.synth[i] != null) {
+          this.synth[i].setSynthName(this.song.tracks[i].name);
+        } else {
+          this.addSynth(this.song.tracks[i].name);
+        }
       }
       this.session.setSynth(this.synth);
-      this.session.readSong(song);
+      this.session.readSong(this.song);
       return this.view.setSynthNum(this.synth.length, this.synth_pos);
+    };
+
+    Player.prototype.clearSong = function() {
+      this.synth = [];
+      return this.num_id = 0;
     };
 
     Player.prototype.readScene = function(scene) {
@@ -788,7 +798,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       _ref = this.cue_queue;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         q = _ref[_i];
-        pat = this.song.tracks[q[0]].patterns[q[1]].pattern;
+        pat = this.song.tracks[q[0]].patterns[q[1]];
         this.synth[q[0]].readPattern(pat);
         this.current_cells[q[0]] = q[1];
       }
@@ -817,10 +827,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         if (this.song.tracks[i].patterns[pos] == null) {
           continue;
         }
-        pat = this.song.tracks[i].patterns[pos].pattern;
+        pat = this.song.tracks[i].patterns[pos];
         if (pat != null) {
           this.synth[i].readPattern(pat);
-          this.scene_length = Math.max(this.scene_length, pat.length);
+          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
           this.current_cells[i] = pos;
         }
       }
@@ -871,7 +881,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       pos = _pos ? _pos : this.scene_pos;
       pp = [];
       pp[pos] = {
-        name: s.id + '-' + 0,
+        name: s.id + '-' + pos,
         pattern: s.pattern
       };
       s_obj = {
@@ -905,16 +915,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.song.tracks.length <= _synth_num) {
         synth_num = this.song.tracks.length;
         this.player.addSynth(pat_num);
-        this.song.tracks[synth_num].patterns[pat_num] = this.song.tracks[synth_num].patterns[0];
-        delete this.song.tracks[synth_num].patterns[0];
       }
       if (this.song.tracks[synth_num].patterns[pat_num] != null) {
-        this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num].pattern);
+        this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num]);
       } else {
         this.player.synth[synth_num].clearPattern();
-        this.song.tracks[synth_num].patterns[pat_num] = {
-          pattern: this.player.synth[synth_num].pattern
-        };
+        this.player.synth[synth_num].setPatternName(synth_num + '-' + pat_num);
+        console.log(this.player.synth[synth_num].pattern_obj);
+        this.song.tracks[synth_num].patterns[pat_num] = this.player.synth[synth_num].pattern_obj;
       }
       this.current_cells[synth_num] = pat_num;
       this.view.readSong(this.song, this.current_cells);
@@ -946,7 +954,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         pat = this.song.tracks[i].patterns[0].pattern;
         if (pat != null) {
-          this.synth[i].readPattern(this.song.tracks[i].patterns[0].pattern);
+          this.synth[i].readPattern(this.song.tracks[i].patterns[0]);
           this.current_cells[i] = 0;
         }
         this.song_length = Math.max(this.song_length, song.tracks[i].patterns.length);
@@ -992,6 +1000,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }).fail(function(err) {
         return _this.showError(err);
       });
+    };
+
+    Session.prototype.setSynthName = function(synth_id, name) {
+      this.song.tracks[synth_id].name = name;
+      return this.view.drawTrackName(synth_id, name);
+    };
+
+    Session.prototype.setPatternName = function(synth_id, name) {
+      var pat_num;
+      pat_num = this.current_cells[synth_id];
+      this.song.tracks[synth_id].patterns[pat_num].name = name;
+      return this.view.drawPatternName(synth_id, pat_num, this.song.tracks[synth_id].patterns[pat_num]);
     };
 
     return Session;
@@ -1197,7 +1217,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       for (x = _i = 0, _ref = Math.max(song.tracks.length + 1, 8); 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         t = song.tracks[x];
         if ((t != null) && (t.name != null)) {
-          this.drawTrackName(this.ctx_tracks, t.name, x);
+          this.drawTrackName(x, t.name);
         }
         for (y = _j = 0, _ref1 = Math.max(song.length, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           if ((t != null) && (t.patterns[y] != null)) {
@@ -1246,19 +1266,25 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
     };
 
-    SessionView.prototype.drawTrackName = function(ctx, name, x) {
+    SessionView.prototype.drawTrackName = function(x, name) {
       var dx, dy, m;
-      ctx.fillStyle = this.color[1];
-      ctx.fillRect(x * this.w + 2, -20, this.w - 2, 18);
-      m = ctx.measureText(name);
+      this.ctx_tracks.fillStyle = this.color[1];
+      this.ctx_tracks.fillRect(x * this.w + 2, -20, this.w - 2, 18);
+      m = this.ctx_tracks.measureText(name);
       dx = (this.w - m.width) / 2;
       dy = (this.offset_y - this.font_size) / 2;
-      ctx.shadowColor = '#fff';
-      ctx.shadowBlur = 1;
-      ctx.fillStyle = '#fff';
-      ctx.fillText(name, x * this.w + dx + 2, -dy - 3);
-      return ctx.shadowBlur = 0;
+      this.ctx_tracks.shadowColor = '#fff';
+      this.ctx_tracks.shadowBlur = 1;
+      this.ctx_tracks.fillStyle = '#fff';
+      this.ctx_tracks.fillText(name, x * this.w + dx + 2, -dy - 3);
+      return this.ctx_tracks.shadowBlur = 0;
     };
+
+    SessionView.prototype.drawPatternName = function(x, y, p) {
+      return this.drawCell(this.ctx_tracks, p, x, y);
+    };
+
+    SessionView.prototype.drawSceneName = function(y, name) {};
 
     SessionView.prototype.drawScene = function(pos, cells) {
       var i, _i, _ref;
@@ -1807,11 +1833,20 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   })();
 
   this.Synth = (function() {
-    function Synth(ctx, id, player) {
+    function Synth(ctx, id, player, name) {
       this.ctx = ctx;
       this.id = id;
       this.player = player;
+      this.name = name;
+      if (this.name == null) {
+        this.name = 'Synth #' + this.id;
+      }
+      this.pattern_name = 'pattern 0';
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern_obj = {
+        name: this.pattern_name,
+        pattern: this.pattern
+      };
       this.time = 0;
       this.scale = [];
       this.view = new SynthView(this, this.id);
@@ -1890,14 +1925,17 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.core.noteOff();
     };
 
-    Synth.prototype.readPattern = function(pattern) {
-      this.pattern = pattern;
-      return this.view.readPattern(this.pattern);
+    Synth.prototype.readPattern = function(pattern_obj) {
+      this.pattern_obj = pattern_obj;
+      this.pattern = this.pattern_obj.pattern;
+      this.pattern_name = this.pattern_obj.name;
+      return this.view.readPattern(this.pattern_obj);
     };
 
     Synth.prototype.clearPattern = function() {
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      return this.view.readPattern(this.pattern);
+      this.pattern_obj.pattern = this.pattern;
+      return this.view.readPattern(this.pattern_obj);
     };
 
     Synth.prototype.plusPattern = function() {
@@ -1936,6 +1974,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.id = id;
     };
 
+    Synth.prototype.setSynthName = function(name) {
+      this.name = name;
+      this.session.setSynthName(this.id, this.name);
+      return this.view.setSynthName(this.name);
+    };
+
+    Synth.prototype.setPatternName = function(pattern_name) {
+      this.pattern_name = pattern_name;
+      this.session.setPatternName(this.id, this.pattern_name);
+      return this.view.setPatternName(this.pattern_name);
+    };
+
     return Synth;
 
   })();
@@ -1951,7 +2001,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.dom.attr('id', 'synth' + id);
       $("#instruments").append(this.dom);
       this.synth_name = this.dom.find('.synth-name');
-      this.synth_name.html('SYNTH #' + this.id);
+      this.synth_name.val(this.model.name);
+      this.pattern_name = this.dom.find('.pattern-name');
+      this.pattern_name.val(this.model.pattern_name);
       this.header = this.dom.find('.header');
       this.pos_markers = this.dom.find('.marker');
       this.plus = this.dom.find('.pattern-plus');
@@ -2007,7 +2059,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
         }
       }
-      return this.readPattern(this.pattern);
+      return this.readPattern(this.pattern_obj);
     };
 
     SynthView.prototype.getPos = function(e) {
@@ -2063,6 +2115,20 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _this.is_clicked = false;
         return _this.is_adding = false;
       });
+      this.synth_name.on('focus', (function() {
+        return window.is_input_mode = true;
+      })).on('blur', (function() {
+        return window.is_input_mode = false;
+      })).on('change', (function() {
+        return _this.model.setSynthName(_this.synth_name.val());
+      }));
+      this.pattern_name.on('focus', (function() {
+        return window.is_input_mode = true;
+      })).on('blur', (function() {
+        return window.is_input_mode = false;
+      })).on('change', (function() {
+        return _this.model.setPatternName(_this.pattern_name.val());
+      }));
       this.plus.on('click', (function() {
         return _this.plusPattern();
       }));
@@ -2120,12 +2186,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.last_time = time;
     };
 
-    SynthView.prototype.readPattern = function(pattern) {
-      this.pattern = pattern;
+    SynthView.prototype.readPattern = function(pattern_obj) {
+      this.pattern_obj = pattern_obj;
+      this.pattern = this.pattern_obj.pattern;
       this.page = 0;
       this.page_total = this.pattern.length / 32;
       this.drawPattern(0);
-      return this.setMarker();
+      this.setMarker();
+      return this.setPatternName(this.pattern_obj.name);
     };
 
     SynthView.prototype.drawPattern = function(time) {
@@ -2191,6 +2259,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SynthView.prototype.inactivate = function() {
       return this.is_active = false;
+    };
+
+    SynthView.prototype.setSynthName = function(name) {
+      return this.synth_name.val(name);
+    };
+
+    SynthView.prototype.setPatternName = function(name) {
+      return this.pattern_name.val(name);
     };
 
     return SynthView;
@@ -2388,9 +2464,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   $(function() {
     var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, s1, s2, scn1, scn2, scn55, song1, song2, t1, t2;
     window.player = new Player();
+    window.is_input_mode = false;
     is_key_pressed = false;
     $(window).keydown(function(e) {
       var n;
+      if (window.is_input_mode) {
+        return;
+      }
       if (is_key_pressed === false) {
         is_key_pressed = true;
         if (player.isPlaying()) {

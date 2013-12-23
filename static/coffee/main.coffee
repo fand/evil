@@ -59,8 +59,10 @@ $(() ->
 
     window.player = new Player()
 
+    window.is_input_mode = false
     is_key_pressed = false
     $(window).keydown((e) ->
+        return if window.is_input_mode
         if is_key_pressed == false
             is_key_pressed = true
             player.noteOff() if player.isPlaying()

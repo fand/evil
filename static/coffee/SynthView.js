@@ -8,7 +8,9 @@
       this.dom.attr('id', 'synth' + id);
       $("#instruments").append(this.dom);
       this.synth_name = this.dom.find('.synth-name');
-      this.synth_name.html('SYNTH #' + this.id);
+      this.synth_name.val(this.model.name);
+      this.pattern_name = this.dom.find('.pattern-name');
+      this.pattern_name.val(this.model.pattern_name);
       this.header = this.dom.find('.header');
       this.pos_markers = this.dom.find('.marker');
       this.plus = this.dom.find('.pattern-plus');
@@ -64,7 +66,7 @@
           this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
         }
       }
-      return this.readPattern(this.pattern);
+      return this.readPattern(this.pattern_obj);
     };
 
     SynthView.prototype.getPos = function(e) {
@@ -120,6 +122,20 @@
         _this.is_clicked = false;
         return _this.is_adding = false;
       });
+      this.synth_name.on('focus', (function() {
+        return window.is_input_mode = true;
+      })).on('blur', (function() {
+        return window.is_input_mode = false;
+      })).on('change', (function() {
+        return _this.model.setSynthName(_this.synth_name.val());
+      }));
+      this.pattern_name.on('focus', (function() {
+        return window.is_input_mode = true;
+      })).on('blur', (function() {
+        return window.is_input_mode = false;
+      })).on('change', (function() {
+        return _this.model.setPatternName(_this.pattern_name.val());
+      }));
       this.plus.on('click', (function() {
         return _this.plusPattern();
       }));
@@ -177,12 +193,14 @@
       return this.last_time = time;
     };
 
-    SynthView.prototype.readPattern = function(pattern) {
-      this.pattern = pattern;
+    SynthView.prototype.readPattern = function(pattern_obj) {
+      this.pattern_obj = pattern_obj;
+      this.pattern = this.pattern_obj.pattern;
       this.page = 0;
       this.page_total = this.pattern.length / 32;
       this.drawPattern(0);
-      return this.setMarker();
+      this.setMarker();
+      return this.setPatternName(this.pattern_obj.name);
     };
 
     SynthView.prototype.drawPattern = function(time) {
@@ -248,6 +266,14 @@
 
     SynthView.prototype.inactivate = function() {
       return this.is_active = false;
+    };
+
+    SynthView.prototype.setSynthName = function(name) {
+      return this.synth_name.val(name);
+    };
+
+    SynthView.prototype.setPatternName = function(name) {
+      return this.pattern_name.val(name);
     };
 
     return SynthView;
