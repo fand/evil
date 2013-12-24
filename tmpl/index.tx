@@ -2,6 +2,19 @@
 
 : override content -> {
 
+
+<div id="top">
+  <div id="top-logo">
+    <div id="top-logo-wrapper">
+      <img id="evil-logo" src="/static/img/evil_300.png" />
+      <a id="chrome-logo" href="http://www.google.com/intl/ja/chrome/browser/"><img src="/static/img/chrome_300.png" /></a>
+    </div>
+  </div>
+  <div id="top-sorry">for <a href="http://www.google.com/intl/ja/chrome/browser/">Google Chrome</a></div>
+</div>
+<div id="dialog"></div>
+<div id="key-help"></div>
+
 <div id="wrapper">
 
   <div id="social" class="clearfix">
@@ -146,8 +159,8 @@
   <i id="btn-bottom" class="btn fa fa-angle-down"  data-line1="synths"></i>
 
 
-<i class="fa fa-save" id="btn-save">
-<form id="ajax-form" method="POST" />
+<i class="fa fa-save" id="btn-save"></i>
+<form id="ajax-form" method="POST"></form>
 <script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
 
 : }
