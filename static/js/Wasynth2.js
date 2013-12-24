@@ -2566,7 +2566,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     T.setTimeout((function() {
       $('#top').css({
         opacity: '0'
-      });
+      }).delay(500).css('z-index', '-1');
       return $('#top-logo').css({
         '-webkit-transform': 'translate3d(0px, -100px, 0px)',
         opacity: '0'
