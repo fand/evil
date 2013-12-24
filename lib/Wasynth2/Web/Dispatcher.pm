@@ -7,7 +7,13 @@ use Amon2::Web::Dispatcher::RouterBoom;
 
 get '/' => sub {
     my ($c) = @_;
-    return $c->render('index.tx');
+    my $ua = $c->req->headers->user_agent;
+    if ( $ua =~ /msie/i ) {
+        return $c->render( 'ie.tx' );
+    }
+    else  {
+        return $c->render( 'index.tx' );
+    }
 };
 
 post '/' => sub {

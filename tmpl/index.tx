@@ -159,8 +159,8 @@
   <i id="btn-bottom" class="btn fa fa-angle-down"  data-line1="synths"></i>
 
 
-<i class="fa fa-save" id="btn-save">
-<form id="ajax-form" method="POST" />
+<i class="fa fa-save" id="btn-save"></i>
+<form id="ajax-form" method="POST"></form>
 <script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
 
 : }
