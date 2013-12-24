@@ -1,6 +1,4 @@
 (function() {
-  this.CONTEXT = new webkitAudioContext();
-
   this.STREAM_LENGTH = 1024;
 
   this.SAMPLE_RATE = 48000;
@@ -53,7 +51,35 @@
   };
 
   $(function() {
-    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, s1, s2, scn1, scn2, scn55, song1, song2, t1, t2;
+    var ua;
+    console.log('Welcome to evil!');
+    ua = window.navigator.userAgent.toLowerCase();
+    if (ua.match(/chrome/g)) {
+      return initEvil();
+    } else {
+      console.log(ua);
+      return sorry();
+    }
+  });
+
+  this.sorry = function() {
+    $('#top-sorry').show();
+    return $('#top-logo-wrapper').addClass('logo-sorry');
+  };
+
+  this.initEvil = function() {
+    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, s1, s2, scn1, scn2, scn55, song1, song2, t1, t2,
+      _this = this;
+    T.setTimeout((function() {
+      $('#top').css({
+        opacity: '0'
+      });
+      return $('#top-logo').css({
+        '-webkit-transform': 'translate3d(0px, -100px, 0px)',
+        opacity: '0'
+      });
+    }), 1500);
+    window.CONTEXT = new webkitAudioContext();
     window.player = new Player();
     window.is_input_mode = false;
     is_key_pressed = false;
@@ -174,6 +200,6 @@
     return $("#facebook").socialbutton('facebook_like', {
       button: 'button_count'
     });
-  });
+  };
 
 }).call(this);

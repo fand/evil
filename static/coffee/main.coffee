@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # CONSTANT
 
-@CONTEXT = new webkitAudioContext()
+#@CONTEXT = new webkitAudioContext()
 @STREAM_LENGTH = 1024
 @SAMPLE_RATE = 48000
 @SEMITONE = 1.05946309
@@ -56,6 +56,36 @@
 # Main
 
 $(() ->
+
+    console.log('Welcome to evil!')
+    ua = window.navigator.userAgent.toLowerCase()
+    if ua.match(/chrome/g)
+        initEvil()
+    else
+        console.log(ua)
+        sorry()
+)
+
+
+
+@sorry = ->
+    $('#top-sorry').show()
+    $('#top-logo-wrapper').addClass('logo-sorry')
+
+
+@initEvil = ->
+
+    T.setTimeout((() =>
+        $('#top').css(
+            opacity: '0'
+        )
+        $('#top-logo').css(
+            '-webkit-transform': 'translate3d(0px, -100px, 0px)'
+            opacity: '0'
+        )
+    ), 1500)
+
+    window.CONTEXT = new webkitAudioContext()
 
     window.player = new Player()
 
@@ -149,5 +179,3 @@ $(() ->
     $("#facebook").socialbutton('facebook_like', {
         button: 'button_count'
     })
-
-)
