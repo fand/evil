@@ -447,6 +447,7 @@
       this.scale = [];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
+      this.is_sustaining = false;
       this.session = this.player.session;
     }
 
@@ -492,19 +493,35 @@
     };
 
     Synth.prototype.playAt = function(time) {
-      var mytime,
+      var mytime, n,
         _this = this;
       this.time = time;
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
       if (this.pattern[mytime] === 0) {
-        return this.core.noteOff();
+        if (this.is_sustaining) {
+          return T.setTimeout((function() {
+            return _this.core.noteOff();
+          }), this.duration - 10);
+        } else {
+          return this.core.noteOff();
+        }
       } else {
-        this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
-        this.core.noteOn();
-        return T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
+        if (this.pattern[mytime] == null) {
+          return;
+        }
+        if (this.pattern[mytime] < 0) {
+          this.is_sustaining = true;
+          n = -this.pattern[mytime];
+          this.core.setNote(this.noteToSemitone(n));
+          return this.core.noteOn();
+        } else {
+          this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
+          this.core.noteOn();
+          return T.setTimeout((function() {
+            return _this.core.noteOff();
+          }), this.duration - 10);
+        }
       }
     };
 
@@ -550,6 +567,20 @@
 
     Synth.prototype.removeNote = function(time) {
       return this.pattern[time] = 0;
+    };
+
+    Synth.prototype.sustainNote = function(l, r, note) {
+      var i, _i;
+      for (i = _i = l; l <= r ? _i < r : _i > r; i = l <= r ? ++_i : --_i) {
+        this.pattern[i] = void 0;
+      }
+      this.pattern[l] = -note;
+      return this.pattern[r] = 0;
+    };
+
+    Synth.prototype.cutNote = function(pos) {
+      this.pattern[pos.x - 1] = 0;
+      return this.pattern[pos.x] = -pos.y;
     };
 
     Synth.prototype.activate = function(i) {

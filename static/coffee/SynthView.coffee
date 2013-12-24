@@ -11,8 +11,9 @@ class @SynthView
         @pattern_name.val(@model.pattern_name)
 
         # header DOM
-        @pencil  = @dom.find('.sequencer-pencil')
-        @sustain = @dom.find('.sequencer-sustain')
+        @pencil = @dom.find('.sequencer-pencil')
+        @step   = @dom.find('.sequencer-step')
+        @is_step = false
 
         @header = @dom.find('.header')
         @markers = @dom.find('.markers')
@@ -43,6 +44,8 @@ class @SynthView
         @cell.src = 'static/img/sequencer_cell.png'
         @cell.onload = () => @initCanvas()
 
+        @cells_y = 20
+
         @fold = @dom.find('.btn-fold-core')
         @core = @dom.find('.synth-core')
         @is_panel_opened = true
@@ -69,7 +72,7 @@ class @SynthView
         @rect = @canvas_off.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top
 
-        for i in [0...20]
+        for i in [0...@cells_y]
             for j in [0...32]
                 @ctx_off.drawImage(@cell,
                     0, 0, 26, 26,           # src (x, y, w, h)
@@ -90,7 +93,6 @@ class @SynthView
         # Sequencer
         @canvas_hover_dom.on('mousemove', (e) =>
             pos = @getPos(e)
-
             if pos != @hover_pos
                 @ctx_hover.clearRect(
                     @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
@@ -102,23 +104,58 @@ class @SynthView
                 @hover_pos = pos
 
             if @is_clicked and @click_pos != pos
-                if @is_adding
-                    @addNote(pos)
-                else if @pattern[pos.x_abs] == 20 - pos.y
-                    @removeNote(pos)
+                if @is_sustaining
+                    @sustain_l = Math.min(pos.x_abs, @sustain_l)
+                    @sustain_r = Math.max(pos.x_abs, @sustain_r)
+                    @sustainNote(@sustain_l, @sustain_r, pos.y)
+                else
+                    if @is_adding
+                        @addNote(pos)
+                    else if @pattern[pos.x_abs] == @cells_y - pos.y
+                        @removeNote(pos)
                 @click_pos = pos
 
         ).on('mousedown', (e) =>
             @is_clicked = true
             pos = @getPos(e)
-            if @pattern[pos.x_abs] == 20 - pos.y
-                @removeNote(pos)
+
+            if not @is_step
+                # not sustaining
+                if @pattern[pos.x_abs]? or @pattern[pos.x_abs] == 0
+                    @addNote(pos)
+                    @sustain_l = @sustain_r = pos.x_abs
+                    @is_sustaining = true
+                # sustaining
+                else
+                    i = pos.x_abs - 1
+                    while not @pattern[i]?
+                        i--
+                    if i < 0
+                        console.log('strange data!')
+                        @removeNote(pos.x)
+                        return
+                    if @pattern[i] != @cells_y - pos.y
+                        # divide note at (pos.x - 1)
+                        @cutNote(pos)
+                    @sustain_l = i
+                    @sustain_r = pos.x_abs
+                    while not @pattern[@sustain_r]?
+                        @sustain_r++
+                    @is_sustaining = true
             else
-                @is_adding = true
-                @addNote(pos)
+                if @pattern[pos.x_abs] == @cells_y - pos.y
+                    @removeNote(pos)
+                else
+                    @is_adding = true
+                    @addNote(pos)
         ).on('mouseup', (e) =>
             @is_clicked = false
-            @is_adding = false
+            if not @is_step
+                pos = @getPos(e)
+                @sustainNote(@sustain_left, @sustain_right, pos.y)
+                @is_sustaining = false
+            else
+                @is_adding = false
         ).on('mouseout', (e) =>
             @ctx_hover.clearRect(
                 @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
@@ -144,7 +181,7 @@ class @SynthView
             ( => @model.setPatternName(@pattern_name.val()))
         )
         @pencil.on('click', ( => @pencilMode()))
-        @sustain.on('click', ( => @sustainMode()))
+        @step.on('click', ( => @stepMode()))
 
         @marker_prev.on('click', ( => @model.player.backward(true)))
         @marker_next.on('click', ( => @model.player.forward()))
@@ -171,7 +208,7 @@ class @SynthView
 
 
     addNote: (pos) ->
-        note = 20 - pos.y
+        note = @cells_y - pos.y
         @pattern[pos.x_abs] = note
         @model.addNote(pos.x_abs, note)
         @ctx_on.clearRect(pos.x * 26, 0, 26, 1000)
@@ -185,12 +222,43 @@ class @SynthView
         @ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26)
         @model.removeNote(pos.x_abs)
 
+    cutNote: (pos) ->
+        i = pos.x
+        while not @pattern[i]?
+            i++  # then i is end of note
+        @pattern[pos.x - 1] = 0
+        @ctx_on.clearRect(x * 26, pos.y * 26, (i - x) * 26, 26)
+        @model.cutNote(pos)
+
+    sustainNote: (l, r, y) ->
+        for i in [l..r]
+            @ctx_on.clearRect(i * 26, 0, 26, 1000)
+
+        for i in [(l+1)...r]
+            @pattern[i] = undefined
+            @ctx_on.drawImage(@cell,
+                130, 0, 26, 26,
+                i * 26, y * 26, 26, 26
+            )
+        @pattern[l] = -(@cells_y - y)
+        @pattern[r] = 0
+        @ctx_on.drawImage(@cell,
+            104, 0, 26, 26,
+            l * 26, y * 26, 26, 26
+        )
+        @ctx_on.drawImage(@cell,
+            156, 0, 26, 26,
+            r * 26, y * 26, 26, 26
+        )
+        @model.sustainNote(l, r, @cells_y - y)
+
+
     playAt: (@time) ->
         return if @is_nosync
 
         if @time % 32 == 0
             @drawPattern(@time)
-        for i in [0...20]
+        for i in [0...@cells_y]
             @ctx_off.drawImage(@cell,
                 0, 0, 26, 26,
                 (@last_time % 32) * 26, i * 26, 26, 26
@@ -213,17 +281,45 @@ class @SynthView
         @time = time if time?
         @page = Math.floor(@time / 32)
         @ctx_on.clearRect(0, 0, 832, 520)
-        for i in [0...32]
-            y = 20 - @pattern[@page * 32 + i]
-            @ctx_on.drawImage(
-                @cell,
-                26, 0, 26, 26,
-                i * 26, y * 26, 26, 26
-            )
-        @setMarker()
 
-    pencilMode: -> @is_sustain = false
-    pencilMode: -> @is_sustain = false
+        last_y = 0
+
+        for i in [0...32]
+            note = @pattern[@page * 32 + i]
+
+            if not note?
+                is_sus = true
+                @ctx_on.drawImage(
+                    @cell,
+                    130, 0, 26, 26,
+                    i * 26, last_y * 26, 26, 26
+                )
+            else if note == 0
+                return if not is_sus
+                is_sus = false
+                @ctx_on.drawImage(
+                    @cell,
+                    156, 0, 26, 26,
+                    i * 26, last_y * 26, 26, 26
+                )
+                last_y = 0
+            else if note < 0
+                y = @cells_y + note
+                @ctx_on.drawImage(
+                    @cell,
+                    104, 0, 26, 26,
+                    i * 26, y * 26, 26, 26
+                )
+                last_y = y
+            else
+                y = @cells_y - note
+                @ctx_on.drawImage(
+                    @cell,
+                    26, 0, 26, 26,
+                    i * 26, y * 26, 26, 26
+                )
+                last_y = y
+        @setMarker()
 
     plusPattern: ->
         return if @page_total == 8
@@ -264,7 +360,7 @@ class @SynthView
 
     play: ->
     stop: ->
-        for i in [0...20]
+        for i in [0...@cells_y]
             @ctx_off.drawImage(@cell,
                 0, 0, 26, 26,
                 (@last_time % 32) * 26, i * 26, 26, 26
@@ -287,11 +383,22 @@ class @SynthView
         else
             @is_nosync = true
             @nosync.removeClass('btn-false').addClass('btn-true')
-            for i in [0...20]
+            for i in [0...@cells_y]
                 @ctx_off.drawImage(@cell,
                     0, 0, 26, 26,
                     (@time % 32) * 26, i * 26, 26, 26
                 )
+
+    pencilMode: ->
+        @is_step = false
+        @pencil.removeClass('btn-false').addClass('btn-true')
+        @step.removeClass('btn-true').addClass('btn-false')
+
+    stepMode: ->
+        @is_step = true
+        @step.removeClass('btn-false').addClass('btn-true')
+        @pencil.removeClass('btn-true').addClass('btn-false')
+
 
 
 
