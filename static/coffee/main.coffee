@@ -78,7 +78,7 @@ $(() ->
     T.setTimeout((() =>
         $('#top').css(
             opacity: '0'
-        )
+        ).delay(500).css('z-index', '-1')
         $('#top-logo').css(
             '-webkit-transform': 'translate3d(0px, -100px, 0px)'
             opacity: '0'
