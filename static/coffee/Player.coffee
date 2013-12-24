@@ -63,11 +63,15 @@ class @Player
         @time = (@time + 32) % @scene_length
         @synth_now.redraw(@time)
 
-    backward: ->
-        if @time % 32  < 3 && @time >= 32
-            @time = (@time - 32 - (@time % 32)) % @scene_length
+    backward: (force) ->
+        if force
+            if @time >= 32
+                @time = (@time - 32) % @scene_length
         else
-            @time = @time - (@time % 32)
+            if @time % 32  < 3 and @time >= 32
+                @time = (@time - 32 - (@time % 32)) % @scene_length
+            else
+                @time = @time - (@time % 32)
         @synth_now.redraw(@time)
 
     toggleLoop: -> @session.toggleLoop()
@@ -93,8 +97,8 @@ class @Player
         else
             @stop()
 
-    addSynth: (scene_pos) ->
-        s = new Synth(@context, @num_id++, this)
+    addSynth: (scene_pos, name) ->
+        s = new Synth(@context, @num_id++, this, name)
         s.setScale(@scene.scale)
         s.setKey(@scene.key)
         @synth.push(s)
@@ -123,11 +127,18 @@ class @Player
                 @view.moveRight()
 
     readSong: (@song) ->
-        while @song.tracks.length > @synth.length
-            @addSynth()
+        for i in [0...@song.tracks.length]
+            if @synth[i]?
+                @synth[i].setSynthName(@song.tracks[i].name)
+            else
+                @addSynth(@song.tracks[i].name)
         @session.setSynth(@synth)
-        @session.readSong(song)
+        @session.readSong(@song)
         @view.setSynthNum(@synth.length, @synth_pos)
+
+    clearSong: () ->
+        @synth = []
+        @num_id = 0
 
     readScene: (@scene) ->
         @setBPM(@scene.bpm) if @scene.bpm?

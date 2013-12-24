@@ -196,7 +196,7 @@
       for (x = _i = 0, _ref = Math.max(song.tracks.length + 1, 8); 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         t = song.tracks[x];
         if ((t != null) && (t.name != null)) {
-          this.drawTrackName(this.ctx_tracks, t.name, x);
+          this.drawTrackName(x, t.name);
         }
         for (y = _j = 0, _ref1 = Math.max(song.length, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           if ((t != null) && (t.patterns[y] != null)) {
@@ -245,19 +245,25 @@
       return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
     };
 
-    SessionView.prototype.drawTrackName = function(ctx, name, x) {
+    SessionView.prototype.drawTrackName = function(x, name) {
       var dx, dy, m;
-      ctx.fillStyle = this.color[1];
-      ctx.fillRect(x * this.w + 2, -20, this.w - 2, 18);
-      m = ctx.measureText(name);
+      this.ctx_tracks.fillStyle = this.color[1];
+      this.ctx_tracks.fillRect(x * this.w + 2, -20, this.w - 2, 18);
+      m = this.ctx_tracks.measureText(name);
       dx = (this.w - m.width) / 2;
       dy = (this.offset_y - this.font_size) / 2;
-      ctx.shadowColor = '#fff';
-      ctx.shadowBlur = 1;
-      ctx.fillStyle = '#fff';
-      ctx.fillText(name, x * this.w + dx + 2, -dy - 3);
-      return ctx.shadowBlur = 0;
+      this.ctx_tracks.shadowColor = '#fff';
+      this.ctx_tracks.shadowBlur = 1;
+      this.ctx_tracks.fillStyle = '#fff';
+      this.ctx_tracks.fillText(name, x * this.w + dx + 2, -dy - 3);
+      return this.ctx_tracks.shadowBlur = 0;
     };
+
+    SessionView.prototype.drawPatternName = function(x, y, p) {
+      return this.drawCell(this.ctx_tracks, p, x, y);
+    };
+
+    SessionView.prototype.drawSceneName = function(y, name) {};
 
     SessionView.prototype.drawScene = function(pos, cells) {
       var i, _i, _ref;

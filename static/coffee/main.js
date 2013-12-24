@@ -55,9 +55,13 @@
   $(function() {
     var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, s1, s2, scn1, scn2, scn55, song1, song2, t1, t2;
     window.player = new Player();
+    window.is_input_mode = false;
     is_key_pressed = false;
     $(window).keydown(function(e) {
       var n;
+      if (window.is_input_mode) {
+        return;
+      }
       if (is_key_pressed === false) {
         is_key_pressed = true;
         if (player.isPlaying()) {

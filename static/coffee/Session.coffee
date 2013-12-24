@@ -34,7 +34,7 @@ class @Session
 
         @is_waiting_next_pattern = false
         for q in @cue_queue
-            pat = @song.tracks[q[0]].patterns[q[1]].pattern
+            pat = @song.tracks[q[0]].patterns[q[1]]
             @synth[q[0]].readPattern(pat)
             @current_cells[q[0]] = q[1]
         @view.drawScene(@scene_pos, @current_cells)
@@ -59,10 +59,10 @@ class @Session
 
         for i in [0...@synth.length]
             continue if not @song.tracks[i].patterns[pos]?
-            pat = @song.tracks[i].patterns[pos].pattern
+            pat = @song.tracks[i].patterns[pos]
             if pat?
                 @synth[i].readPattern(pat)
-                @scene_length = Math.max(@scene_length, pat.length)
+                @scene_length = Math.max(@scene_length, pat.pattern.length)
                 @current_cells[i] = pos
 
         @player.readScene(@song.master[@scene_pos]) if @song.master[@scene_pos]?
@@ -98,7 +98,7 @@ class @Session
     addSynth: (s, _pos) ->
         pos = if _pos then _pos else @scene_pos
         pp = []
-        pp[pos] = name: (s.id + '-' + 0), pattern: s.pattern
+        pp[pos] = name: (s.id + '-' + pos), pattern: s.pattern
         s_obj = id: s.id, name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
         @song.tracks.push(s_obj)
         @view.readSong(@song, @current_cells)
@@ -120,14 +120,16 @@ class @Session
             synth_num = @song.tracks.length
             @player.addSynth(pat_num)
 
-            @song.tracks[synth_num].patterns[pat_num] = @song.tracks[synth_num].patterns[0]
-            delete @song.tracks[synth_num].patterns[0]
+            # @song.tracks[synth_num].patterns[pat_num] = @song.tracks[synth_num].patterns[0]
+            # delete @song.tracks[synth_num].patterns[0]
 
         if @song.tracks[synth_num].patterns[pat_num]?
-            @player.synth[synth_num].readPattern(@song.tracks[synth_num].patterns[pat_num].pattern)
+            @player.synth[synth_num].readPattern(@song.tracks[synth_num].patterns[pat_num])
         else
             @player.synth[synth_num].clearPattern()
-            @song.tracks[synth_num].patterns[pat_num] = pattern: @player.synth[synth_num].pattern
+            @player.synth[synth_num].setPatternName(synth_num + '-' + pat_num)
+            console.log(@player.synth[synth_num].pattern_obj)
+            @song.tracks[synth_num].patterns[pat_num] = @player.synth[synth_num].pattern_obj
 
         # draw
         @current_cells[synth_num] = pat_num
@@ -150,7 +152,7 @@ class @Session
         for i in [0...@song.tracks.length]
             pat = @song.tracks[i].patterns[0].pattern
             if pat?
-                @synth[i].readPattern(@song.tracks[i].patterns[0].pattern)
+                @synth[i].readPattern(@song.tracks[i].patterns[0])
                 @current_cells[i] = 0
             @song_length = Math.max(@song_length, song.tracks[i].patterns.length)
             @scene_length = Math.max(@scene_length, song.tracks[i].patterns[0].pattern.length)
@@ -181,3 +183,12 @@ class @Session
         ).fail((err) =>
             @showError(err)
         )
+
+    setSynthName: (synth_id, name) ->
+        @song.tracks[synth_id].name = name
+        @view.drawTrackName(synth_id, name)
+
+    setPatternName: (synth_id, name) ->
+        pat_num = @current_cells[synth_id]
+        @song.tracks[synth_id].patterns[pat_num].name = name
+        @view.drawPatternName(synth_id, pat_num, @song.tracks[synth_id].patterns[pat_num])

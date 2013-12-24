@@ -429,11 +429,20 @@
   })();
 
   this.Synth = (function() {
-    function Synth(ctx, id, player) {
+    function Synth(ctx, id, player, name) {
       this.ctx = ctx;
       this.id = id;
       this.player = player;
+      this.name = name;
+      if (this.name == null) {
+        this.name = 'Synth #' + this.id;
+      }
+      this.pattern_name = 'pattern 0';
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern_obj = {
+        name: this.pattern_name,
+        pattern: this.pattern
+      };
       this.time = 0;
       this.scale = [];
       this.view = new SynthView(this, this.id);
@@ -512,14 +521,17 @@
       return this.core.noteOff();
     };
 
-    Synth.prototype.readPattern = function(pattern) {
-      this.pattern = pattern;
-      return this.view.readPattern(this.pattern);
+    Synth.prototype.readPattern = function(pattern_obj) {
+      this.pattern_obj = pattern_obj;
+      this.pattern = this.pattern_obj.pattern;
+      this.pattern_name = this.pattern_obj.name;
+      return this.view.readPattern(this.pattern_obj);
     };
 
     Synth.prototype.clearPattern = function() {
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      return this.view.readPattern(this.pattern);
+      this.pattern_obj.pattern = this.pattern;
+      return this.view.readPattern(this.pattern_obj);
     };
 
     Synth.prototype.plusPattern = function() {
@@ -550,12 +562,23 @@
 
     Synth.prototype.redraw = function(time) {
       this.time = time;
-      this.view.drawPattern(this.time);
-      return this.view.playAt(this.time);
+      return this.view.drawPattern(this.time);
     };
 
     Synth.prototype.setId = function(id) {
       this.id = id;
+    };
+
+    Synth.prototype.setSynthName = function(name) {
+      this.name = name;
+      this.session.setSynthName(this.id, this.name);
+      return this.view.setSynthName(this.name);
+    };
+
+    Synth.prototype.setPatternName = function(pattern_name) {
+      this.pattern_name = pattern_name;
+      this.session.setPatternName(this.id, this.pattern_name);
+      return this.view.setPatternName(this.pattern_name);
     };
 
     return Synth;

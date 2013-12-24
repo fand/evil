@@ -107,11 +107,17 @@
       return this.synth_now.redraw(this.time);
     };
 
-    Player.prototype.backward = function() {
-      if (this.time % 32 < 3 && this.time >= 32) {
-        this.time = (this.time - 32 - (this.time % 32)) % this.scene_length;
+    Player.prototype.backward = function(force) {
+      if (force) {
+        if (this.time >= 32) {
+          this.time = (this.time - 32) % this.scene_length;
+        }
       } else {
-        this.time = this.time - (this.time % 32);
+        if (this.time % 32 < 3 && this.time >= 32) {
+          this.time = (this.time - 32 - (this.time % 32)) % this.scene_length;
+        } else {
+          this.time = this.time - (this.time % 32);
+        }
       }
       return this.synth_now.redraw(this.time);
     };
@@ -155,9 +161,9 @@
       }
     };
 
-    Player.prototype.addSynth = function(scene_pos) {
+    Player.prototype.addSynth = function(scene_pos, name) {
       var s;
-      s = new Synth(this.context, this.num_id++, this);
+      s = new Synth(this.context, this.num_id++, this, name);
       s.setScale(this.scene.scale);
       s.setKey(this.scene.key);
       this.synth.push(s);
@@ -198,13 +204,23 @@
     };
 
     Player.prototype.readSong = function(song) {
+      var i, _i, _ref;
       this.song = song;
-      while (this.song.tracks.length > this.synth.length) {
-        this.addSynth();
+      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.synth[i] != null) {
+          this.synth[i].setSynthName(this.song.tracks[i].name);
+        } else {
+          this.addSynth(this.song.tracks[i].name);
+        }
       }
       this.session.setSynth(this.synth);
-      this.session.readSong(song);
+      this.session.readSong(this.song);
       return this.view.setSynthNum(this.synth.length, this.synth_pos);
+    };
+
+    Player.prototype.clearSong = function() {
+      this.synth = [];
+      return this.num_id = 0;
     };
 
     Player.prototype.readScene = function(scene) {

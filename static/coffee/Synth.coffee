@@ -295,8 +295,11 @@ class @SynthCoreView
 
 
 class @Synth
-    constructor: (@ctx, @id, @player) ->
+    constructor: (@ctx, @id, @player, @name) ->
+        @name = 'Synth #' + @id if not @name?
+        @pattern_name = 'pattern 0'
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @pattern_obj = name: @pattern_name, pattern: @pattern
         @time = 0
         @scale = []
         @view = new SynthView(this, @id)
@@ -345,21 +348,22 @@ class @Synth
     pause: (time) ->
         @core.noteOff()
 
-    readPattern: (@pattern) ->
-        @view.readPattern(@pattern)
+    readPattern: (@pattern_obj) ->
+        @pattern = @pattern_obj.pattern
+        @pattern_name = @pattern_obj.name
+        @view.readPattern(@pattern_obj)
 
     clearPattern: () ->
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        @view.readPattern(@pattern)
+        @pattern_obj.pattern = @pattern
+        @view.readPattern(@pattern_obj)
 
     plusPattern: ->
         @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-#        @session.setSceneLength()
         @player.resetSceneLength()
 
     minusPattern: ->
         @pattern = @pattern.slice(0, @pattern.length - 32)
-#        @session.setSceneLength()
         @player.resetSceneLength()
 
     addNote: (time, note) ->
@@ -373,6 +377,13 @@ class @Synth
 
     redraw: (@time) ->
         @view.drawPattern(@time)
-        @view.playAt(@time)
 
     setId: (@id) ->
+
+    setSynthName: (@name) ->
+        @session.setSynthName(@id, @name)
+        @view.setSynthName(@name)
+
+    setPatternName: (@pattern_name) ->
+        @session.setPatternName(@id, @pattern_name)
+        @view.setPatternName(@pattern_name)

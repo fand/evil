@@ -157,7 +157,7 @@ class @SessionView
         for x in [0...Math.max(song.tracks.length + 1, 8)]
 #        for x in [0...Math.max(song.tracks.length + 2, 8)]
             t = song.tracks[x]
-            @drawTrackName(@ctx_tracks, t.name, x) if t? and t.name?
+            @drawTrackName(x, t.name) if t? and t.name?
             for y in [0...Math.max(song.length, 10)]
                 if t? and t.patterns[y]?
                     @drawCell(@ctx_tracks, t.patterns[y], x, y)
@@ -199,19 +199,24 @@ class @SessionView
     clearCell: (ctx, x, y) ->
         ctx.clearRect(x * @w, y * @h, @w, @h)
 
-    drawTrackName: (ctx, name, x) ->
-        ctx.fillStyle = @color[1]
-        ctx.fillRect(x * @w + 2, -20, @w - 2, 18)
+    drawTrackName: (x, name) ->
+        @ctx_tracks.fillStyle = @color[1]
+        @ctx_tracks.fillRect(x * @w + 2, -20, @w - 2, 18)
 
-        m = ctx.measureText(name)
+        m = @ctx_tracks.measureText(name)
         dx = (@w - m.width)  / 2
         dy = (@offset_y - @font_size) / 2
 
-        ctx.shadowColor = '#fff'
-        ctx.shadowBlur  = 1
-        ctx.fillStyle   = '#fff'
-        ctx.fillText(name, x * @w + dx + 2, -dy-3)
-        ctx.shadowBlur  = 0
+        @ctx_tracks.shadowColor = '#fff'
+        @ctx_tracks.shadowBlur  = 1
+        @ctx_tracks.fillStyle   = '#fff'
+        @ctx_tracks.fillText(name, x * @w + dx + 2, -dy-3)
+        @ctx_tracks.shadowBlur  = 0
+
+    drawPatternName: (x, y, p) ->
+        @drawCell(@ctx_tracks, p, x, y)
+
+    drawSceneName: (y, name) ->
 
     drawScene: (pos, cells) ->
         @ctx_tracks_on.clearRect(0, @scene_pos * @h, @w * 8, @h)
