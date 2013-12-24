@@ -377,7 +377,6 @@ class @Synth
 
     redraw: (@time) ->
         @view.drawPattern(@time)
-        @view.playAt(@time)
 
     setId: (@id) ->
 

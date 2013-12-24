@@ -16,17 +16,22 @@
 
       <div class="sequencer-mode clearfix">
         <span>input:</span>
-        <i class="fa fa-pencil sequencer-pencil"></i>
-        <i class="fa fa-arrows-h sequencer-sustain"></i>
+        <i class="fa fa-pencil sequencer-pencil btn-true"></i>
+        <i class="fa fa-arrows-h sequencer-sustain btn-false"></i>
       </div>
 
-      <!-- <i class="fa fa-thumb-tack sequencer-nosync"></i> -->
-      <div class="markers">
-        <i class="fa fa-angle-left marker-prev">
-        <: for [0..7] -> $_ { :><i class="fa fa-circle marker"></i>
-          <: } :>
-        <i class="fa fa-angle-right marker-next">
+
+      <div class="markers clearfix">
+        <i class="fa fa-angle-left marker-prev"></i>
+        <: for [0..7] -> $_ { :><i class="fa fa-circle marker"></i><: } :>
+        <i class="fa fa-angle-right marker-next"></i>
+
+        <span class="marker-pos">1</span>
+        <span class="marker-divide">/</span>
+        <span class="marker-total">1</span>
       </div>
+
+      <i class="fa fa-thumb-tack pattern-nosync btn-false"></i>
       <i class="fa fa-minus pattern-minus"></i>
       <i class="fa fa-plus pattern-plus"></i>
 

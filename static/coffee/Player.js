@@ -107,11 +107,17 @@
       return this.synth_now.redraw(this.time);
     };
 
-    Player.prototype.backward = function() {
-      if (this.time % 32 < 3 && this.time >= 32) {
-        this.time = (this.time - 32 - (this.time % 32)) % this.scene_length;
+    Player.prototype.backward = function(force) {
+      if (force) {
+        if (this.time >= 32) {
+          this.time = (this.time - 32) % this.scene_length;
+        }
       } else {
-        this.time = this.time - (this.time % 32);
+        if (this.time % 32 < 3 && this.time >= 32) {
+          this.time = (this.time - 32 - (this.time % 32)) % this.scene_length;
+        } else {
+          this.time = this.time - (this.time % 32);
+        }
       }
       return this.synth_now.redraw(this.time);
     };

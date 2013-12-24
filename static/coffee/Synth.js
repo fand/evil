@@ -562,8 +562,7 @@
 
     Synth.prototype.redraw = function(time) {
       this.time = time;
-      this.view.drawPattern(this.time);
-      return this.view.playAt(this.time);
+      return this.view.drawPattern(this.time);
     };
 
     Synth.prototype.setId = function(id) {

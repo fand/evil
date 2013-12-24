@@ -552,35 +552,76 @@ html, body {
 .markers {
     position: absolute;
     top: 0px;
-    left: 460px;
+    left: 480px;
     width: 400px;
     height: 36px;
     margin: 0px;
     padding: 0px;
     text-align: center;
 }
-.marker {
-    width: 12px;
+.markers *{
+    float: left;
+    width: 10px;
     height: 12px;
     font-size: 12px;
     text-align: center;
     margin: 0px;
-    padding: 9px;
+    padding: 12px 6px;
     color: #8df;
 }
-.marker:hover {
+.marker {
+    color: #fafafa;
+}
+.marker-active {
+    color: #8df;
+}
+.marker-active:hover {
     cursor: pointer;
     text-shadow: 0px 0px 4px #088;
 }
 .marker-now {
     color: #fff;
-    text-shadow: 0px 0px 3px #0df;
+    text-shadow: 0px 0px 5px #0df;
 }
 .marker-now:hover {
     cursor: default;
     text-shadow: 0px 0px 10px #0df;
 }
+.marker-prev, .marker-next {
+    padding: 12px;
+}
+.marker-prev:hover, .marker-next:hover {
+    text-shadow: 0px 0px 5px #0df;
+}
+.marker-pos {
+    margin-left: 15px;
+}
+.marker-pos, .marker-divide, .marker-total {
+    padding: 12px 0px;
+    width: 20px;
+}
 
+.btn-false {
+    color: #eee;
+}
+.btn-false:hover {
+    cursor: pointer;
+    color: #fff;
+    text-shadow: 0px 0px 5px #0df;
+}
+.btn-true {
+    color: #8df;
+}
+
+.pattern-nosync {
+    position: absolute;
+    width: 16px;
+    margin: 10px;
+    padding: 2px;
+    top: 0px;
+    right: 60px;
+    font-size: 12px;
+}
 .pattern-plus {
     position: absolute;
     width: 16px;
@@ -590,7 +631,6 @@ html, body {
     right: 0px;
     color: #8df;
     font-size: 12px;
-    z-index: 2;
 }
 .pattern-plus:hover {
     color: #fff;
@@ -605,7 +645,6 @@ html, body {
     right: 30px;
     color: #8df;
     font-size: 12px;
-    z-index: 2;
 }
 .pattern-minus:hover {
     color: #fff;

@@ -15,9 +15,14 @@ class @SynthView
         @sustain = @dom.find('.sequencer-sustain')
 
         @header = @dom.find('.header')
+        @markers = @dom.find('.markers')
         @pos_markers = @dom.find('.marker')  # list of list of markers
+        @marker_prev = @dom.find('.marker-prev')
+        @marker_next = @dom.find('.marker-next')
         @plus  = @dom.find('.pattern-plus')
         @minus = @dom.find('.pattern-minus')
+        @nosync = @dom.find('.pattern-nosync')
+        @is_nosync = false
         @setMarker()
 
         # table DOM
@@ -138,8 +143,13 @@ class @SynthView
         ).on('change',
             ( => @model.setPatternName(@pattern_name.val()))
         )
-        @plus.on('click', ( => @pencilMode()))
-        @minus.on('click', ( => @sustainMode()))
+        @pencil.on('click', ( => @pencilMode()))
+        @sustain.on('click', ( => @sustainMode()))
+
+        @marker_prev.on('click', ( => @model.player.backward(true)))
+        @marker_next.on('click', ( => @model.player.forward()))
+
+        @nosync.on('click', ( => @toggleNoSync()))
         @plus.on('click', ( => @plusPattern()))
         @minus.on('click', ( =>
             if @pattern.length > 32
@@ -176,6 +186,8 @@ class @SynthView
         @model.removeNote(pos.x_abs)
 
     playAt: (@time) ->
+        return if @is_nosync
+
         if @time % 32 == 0
             @drawPattern(@time)
         for i in [0...20]
@@ -228,9 +240,21 @@ class @SynthView
         @drawPattern()
 
     setMarker: ->
-        @pos_markers.filter((i) => i  < @page_total).show()
-        @pos_markers.filter((i) => @page_total <= i).hide()
+        @pos_markers.filter((i) => i  < @page_total).addClass('marker-active')
+        @pos_markers.filter((i) => @page_total <= i).removeClass('marker-active')
         @pos_markers.removeClass('marker-now').eq(@page).addClass('marker-now')
+        @markers.find('.marker-pos').text(@page + 1)
+        @markers.find('.marker-total').text(@page_total)
+        @pos_markers.filter((i) => i  < @page_total).each((i) =>
+            @pos_markers.eq(i).on('mousedown', () =>
+                if @page < i
+                    while @page != i
+                        @model.player.forward()
+                if @page > i
+                    while @page != i
+                        @model.player.backward(true)  # force
+            )
+        )
 
     play: ->
     stop: ->
@@ -248,6 +272,21 @@ class @SynthView
 
     setSynthName:   (name) -> @synth_name.val(name)
     setPatternName: (name) -> @pattern_name.val(name)
+
+    toggleNoSync: ->
+        if @is_nosync
+            @is_nosync = false
+            @nosync.removeClass('btn-true').addClass('btn-false')
+            @drawPattern(@time)
+        else
+            @is_nosync = true
+            @nosync.removeClass('btn-false').addClass('btn-true')
+            for i in [0...20]
+                @ctx_off.drawImage(@cell,
+                    0, 0, 26, 26,
+                    (@time % 32) * 26, i * 26, 26, 26
+                )
+
 
 
 class @KeyboardView

@@ -63,11 +63,15 @@ class @Player
         @time = (@time + 32) % @scene_length
         @synth_now.redraw(@time)
 
-    backward: ->
-        if @time % 32  < 3 && @time >= 32
-            @time = (@time - 32 - (@time % 32)) % @scene_length
+    backward: (force) ->
+        if force
+            if @time >= 32
+                @time = (@time - 32) % @scene_length
         else
-            @time = @time - (@time % 32)
+            if @time % 32  < 3 and @time >= 32
+                @time = (@time - 32 - (@time % 32)) % @scene_length
+            else
+                @time = @time - (@time % 32)
         @synth_now.redraw(@time)
 
     toggleLoop: -> @session.toggleLoop()

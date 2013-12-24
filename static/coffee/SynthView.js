@@ -14,9 +14,14 @@
       this.pencil = this.dom.find('.sequencer-pencil');
       this.sustain = this.dom.find('.sequencer-sustain');
       this.header = this.dom.find('.header');
+      this.markers = this.dom.find('.markers');
       this.pos_markers = this.dom.find('.marker');
+      this.marker_prev = this.dom.find('.marker-prev');
+      this.marker_next = this.dom.find('.marker-next');
       this.plus = this.dom.find('.pattern-plus');
       this.minus = this.dom.find('.pattern-minus');
+      this.nosync = this.dom.find('.pattern-nosync');
+      this.is_nosync = false;
       this.setMarker();
       this.table_wrapper = this.dom.find('.sequencer-table');
       this.canvas_hover_dom = this.dom.find('.table-hover');
@@ -138,11 +143,20 @@
       })).on('change', (function() {
         return _this.model.setPatternName(_this.pattern_name.val());
       }));
-      this.plus.on('click', (function() {
+      this.pencil.on('click', (function() {
         return _this.pencilMode();
       }));
-      this.minus.on('click', (function() {
+      this.sustain.on('click', (function() {
         return _this.sustainMode();
+      }));
+      this.marker_prev.on('click', (function() {
+        return _this.model.player.backward(true);
+      }));
+      this.marker_next.on('click', (function() {
+        return _this.model.player.forward();
+      }));
+      this.nosync.on('click', (function() {
+        return _this.toggleNoSync();
       }));
       this.plus.on('click', (function() {
         return _this.plusPattern();
@@ -191,6 +205,9 @@
     SynthView.prototype.playAt = function(time) {
       var i, _i;
       this.time = time;
+      if (this.is_nosync) {
+        return;
+      }
       if (this.time % 32 === 0) {
         this.drawPattern(this.time);
       }
@@ -257,11 +274,32 @@
       var _this = this;
       this.pos_markers.filter(function(i) {
         return i < _this.page_total;
-      }).show();
+      }).addClass('marker-active');
       this.pos_markers.filter(function(i) {
         return _this.page_total <= i;
-      }).hide();
-      return this.pos_markers.removeClass('marker-now').eq(this.page).addClass('marker-now');
+      }).removeClass('marker-active');
+      this.pos_markers.removeClass('marker-now').eq(this.page).addClass('marker-now');
+      this.markers.find('.marker-pos').text(this.page + 1);
+      this.markers.find('.marker-total').text(this.page_total);
+      return this.pos_markers.filter(function(i) {
+        return i < _this.page_total;
+      }).each(function(i) {
+        return _this.pos_markers.eq(i).on('mousedown', function() {
+          var _results;
+          if (_this.page < i) {
+            while (_this.page !== i) {
+              _this.model.player.forward();
+            }
+          }
+          if (_this.page > i) {
+            _results = [];
+            while (_this.page !== i) {
+              _results.push(_this.model.player.backward(true));
+            }
+            return _results;
+          }
+        });
+      });
     };
 
     SynthView.prototype.play = function() {};
@@ -290,6 +328,23 @@
 
     SynthView.prototype.setPatternName = function(name) {
       return this.pattern_name.val(name);
+    };
+
+    SynthView.prototype.toggleNoSync = function() {
+      var i, _i, _results;
+      if (this.is_nosync) {
+        this.is_nosync = false;
+        this.nosync.removeClass('btn-true').addClass('btn-false');
+        return this.drawPattern(this.time);
+      } else {
+        this.is_nosync = true;
+        this.nosync.removeClass('btn-false').addClass('btn-true');
+        _results = [];
+        for (i = _i = 0; _i < 20; i = ++_i) {
+          _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.time % 32) * 26, i * 26, 26, 26));
+        }
+        return _results;
+      }
     };
 
     return SynthView;
