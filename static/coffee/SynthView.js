@@ -257,7 +257,11 @@
       this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
       this.page_total++;
       this.model.plusPattern();
-      return this.drawPattern();
+      this.drawPattern();
+      this.minus.removeClass('btn-false').addClass('btn-true');
+      if (this.page_total === 8) {
+        return this.plus.removeClass('btn-true').addClass('btn-false');
+      }
     };
 
     SynthView.prototype.minusPattern = function() {
@@ -267,7 +271,11 @@
       this.pattern = this.pattern.slice(0, this.pattern.length - 32);
       this.page_total--;
       this.model.minusPattern();
-      return this.drawPattern();
+      this.drawPattern();
+      this.plus.removeClass('btn-false').addClass('btn-true');
+      if (this.page_total === 1) {
+        return this.minus.removeClass('btn-true').addClass('btn-false');
+      }
     };
 
     SynthView.prototype.setMarker = function() {

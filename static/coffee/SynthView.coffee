@@ -231,6 +231,9 @@ class @SynthView
         @page_total++
         @model.plusPattern()
         @drawPattern()
+        @minus.removeClass('btn-false').addClass('btn-true')
+        if @page_total == 8
+            @plus.removeClass('btn-true').addClass('btn-false')
 
     minusPattern: ->
         return if @page_total == 1
@@ -238,6 +241,9 @@ class @SynthView
         @page_total--
         @model.minusPattern()
         @drawPattern()
+        @plus.removeClass('btn-false').addClass('btn-true')
+        if @page_total == 1
+            @minus.removeClass('btn-true').addClass('btn-false')
 
     setMarker: ->
         @pos_markers.filter((i) => i  < @page_total).addClass('marker-active')

@@ -548,7 +548,6 @@ html, body {
     margin: 10px 6px;
 }
 
-
 .markers {
     position: absolute;
     top: 0px;
@@ -601,6 +600,12 @@ html, body {
     width: 20px;
 }
 
+.header .btn {
+    width: 16px;
+    margin: 10px;
+    padding: 2px;
+    font-size: 12px;
+}
 .btn-false {
     color: #eee;
 }
@@ -619,18 +624,13 @@ html, body {
     margin: 10px;
     padding: 2px;
     top: 0px;
-    right: 60px;
+    right: 0px;
     font-size: 12px;
 }
 .pattern-plus {
     position: absolute;
-    width: 16px;
-    margin: 10px;
-    padding: 2px;
     top: 0px;
-    right: 0px;
-    color: #8df;
-    font-size: 12px;
+    right: 30px;
 }
 .pattern-plus:hover {
     color: #fff;
@@ -638,13 +638,8 @@ html, body {
 }
 .pattern-minus {
     position: absolute;
-    width: 16px;
-    margin: 10px;
-    padding: 2px;
     top: 0px;
-    right: 30px;
-    color: #8df;
-    font-size: 12px;
+    right: 60px;
 }
 .pattern-minus:hover {
     color: #fff;
