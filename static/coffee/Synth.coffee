@@ -305,6 +305,7 @@ class @Synth
         @view = new SynthView(this, @id)
         @core = new SynthCore(this, @ctx, @id)
 
+        @is_sustaining = false
         @session = @player.session
 
     connect: (dst) -> @core.connect(dst)
@@ -331,6 +332,17 @@ class @Synth
         @view.playAt(mytime)
         if @pattern[mytime] == 0
             @core.noteOff()
+        else if @pattern[mytime] == 'end'
+            T.setTimeout(( =>
+                @core.noteOff()
+                ), @duration - 10)
+        else if @pattern[mytime] == 'sustain'
+            return
+        else if @pattern[mytime] < 0
+            @is_sustaining = true
+            n = -( @pattern[mytime] )
+            @core.setNote(@noteToSemitone(n))
+            @core.noteOn()
         else
             @core.setNote(@noteToSemitone(@pattern[mytime]))
             @core.noteOn()
@@ -371,6 +383,15 @@ class @Synth
 
     removeNote: (time) ->
         @pattern[time] = 0
+
+    sustainNote: (l, r, note) ->
+        if l == r
+            @pattern[l] = note
+            return
+        for i in [l...r]
+            @pattern[i] = 'sustain'
+        @pattern[l] = -(note)
+        @pattern[r] = 'end'
 
     activate: (i) -> @view.activate(i)
     inactivate: (i) -> @view.inactivate(i)

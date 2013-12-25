@@ -447,6 +447,7 @@
       this.scale = [];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
+      this.is_sustaining = false;
       this.session = this.player.session;
     }
 
@@ -492,13 +493,24 @@
     };
 
     Synth.prototype.playAt = function(time) {
-      var mytime,
+      var mytime, n,
         _this = this;
       this.time = time;
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
       if (this.pattern[mytime] === 0) {
         return this.core.noteOff();
+      } else if (this.pattern[mytime] === 'end') {
+        return T.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
+      } else if (this.pattern[mytime] === 'sustain') {
+
+      } else if (this.pattern[mytime] < 0) {
+        this.is_sustaining = true;
+        n = -this.pattern[mytime];
+        this.core.setNote(this.noteToSemitone(n));
+        return this.core.noteOn();
       } else {
         this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
         this.core.noteOn();
@@ -550,6 +562,19 @@
 
     Synth.prototype.removeNote = function(time) {
       return this.pattern[time] = 0;
+    };
+
+    Synth.prototype.sustainNote = function(l, r, note) {
+      var i, _i;
+      if (l === r) {
+        this.pattern[l] = note;
+        return;
+      }
+      for (i = _i = l; l <= r ? _i < r : _i > r; i = l <= r ? ++_i : --_i) {
+        this.pattern[i] = 'sustain';
+      }
+      this.pattern[l] = -note;
+      return this.pattern[r] = 'end';
     };
 
     Synth.prototype.activate = function(i) {
