@@ -12,8 +12,32 @@
   </div>
   <div id="top-sorry">for <a href="http://www.google.com/intl/ja/chrome/browser/">Google Chrome</a></div>
 </div>
-<div id="dialog"></div>
+
+<div id="dialog">
+  <div id="dialog-wrapper">
+    <div id="dialog-success" class="dialog-message">
+      <i class="fa fa-check dialog-icon"></i>
+      <div class="dialog-message-main">Saved!</div>
+      <div class="dialog-message-sub"></div>
+      <a href=""></a>
+    </div>
+    <div id="dialog-error" class="dialog-message">
+      <i class="fa fa-frown-o dialog-icon"></i>
+      <div class="dialog-message-main">Failed.</div>
+      <div class="dialog-message-sub">Hmm... something's going wrong.</div>
+    </div>
+    <div id="dialog-socials" class="clearfix">
+      <a class="dialog-twitter dialog-social fa fa-twitter"></a>
+      <a class="dialog-facebook dialog-social fa fa-facebook" onclick="window.open(this.href, 'twitter_tweet', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1'); return false;"></a>
+    </div>
+
+    <i class="fa fa-times dialog-close"></i>
+  </div>
+</div>
+
 <div id="key-help"></div>
+
+
 
 <div id="wrapper">
 
@@ -151,6 +175,12 @@
   <i id="control-backward"  class="fa fa-backward"></i>
   <i id="control-loop"      class="fa fa-repeat control-on"></i>
 
+
+  <div id="song-info">
+    <div><label>title: </label><input type="text" id="song-title" /></div>
+    <div><label>by:    </label><input type="text" id="song-creator" /></div>
+  </div>
+
 </footer>
 
   <i id="btn-left"   class="btn fa fa-angle-left"  data-line1="prev" data-line2="synth"></i>
@@ -159,7 +189,8 @@
   <i id="btn-bottom" class="btn fa fa-angle-down"  data-line1="synths"></i>
 
 
-<i class="fa fa-save" id="btn-save"></i>
+<div id="btn-save" class="fa fa-save"></div>
+<div id="btn-clear" class="fa fa-file-o"></div>
 <form id="ajax-form" method="POST"></form>
 <script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
 

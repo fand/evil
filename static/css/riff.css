@@ -94,6 +94,179 @@ html, body {
     color: #def;
 }
 
+
+/* Share */
+
+#dialog {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255,255,255, 0.8);
+    z-index: -10000;
+    opacity: 0;
+}
+#btn-clear {
+    position: fixed;
+    top: 15px;
+    left: 90px;
+    width: 70px;
+    height: 20px;
+    padding-left:20px;
+    font-size: 16px;
+    text-align: center;
+    color: #ddd;
+    z-index: 100;
+}
+#btn-save {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: #eee;
+    z-index: 100;
+    text-shadow: none;
+}
+#btn-save:hover  {
+    cursor: pointer;
+    color: #999;
+}
+#btn-clear {
+    position: fixed;
+    top: 15px;
+    left: 35px;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: #eee;
+    z-index: 100;
+    text-shadow: none;
+}
+#btn-clear:hover  {
+    cursor: pointer;
+    color: #999;
+}
+#dialog-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -160px;
+    margin-left: -240px;
+    width: 480px;
+    height: 300px;
+    background-color: #fff;
+    border: 1px solid #8df;
+    border-radius: 3px;
+}
+.dialog-message {
+    position: absolute;
+    width: 400px;
+    height: 200px;
+    text-align: center;
+}
+.dialog-icon {
+    width: 100px;
+    height: 100px;
+    font-size: 100px;
+    text-align: center;
+}
+.dialog-message-main {
+    display: block;
+    width: 100%;
+    height: 36px;
+    font-size: 36px;
+    font-family: sans-serif;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: none;
+    color: #444;
+}
+.dialog-message-sub {
+    display: block;
+    width: 100%;
+    height: 24px;
+    margin-top: 12px;
+    font-size: 24px;
+    font-family: sans-serif;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: none;
+    -webkit-user-select: text;
+    color: #444;
+}
+.dialog-message i {
+    font-size: 100px;
+    width: 100px;
+    height: 100px;
+}
+#dialog-success {
+    left: 40px;
+}
+#dialog-error {
+    top: 45px;
+    left: 40px;
+    color: #ccc;
+}
+#dialog-success i {
+    color: #8f8;
+}
+#dialog-error i {
+    color: #ccc;
+    margin-bottom: 20px;
+}
+#dialog-socials {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: 60px;
+    margin-left: -140px;
+    width: 280px;
+    height: 80px;
+}
+.dialog-social {
+    display: block;
+    width: 64px;
+    height:: 64px;
+    font-size: 64px;
+    text-align: center;
+    text-decoration: none;
+    color: #ddd;
+}
+.dialog-twitter {
+    position: absolute;
+    left: 0px;
+}
+.dialog-twitter:hover {
+    color: #0df;
+    cursor: pointer;
+}
+.dialog-facebook {
+    position: absolute;
+    right: 0px;
+}
+.dialog-facebook:hover {
+    color: #049;
+    cursor: pointer;
+}
+.dialog-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 16px;
+    color: #eee;
+}
+.dialog-close:hover {
+    color: #666;
+    cursor: pointer;
+}
+
+
+
+
+
 /* ScrollBar */
 
 *::-webkit-scrollbar {
@@ -782,6 +955,7 @@ footer {
     position: fixed;
     bottom: 0px;
     width: 100%;
+    background-color: rgba(255,255,255,0.8);
 }
 #control {
     position: absolute;
@@ -871,22 +1045,32 @@ footer {
     color: #ddd;
     text-shadow: none;
 }
-
-
-
-/* Share */
-
-#btn-save {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 20px;
-    height: 20px;
-    font-size: 20px;
-    text-align: center;
-    color: #aaa;
-    z-index: 10;
+#song-info {
+    position: absolute;
+    width: 300px;
+    height: 60px;
+    top: 50%;
+    left: 50%;
+    margin-top: -35px;
+    margin-left: 160px;
+    text-align: right;
+    font-size: 16px;
+    color: #0df;
 }
+#song-info label {
+    width: 80px;
+    margin-right: 10px;
+    font-size: 16px
+}
+#song-info input {
+    outline: none;
+    border: none;
+    width: 140px;
+    text-align: left;
+    color: #0df;
+    font-size: 12px;
+}
+
 
 
 

@@ -45,6 +45,14 @@
         y: -1
       };
       this.last_clicked = performance.now();
+      this.dialog = $('#dialog');
+      this.dialog_wrapper = $('#dialog-wrapper');
+      this.dialog_close = this.dialog.find('.dialog-close');
+      this.btn_save = $('#btn-save');
+      this.btn_clear = $('#btn-clear');
+      this.song_info = $('#song-info');
+      this.song_title = this.song_info.find('#song-title');
+      this.song_creator = this.song_info.find('#song-creator');
     }
 
     SessionView.prototype.initCanvas = function() {
@@ -185,7 +193,32 @@
       this.wrapper_tracks_sub.on('scroll', function(e) {
         return _this.wrapper_master.scrollTop(_this.wrapper_tracks_sub.scrollTop());
       });
-      return this.readSong(this.song, this.current_cells);
+      this.readSong(this.song, this.current_cells);
+      this.btn_save.on('mousedown', function() {
+        return _this.model.saveSong();
+      });
+      this.dialog.on('mousedown', function(e) {
+        if ((!_this.dialog_wrapper.is(e.target)) && _this.dialog_wrapper.has(e.target).length === 0) {
+          return _this.closeDialog();
+        }
+      });
+      this.dialog_close.on('mousedown', function() {
+        return _this.closeDialog();
+      });
+      this.song_title.on('focus', function() {
+        return window.is_input_mode = true;
+      }).on('change', function() {
+        return _this.model.setSongTitle(_this.song_title.val());
+      }).on('blur', function() {
+        return window.is_input_mode = false;
+      });
+      return this.song_creator.on('focus', function() {
+        return window.is_input_mode = true;
+      }).on('change', function() {
+        return _this.model.setCreatorName(_this.song_creator.val());
+      }).on('blur', function() {
+        return window.is_input_mode = false;
+      });
     };
 
     SessionView.prototype.readSong = function(song, current_cells) {
@@ -213,7 +246,9 @@
           this.drawEmptyMaster(y);
         }
       }
-      return this.drawScene(0, this.current_cells);
+      this.drawScene(0, this.current_cells);
+      this.song_title.val(this.song.title);
+      return this.song_creator.val(this.song.creator);
     };
 
     SessionView.prototype.drawCell = function(ctx, p, x, y) {
@@ -374,6 +409,58 @@
     SessionView.prototype.addSynth = function(song) {
       this.song = song;
       return this.readSong(this.song, this.current_cells);
+    };
+
+    SessionView.prototype.showSuccess = function(_url, song_title, user_name) {
+      var fb_url, text, title, tw_url, url,
+        _this = this;
+      if (song_title != null) {
+        if (user_name != null) {
+          text = '"' + song_title + '" by ' + user_name;
+        } else {
+          text = '"' + song_title + '"';
+        }
+        title = text + ' :: evil';
+      } else {
+        text = '"evil" by gmork';
+        title = 'evil';
+      }
+      url = 'http://evil.gmork.in/' + _url;
+      history.pushState('', title, _url);
+      document.title = title;
+      this.dialog.css({
+        opacity: '1',
+        'z-index': '10000'
+      });
+      this.dialog.find('#dialog-socials').show();
+      this.dialog.find('#dialog-success').show();
+      this.dialog.find('#dialog-error').hide();
+      this.dialog.find('.dialog-message-sub').text(url);
+      tw_url = 'http://twitter.com/intent/tweet?url=' + encodeURI(url + '&text=' + text + '&hashtags=evil');
+      fb_url = 'http://www.facebook.com/sharer.php?&u=' + url;
+      this.dialog.find('.dialog-twitter').attr('href', tw_url).click(function() {
+        return _this.closeDialog();
+      });
+      return this.dialog.find('.dialog-facebook').attr('href', fb_url).click(function() {
+        return _this.closeDialog();
+      });
+    };
+
+    SessionView.prototype.showError = function(error) {
+      this.dialog.css({
+        opacity: '1',
+        'z-index': '10000'
+      });
+      this.dialog.find('#dialog-socials').hide();
+      this.dialog.find('#dialog-success').hide();
+      return this.dialog.find('#dialog-error').show();
+    };
+
+    SessionView.prototype.closeDialog = function() {
+      return this.dialog.css({
+        opacity: '1',
+        'z-index': '-10000'
+      });
     };
 
     return SessionView;

@@ -562,7 +562,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_bottom = $('#btn-bottom');
       this.synth_now = 0;
       this.synth_total = 1;
-      this.btn_save = $('#btn-save');
       this.initEvent();
       this.resize();
     }
@@ -604,9 +603,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
       this.btn_bottom.on('mousedown', function() {
         return _this.moveBottom();
-      });
-      this.btn_save.on('click', function() {
-        return _this.model.saveSong();
       });
       return $(window).on('resize', function() {
         return _this.resize();
@@ -972,26 +968,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Session.prototype.saveSong = function() {
-      var csrf_token, s, song_json,
+      var csrf_token, song_json,
         _this = this;
-      this.scene = {
-        size: this.scene_size,
-        patterns: (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.synth;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            s = _ref[_i];
-            _results.push(s.pattern);
-          }
-          return _results;
-        }).call(this),
-        bpm: this.bpm,
-        scale: this.scale,
-        key: this.key
-      };
-      this.scenes = [this.scene];
-      song_json = JSON.stringify(this.scenes);
+      song_json = JSON.stringify(this.song);
       csrf_token = $('#ajax-form > input[name=csrf_token]').val();
       return $.ajax({
         url: '/',
@@ -1002,9 +981,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           csrf_token: csrf_token
         }
       }).done(function(d) {
-        return _this.showSuccess(d);
+        return _this.view.showSuccess(d, _this.song.title, _this.song.creator);
       }).fail(function(err) {
-        return _this.showError(err);
+        return _this.view.showError(err);
       });
     };
 
@@ -1018,6 +997,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       pat_num = this.current_cells[synth_id];
       this.song.tracks[synth_id].patterns[pat_num].name = name;
       return this.view.drawPatternName(synth_id, pat_num, this.song.tracks[synth_id].patterns[pat_num]);
+    };
+
+    Session.prototype.setSongTitle = function(title) {
+      return this.song.title = title;
+    };
+
+    Session.prototype.setCreatorName = function(name) {
+      return this.song.creator = name;
     };
 
     return Session;
@@ -1072,6 +1059,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         y: -1
       };
       this.last_clicked = performance.now();
+      this.dialog = $('#dialog');
+      this.dialog_wrapper = $('#dialog-wrapper');
+      this.dialog_close = this.dialog.find('.dialog-close');
+      this.btn_save = $('#btn-save');
+      this.btn_clear = $('#btn-clear');
+      this.song_info = $('#song-info');
+      this.song_title = this.song_info.find('#song-title');
+      this.song_creator = this.song_info.find('#song-creator');
     }
 
     SessionView.prototype.initCanvas = function() {
@@ -1212,7 +1207,32 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.wrapper_tracks_sub.on('scroll', function(e) {
         return _this.wrapper_master.scrollTop(_this.wrapper_tracks_sub.scrollTop());
       });
-      return this.readSong(this.song, this.current_cells);
+      this.readSong(this.song, this.current_cells);
+      this.btn_save.on('mousedown', function() {
+        return _this.model.saveSong();
+      });
+      this.dialog.on('mousedown', function(e) {
+        if ((!_this.dialog_wrapper.is(e.target)) && _this.dialog_wrapper.has(e.target).length === 0) {
+          return _this.closeDialog();
+        }
+      });
+      this.dialog_close.on('mousedown', function() {
+        return _this.closeDialog();
+      });
+      this.song_title.on('focus', function() {
+        return window.is_input_mode = true;
+      }).on('change', function() {
+        return _this.model.setSongTitle(_this.song_title.val());
+      }).on('blur', function() {
+        return window.is_input_mode = false;
+      });
+      return this.song_creator.on('focus', function() {
+        return window.is_input_mode = true;
+      }).on('change', function() {
+        return _this.model.setCreatorName(_this.song_creator.val());
+      }).on('blur', function() {
+        return window.is_input_mode = false;
+      });
     };
 
     SessionView.prototype.readSong = function(song, current_cells) {
@@ -1240,7 +1260,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           this.drawEmptyMaster(y);
         }
       }
-      return this.drawScene(0, this.current_cells);
+      this.drawScene(0, this.current_cells);
+      this.song_title.val(this.song.title);
+      return this.song_creator.val(this.song.creator);
     };
 
     SessionView.prototype.drawCell = function(ctx, p, x, y) {
@@ -1401,6 +1423,58 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SessionView.prototype.addSynth = function(song) {
       this.song = song;
       return this.readSong(this.song, this.current_cells);
+    };
+
+    SessionView.prototype.showSuccess = function(_url, song_title, user_name) {
+      var fb_url, text, title, tw_url, url,
+        _this = this;
+      if (song_title != null) {
+        if (user_name != null) {
+          text = '"' + song_title + '" by ' + user_name;
+        } else {
+          text = '"' + song_title + '"';
+        }
+        title = text + ' :: evil';
+      } else {
+        text = '"evil" by gmork';
+        title = 'evil';
+      }
+      url = 'http://evil.gmork.in/' + _url;
+      history.pushState('', title, _url);
+      document.title = title;
+      this.dialog.css({
+        opacity: '1',
+        'z-index': '10000'
+      });
+      this.dialog.find('#dialog-socials').show();
+      this.dialog.find('#dialog-success').show();
+      this.dialog.find('#dialog-error').hide();
+      this.dialog.find('.dialog-message-sub').text(url);
+      tw_url = 'http://twitter.com/intent/tweet?url=' + encodeURI(url + '&text=' + text + '&hashtags=evil');
+      fb_url = 'http://www.facebook.com/sharer.php?&u=' + url;
+      this.dialog.find('.dialog-twitter').attr('href', tw_url).click(function() {
+        return _this.closeDialog();
+      });
+      return this.dialog.find('.dialog-facebook').attr('href', fb_url).click(function() {
+        return _this.closeDialog();
+      });
+    };
+
+    SessionView.prototype.showError = function(error) {
+      this.dialog.css({
+        opacity: '1',
+        'z-index': '10000'
+      });
+      this.dialog.find('#dialog-socials').hide();
+      this.dialog.find('#dialog-success').hide();
+      return this.dialog.find('#dialog-error').show();
+    };
+
+    SessionView.prototype.closeDialog = function() {
+      return this.dialog.css({
+        opacity: '1',
+        'z-index': '-10000'
+      });
     };
 
     return SessionView;
@@ -2788,6 +2862,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       scale: 'AEOLIAN'
     };
     song2 = {
+      title: 'hello',
+      creator: 'fand',
       tracks: [t1, t2],
       master: [c1, c2],
       length: 2

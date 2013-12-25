@@ -25,7 +25,6 @@
       this.btn_bottom = $('#btn-bottom');
       this.synth_now = 0;
       this.synth_total = 1;
-      this.btn_save = $('#btn-save');
       this.initEvent();
       this.resize();
     }
@@ -67,9 +66,6 @@
       });
       this.btn_bottom.on('mousedown', function() {
         return _this.moveBottom();
-      });
-      this.btn_save.on('click', function() {
-        return _this.model.saveSong();
       });
       return $(window).on('resize', function() {
         return _this.resize();

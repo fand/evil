@@ -213,26 +213,9 @@
     };
 
     Session.prototype.saveSong = function() {
-      var csrf_token, s, song_json,
+      var csrf_token, song_json,
         _this = this;
-      this.scene = {
-        size: this.scene_size,
-        patterns: (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.synth;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            s = _ref[_i];
-            _results.push(s.pattern);
-          }
-          return _results;
-        }).call(this),
-        bpm: this.bpm,
-        scale: this.scale,
-        key: this.key
-      };
-      this.scenes = [this.scene];
-      song_json = JSON.stringify(this.scenes);
+      song_json = JSON.stringify(this.song);
       csrf_token = $('#ajax-form > input[name=csrf_token]').val();
       return $.ajax({
         url: '/',
@@ -243,9 +226,9 @@
           csrf_token: csrf_token
         }
       }).done(function(d) {
-        return _this.showSuccess(d);
+        return _this.view.showSuccess(d, _this.song.title, _this.song.creator);
       }).fail(function(err) {
-        return _this.showError(err);
+        return _this.view.showError(err);
       });
     };
 
@@ -259,6 +242,14 @@
       pat_num = this.current_cells[synth_id];
       this.song.tracks[synth_id].patterns[pat_num].name = name;
       return this.view.drawPatternName(synth_id, pat_num, this.song.tracks[synth_id].patterns[pat_num]);
+    };
+
+    Session.prototype.setSongTitle = function(title) {
+      return this.song.title = title;
+    };
+
+    Session.prototype.setCreatorName = function(name) {
+      return this.song.creator = name;
     };
 
     return Session;

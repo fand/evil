@@ -41,6 +41,15 @@ class @SessionView
         @click_pos = x:-1, y:-1
         @last_clicked = performance.now()
 
+        @dialog = $('#dialog')
+        @dialog_wrapper = $('#dialog-wrapper')
+        @dialog_close = @dialog.find('.dialog-close')
+        @btn_save = $('#btn-save')
+        @btn_clear = $('#btn-clear')
+        @song_info = $('#song-info')
+        @song_title = @song_info.find('#song-title')
+        @song_creator = @song_info.find('#song-creator')
+
     initCanvas: ->
         @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = @w*8 + 1
         @canvas_master.width  = @canvas_master_on.width  = @canvas_master_hover.width  = @w + 1
@@ -151,6 +160,18 @@ class @SessionView
         @readSong(@song, @current_cells)
 
 
+        # for Other view
+        @btn_save.on('mousedown', () => @model.saveSong())
+        @dialog.on('mousedown', (e) =>
+            if (not @dialog_wrapper.is(e.target)) and @dialog_wrapper.has(e.target).length == 0
+                @closeDialog()
+        )
+        @dialog_close.on('mousedown', () => @closeDialog())
+
+        @song_title.on('focus', () => window.is_input_mode = true).on('change', () => @model.setSongTitle(@song_title.val())).on('blur', () => window.is_input_mode = false)
+        @song_creator.on('focus', () => window.is_input_mode = true).on('change', () => @model.setCreatorName(@song_creator.val())).on('blur', () => window.is_input_mode = false)
+
+
     readSong: (@song, @current_cells) ->
         @resize()
 
@@ -171,6 +192,10 @@ class @SessionView
                 @drawEmptyMaster(y)
 
         @drawScene(0, @current_cells)
+
+        # set Global info
+        @song_title.val(@song.title)
+        @song_creator.val(@song.creator)
 
 
     drawCell: (ctx, p, x, y) ->
@@ -303,3 +328,39 @@ class @SessionView
 
     addSynth: (@song) ->
         @readSong(@song, @current_cells)
+
+
+    showSuccess: (_url, song_title, user_name) ->
+
+        if song_title?
+            if user_name?
+                text = '"' + song_title + '" by ' + user_name
+            else
+                text = '"' + song_title + '"'
+            title = text + ' :: evil'
+        else
+            text = '"evil" by gmork'
+            title = 'evil'
+        url = 'http://evil.gmork.in/' + _url
+
+        history.pushState('', title, _url)
+        document.title = title
+
+        @dialog.css(opacity: '1', 'z-index': '10000')
+        @dialog.find('#dialog-socials').show()
+        @dialog.find('#dialog-success').show()
+        @dialog.find('#dialog-error').hide()
+        @dialog.find('.dialog-message-sub').text(url)
+        tw_url = 'http://twitter.com/intent/tweet?url=' + encodeURI(url + '&text=' + text + '&hashtags=evil')
+        fb_url = 'http://www.facebook.com/sharer.php?&u=' + url
+        @dialog.find('.dialog-twitter').attr('href', tw_url).click( => @closeDialog())
+        @dialog.find('.dialog-facebook').attr('href', fb_url).click( => @closeDialog())
+
+    showError: (error) ->
+        @dialog.css(opacity: '1', 'z-index': '10000')
+        @dialog.find('#dialog-socials').hide()
+        @dialog.find('#dialog-success').hide()
+        @dialog.find('#dialog-error').show()
+
+    closeDialog: ->
+        @dialog.css(opacity: '1', 'z-index': '-10000')
