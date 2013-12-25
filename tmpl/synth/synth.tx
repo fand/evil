@@ -17,7 +17,7 @@
       <div class="sequencer-mode clearfix">
         <span>input:</span>
         <i class="fa fa-pencil sequencer-pencil btn-true"></i>
-        <i class="fa fa-arrows-h sequencer-sustain btn-false"></i>
+        <i class="fa fa-ellipsis-h sequencer-step btn-false"></i>
       </div>
 
 
