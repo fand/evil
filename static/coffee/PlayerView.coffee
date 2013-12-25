@@ -30,8 +30,6 @@ class @PlayerView
         @synth_now = 0
         @synth_total = 1
 
-        @btn_save = $('#btn-save')
-
         @initEvent()
         @resize()
 
@@ -57,8 +55,6 @@ class @PlayerView
         @btn_right.on('mousedown', () => @moveRight())
         @btn_top.on('mousedown', () => @moveTop())
         @btn_bottom.on('mousedown', () => @moveBottom())
-
-        @btn_save.on('click', () => @model.saveSong())
 
         $(window).on('resize', () => @resize())
 

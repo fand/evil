@@ -161,15 +161,7 @@ class @Session
         @view.readSong(song, @current_cells)
 
     saveSong: () ->
-        @scene =
-            size:     @scene_size
-            patterns: (s.pattern for s in @synth)
-            bpm:      @bpm
-            scale:    @scale
-            key:      @key
-
-        @scenes = [@scene]
-        song_json = JSON.stringify(@scenes)
+        song_json = JSON.stringify(@song)
         csrf_token = $('#ajax-form > input[name=csrf_token]').val()
         $.ajax(
             url: '/'
@@ -179,9 +171,9 @@ class @Session
                 json: song_json
                 csrf_token: csrf_token
         ).done((d) =>
-            @showSuccess(d)
+            @view.showSuccess(d, @song.title, @song.creator)
         ).fail((err) =>
-            @showError(err)
+            @view.showError(err)
         )
 
     setSynthName: (synth_id, name) ->
@@ -192,3 +184,6 @@ class @Session
         pat_num = @current_cells[synth_id]
         @song.tracks[synth_id].patterns[pat_num].name = name
         @view.drawPatternName(synth_id, pat_num, @song.tracks[synth_id].patterns[pat_num])
+
+    setSongTitle: (title) -> @song.title = title
+    setCreatorName: (name) -> @song.creator = name

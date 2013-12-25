@@ -187,6 +187,8 @@
       scale: 'AEOLIAN'
     };
     song2 = {
+      title: 'hello',
+      creator: 'fand',
       tracks: [t1, t2],
       master: [c1, c2],
       length: 2
