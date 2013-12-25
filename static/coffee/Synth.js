@@ -499,29 +499,24 @@
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
       if (this.pattern[mytime] === 0) {
-        if (this.is_sustaining) {
-          return T.setTimeout((function() {
-            return _this.core.noteOff();
-          }), this.duration - 10);
-        } else {
-          return this.core.noteOff();
-        }
+        return this.core.noteOff();
+      } else if (this.pattern[mytime] === 'end') {
+        return T.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
+      } else if (this.pattern[mytime] === 'sustain') {
+
+      } else if (this.pattern[mytime] < 0) {
+        this.is_sustaining = true;
+        n = -this.pattern[mytime];
+        this.core.setNote(this.noteToSemitone(n));
+        return this.core.noteOn();
       } else {
-        if (this.pattern[mytime] == null) {
-          return;
-        }
-        if (this.pattern[mytime] < 0) {
-          this.is_sustaining = true;
-          n = -this.pattern[mytime];
-          this.core.setNote(this.noteToSemitone(n));
-          return this.core.noteOn();
-        } else {
-          this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
-          this.core.noteOn();
-          return T.setTimeout((function() {
-            return _this.core.noteOff();
-          }), this.duration - 10);
-        }
+        this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
+        this.core.noteOn();
+        return T.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
       }
     };
 
@@ -571,16 +566,15 @@
 
     Synth.prototype.sustainNote = function(l, r, note) {
       var i, _i;
+      if (l === r) {
+        this.pattern[l] = note;
+        return;
+      }
       for (i = _i = l; l <= r ? _i < r : _i > r; i = l <= r ? ++_i : --_i) {
-        this.pattern[i] = void 0;
+        this.pattern[i] = 'sustain';
       }
       this.pattern[l] = -note;
-      return this.pattern[r] = 0;
-    };
-
-    Synth.prototype.cutNote = function(pos) {
-      this.pattern[pos.x - 1] = 0;
-      return this.pattern[pos.x] = -pos.y;
+      return this.pattern[r] = 'end';
     };
 
     Synth.prototype.activate = function(i) {

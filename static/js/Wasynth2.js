@@ -1909,29 +1909,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
       if (this.pattern[mytime] === 0) {
-        if (this.is_sustaining) {
-          return T.setTimeout((function() {
-            return _this.core.noteOff();
-          }), this.duration - 10);
-        } else {
-          return this.core.noteOff();
-        }
+        return this.core.noteOff();
+      } else if (this.pattern[mytime] === 'end') {
+        return T.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
+      } else if (this.pattern[mytime] === 'sustain') {
+
+      } else if (this.pattern[mytime] < 0) {
+        this.is_sustaining = true;
+        n = -this.pattern[mytime];
+        this.core.setNote(this.noteToSemitone(n));
+        return this.core.noteOn();
       } else {
-        if (this.pattern[mytime] == null) {
-          return;
-        }
-        if (this.pattern[mytime] < 0) {
-          this.is_sustaining = true;
-          n = -this.pattern[mytime];
-          this.core.setNote(this.noteToSemitone(n));
-          return this.core.noteOn();
-        } else {
-          this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
-          this.core.noteOn();
-          return T.setTimeout((function() {
-            return _this.core.noteOff();
-          }), this.duration - 10);
-        }
+        this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
+        this.core.noteOn();
+        return T.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
       }
     };
 
@@ -1981,16 +1976,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Synth.prototype.sustainNote = function(l, r, note) {
       var i, _i;
+      if (l === r) {
+        this.pattern[l] = note;
+        return;
+      }
       for (i = _i = l; l <= r ? _i < r : _i > r; i = l <= r ? ++_i : --_i) {
-        this.pattern[i] = void 0;
+        this.pattern[i] = 'sustain';
       }
       this.pattern[l] = -note;
-      return this.pattern[r] = 0;
-    };
-
-    Synth.prototype.cutNote = function(pos) {
-      this.pattern[pos.x - 1] = 0;
-      return this.pattern[pos.x] = -pos.y;
+      return this.pattern[r] = 'end';
     };
 
     Synth.prototype.activate = function(i) {
@@ -2068,6 +2062,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.cell.onload = function() {
         return _this.initCanvas();
       };
+      this.cells_x = 32;
       this.cells_y = 20;
       this.fold = this.dom.find('.btn-fold-core');
       this.core = this.dom.find('.synth-core');
@@ -2091,7 +2086,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }
 
     SynthView.prototype.initCanvas = function() {
-      var i, j, _i, _j, _ref;
+      var i, j, _i, _j, _ref, _ref1;
       this.canvas_hover.width = this.canvas_on.width = this.canvas_off.width = 832;
       this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 520;
       this.rect = this.canvas_off.getBoundingClientRect();
@@ -2100,7 +2095,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         y: this.rect.top
       };
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        for (j = _j = 0; _j < 32; j = ++_j) {
+        for (j = _j = 0, _ref1 = this.cells_x; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; j = 0 <= _ref1 ? ++_j : --_j) {
           this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
         }
       }
@@ -2115,8 +2110,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return {
         x: _x,
         y: _y,
-        x_abs: this.page * 32 + _x,
-        y_abs: _y
+        x_abs: this.page * this.cells_x + _x,
+        y_abs: _y,
+        note: this.cells_y - _y
       };
     };
 
@@ -2134,47 +2130,32 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           if (_this.is_sustaining) {
             _this.sustain_l = Math.min(pos.x_abs, _this.sustain_l);
             _this.sustain_r = Math.max(pos.x_abs, _this.sustain_r);
-            _this.sustainNote(_this.sustain_l, _this.sustain_r, pos.y);
+            _this.sustainNote(_this.sustain_l, _this.sustain_r, pos);
           } else {
             if (_this.is_adding) {
               _this.addNote(pos);
-            } else if (_this.pattern[pos.x_abs] === _this.cells_y - pos.y) {
+            } else if (_this.pattern[pos.x_abs] === pos.note) {
               _this.removeNote(pos);
             }
           }
           return _this.click_pos = pos;
         }
       }).on('mousedown', function(e) {
-        var i, pos;
+        var pos;
         _this.is_clicked = true;
         pos = _this.getPos(e);
         if (!_this.is_step) {
-          if ((_this.pattern[pos.x_abs] != null) || _this.pattern[pos.x_abs] === 0) {
+          if (_this.pattern[pos.x_abs] === 'sustain' || _this.pattern[pos.x_abs] === 'end') {
             _this.addNote(pos);
             _this.sustain_l = _this.sustain_r = pos.x_abs;
             return _this.is_sustaining = true;
           } else {
-            i = pos.x_abs - 1;
-            while (_this.pattern[i] == null) {
-              i--;
-            }
-            if (i < 0) {
-              console.log('strange data!');
-              _this.removeNote(pos.x);
-              return;
-            }
-            if (_this.pattern[i] !== _this.cells_y - pos.y) {
-              _this.cutNote(pos);
-            }
-            _this.sustain_l = i;
-            _this.sustain_r = pos.x_abs;
-            while (_this.pattern[_this.sustain_r] == null) {
-              _this.sustain_r++;
-            }
+            _this.addNote(pos);
+            _this.sustain_l = _this.sustain_r = pos.x_abs;
             return _this.is_sustaining = true;
           }
         } else {
-          if (_this.pattern[pos.x_abs] === _this.cells_y - pos.y) {
+          if (_this.pattern[pos.x_abs] === pos.note) {
             return _this.removeNote(pos);
           } else {
             _this.is_adding = true;
@@ -2186,7 +2167,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _this.is_clicked = false;
         if (!_this.is_step) {
           pos = _this.getPos(e);
-          _this.sustainNote(_this.sustain_left, _this.sustain_right, pos.y);
           return _this.is_sustaining = false;
         } else {
           return _this.is_adding = false;
@@ -2233,7 +2213,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.plusPattern();
       }));
       this.minus.on('click', (function() {
-        if (_this.pattern.length > 32) {
+        if (_this.pattern.length > _this.cells_x) {
           return _this.minusPattern();
         }
       }));
@@ -2259,10 +2239,27 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SynthView.prototype.addNote = function(pos) {
-      var note;
-      note = this.cells_y - pos.y;
-      this.pattern[pos.x_abs] = note;
-      this.model.addNote(pos.x_abs, note);
+      var i;
+      if (this.pattern[pos.x_abs] === 'end' || this.pattern[pos.x_abs] === 'sustain') {
+        if (pos.x > 0) {
+          this.ctx_on.clearRect((pos.x - 1) * 26, 0, 26, 1000);
+          if (this.pattern[pos.x_abs - 1] < 0) {
+            this.pattern[pos.x_abs - 1] = -this.pattern[pos.x_abs - 1];
+            this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, (pos.x - 1) * 26, (this.cells_y - this.pattern[pos.x_abs - 1]) * 26, 26, 26);
+          } else {
+            this.pattern[pos.x_abs - 1] = 'end';
+            this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, (pos.x - 1) * 26, (this.cells_y - this.pattern[pos.x_abs - 1]) * 26, 26, 26);
+          }
+        }
+      }
+      i = pos.x_abs + 1;
+      while (this.pattern[i] === 'end' || this.pattern[i] === 'sustain') {
+        this.pattern[i] = 0;
+        i++;
+      }
+      this.ctx_on.clearRect(pos.x * 26, 0, (i - pos.x_abs) * 26, 1000);
+      this.pattern[pos.x_abs] = pos.note;
+      this.model.addNote(pos.x_abs, pos.note);
       this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
       return this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
     };
@@ -2273,31 +2270,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.model.removeNote(pos.x_abs);
     };
 
-    SynthView.prototype.cutNote = function(pos) {
-      var i;
-      i = pos.x;
-      while (this.pattern[i] == null) {
-        i++;
-      }
-      this.pattern[pos.x - 1] = 0;
-      this.ctx_on.clearRect(x * 26, pos.y * 26, (i - x) * 26, 26);
-      return this.model.cutNote(pos);
-    };
-
-    SynthView.prototype.sustainNote = function(l, r, y) {
+    SynthView.prototype.sustainNote = function(l, r, pos) {
       var i, _i, _j, _ref;
+      if (l === r) {
+        this.addNote(pos);
+        return;
+      }
       for (i = _i = l; l <= r ? _i <= r : _i >= r; i = l <= r ? ++_i : --_i) {
         this.ctx_on.clearRect(i * 26, 0, 26, 1000);
       }
       for (i = _j = _ref = l + 1; _ref <= r ? _j < r : _j > r; i = _ref <= r ? ++_j : --_j) {
-        this.pattern[i] = void 0;
-        this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, i * 26, y * 26, 26, 26);
+        this.pattern[i] = 'sustain';
+        this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, i * 26, pos.y * 26, 26, 26);
       }
-      this.pattern[l] = -(this.cells_y - y);
-      this.pattern[r] = 0;
-      this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, l * 26, y * 26, 26, 26);
-      this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, r * 26, y * 26, 26, 26);
-      return this.model.sustainNote(l, r, this.cells_y - y);
+      this.pattern[l] = -pos.note;
+      this.pattern[r] = 'end';
+      this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, l * 26, pos.y * 26, 26, 26);
+      this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, r * 26, pos.y * 26, 26, 26);
+      return this.model.sustainNote(l, r, pos.note);
     };
 
     SynthView.prototype.playAt = function(time) {
@@ -2306,12 +2296,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.is_nosync) {
         return;
       }
-      if (this.time % 32 === 0) {
+      if (this.time % this.cells_x === 0) {
         this.drawPattern(this.time);
       }
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % 32) * 26, i * 26, 26, 26);
-        this.ctx_off.drawImage(this.cell, 78, 0, 26, 26, (time % 32) * 26, i * 26, 26, 26);
+        this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26);
+        this.ctx_off.drawImage(this.cell, 78, 0, 26, 26, (time % this.cells_x) * 26, i * 26, 26, 26);
       }
       return this.last_time = time;
     };
@@ -2320,30 +2310,25 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.pattern_obj = pattern_obj;
       this.pattern = this.pattern_obj.pattern;
       this.page = 0;
-      this.page_total = this.pattern.length / 32;
+      this.page_total = this.pattern.length / this.cells_x;
       this.drawPattern(0);
       this.setMarker();
       return this.setPatternName(this.pattern_obj.name);
     };
 
     SynthView.prototype.drawPattern = function(time) {
-      var i, is_sus, last_y, note, y, _i;
+      var i, last_y, note, y, _i, _ref;
       if (time != null) {
         this.time = time;
       }
-      this.page = Math.floor(this.time / 32);
+      this.page = Math.floor(this.time / this.cells_x);
       this.ctx_on.clearRect(0, 0, 832, 520);
       last_y = 0;
-      for (i = _i = 0; _i < 32; i = ++_i) {
-        note = this.pattern[this.page * 32 + i];
-        if (note == null) {
-          is_sus = true;
+      for (i = _i = 0, _ref = this.cells_x; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        note = this.pattern[this.page * this.cells_x + i];
+        if (note === 'sustain') {
           this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, i * 26, last_y * 26, 26, 26);
-        } else if (note === 0) {
-          if (!is_sus) {
-            return;
-          }
-          is_sus = false;
+        } else if (note === 'end') {
           this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, i * 26, last_y * 26, 26, 26);
           last_y = 0;
         } else if (note < 0) {
@@ -2377,7 +2362,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.page_total === 1) {
         return;
       }
-      this.pattern = this.pattern.slice(0, this.pattern.length - 32);
+      this.pattern = this.pattern.slice(0, this.pattern.length - this.cells_x);
       this.page_total--;
       this.model.minusPattern();
       this.drawPattern();
@@ -2425,7 +2410,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % 32) * 26, i * 26, 26, 26));
+        _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26));
       }
       return _results;
     };
@@ -2458,7 +2443,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.nosync.removeClass('btn-false').addClass('btn-true');
         _results = [];
         for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.time % 32) * 26, i * 26, 26, 26));
+          _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.time % this.cells_x) * 26, i * 26, 26, 26));
         }
         return _results;
       }

@@ -331,26 +331,24 @@ class @Synth
         mytime = @time % @pattern.length
         @view.playAt(mytime)
         if @pattern[mytime] == 0
-            if @is_sustaining
-                T.setTimeout(( =>
-                    @core.noteOff()
-                    ), @duration - 10)
-            else
+            @core.noteOff()
+        else if @pattern[mytime] == 'end'
+            T.setTimeout(( =>
                 @core.noteOff()
+                ), @duration - 10)
+        else if @pattern[mytime] == 'sustain'
+            return
+        else if @pattern[mytime] < 0
+            @is_sustaining = true
+            n = -( @pattern[mytime] )
+            @core.setNote(@noteToSemitone(n))
+            @core.noteOn()
         else
-            if not @pattern[mytime]?
-                return
-            if @pattern[mytime] < 0
-                @is_sustaining = true
-                n = -( @pattern[mytime] )
-                @core.setNote(@noteToSemitone(n))
-                @core.noteOn()
-            else
-                @core.setNote(@noteToSemitone(@pattern[mytime]))
-                @core.noteOn()
-                T.setTimeout(( =>
-                    @core.noteOff()
-                    ), @duration - 10)
+            @core.setNote(@noteToSemitone(@pattern[mytime]))
+            @core.noteOn()
+            T.setTimeout(( =>
+                @core.noteOff()
+                ), @duration - 10)
 
     play: () ->
         @view.play()
@@ -387,14 +385,13 @@ class @Synth
         @pattern[time] = 0
 
     sustainNote: (l, r, note) ->
+        if l == r
+            @pattern[l] = note
+            return
         for i in [l...r]
-            @pattern[i] = undefined
+            @pattern[i] = 'sustain'
         @pattern[l] = -(note)
-        @pattern[r] = 0
-
-    cutNote: (pos) ->
-        @pattern[pos.x - 1] = 0
-        @pattern[pos.x] = -(pos.y)
+        @pattern[r] = 'end'
 
     activate: (i) -> @view.activate(i)
     inactivate: (i) -> @view.inactivate(i)
