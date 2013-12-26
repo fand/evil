@@ -245,11 +245,11 @@
     };
 
     Session.prototype.setSongTitle = function(title) {
-      return this.song.title = title;
+      return this.song.title = this.view.song.title = title;
     };
 
     Session.prototype.setCreatorName = function(name) {
-      return this.song.creator = name;
+      return this.song.creator = this.view.song.creator = name;
     };
 
     return Session;

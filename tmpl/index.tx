@@ -2,7 +2,6 @@
 
 : override content -> {
 
-
 <div id="top">
   <div id="top-logo">
     <div id="top-logo-wrapper">
@@ -28,7 +27,7 @@
     </div>
     <div id="dialog-socials" class="clearfix">
       <a class="dialog-twitter dialog-social fa fa-twitter"></a>
-      <a class="dialog-facebook dialog-social fa fa-facebook" onclick="window.open(this.href, 'twitter_tweet', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1'); return false;"></a>
+      <a class="dialog-facebook dialog-social fa fa-facebook" onclick="window.open(this.href, 'Share on facebook', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1'); return false;"></a>
     </div>
 
     <i class="fa fa-times dialog-close"></i>
@@ -37,15 +36,21 @@
 
 <div id="key-help"></div>
 
+<!-- top left -->
+<div id="btn-save" class="fa fa-save"></div>
+<div id="btn-clear" class="fa fa-file-o"></div>
+<form id="ajax-form" method="POST"></form>
+<script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
+
+<!-- top right -->
+<div id="social" class="clearfix">
+  <div id="hatena"   class="social"></div>
+  <div id="facebook" class="social fa fa-facebook"></div>
+  <div id="twitter"  class="social fa fa-twitter"></div>
+</div>
 
 
 <div id="wrapper">
-
-  <div id="social" class="clearfix">
-    <div id="facebook" class="social"></div>
-    <div id="twitter"  class="social"></div>
-    <div id="hatena"   class="social"></div>
-  </div>
 
   <div id="env"></div>
 
@@ -183,15 +188,16 @@
 
 </footer>
 
-  <i id="btn-left"   class="btn fa fa-angle-left"  data-line1="prev" data-line2="synth"></i>
-  <i id="btn-right"  class="btn fa fa-angle-right" data-line1="new"  data-line2="synth"></i>
-  <i id="btn-top"    class="btn fa fa-angle-up"    data-line1="mixer"></i>
-  <i id="btn-bottom" class="btn fa fa-angle-down"  data-line1="synths"></i>
+<i id="btn-left"   class="btn fa fa-angle-left"  data-line1="prev" data-line2="synth"></i>
+<i id="btn-right"  class="btn fa fa-angle-right" data-line1="new"  data-line2="synth"></i>
+<i id="btn-top"    class="btn fa fa-angle-up"    data-line1="mixer"></i>
+<i id="btn-bottom" class="btn fa fa-angle-down"  data-line1="synths"></i>
 
 
-<div id="btn-save" class="fa fa-save"></div>
-<div id="btn-clear" class="fa fa-file-o"></div>
-<form id="ajax-form" method="POST"></form>
-<script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
+
+<!-- <div id="btn-save" class="fa fa-save"></div> -->
+<!-- <div id="btn-clear" class="fa fa-file-o"></div> -->
+<!-- <form id="ajax-form" method="POST"></form> -->
+<!-- <script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script> -->
 
 : }

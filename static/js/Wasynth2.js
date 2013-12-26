@@ -1000,11 +1000,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Session.prototype.setSongTitle = function(title) {
-      return this.song.title = title;
+      return this.song.title = this.view.song.title = title;
     };
 
     Session.prototype.setCreatorName = function(name) {
-      return this.song.creator = name;
+      return this.song.creator = this.view.song.creator = name;
     };
 
     return Session;
@@ -1067,6 +1067,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.song_info = $('#song-info');
       this.song_title = this.song_info.find('#song-title');
       this.song_creator = this.song_info.find('#song-creator');
+      this.social_twitter = $('#twitter');
+      this.social_facebook = $('#facebook');
+      this.social_hatena = $('#hatena');
     }
 
     SessionView.prototype.initCanvas = function() {
@@ -1208,7 +1211,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.wrapper_master.scrollTop(_this.wrapper_tracks_sub.scrollTop());
       });
       this.readSong(this.song, this.current_cells);
-      this.btn_save.on('mousedown', function() {
+      this.btn_save.on('click', function() {
         return _this.model.saveSong();
       });
       this.dialog.on('mousedown', function(e) {
@@ -1226,12 +1229,22 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }).on('blur', function() {
         return window.is_input_mode = false;
       });
-      return this.song_creator.on('focus', function() {
+      this.song_creator.on('focus', function() {
         return window.is_input_mode = true;
       }).on('change', function() {
         return _this.model.setCreatorName(_this.song_creator.val());
       }).on('blur', function() {
         return window.is_input_mode = false;
+      });
+      this.social_twitter.on('click', function() {
+        _this.share('twitter');
+        return console.log('clicked');
+      });
+      this.social_facebook.on('click', function() {
+        return _this.share('facebook');
+      });
+      return this.social_hatena.on('click', function() {
+        return _this.share('hatena');
       });
     };
 
@@ -1475,6 +1488,32 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         opacity: '1',
         'z-index': '-10000'
       });
+    };
+
+    SessionView.prototype.share = function(service) {
+      var fb_url, hb_url, text, title, tw_url, url;
+      if (this.song.title != null) {
+        if (this.song.creator != null) {
+          text = '"' + this.song.title + '" by ' + this.song.creator;
+        } else {
+          text = '"' + this.song.title + '"';
+        }
+        title = text + ' :: evil';
+      } else {
+        text = '"evil" by gmork';
+        title = 'evil';
+      }
+      url = location.href;
+      if (service === 'twitter') {
+        tw_url = 'http://twitter.com/intent/tweet?url=' + encodeURI(url + '&text=' + text + '&hashtags=evil');
+        return window.open(tw_url, 'Tweet', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1');
+      } else if (service === 'facebook') {
+        fb_url = 'http://www.facebook.com/sharer.php?&u=' + url;
+        return window.open(fb_url, 'Share on facebook', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1');
+      } else {
+        hb_url = 'http://b.hatena.ne.jp/entry/' + url.split('://')[1];
+        return window.open(hb_url);
+      }
     };
 
     return SessionView;
@@ -2743,7 +2782,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
   this.initEvil = function() {
-    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, s1, s2, scn1, scn2, scn55, song1, song2, t1, t2,
+    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, song2, t1, t2,
       _this = this;
     T.setTimeout((function() {
       $('#top').css({
@@ -2795,28 +2834,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     });
     footer_size = $(window).height() / 2 - 300;
     $('footer').css('height', footer_size + 'px');
-    scn1 = {
-      size: 32,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
-    };
-    scn2 = {
-      size: 64,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]]
-    };
-    scn55 = {
-      size: 32,
-      patterns: [[3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2], [3, 3, 10, 3, 10, 3, 9, 3, 3, 3, 10, 3, 10, 3, 9, 3, 1, 1, 10, 1, 10, 1, 9, 1, 2, 2, 10, 2, 10, 2, 9, 2]]
-    };
-    s1 = {
-      bpm: 80,
-      size: 32,
-      patterns: [[10, 10, 17, 10, 17, 10, 16, 10, 10, 10, 17, 10, 17, 10, 16, 10, 8, 8, 17, 8, 17, 8, 16, 8, 9, 9, 17, 9, 17, 9, 16, 9], [8, 8, 15, 8, 15, 8, 14, 8, 8, 8, 15, 8, 15, 8, 14, 8, 6, 6, 15, 6, 15, 6, 14, 6, 7, 7, 15, 7, 15, 7, 14, 7]]
-    };
-    s2 = {
-      size: 32,
-      patterns: [[1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10]]
-    };
-    song1 = [s1, s2];
     p1 = {
       name: 'p1',
       pattern: [10, 10, 17, 10, 17, 10, 16, 10, 10, 10, 17, 10, 17, 10, 16, 10, 8, 8, 17, 8, 17, 8, 16, 8, 9, 9, 17, 9, 17, 9, 16, 9]
@@ -2868,15 +2885,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       master: [c1, c2],
       length: 2
     };
-    player.readSong(song2);
-    $("#twitter").socialbutton('twitter', {
-      button: 'horizontal',
-      text: 'Web Audio API Sequencer http://www.kde.cs.tsukuba.ac.jp/~fand/wasynth/'
-    });
-    $("#hatena").socialbutton('hatena');
-    return $("#facebook").socialbutton('facebook_like', {
-      button: 'button_count'
-    });
+    return player.readSong(song2);
   };
 
 }).call(this);
