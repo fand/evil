@@ -103,7 +103,6 @@ class @EG
         @target.linearRampToValueAtTime(@sustain * (@max - @min) + @min, (time + @attack + @decay))
 
     noteOff: (time) ->
-        @target.cancelScheduledValues(time)
         @target.linearRampToValueAtTime(@min, time + @release)
 
 
