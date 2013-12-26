@@ -53,6 +53,9 @@
       this.song_info = $('#song-info');
       this.song_title = this.song_info.find('#song-title');
       this.song_creator = this.song_info.find('#song-creator');
+      this.social_twitter = $('#twitter');
+      this.social_facebook = $('#facebook');
+      this.social_hatena = $('#hatena');
     }
 
     SessionView.prototype.initCanvas = function() {
@@ -194,7 +197,7 @@
         return _this.wrapper_master.scrollTop(_this.wrapper_tracks_sub.scrollTop());
       });
       this.readSong(this.song, this.current_cells);
-      this.btn_save.on('mousedown', function() {
+      this.btn_save.on('click', function() {
         return _this.model.saveSong();
       });
       this.dialog.on('mousedown', function(e) {
@@ -212,12 +215,22 @@
       }).on('blur', function() {
         return window.is_input_mode = false;
       });
-      return this.song_creator.on('focus', function() {
+      this.song_creator.on('focus', function() {
         return window.is_input_mode = true;
       }).on('change', function() {
         return _this.model.setCreatorName(_this.song_creator.val());
       }).on('blur', function() {
         return window.is_input_mode = false;
+      });
+      this.social_twitter.on('click', function() {
+        _this.share('twitter');
+        return console.log('clicked');
+      });
+      this.social_facebook.on('click', function() {
+        return _this.share('facebook');
+      });
+      return this.social_hatena.on('click', function() {
+        return _this.share('hatena');
       });
     };
 
@@ -461,6 +474,32 @@
         opacity: '1',
         'z-index': '-10000'
       });
+    };
+
+    SessionView.prototype.share = function(service) {
+      var fb_url, hb_url, text, title, tw_url, url;
+      if (this.song.title != null) {
+        if (this.song.creator != null) {
+          text = '"' + this.song.title + '" by ' + this.song.creator;
+        } else {
+          text = '"' + this.song.title + '"';
+        }
+        title = text + ' :: evil';
+      } else {
+        text = '"evil" by gmork';
+        title = 'evil';
+      }
+      url = location.href;
+      if (service === 'twitter') {
+        tw_url = 'http://twitter.com/intent/tweet?url=' + encodeURI(url + '&text=' + text + '&hashtags=evil');
+        return window.open(tw_url, 'Tweet', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1');
+      } else if (service === 'facebook') {
+        fb_url = 'http://www.facebook.com/sharer.php?&u=' + url;
+        return window.open(fb_url, 'Share on facebook', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1');
+      } else {
+        hb_url = 'http://b.hatena.ne.jp/entry/' + url.split('://')[1];
+        return window.open(hb_url);
+      }
     };
 
     return SessionView;

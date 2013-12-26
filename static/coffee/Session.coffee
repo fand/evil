@@ -185,5 +185,5 @@ class @Session
         @song.tracks[synth_id].patterns[pat_num].name = name
         @view.drawPatternName(synth_id, pat_num, @song.tracks[synth_id].patterns[pat_num])
 
-    setSongTitle: (title) -> @song.title = title
-    setCreatorName: (name) -> @song.creator = name
+    setSongTitle: (title) -> @song.title = @view.song.title = title
+    setCreatorName: (name) -> @song.creator = @view.song.creator = name

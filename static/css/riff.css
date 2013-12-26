@@ -280,6 +280,16 @@ html, body {
 }
 .social:hover {
     opacity: 0.6;
+    color: #0df;
+    cursor: pointer;
+}
+#hatena {
+    width: 18px;
+    background-image: url('/static/img/hatebu_18.png');
+    background-position: left;
+}
+#hatena:hover {
+    background-position: right;
 }
 
 

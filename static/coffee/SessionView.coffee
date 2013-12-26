@@ -50,6 +50,11 @@ class @SessionView
         @song_title = @song_info.find('#song-title')
         @song_creator = @song_info.find('#song-creator')
 
+        @social_twitter  = $('#twitter')
+        @social_facebook = $('#facebook')
+        @social_hatena   = $('#hatena')
+
+
     initCanvas: ->
         @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = @w*8 + 1
         @canvas_master.width  = @canvas_master_on.width  = @canvas_master_hover.width  = @w + 1
@@ -161,7 +166,7 @@ class @SessionView
 
 
         # for Other view
-        @btn_save.on('mousedown', () => @model.saveSong())
+        @btn_save.on('click', () => @model.saveSong())
         @dialog.on('mousedown', (e) =>
             if (not @dialog_wrapper.is(e.target)) and @dialog_wrapper.has(e.target).length == 0
                 @closeDialog()
@@ -171,6 +176,9 @@ class @SessionView
         @song_title.on('focus', () => window.is_input_mode = true).on('change', () => @model.setSongTitle(@song_title.val())).on('blur', () => window.is_input_mode = false)
         @song_creator.on('focus', () => window.is_input_mode = true).on('change', () => @model.setCreatorName(@song_creator.val())).on('blur', () => window.is_input_mode = false)
 
+        @social_twitter.on('click',  () => @share('twitter'); console.log('clicked'))
+        @social_facebook.on('click', () => @share('facebook'))
+        @social_hatena.on('click',   () => @share('hatena'))
 
     readSong: (@song, @current_cells) ->
         @resize()
@@ -364,3 +372,29 @@ class @SessionView
 
     closeDialog: ->
         @dialog.css(opacity: '1', 'z-index': '-10000')
+
+    share: (service) ->
+
+        if @song.title?
+            if @song.creator?
+                text = '"' + @song.title + '" by ' + @song.creator
+            else
+                text = '"' + @song.title + '"'
+            title = text + ' :: evil'
+        else
+            text = '"evil" by gmork'
+            title = 'evil'
+
+        url = location.href
+
+        if service == 'twitter'
+            tw_url = 'http://twitter.com/intent/tweet?url=' + encodeURI(url + '&text=' + text + '&hashtags=evil')
+            window.open(tw_url, 'Tweet', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1')
+        else if service == 'facebook'
+            fb_url = 'http://www.facebook.com/sharer.php?&u=' + url
+            window.open(fb_url, 'Share on facebook', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1')
+        else
+            # hb_url = 'http://b.hatena.ne.jp/entry.touch/' + url.split('://')[1]
+            # window.open(hb_url, 'はてなブックマークに追加', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1')
+            hb_url = 'http://b.hatena.ne.jp/entry/' + url.split('://')[1]
+            window.open(hb_url)

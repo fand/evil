@@ -137,6 +137,3 @@ $(() ->
         length: 2
 
     player.readSong(song2)
-
-
-    # Social Buttons
