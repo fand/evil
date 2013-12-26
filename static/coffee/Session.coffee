@@ -120,15 +120,11 @@ class @Session
             synth_num = @song.tracks.length
             @player.addSynth(pat_num)
 
-            # @song.tracks[synth_num].patterns[pat_num] = @song.tracks[synth_num].patterns[0]
-            # delete @song.tracks[synth_num].patterns[0]
-
         if @song.tracks[synth_num].patterns[pat_num]?
             @player.synth[synth_num].readPattern(@song.tracks[synth_num].patterns[pat_num])
         else
             @player.synth[synth_num].clearPattern()
             @player.synth[synth_num].setPatternName(synth_num + '-' + pat_num)
-            console.log(@player.synth[synth_num].pattern_obj)
             @song.tracks[synth_num].patterns[pat_num] = @player.synth[synth_num].pattern_obj
 
         # draw
@@ -161,6 +157,7 @@ class @Session
         @view.readSong(song, @current_cells)
 
     saveSong: () ->
+        console.log(@song)
         song_json = JSON.stringify(@song)
         csrf_token = $('#ajax-form > input[name=csrf_token]').val()
         $.ajax(

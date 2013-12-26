@@ -168,7 +168,6 @@
       } else {
         this.player.synth[synth_num].clearPattern();
         this.player.synth[synth_num].setPatternName(synth_num + '-' + pat_num);
-        console.log(this.player.synth[synth_num].pattern_obj);
         this.song.tracks[synth_num].patterns[pat_num] = this.player.synth[synth_num].pattern_obj;
       }
       this.current_cells[synth_num] = pat_num;
@@ -215,6 +214,7 @@
     Session.prototype.saveSong = function() {
       var csrf_token, song_json,
         _this = this;
+      console.log(this.song);
       song_json = JSON.stringify(this.song);
       csrf_token = $('#ajax-form > input[name=csrf_token]').val();
       return $.ajax({
