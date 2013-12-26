@@ -243,34 +243,75 @@ class @SynthView
             return
 
         for i in [l..r]
-            @ctx_on.clearRect(i * 26, 0, 26, 1000)
+            @ctx_on.clearRect((i % @cells_x) * 26, 0, 26, 1000)
 
         for i in [(l+1)...r]
             @pattern[i] = 'sustain'
             @ctx_on.drawImage(@cell,
                 130, 0, 26, 26,
-                i * 26, pos.y * 26, 26, 26
+                (i % @cells_x) * 26, pos.y * 26, 26, 26
             )
+
+        if @pattern[l] == 'sustain' or @pattern[l] == 'end'
+            i = l - 1
+            while @pattern[i] == 'sustain' or @pattern[i] == 'end'
+                i--
+            @ctx_on.clearRect(((l-1) % @cells_x) * 26, 0, 26, 1000)
+            y = @cells_y + @pattern[i]
+            if @pattern[l-1] < 0
+                @pattern[l-1] = -(@pattern[l-1])
+                @ctx_on.drawImage(@cell,
+                    0, 0, 26, 26,
+                    ((l-1) % @cells_x) * 26, y * 26, 26, 26
+                )
+            else
+                @pattern[l-1] = 'end'
+                @ctx_on.drawImage(@cell,
+                    156, 0, 26, 26,
+                    ((l-1) % @cells_x) * 26, y * 26, 26, 26
+                )
+
+        if @pattern[r] < 0
+            y = @cells_y + @pattern[r]
+            if @pattern[r+1] == 'end'
+                @pattern[r+1] = -(@pattern[r])
+                @ctx_on.drawImage(@cell,
+                    0, 0, 26, 26,
+                    ((r+1) % @cells_x) * 26, y * 26, 26, 26
+                )
+            else
+                @pattern[r+1] = @pattern[r]
+                @ctx_on.drawImage(@cell,
+                    104, 0, 26, 26,
+                    ((r+1) % @cells_x) * 26, y * 26, 26, 26
+                )
 
         @pattern[l] = -(pos.note)
         @pattern[r] = 'end'
 
-
         @ctx_on.drawImage(@cell,
             104, 0, 26, 26,
-            l * 26, pos.y * 26, 26, 26
+            (l % @cells_x) * 26, pos.y * 26, 26, 26
         )
         @ctx_on.drawImage(@cell,
             156, 0, 26, 26,
-            r * 26, pos.y * 26, 26, 26
+            (r % @cells_x) * 26, pos.y * 26, 26, 26
         )
         @model.sustainNote(l, r, pos.note)
 
+    endSustain: (time) ->
+        if @is_sustaining
+            if @pattern[time-1] == 'sustain'
+                @pattern[time-1] = 'end'
+            else
+                @pattern[time-1] *= -1
+            @is_sustaining = false
 
     playAt: (@time) ->
         return if @is_nosync
 
         if @time % @cells_x == 0
+            @endSustain()
             @drawPattern(@time)
         for i in [0...@cells_y]
             @ctx_off.drawImage(@cell,
