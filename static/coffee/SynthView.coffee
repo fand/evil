@@ -142,8 +142,6 @@ class @SynthView
         ).on('mouseup', (e) =>
             @is_clicked = false
             if not @is_step
-                # if @sustain_l == @sustain_r
-                #     @removeNotes(@sustain_l)
                 pos = @getPos(e)
                 @is_sustaining = false
             else
