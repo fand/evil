@@ -216,17 +216,20 @@
     };
 
     SynthView.prototype.addNote = function(pos) {
-      var i;
+      var i, y;
       if (this.pattern[pos.x_abs] === 'end' || this.pattern[pos.x_abs] === 'sustain') {
-        if (pos.x > 0) {
-          this.ctx_on.clearRect((pos.x - 1) * 26, 0, 26, 1000);
-          if (this.pattern[pos.x_abs - 1] < 0) {
-            this.pattern[pos.x_abs - 1] = -this.pattern[pos.x_abs - 1];
-            this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, (pos.x - 1) * 26, (this.cells_y - this.pattern[pos.x_abs - 1]) * 26, 26, 26);
-          } else {
-            this.pattern[pos.x_abs - 1] = 'end';
-            this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, (pos.x - 1) * 26, (this.cells_y - this.pattern[pos.x_abs - 1]) * 26, 26, 26);
-          }
+        i = pos.x_abs - 1;
+        while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
+          i--;
+        }
+        this.ctx_on.clearRect(((pos.x_abs - 1) % this.cells_x) * 26, 0, 26, 1000);
+        y = this.cells_y + this.pattern[i];
+        if (this.pattern[pos.x_abs - 1] < 0) {
+          this.pattern[pos.x_abs - 1] = -this.pattern[pos.x_abs - 1];
+          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
+        } else {
+          this.pattern[pos.x_abs - 1] = 'end';
+          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
         }
       }
       i = pos.x_abs + 1;
@@ -248,23 +251,59 @@
     };
 
     SynthView.prototype.sustainNote = function(l, r, pos) {
-      var i, _i, _j, _ref;
+      var i, y, _i, _j, _ref;
       if (l === r) {
         this.addNote(pos);
         return;
       }
       for (i = _i = l; l <= r ? _i <= r : _i >= r; i = l <= r ? ++_i : --_i) {
-        this.ctx_on.clearRect(i * 26, 0, 26, 1000);
+        this.ctx_on.clearRect((i % this.cells_x) * 26, 0, 26, 1000);
       }
       for (i = _j = _ref = l + 1; _ref <= r ? _j < r : _j > r; i = _ref <= r ? ++_j : --_j) {
         this.pattern[i] = 'sustain';
-        this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, i * 26, pos.y * 26, 26, 26);
+        this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, (i % this.cells_x) * 26, pos.y * 26, 26, 26);
+      }
+      if (this.pattern[l] === 'sustain' || this.pattern[l] === 'end') {
+        i = l - 1;
+        while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
+          i--;
+        }
+        this.ctx_on.clearRect(((l - 1) % this.cells_x) * 26, 0, 26, 1000);
+        y = this.cells_y + this.pattern[i];
+        if (this.pattern[l - 1] < 0) {
+          this.pattern[l - 1] = -this.pattern[l - 1];
+          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((l - 1) % this.cells_x) * 26, y * 26, 26, 26);
+        } else {
+          this.pattern[l - 1] = 'end';
+          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, ((l - 1) % this.cells_x) * 26, y * 26, 26, 26);
+        }
+      }
+      if (this.pattern[r] < 0) {
+        y = this.cells_y + this.pattern[r];
+        if (this.pattern[r + 1] === 'end') {
+          this.pattern[r + 1] = -this.pattern[r];
+          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
+        } else {
+          this.pattern[r + 1] = this.pattern[r];
+          this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
+        }
       }
       this.pattern[l] = -pos.note;
       this.pattern[r] = 'end';
-      this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, l * 26, pos.y * 26, 26, 26);
-      this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, r * 26, pos.y * 26, 26, 26);
+      this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, (l % this.cells_x) * 26, pos.y * 26, 26, 26);
+      this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, (r % this.cells_x) * 26, pos.y * 26, 26, 26);
       return this.model.sustainNote(l, r, pos.note);
+    };
+
+    SynthView.prototype.endSustain = function(time) {
+      if (this.is_sustaining) {
+        if (this.pattern[time - 1] === 'sustain') {
+          this.pattern[time - 1] = 'end';
+        } else {
+          this.pattern[time - 1] *= -1;
+        }
+        return this.is_sustaining = false;
+      }
     };
 
     SynthView.prototype.playAt = function(time) {
@@ -274,6 +313,7 @@
         return;
       }
       if (this.time % this.cells_x === 0) {
+        this.endSustain();
         this.drawPattern(this.time);
       }
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
