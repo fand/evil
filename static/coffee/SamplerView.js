@@ -1,11 +1,121 @@
 (function() {
-  this.SynthView = (function() {
-    function SynthView(model, id) {
+  this.SamplerCoreView = (function() {
+    function SamplerCoreView(model, id, dom) {
+      this.model = model;
+      this.id = id;
+      this.dom = dom;
+      this.vcos = $(this.dom.find('.Sampler_VCO'));
+      this.EG_inputs = this.dom.find('.Sampler_EG input');
+      this.FEG_inputs = this.dom.find('.Sampler_FEG input');
+      this.filter_inputs = this.dom.find(".Sampler_filter input");
+      this.gain_inputs = this.dom.find('.Sampler_mixer input');
+      this.canvasEG = this.dom.find(".Sampler_EG .canvasEG").get()[0];
+      this.canvasFEG = this.dom.find(".Sampler_FEG .canvasFEG").get()[0];
+      this.contextEG = this.canvasEG.getContext('2d');
+      this.contextFEG = this.canvasFEG.getContext('2d');
+      this.initEvent();
+    }
+
+    SamplerCoreView.prototype.initEvent = function() {
+      var _this = this;
+      this.vcos.on("change", function() {
+        return _this.setVCOParam();
+      });
+      this.gain_inputs.on("change", function() {
+        return _this.setGains();
+      });
+      this.filter_inputs.on("change", function() {
+        return _this.setFilterParam();
+      });
+      this.EG_inputs.on("change", function() {
+        return _this.setEGParam();
+      });
+      this.FEG_inputs.on("change", function() {
+        return _this.setFEGParam();
+      });
+      return this.setParam();
+    };
+
+    SamplerCoreView.prototype.updateCanvas = function(name) {
+      var adsr, canvas, context, h, w, w4;
+      canvas = null;
+      context = null;
+      adsr = null;
+      if (name === "EG") {
+        canvas = this.canvasEG;
+        context = this.contextEG;
+        adsr = this.model.eg.getParam();
+      } else {
+        canvas = this.canvasFEG;
+        context = this.contextFEG;
+        adsr = this.model.feg.getParam();
+      }
+      w = canvas.width = 180;
+      h = canvas.height = 50;
+      w4 = w / 4;
+      context.clearRect(0, 0, w, h);
+      context.beginPath();
+      context.moveTo(w4 * (1.0 - adsr[0]), h);
+      context.lineTo(w / 4, 0);
+      context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));
+      context.lineTo(w4 * 3, h * (1.0 - adsr[2]));
+      context.lineTo(w4 * (adsr[3] + 3), h);
+      context.strokeStyle = 'rgb(0, 220, 255)';
+      return context.stroke();
+    };
+
+    SamplerCoreView.prototype.setParam = function() {
+      this.setVCOParam();
+      this.setEGParam();
+      this.setFEGParam();
+      this.setFilterParam();
+      return this.setGains();
+    };
+
+    SamplerCoreView.prototype.setVCOParam = function() {
+      var i, vco, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        vco = this.vcos.eq(i);
+        _results.push(this.model.setVCOParam(i, vco.find('.shape').val(), parseInt(vco.find('.octave').val()), parseInt(vco.find('.interval').val()), parseInt(vco.find('.fine').val())));
+      }
+      return _results;
+    };
+
+    SamplerCoreView.prototype.setEGParam = function() {
+      this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
+      return this.updateCanvas("EG");
+    };
+
+    SamplerCoreView.prototype.setFEGParam = function() {
+      this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
+      return this.updateCanvas("FEG");
+    };
+
+    SamplerCoreView.prototype.setFilterParam = function() {
+      return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
+    };
+
+    SamplerCoreView.prototype.setGains = function() {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
+      }
+      return _results;
+    };
+
+    return SamplerCoreView;
+
+  })();
+
+  this.SamplerView = (function() {
+    function SamplerView(model, id) {
       var _this = this;
       this.model = model;
       this.id = id;
-      this.dom = $('#tmpl_synth').clone();
-      this.dom.attr('id', 'synth' + id);
+      this.dom = $('#tmpl_sampler').clone();
+      this.dom.attr('id', 'sampler' + id);
       $("#instruments").append(this.dom);
       this.synth_name = this.dom.find('.synth-name');
       this.synth_name.val(this.model.name);
@@ -43,7 +153,7 @@
       this.cells_x = 32;
       this.cells_y = 20;
       this.fold = this.dom.find('.btn-fold-core');
-      this.core = this.dom.find('.synth-core');
+      this.core = this.dom.find('.sampler-core');
       this.is_panel_opened = true;
       this.keyboard = new KeyboardView(this);
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -63,7 +173,7 @@
       this.initEvent();
     }
 
-    SynthView.prototype.initCanvas = function() {
+    SamplerView.prototype.initCanvas = function() {
       var i, j, _i, _j, _ref, _ref1;
       this.canvas_hover.width = this.canvas_on.width = this.canvas_off.width = 832;
       this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 520;
@@ -80,7 +190,7 @@
       return this.readPattern(this.pattern_obj);
     };
 
-    SynthView.prototype.getPos = function(e) {
+    SamplerView.prototype.getPos = function(e) {
       var _x, _y;
       this.rect = this.canvas_off.getBoundingClientRect();
       _x = Math.floor((e.clientX - this.rect.left) / 26);
@@ -94,7 +204,7 @@
       };
     };
 
-    SynthView.prototype.initEvent = function() {
+    SamplerView.prototype.initEvent = function() {
       var _this = this;
       this.canvas_hover_dom.on('mousemove', function(e) {
         var pos;
@@ -219,7 +329,7 @@
       });
     };
 
-    SynthView.prototype.addNote = function(pos) {
+    SamplerView.prototype.addNote = function(pos) {
       var i, y;
       if (this.pattern[pos.x_abs] === 'end' || this.pattern[pos.x_abs] === 'sustain') {
         i = pos.x_abs - 1;
@@ -248,13 +358,13 @@
       return this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
     };
 
-    SynthView.prototype.removeNote = function(pos) {
+    SamplerView.prototype.removeNote = function(pos) {
       this.pattern[pos.x_abs] = 0;
       this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
       return this.model.removeNote(pos.x_abs);
     };
 
-    SynthView.prototype.sustainNote = function(l, r, pos) {
+    SamplerView.prototype.sustainNote = function(l, r, pos) {
       var i, y, _i, _j, _ref;
       if (l === r) {
         this.addNote(pos);
@@ -299,7 +409,7 @@
       return this.model.sustainNote(l, r, pos.note);
     };
 
-    SynthView.prototype.endSustain = function(time) {
+    SamplerView.prototype.endSustain = function(time) {
       if (this.is_sustaining) {
         if (this.pattern[time - 1] === 'sustain') {
           this.pattern[time - 1] = 'end';
@@ -310,7 +420,7 @@
       }
     };
 
-    SynthView.prototype.playAt = function(time) {
+    SamplerView.prototype.playAt = function(time) {
       var i, _i, _ref;
       this.time = time;
       if (this.is_nosync) {
@@ -327,7 +437,7 @@
       return this.last_time = time;
     };
 
-    SynthView.prototype.readPattern = function(pattern_obj) {
+    SamplerView.prototype.readPattern = function(pattern_obj) {
       this.pattern_obj = pattern_obj;
       this.pattern = this.pattern_obj.pattern;
       this.page = 0;
@@ -337,7 +447,7 @@
       return this.setPatternName(this.pattern_obj.name);
     };
 
-    SynthView.prototype.drawPattern = function(time) {
+    SamplerView.prototype.drawPattern = function(time) {
       var i, last_y, note, y, _i, _ref;
       if (time != null) {
         this.time = time;
@@ -365,7 +475,7 @@
       return this.setMarker();
     };
 
-    SynthView.prototype.plusPattern = function() {
+    SamplerView.prototype.plusPattern = function() {
       if (this.page_total === 8) {
         return;
       }
@@ -379,7 +489,7 @@
       }
     };
 
-    SynthView.prototype.minusPattern = function() {
+    SamplerView.prototype.minusPattern = function() {
       if (this.page_total === 1) {
         return;
       }
@@ -393,7 +503,7 @@
       }
     };
 
-    SynthView.prototype.setMarker = function() {
+    SamplerView.prototype.setMarker = function() {
       var _this = this;
       this.pos_markers.filter(function(i) {
         return i < _this.page_total;
@@ -425,9 +535,9 @@
       });
     };
 
-    SynthView.prototype.play = function() {};
+    SamplerView.prototype.play = function() {};
 
-    SynthView.prototype.stop = function() {
+    SamplerView.prototype.stop = function() {
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -436,24 +546,24 @@
       return _results;
     };
 
-    SynthView.prototype.activate = function(i) {
+    SamplerView.prototype.activate = function(i) {
       this.is_active = true;
       return this.initCanvas();
     };
 
-    SynthView.prototype.inactivate = function() {
+    SamplerView.prototype.inactivate = function() {
       return this.is_active = false;
     };
 
-    SynthView.prototype.setSynthName = function(name) {
+    SamplerView.prototype.setSynthName = function(name) {
       return this.synth_name.val(name);
     };
 
-    SynthView.prototype.setPatternName = function(name) {
+    SamplerView.prototype.setPatternName = function(name) {
       return this.pattern_name.val(name);
     };
 
-    SynthView.prototype.toggleNoSync = function() {
+    SamplerView.prototype.toggleNoSync = function() {
       var i, _i, _ref, _results;
       if (this.is_nosync) {
         this.is_nosync = false;
@@ -470,19 +580,19 @@
       }
     };
 
-    SynthView.prototype.pencilMode = function() {
+    SamplerView.prototype.pencilMode = function() {
       this.is_step = false;
       this.pencil.removeClass('btn-false').addClass('btn-true');
       return this.step.removeClass('btn-true').addClass('btn-false');
     };
 
-    SynthView.prototype.stepMode = function() {
+    SamplerView.prototype.stepMode = function() {
       this.is_step = true;
       this.step.removeClass('btn-false').addClass('btn-true');
       return this.pencil.removeClass('btn-true').addClass('btn-false');
     };
 
-    return SynthView;
+    return SamplerView;
 
   })();
 

@@ -1,8 +1,107 @@
-class @SynthView
+class @SamplerCoreView
+    constructor: (@model, @id, @dom) ->
+
+        @vcos = $(@dom.find('.Sampler_VCO'))
+
+        @EG_inputs     = @dom.find('.Sampler_EG input')
+        @FEG_inputs    = @dom.find('.Sampler_FEG input')
+        @filter_inputs = @dom.find(".Sampler_filter input")
+        @gain_inputs   = @dom.find('.Sampler_mixer input')
+
+        @canvasEG   = @dom.find(".Sampler_EG .canvasEG").get()[0]
+        @canvasFEG  = @dom.find(".Sampler_FEG .canvasFEG").get()[0]
+        @contextEG  = @canvasEG.getContext('2d')
+        @contextFEG = @canvasFEG.getContext('2d')
+
+        @initEvent()
+
+    initEvent: ->
+        @vcos.on("change",          () => @setVCOParam())
+        @gain_inputs.on("change",   () => @setGains())
+        @filter_inputs.on("change", () => @setFilterParam())
+        @EG_inputs.on("change",     () => @setEGParam())
+        @FEG_inputs.on("change",    () => @setFEGParam())
+        @setParam()
+
+    updateCanvas: (name) ->
+        canvas  = null
+        context = null
+        adsr    = null
+        if name == "EG"
+            canvas  = @canvasEG
+            context = @contextEG
+            adsr    = @model.eg.getParam()
+        else
+            canvas  = @canvasFEG
+            context = @contextFEG
+            adsr    = @model.feg.getParam()
+
+        w = canvas.width = 180
+        h = canvas.height = 50
+        w4 = w/4
+        context.clearRect(0,0,w,h)
+        context.beginPath();
+        context.moveTo(w4 * (1.0 - adsr[0]), h)
+        context.lineTo(w / 4,0)                                  # attack
+        context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]))  # decay
+        context.lineTo(w4 * 3, h * (1.0 - adsr[2]))              # sustain
+        context.lineTo(w4 * (adsr[3] + 3), h)                    # release
+        context.strokeStyle = 'rgb(0, 220, 255)'
+        context.stroke()
+
+    setParam: ->
+        @setVCOParam()
+        @setEGParam()
+        @setFEGParam()
+        @setFilterParam()
+        @setGains()
+
+    setVCOParam: ->
+        for i in [0...@vcos.length]
+            vco = @vcos.eq(i)
+            @model.setVCOParam(
+                i,
+                vco.find('.shape').val(),
+                parseInt(vco.find('.octave').val()),
+                parseInt(vco.find('.interval').val()),
+                parseInt(vco.find('.fine').val())
+            )
+
+    setEGParam: ->
+        @model.setEGParam(
+            parseFloat(@EG_inputs.eq(0).val()),
+            parseFloat(@EG_inputs.eq(1).val()),
+            parseFloat(@EG_inputs.eq(2).val()),
+            parseFloat(@EG_inputs.eq(3).val())
+        )
+        @updateCanvas("EG");
+
+    setFEGParam: ->
+        @model.setFEGParam(
+            parseFloat(@FEG_inputs.eq(0).val()),
+            parseFloat(@FEG_inputs.eq(1).val()),
+            parseFloat(@FEG_inputs.eq(2).val()),
+            parseFloat(@FEG_inputs.eq(3).val())
+        );
+        @updateCanvas("FEG");
+
+    setFilterParam: ->
+        @model.setFilterParam(
+            parseFloat(@filter_inputs.eq(0).val()),
+            parseFloat(@filter_inputs.eq(1).val())
+        )
+
+    setGains: ->
+        for i in [0... @gain_inputs.length]
+            @model.setVCOGain(i, parseInt(@gain_inputs.eq(i).val()))
+
+
+
+class @SamplerView
     constructor: (@model, @id) ->
 
-        @dom = $('#tmpl_synth').clone()
-        @dom.attr('id', 'synth' + id)
+        @dom = $('#tmpl_sampler').clone()
+        @dom.attr('id', 'sampler' + id)
         $("#instruments").append(@dom)
 
         @synth_name = @dom.find('.synth-name')
@@ -49,7 +148,7 @@ class @SynthView
         @cells_y = 20
 
         @fold = @dom.find('.btn-fold-core')
-        @core = @dom.find('.synth-core')
+        @core = @dom.find('.sampler-core')
         @is_panel_opened = true
 
         @keyboard = new KeyboardView(this)

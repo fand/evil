@@ -1,11 +1,11 @@
-<div id="tmpl_synth" class="instrument synth clearfix">
+<div id="tmpl_sampler" class="instrument sampler clearfix">
 
   <div class="sequencer">
     <div class="header">
 
       <select class="synth-type">
-        <option selected="selected">REZ</option>
-        <option>SAMPLER</option>
+        <option>REZ</option>
+        <option selected="selected">SAMPLER</option>
       </select>
 
       <div class="names clearfix">
@@ -45,10 +45,10 @@
   </div>
 
 
-  <div class="synth-core">
+  <div class="sampler-core">
     <i class="fa fa-angle-down btn-fold-core"></i>
 
-    <fieldset class="RS_module RS_vco0 RS_VCO">
+    <fieldset class="Sampler_module Sampler_vco0 Sampler_VCO">
       <legend>OSC1</legend>
 
       <div class="clearfix">
@@ -66,7 +66,7 @@
       <div class="clearfix"><label>TUNE</label>  <input class="fine"     type="number" min="-50" max="50" value="0"></div>
     </fieldset>
 
-    <fieldset class="RS_module RS_vco1 RS_VCO">
+    <fieldset class="Sampler_module Sampler_vco1 Sampler_VCO">
       <legend>OSC2</legend>
 
       <div class="clearfix">
@@ -84,7 +84,7 @@
       <div class="clearfix"><label>TUNE</label>  <input class="fine"     type="number" min="-50" max="50" value="1"></div>
     </fieldset>
 
-    <fieldset class="RS_module RS_vco2 RS_VCO">
+    <fieldset class="Sampler_module Sampler_vco2 Sampler_VCO">
       <legend>OSC3</legend>
 
       <div class="clearfix">
@@ -103,14 +103,14 @@
       <div class="clearfix"><label>TUNE</label>  <input class="fine"     min="-50" max="50" value="0" type="number"></div>
     </fieldset>
 
-    <fieldset class="RS_module RS_mixer gain">
+    <fieldset class="Sampler_module Sampler_mixer gain">
       <legend>Mixer</legend>
       <div class="clearfix"><label>OSC1</label>  <input type="range" min="0" max="99" value="50"></div>
       <div class="clearfix"><label>OSC2</label>  <input type="range" min="0" max="99" value="40"></div>
       <div class="clearfix"><label>NOISE</label> <input type="range" min="0" max="99" value="1"></div>
     </fieldset>
 
-    <fieldset class="RS_module RS_EG EG">
+    <fieldset class="Sampler_module Sampler_EG EG">
       <legend>Envelope</legend>
       <canvas class="canvasEG"></canvas>
       <div class="clearfix"><label>ATTACK</label>  <input name="attack"  type="range" min="0" max="50000" value="0"></div>
@@ -119,17 +119,17 @@
       <div class="clearfix"><label>RELEASE</label> <input name="release" type="range" min="0" max="50000" value="10000"></div>
     </fieldset>
 
-    <fieldset class="RS_module RS_filter filter clearfix">
+    <fieldset class="Sampler_module Sampler_filter filter clearfix">
       <legend>Filter</legend>
-      <div class="RS_filter_freq">
+      <div class="Sampler_filter_freq">
         <label>FREQ</label><input class="filter_slider freq" type="range" min="10" max="1000" value="400">
       </div>
-      <div class="RS_filter_Q">
+      <div class="Sampler_filter_Q">
         <label>REZ</label><input class="filter_slider q" type="range" min="0" max="40" value="6">
       </div>
     </fieldset>
 
-    <fieldset class="RS_module RS_FEG FEG">
+    <fieldset class="Sampler_module Sampler_FEG FEG">
       <legend>FilterEnvelope</legend>
       <canvas class="canvasFEG"></canvas>
       <div class="clearfix"><label>ATTACK</label>  <input name="attack"  type="range" min="0" max="50000" value="0"></div>

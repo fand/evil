@@ -184,3 +184,13 @@ class @Session
 
     setSongTitle: (title) -> @song.title = @view.song.title = title
     setCreatorName: (name) -> @song.creator = @view.song.creator = name
+
+    changeSynth: (id, type) ->
+        s = @player.changeSynth(id, type)
+        @synth[id] = s
+
+        pp = []
+        pp[@scene_pos] = name: (s.id + '-' + @scene_pos), pattern: s.pattern
+        s_obj = id: s.id, name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
+        @song.tracks[id] = s_obj
+        s.readPattern(pp[@scene_pos])

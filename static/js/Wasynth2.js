@@ -76,6 +76,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
+    Mixer.prototype.changeSynth = function(id, synth) {
+      return synth.connect(this.panners[id]);
+    };
+
     return Mixer;
 
   })();
@@ -439,6 +443,31 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.session.addSynth(s, scene_pos);
     };
 
+    Player.prototype.addSampler = function(scene_pos, name) {
+      var s;
+      s = new Sampler(this.context, this.num_id++, this, name);
+      this.synth.push(s);
+      this.mixer.addSynth(s);
+      return this.session.addSynth(s, scene_pos);
+    };
+
+    Player.prototype.changeSynth = function(id, type) {
+      var name, s_new, s_old;
+      s_old = this.synth[id];
+      name = s_old.name;
+      if (type === 'REZ') {
+        s_new = new Synth(this.context, id, this, name);
+        s_new.setScale(this.scene.scale);
+        s_new.setKey(this.scene.key);
+        this.session.addSynth(s, scene_pos);
+      } else if (type === 'SAMPLER') {
+        s_new = new Sampler(this.context, id, this, name);
+      }
+      this.synth[id] = s_new;
+      s_old.replaceWith(s_new);
+      return s_new;
+    };
+
     Player.prototype.moveRight = function(next_idx) {
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
@@ -754,6 +783,1156 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
+  this.VCO = (function() {
+    function VCO(ctx) {
+      this.ctx = ctx;
+      this.freq_key = 55;
+      this.octave = 4;
+      this.interval = 0;
+      this.fine = 0;
+      this.note = 0;
+      this.freq = Math.pow(2, this.octave) * this.freq_key;
+      this.node = this.ctx.createOscillator();
+      this.node.type = 'sine';
+      this.setFreq();
+      this.node.start(0);
+    }
+
+    VCO.prototype.setOctave = function(octave) {
+      this.octave = octave;
+    };
+
+    VCO.prototype.setFine = function(fine) {
+      this.fine = fine;
+      return this.node.detune.value = this.fine;
+    };
+
+    VCO.prototype.setNote = function(note) {
+      this.note = note;
+    };
+
+    VCO.prototype.setKey = function(freq_key) {
+      this.freq_key = freq_key;
+    };
+
+    VCO.prototype.setInterval = function(interval) {
+      this.interval = interval;
+    };
+
+    VCO.prototype.setShape = function(shape) {
+      return this.node.type = OSC_TYPE[shape];
+    };
+
+    VCO.prototype.setFreq = function() {
+      this.freq = (Math.pow(2, this.octave) * Math.pow(SEMITONE, this.interval + this.note) * this.freq_key) + this.fine;
+      return this.node.frequency.setValueAtTime(this.freq, 0);
+    };
+
+    VCO.prototype.connect = function(dst) {
+      return this.node.connect(dst);
+    };
+
+    return VCO;
+
+  })();
+
+  this.EG = (function() {
+    function EG(target, min, max) {
+      this.target = target;
+      this.min = min;
+      this.max = max;
+      this.attack = 0;
+      this.decay = 0;
+      this.sustain = 0.0;
+      this.release = 0;
+    }
+
+    EG.prototype.getParam = function() {
+      return [this.attack, this.decay, this.sustain, this.release];
+    };
+
+    EG.prototype.setParam = function(attack, decay, sustain, release) {
+      this.attack = attack / 50000.0;
+      this.decay = decay / 50000.0;
+      this.sustain = sustain / 100.0;
+      return this.release = release / 50000.0;
+    };
+
+    EG.prototype.setRange = function(min, max) {
+      this.min = min;
+      this.max = max;
+    };
+
+    EG.prototype.getRange = function() {
+      return [this.min, this.max];
+    };
+
+    EG.prototype.noteOn = function(time) {
+      this.target.cancelScheduledValues(time);
+      this.target.setValueAtTime(this.min, time);
+      this.target.linearRampToValueAtTime(this.max, time + this.attack);
+      return this.target.linearRampToValueAtTime(this.sustain * (this.max - this.min) + this.min, time + this.attack + this.decay);
+    };
+
+    EG.prototype.noteOff = function(time) {
+      this.target.cancelScheduledValues(time);
+      return this.target.linearRampToValueAtTime(this.min, time + this.release);
+    };
+
+    return EG;
+
+  })();
+
+  this.ResFilter = (function() {
+    function ResFilter(ctx) {
+      this.ctx = ctx;
+      this.lpf = this.ctx.createBiquadFilter();
+      this.lpf.type = 'lowpass';
+      this.lpf.gain.value = 1.0;
+    }
+
+    ResFilter.prototype.connect = function(dst) {
+      return this.lpf.connect(dst);
+    };
+
+    ResFilter.prototype.getResonance = function() {
+      return this.lpf.Q.value;
+    };
+
+    ResFilter.prototype.setQ = function(Q) {
+      return this.lpf.Q.value = Q;
+    };
+
+    return ResFilter;
+
+  })();
+
+  this.SamplerCore = (function() {
+    function SamplerCore(parent, ctx, id) {
+      var i, _i;
+      this.parent = parent;
+      this.ctx = ctx;
+      this.id = id;
+      this.node = this.ctx.createGain();
+      this.node.gain.value = 0;
+      this.gain = 1.0;
+      this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
+      this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
+      for (i = _i = 0; _i < 3; i = ++_i) {
+        this.vcos[i].connect(this.gains[i]);
+        this.gains[i].gain.value = 0;
+        this.gains[i].connect(this.node);
+      }
+      this.filter = new ResFilter(this.ctx);
+      this.eg = new EG(this.node.gain, 0.0, this.gain);
+      this.feg = new EG(this.filter.lpf.frequency, 0, 0);
+      this.gain_res = this.ctx.createGain();
+      this.gain_res.gain.value = 0;
+      this.vcos[2].connect(this.gain_res);
+      this.gain_res.connect(this.node);
+      this.view = new SamplerCoreView(this, id, this.parent.view.dom.find('.sampler-core'));
+    }
+
+    SamplerCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
+      this.vcos[i].setShape(shape);
+      this.vcos[i].setOctave(oct);
+      this.vcos[i].setInterval(interval);
+      this.vcos[i].setFine(fine);
+      return this.vcos[i].setFreq();
+    };
+
+    SamplerCore.prototype.setEGParam = function(a, d, s, r) {
+      return this.eg.setParam(a, d, s, r);
+    };
+
+    SamplerCore.prototype.setFEGParam = function(a, d, s, r) {
+      return this.feg.setParam(a, d, s, r);
+    };
+
+    SamplerCore.prototype.setFilterParam = function(freq, q) {
+      this.feg.setRange(80, Math.pow(freq / 1000, 2.0) * 25000 + 80);
+      this.filter.setQ(q);
+      if (q > 1) {
+        return this.gain_res.value = 0.1 * (q / 1000.0);
+      }
+    };
+
+    SamplerCore.prototype.setVCOGain = function(i, gain) {
+      return this.gains[i].gain.value = (gain / 100.0) * 0.3;
+    };
+
+    SamplerCore.prototype.setGain = function(gain) {
+      this.gain = gain;
+      return this.eg.setRange(0.0, this.gain);
+    };
+
+    SamplerCore.prototype.noteOn = function() {
+      var t0;
+      t0 = this.ctx.currentTime;
+      this.eg.noteOn(t0);
+      return this.feg.noteOn(t0);
+    };
+
+    SamplerCore.prototype.noteOff = function() {
+      var t0;
+      t0 = this.ctx.currentTime;
+      this.eg.noteOff(t0);
+      return this.feg.noteOff(t0);
+    };
+
+    SamplerCore.prototype.setKey = function(key) {
+      var freq_key, v, _i, _len, _ref, _results;
+      freq_key = KEY_LIST[key];
+      _ref = this.vcos;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        v = _ref[_i];
+        _results.push(v.setKey(freq_key));
+      }
+      return _results;
+    };
+
+    SamplerCore.prototype.setScale = function(scale) {
+      this.scale = scale;
+    };
+
+    SamplerCore.prototype.connect = function(dst) {
+      this.node.connect(this.filter.lpf);
+      return this.filter.connect(dst);
+    };
+
+    SamplerCore.prototype.setNote = function(note) {
+      var v, _i, _len, _ref, _results;
+      _ref = this.vcos;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        v = _ref[_i];
+        v.setNote(note);
+        _results.push(v.setFreq());
+      }
+      return _results;
+    };
+
+    return SamplerCore;
+
+  })();
+
+  this.Sampler = (function() {
+    function Sampler(ctx, id, player, name) {
+      this.ctx = ctx;
+      this.id = id;
+      this.player = player;
+      this.name = name;
+      if (this.name == null) {
+        this.name = 'Sampler #' + this.id;
+      }
+      this.pattern_name = 'pattern 0';
+      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern_obj = {
+        name: this.pattern_name,
+        pattern: this.pattern
+      };
+      this.time = 0;
+      this.scale = [];
+      this.view = new SamplerView(this, this.id);
+      this.core = new SamplerCore(this, this.ctx, this.id);
+      this.is_sustaining = false;
+      this.session = this.player.session;
+    }
+
+    Sampler.prototype.connect = function(dst) {
+      return this.core.connect(dst);
+    };
+
+    Sampler.prototype.setDuration = function(duration) {
+      this.duration = duration;
+    };
+
+    Sampler.prototype.setKey = function(key) {
+      return this.core.setKey(key);
+    };
+
+    Sampler.prototype.setScale = function(scale_name) {
+      return this.scale = SCALE_LIST[scale_name];
+    };
+
+    Sampler.prototype.setNote = function(note) {
+      return this.core.setNote(note);
+    };
+
+    Sampler.prototype.setGain = function(gain) {
+      return this.core.setGain(gain);
+    };
+
+    Sampler.prototype.getGain = function() {
+      return this.core.gain;
+    };
+
+    Sampler.prototype.noteToSemitone = function(ival) {
+      return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
+    };
+
+    Sampler.prototype.noteOn = function(note) {
+      this.core.setNote(this.noteToSemitone(note));
+      return this.core.noteOn();
+    };
+
+    Sampler.prototype.noteOff = function() {
+      return this.core.noteOff();
+    };
+
+    Sampler.prototype.playAt = function(time) {
+      var mytime, n,
+        _this = this;
+      this.time = time;
+      mytime = this.time % this.pattern.length;
+      this.view.playAt(mytime);
+      if (this.pattern[mytime] === 0) {
+        return this.core.noteOff();
+      } else if (this.pattern[mytime] === 'end') {
+        return T.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
+      } else if (this.pattern[mytime] === 'sustain') {
+
+      } else if (this.pattern[mytime] < 0) {
+        this.is_sustaining = true;
+        n = -this.pattern[mytime];
+        this.core.setNote(this.noteToSemitone(n));
+        return this.core.noteOn();
+      } else {
+        this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
+        this.core.noteOn();
+        return T.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
+      }
+    };
+
+    Sampler.prototype.play = function() {
+      return this.view.play();
+    };
+
+    Sampler.prototype.stop = function() {
+      this.core.noteOff();
+      return this.view.stop();
+    };
+
+    Sampler.prototype.pause = function(time) {
+      return this.core.noteOff();
+    };
+
+    Sampler.prototype.readPattern = function(pattern_obj) {
+      this.pattern_obj = pattern_obj;
+      this.pattern = this.pattern_obj.pattern;
+      this.pattern_name = this.pattern_obj.name;
+      return this.view.readPattern(this.pattern_obj);
+    };
+
+    Sampler.prototype.clearPattern = function() {
+      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern_obj.pattern = this.pattern;
+      return this.view.readPattern(this.pattern_obj);
+    };
+
+    Sampler.prototype.plusPattern = function() {
+      this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      return this.player.resetSceneLength();
+    };
+
+    Sampler.prototype.minusPattern = function() {
+      this.pattern = this.pattern.slice(0, this.pattern.length - 32);
+      return this.player.resetSceneLength();
+    };
+
+    Sampler.prototype.addNote = function(time, note) {
+      return this.pattern[time] = note;
+    };
+
+    Sampler.prototype.removeNote = function(time) {
+      return this.pattern[time] = 0;
+    };
+
+    Sampler.prototype.sustainNote = function(l, r, note) {
+      var i, _i;
+      if (l === r) {
+        this.pattern[l] = note;
+        return;
+      }
+      for (i = _i = l; l <= r ? _i < r : _i > r; i = l <= r ? ++_i : --_i) {
+        this.pattern[i] = 'sustain';
+      }
+      this.pattern[l] = -note;
+      return this.pattern[r] = 'end';
+    };
+
+    Sampler.prototype.activate = function(i) {
+      return this.view.activate(i);
+    };
+
+    Sampler.prototype.inactivate = function(i) {
+      return this.view.inactivate(i);
+    };
+
+    Sampler.prototype.redraw = function(time) {
+      this.time = time;
+      return this.view.drawPattern(this.time);
+    };
+
+    Sampler.prototype.setId = function(id) {
+      this.id = id;
+    };
+
+    Sampler.prototype.setSynthName = function(name) {
+      this.name = name;
+      this.session.setSynthName(this.id, this.name);
+      return this.view.setSynthName(this.name);
+    };
+
+    Sampler.prototype.setPatternName = function(pattern_name) {
+      this.pattern_name = pattern_name;
+      this.session.setPatternName(this.id, this.pattern_name);
+      return this.view.setPatternName(this.pattern_name);
+    };
+
+    return Sampler;
+
+  })();
+
+}).call(this);
+;(function() {
+  this.SamplerCoreView = (function() {
+    function SamplerCoreView(model, id, dom) {
+      this.model = model;
+      this.id = id;
+      this.dom = dom;
+      this.vcos = $(this.dom.find('.Sampler_VCO'));
+      this.EG_inputs = this.dom.find('.Sampler_EG input');
+      this.FEG_inputs = this.dom.find('.Sampler_FEG input');
+      this.filter_inputs = this.dom.find(".Sampler_filter input");
+      this.gain_inputs = this.dom.find('.Sampler_mixer input');
+      this.canvasEG = this.dom.find(".Sampler_EG .canvasEG").get()[0];
+      this.canvasFEG = this.dom.find(".Sampler_FEG .canvasFEG").get()[0];
+      this.contextEG = this.canvasEG.getContext('2d');
+      this.contextFEG = this.canvasFEG.getContext('2d');
+      this.initEvent();
+    }
+
+    SamplerCoreView.prototype.initEvent = function() {
+      var _this = this;
+      this.vcos.on("change", function() {
+        return _this.setVCOParam();
+      });
+      this.gain_inputs.on("change", function() {
+        return _this.setGains();
+      });
+      this.filter_inputs.on("change", function() {
+        return _this.setFilterParam();
+      });
+      this.EG_inputs.on("change", function() {
+        return _this.setEGParam();
+      });
+      this.FEG_inputs.on("change", function() {
+        return _this.setFEGParam();
+      });
+      return this.setParam();
+    };
+
+    SamplerCoreView.prototype.updateCanvas = function(name) {
+      var adsr, canvas, context, h, w, w4;
+      canvas = null;
+      context = null;
+      adsr = null;
+      if (name === "EG") {
+        canvas = this.canvasEG;
+        context = this.contextEG;
+        adsr = this.model.eg.getParam();
+      } else {
+        canvas = this.canvasFEG;
+        context = this.contextFEG;
+        adsr = this.model.feg.getParam();
+      }
+      w = canvas.width = 180;
+      h = canvas.height = 50;
+      w4 = w / 4;
+      context.clearRect(0, 0, w, h);
+      context.beginPath();
+      context.moveTo(w4 * (1.0 - adsr[0]), h);
+      context.lineTo(w / 4, 0);
+      context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));
+      context.lineTo(w4 * 3, h * (1.0 - adsr[2]));
+      context.lineTo(w4 * (adsr[3] + 3), h);
+      context.strokeStyle = 'rgb(0, 220, 255)';
+      return context.stroke();
+    };
+
+    SamplerCoreView.prototype.setParam = function() {
+      this.setVCOParam();
+      this.setEGParam();
+      this.setFEGParam();
+      this.setFilterParam();
+      return this.setGains();
+    };
+
+    SamplerCoreView.prototype.setVCOParam = function() {
+      var i, vco, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        vco = this.vcos.eq(i);
+        _results.push(this.model.setVCOParam(i, vco.find('.shape').val(), parseInt(vco.find('.octave').val()), parseInt(vco.find('.interval').val()), parseInt(vco.find('.fine').val())));
+      }
+      return _results;
+    };
+
+    SamplerCoreView.prototype.setEGParam = function() {
+      this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
+      return this.updateCanvas("EG");
+    };
+
+    SamplerCoreView.prototype.setFEGParam = function() {
+      this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
+      return this.updateCanvas("FEG");
+    };
+
+    SamplerCoreView.prototype.setFilterParam = function() {
+      return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
+    };
+
+    SamplerCoreView.prototype.setGains = function() {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
+      }
+      return _results;
+    };
+
+    return SamplerCoreView;
+
+  })();
+
+  this.SamplerView = (function() {
+    function SamplerView(model, id) {
+      var _this = this;
+      this.model = model;
+      this.id = id;
+      this.dom = $('#tmpl_sampler').clone();
+      this.dom.attr('id', 'sampler' + id);
+      $("#instruments").append(this.dom);
+      this.synth_name = this.dom.find('.synth-name');
+      this.synth_name.val(this.model.name);
+      this.pattern_name = this.dom.find('.pattern-name');
+      this.pattern_name.val(this.model.pattern_name);
+      this.synth_type = this.dom.find('.synth-type');
+      this.pencil = this.dom.find('.sequencer-pencil');
+      this.step = this.dom.find('.sequencer-step');
+      this.is_step = false;
+      this.header = this.dom.find('.header');
+      this.markers = this.dom.find('.markers');
+      this.pos_markers = this.dom.find('.marker');
+      this.marker_prev = this.dom.find('.marker-prev');
+      this.marker_next = this.dom.find('.marker-next');
+      this.plus = this.dom.find('.pattern-plus');
+      this.minus = this.dom.find('.pattern-minus');
+      this.nosync = this.dom.find('.pattern-nosync');
+      this.is_nosync = false;
+      this.setMarker();
+      this.table_wrapper = this.dom.find('.sequencer-table');
+      this.canvas_hover_dom = this.dom.find('.table-hover');
+      this.canvas_on_dom = this.dom.find('.table-on');
+      this.canvas_off_dom = this.dom.find('.table-off');
+      this.canvas_hover = this.canvas_hover_dom[0];
+      this.canvas_on = this.canvas_on_dom[0];
+      this.canvas_off = this.canvas_off_dom[0];
+      this.ctx_hover = this.canvas_hover.getContext('2d');
+      this.ctx_on = this.canvas_on.getContext('2d');
+      this.ctx_off = this.canvas_off.getContext('2d');
+      this.cell = new Image();
+      this.cell.src = 'static/img/sequencer_cell.png';
+      this.cell.onload = function() {
+        return _this.initCanvas();
+      };
+      this.cells_x = 32;
+      this.cells_y = 20;
+      this.fold = this.dom.find('.btn-fold-core');
+      this.core = this.dom.find('.sampler-core');
+      this.is_panel_opened = true;
+      this.keyboard = new KeyboardView(this);
+      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.page = 0;
+      this.page_total = 1;
+      this.last_time = 0;
+      this.last_page = 0;
+      this.is_clicked = false;
+      this.hover_pos = {
+        x: -1,
+        y: -1
+      };
+      this.click_pos = {
+        x: -1,
+        y: -1
+      };
+      this.initEvent();
+    }
+
+    SamplerView.prototype.initCanvas = function() {
+      var i, j, _i, _j, _ref, _ref1;
+      this.canvas_hover.width = this.canvas_on.width = this.canvas_off.width = 832;
+      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 520;
+      this.rect = this.canvas_off.getBoundingClientRect();
+      this.offset = {
+        x: this.rect.left,
+        y: this.rect.top
+      };
+      for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        for (j = _j = 0, _ref1 = this.cells_x; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; j = 0 <= _ref1 ? ++_j : --_j) {
+          this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
+        }
+      }
+      return this.readPattern(this.pattern_obj);
+    };
+
+    SamplerView.prototype.getPos = function(e) {
+      var _x, _y;
+      this.rect = this.canvas_off.getBoundingClientRect();
+      _x = Math.floor((e.clientX - this.rect.left) / 26);
+      _y = Math.floor((e.clientY - this.rect.top) / 26);
+      return {
+        x: _x,
+        y: _y,
+        x_abs: this.page * this.cells_x + _x,
+        y_abs: _y,
+        note: this.cells_y - _y
+      };
+    };
+
+    SamplerView.prototype.initEvent = function() {
+      var _this = this;
+      this.canvas_hover_dom.on('mousemove', function(e) {
+        var pos;
+        pos = _this.getPos(e);
+        if (pos !== _this.hover_pos) {
+          _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
+          _this.ctx_hover.drawImage(_this.cell, 52, 0, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
+          _this.hover_pos = pos;
+        }
+        if (_this.is_clicked && _this.click_pos !== pos) {
+          if (_this.is_sustaining) {
+            _this.sustain_l = Math.min(pos.x_abs, _this.sustain_l);
+            _this.sustain_r = Math.max(pos.x_abs, _this.sustain_r);
+            _this.sustainNote(_this.sustain_l, _this.sustain_r, pos);
+          } else {
+            if (_this.is_adding) {
+              _this.addNote(pos);
+            } else if (_this.pattern[pos.x_abs] === pos.note) {
+              _this.removeNote(pos);
+            }
+          }
+          return _this.click_pos = pos;
+        }
+      }).on('mousedown', function(e) {
+        var pos;
+        _this.is_clicked = true;
+        pos = _this.getPos(e);
+        if (!_this.is_step) {
+          if (_this.pattern[pos.x_abs] === 'sustain' || _this.pattern[pos.x_abs] === 'end') {
+            _this.addNote(pos);
+            _this.sustain_l = _this.sustain_r = pos.x_abs;
+            return _this.is_sustaining = true;
+          } else {
+            _this.addNote(pos);
+            _this.sustain_l = _this.sustain_r = pos.x_abs;
+            return _this.is_sustaining = true;
+          }
+        } else {
+          if (_this.pattern[pos.x_abs] === pos.note) {
+            return _this.removeNote(pos);
+          } else {
+            _this.is_adding = true;
+            return _this.addNote(pos);
+          }
+        }
+      }).on('mouseup', function(e) {
+        var pos;
+        _this.is_clicked = false;
+        if (!_this.is_step) {
+          pos = _this.getPos(e);
+          return _this.is_sustaining = false;
+        } else {
+          return _this.is_adding = false;
+        }
+      }).on('mouseout', function(e) {
+        _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
+        _this.hover_pos = {
+          x: -1,
+          y: -1
+        };
+        _this.is_clicked = false;
+        return _this.is_adding = false;
+      });
+      this.synth_type.on('change', function() {
+        return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
+      });
+      this.synth_name.on('focus', (function() {
+        return window.is_input_mode = true;
+      })).on('blur', (function() {
+        return window.is_input_mode = false;
+      })).on('change', (function() {
+        return _this.model.setSynthName(_this.synth_name.val());
+      }));
+      this.pattern_name.on('focus', (function() {
+        return window.is_input_mode = true;
+      })).on('blur', (function() {
+        return window.is_input_mode = false;
+      })).on('change', (function() {
+        return _this.model.setPatternName(_this.pattern_name.val());
+      }));
+      this.pencil.on('click', (function() {
+        return _this.pencilMode();
+      }));
+      this.step.on('click', (function() {
+        return _this.stepMode();
+      }));
+      this.marker_prev.on('click', (function() {
+        return _this.model.player.backward(true);
+      }));
+      this.marker_next.on('click', (function() {
+        return _this.model.player.forward();
+      }));
+      this.nosync.on('click', (function() {
+        return _this.toggleNoSync();
+      }));
+      this.plus.on('click', (function() {
+        return _this.plusPattern();
+      }));
+      this.minus.on('click', (function() {
+        if (_this.pattern.length > _this.cells_x) {
+          return _this.minusPattern();
+        }
+      }));
+      return this.fold.on('mousedown', function() {
+        if (_this.is_panel_opened) {
+          _this.core.css('height', '0px');
+          _this.table_wrapper.css('height', '524px');
+          _this.fold.css({
+            top: '-22px',
+            padding: '0px 5px 0px 0px'
+          }).removeClass('fa-angle-down').addClass('fa-angle-up');
+          return _this.is_panel_opened = false;
+        } else {
+          _this.core.css('height', '280px');
+          _this.table_wrapper.css('height', '262px');
+          _this.fold.css({
+            top: '0px',
+            padding: '5px 5px 5px 5px'
+          }).removeClass('fa-angle-up').addClass('fa-angle-down');
+          return _this.is_panel_opened = true;
+        }
+      });
+    };
+
+    SamplerView.prototype.addNote = function(pos) {
+      var i, y;
+      if (this.pattern[pos.x_abs] === 'end' || this.pattern[pos.x_abs] === 'sustain') {
+        i = pos.x_abs - 1;
+        while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
+          i--;
+        }
+        this.ctx_on.clearRect(((pos.x_abs - 1) % this.cells_x) * 26, 0, 26, 1000);
+        y = this.cells_y + this.pattern[i];
+        if (this.pattern[pos.x_abs - 1] < 0) {
+          this.pattern[pos.x_abs - 1] = -this.pattern[pos.x_abs - 1];
+          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
+        } else {
+          this.pattern[pos.x_abs - 1] = 'end';
+          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
+        }
+      }
+      i = pos.x_abs + 1;
+      while (this.pattern[i] === 'end' || this.pattern[i] === 'sustain') {
+        this.pattern[i] = 0;
+        i++;
+      }
+      this.ctx_on.clearRect(pos.x * 26, 0, (i - pos.x_abs) * 26, 1000);
+      this.pattern[pos.x_abs] = pos.note;
+      this.model.addNote(pos.x_abs, pos.note);
+      this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
+      return this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
+    };
+
+    SamplerView.prototype.removeNote = function(pos) {
+      this.pattern[pos.x_abs] = 0;
+      this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
+      return this.model.removeNote(pos.x_abs);
+    };
+
+    SamplerView.prototype.sustainNote = function(l, r, pos) {
+      var i, y, _i, _j, _ref;
+      if (l === r) {
+        this.addNote(pos);
+        return;
+      }
+      for (i = _i = l; l <= r ? _i <= r : _i >= r; i = l <= r ? ++_i : --_i) {
+        this.ctx_on.clearRect((i % this.cells_x) * 26, 0, 26, 1000);
+      }
+      for (i = _j = _ref = l + 1; _ref <= r ? _j < r : _j > r; i = _ref <= r ? ++_j : --_j) {
+        this.pattern[i] = 'sustain';
+        this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, (i % this.cells_x) * 26, pos.y * 26, 26, 26);
+      }
+      if (this.pattern[l] === 'sustain' || this.pattern[l] === 'end') {
+        i = l - 1;
+        while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
+          i--;
+        }
+        this.ctx_on.clearRect(((l - 1) % this.cells_x) * 26, 0, 26, 1000);
+        y = this.cells_y + this.pattern[i];
+        if (this.pattern[l - 1] < 0) {
+          this.pattern[l - 1] = -this.pattern[l - 1];
+          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((l - 1) % this.cells_x) * 26, y * 26, 26, 26);
+        } else {
+          this.pattern[l - 1] = 'end';
+          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, ((l - 1) % this.cells_x) * 26, y * 26, 26, 26);
+        }
+      }
+      if (this.pattern[r] < 0) {
+        y = this.cells_y + this.pattern[r];
+        if (this.pattern[r + 1] === 'end') {
+          this.pattern[r + 1] = -this.pattern[r];
+          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
+        } else {
+          this.pattern[r + 1] = this.pattern[r];
+          this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
+        }
+      }
+      this.pattern[l] = -pos.note;
+      this.pattern[r] = 'end';
+      this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, (l % this.cells_x) * 26, pos.y * 26, 26, 26);
+      this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, (r % this.cells_x) * 26, pos.y * 26, 26, 26);
+      return this.model.sustainNote(l, r, pos.note);
+    };
+
+    SamplerView.prototype.endSustain = function(time) {
+      if (this.is_sustaining) {
+        if (this.pattern[time - 1] === 'sustain') {
+          this.pattern[time - 1] = 'end';
+        } else {
+          this.pattern[time - 1] *= -1;
+        }
+        return this.is_sustaining = false;
+      }
+    };
+
+    SamplerView.prototype.playAt = function(time) {
+      var i, _i, _ref;
+      this.time = time;
+      if (this.is_nosync) {
+        return;
+      }
+      if (this.time % this.cells_x === 0) {
+        this.endSustain();
+        this.drawPattern(this.time);
+      }
+      for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26);
+        this.ctx_off.drawImage(this.cell, 78, 0, 26, 26, (time % this.cells_x) * 26, i * 26, 26, 26);
+      }
+      return this.last_time = time;
+    };
+
+    SamplerView.prototype.readPattern = function(pattern_obj) {
+      this.pattern_obj = pattern_obj;
+      this.pattern = this.pattern_obj.pattern;
+      this.page = 0;
+      this.page_total = this.pattern.length / this.cells_x;
+      this.drawPattern(0);
+      this.setMarker();
+      return this.setPatternName(this.pattern_obj.name);
+    };
+
+    SamplerView.prototype.drawPattern = function(time) {
+      var i, last_y, note, y, _i, _ref;
+      if (time != null) {
+        this.time = time;
+      }
+      this.page = Math.floor(this.time / this.cells_x);
+      this.ctx_on.clearRect(0, 0, 832, 520);
+      last_y = 0;
+      for (i = _i = 0, _ref = this.cells_x; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        note = this.pattern[this.page * this.cells_x + i];
+        if (note === 'sustain') {
+          this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, i * 26, last_y * 26, 26, 26);
+        } else if (note === 'end') {
+          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, i * 26, last_y * 26, 26, 26);
+          last_y = 0;
+        } else if (note < 0) {
+          y = this.cells_y + note;
+          this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, i * 26, y * 26, 26, 26);
+          last_y = y;
+        } else {
+          y = this.cells_y - note;
+          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
+          last_y = y;
+        }
+      }
+      return this.setMarker();
+    };
+
+    SamplerView.prototype.plusPattern = function() {
+      if (this.page_total === 8) {
+        return;
+      }
+      this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      this.page_total++;
+      this.model.plusPattern();
+      this.drawPattern();
+      this.minus.removeClass('btn-false').addClass('btn-true');
+      if (this.page_total === 8) {
+        return this.plus.removeClass('btn-true').addClass('btn-false');
+      }
+    };
+
+    SamplerView.prototype.minusPattern = function() {
+      if (this.page_total === 1) {
+        return;
+      }
+      this.pattern = this.pattern.slice(0, this.pattern.length - this.cells_x);
+      this.page_total--;
+      this.model.minusPattern();
+      this.drawPattern();
+      this.plus.removeClass('btn-false').addClass('btn-true');
+      if (this.page_total === 1) {
+        return this.minus.removeClass('btn-true').addClass('btn-false');
+      }
+    };
+
+    SamplerView.prototype.setMarker = function() {
+      var _this = this;
+      this.pos_markers.filter(function(i) {
+        return i < _this.page_total;
+      }).addClass('marker-active');
+      this.pos_markers.filter(function(i) {
+        return _this.page_total <= i;
+      }).removeClass('marker-active');
+      this.pos_markers.removeClass('marker-now').eq(this.page).addClass('marker-now');
+      this.markers.find('.marker-pos').text(this.page + 1);
+      this.markers.find('.marker-total').text(this.page_total);
+      return this.pos_markers.filter(function(i) {
+        return i < _this.page_total;
+      }).each(function(i) {
+        return _this.pos_markers.eq(i).on('mousedown', function() {
+          var _results;
+          if (_this.page < i) {
+            while (_this.page !== i) {
+              _this.model.player.forward();
+            }
+          }
+          if (_this.page > i) {
+            _results = [];
+            while (_this.page !== i) {
+              _results.push(_this.model.player.backward(true));
+            }
+            return _results;
+          }
+        });
+      });
+    };
+
+    SamplerView.prototype.play = function() {};
+
+    SamplerView.prototype.stop = function() {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26));
+      }
+      return _results;
+    };
+
+    SamplerView.prototype.activate = function(i) {
+      this.is_active = true;
+      return this.initCanvas();
+    };
+
+    SamplerView.prototype.inactivate = function() {
+      return this.is_active = false;
+    };
+
+    SamplerView.prototype.setSynthName = function(name) {
+      return this.synth_name.val(name);
+    };
+
+    SamplerView.prototype.setPatternName = function(name) {
+      return this.pattern_name.val(name);
+    };
+
+    SamplerView.prototype.toggleNoSync = function() {
+      var i, _i, _ref, _results;
+      if (this.is_nosync) {
+        this.is_nosync = false;
+        this.nosync.removeClass('btn-true').addClass('btn-false');
+        return this.drawPattern(this.time);
+      } else {
+        this.is_nosync = true;
+        this.nosync.removeClass('btn-false').addClass('btn-true');
+        _results = [];
+        for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.time % this.cells_x) * 26, i * 26, 26, 26));
+        }
+        return _results;
+      }
+    };
+
+    SamplerView.prototype.pencilMode = function() {
+      this.is_step = false;
+      this.pencil.removeClass('btn-false').addClass('btn-true');
+      return this.step.removeClass('btn-true').addClass('btn-false');
+    };
+
+    SamplerView.prototype.stepMode = function() {
+      this.is_step = true;
+      this.step.removeClass('btn-false').addClass('btn-true');
+      return this.pencil.removeClass('btn-true').addClass('btn-false');
+    };
+
+    return SamplerView;
+
+  })();
+
+  this.KeyboardView = (function() {
+    function KeyboardView(sequencer) {
+      this.sequencer = sequencer;
+      this.dom = this.sequencer.dom.find('.keyboard');
+      this.canvas = this.dom[0];
+      this.ctx = this.canvas.getContext('2d');
+      this.w = 48;
+      this.h = 26;
+      this.num = 20;
+      this.color = ['rgba(230, 230, 230, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
+      this.is_clicked = false;
+      this.hover_pos = {
+        x: -1,
+        y: -1
+      };
+      this.click_pos = {
+        x: -1,
+        y: -1
+      };
+      this.initCanvas();
+      this.initEvent();
+    }
+
+    KeyboardView.prototype.initCanvas = function() {
+      var i, _i, _ref, _results;
+      this.canvas.width = this.w;
+      this.canvas.height = this.h * this.num;
+      this.rect = this.canvas.getBoundingClientRect();
+      this.offset = {
+        x: this.rect.left,
+        y: this.rect.top
+      };
+      this.ctx.fillStyle = this.color[0];
+      _results = [];
+      for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.drawNormal(i);
+        _results.push(this.drawText(i));
+      }
+      return _results;
+    };
+
+    KeyboardView.prototype.getPos = function(e) {
+      this.rect = this.canvas.getBoundingClientRect();
+      return Math.floor((e.clientY - this.rect.top) / this.h);
+    };
+
+    KeyboardView.prototype.initEvent = function() {
+      var _this = this;
+      return this.dom.on('mousemove', function(e) {
+        var pos;
+        pos = _this.getPos(e);
+        if (pos !== _this.hover_pos) {
+          _this.drawNormal(_this.hover_pos);
+          _this.drawHover(pos);
+          _this.hover_pos = pos;
+        }
+        if (_this.is_clicked && _this.click_pos !== pos) {
+          _this.clearActive(_this.click_pos);
+          _this.drawActive(pos);
+          _this.sequencer.model.noteOff();
+          _this.sequencer.model.noteOn(_this.num - pos);
+          return _this.click_pos = pos;
+        }
+      }).on('mousedown', function(e) {
+        var pos;
+        _this.is_clicked = true;
+        pos = _this.getPos(e);
+        _this.drawActive(pos);
+        _this.sequencer.model.noteOn(_this.num - pos);
+        return _this.click_pos = pos;
+      }).on('mouseup', function(e) {
+        _this.is_clicked = false;
+        _this.clearActive(_this.click_pos);
+        _this.sequencer.model.noteOff();
+        return _this.click_pos = {
+          x: -1,
+          y: -1
+        };
+      }).on('mouseout', function(e) {
+        _this.clearActive(_this.hover_pos);
+        _this.sequencer.model.noteOff();
+        _this.hover_pos = {
+          x: -1,
+          y: -1
+        };
+        return _this.click_pos = {
+          x: -1,
+          y: -1
+        };
+      });
+    };
+
+    KeyboardView.prototype.drawNormal = function(i) {
+      this.clearNormal(i);
+      this.ctx.fillStyle = this.color[0];
+      this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
+      this.ctx.fillStyle = this.color[3];
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    KeyboardView.prototype.drawHover = function(i) {
+      this.ctx.fillStyle = this.color[1];
+      this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    KeyboardView.prototype.drawActive = function(i) {
+      this.clearNormal(i);
+      this.ctx.fillStyle = this.color[2];
+      this.ctx.fillRect(0, i * this.h, this.w, this.h);
+      this.ctx.fillStyle = this.color[4];
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    KeyboardView.prototype.clearNormal = function(i) {
+      return this.ctx.clearRect(0, i * this.h, this.w, this.h);
+    };
+
+    KeyboardView.prototype.clearActive = function(i) {
+      this.clearNormal(i);
+      this.drawNormal(i);
+      return this.drawText(i);
+    };
+
+    KeyboardView.prototype.drawText = function(i) {
+      this.ctx.fillStyle = this.color[3];
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    return KeyboardView;
+
+  })();
+
+}).call(this);
+;(function() {
   this.Session = (function() {
     function Session(ctx, player) {
       this.ctx = ctx;
@@ -1005,6 +2184,27 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Session.prototype.setCreatorName = function(name) {
       return this.song.creator = this.view.song.creator = name;
+    };
+
+    Session.prototype.changeSynth = function(id, type) {
+      var pp, s, s_obj;
+      s = this.player.changeSynth(id, type);
+      this.synth[id] = s;
+      pp = [];
+      pp[this.scene_pos] = {
+        name: s.id + '-' + this.scene_pos,
+        pattern: s.pattern
+      };
+      s_obj = {
+        id: s.id,
+        name: 'Synth #' + s.id,
+        patterns: pp,
+        params: [],
+        gain: 1.0,
+        pan: 0.0
+      };
+      this.song.tracks[id] = s_obj;
+      return s.readPattern(pp[this.scene_pos]);
     };
 
     return Session;
@@ -1656,6 +2856,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.node.connect(dst);
     };
 
+    VCO.prototype.disconnect = function() {
+      return this.node.disconnect();
+    };
+
     return VCO;
 
   })();
@@ -1825,6 +3029,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.filter.connect(dst);
     };
 
+    SynthCore.prototype.disconnect = function() {
+      this.filter.disconnect();
+      return this.node.disconnect();
+    };
+
     SynthCore.prototype.setNote = function(note) {
       var v, _i, _len, _ref, _results;
       _ref = this.vcos;
@@ -1978,6 +3187,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.core.connect(dst);
     };
 
+    Synth.prototype.disconnect = function() {};
+
     Synth.prototype.setDuration = function(duration) {
       this.duration = duration;
     };
@@ -2129,6 +3340,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.view.setPatternName(this.pattern_name);
     };
 
+    Synth.prototype.replaceWith = function(s_new) {
+      return this.view.dom.replaceWith(s_new.view.dom);
+    };
+
     return Synth;
 
   })();
@@ -2147,6 +3362,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth_name.val(this.model.name);
       this.pattern_name = this.dom.find('.pattern-name');
       this.pattern_name.val(this.model.pattern_name);
+      this.synth_type = this.dom.find('.synth-type');
       this.pencil = this.dom.find('.sequencer-pencil');
       this.step = this.dom.find('.sequencer-step');
       this.is_step = false;
@@ -2292,6 +3508,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         };
         _this.is_clicked = false;
         return _this.is_adding = false;
+      });
+      this.synth_type.on('change', function() {
+        return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
         return window.is_input_mode = true;

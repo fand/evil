@@ -1,89 +1,4 @@
 (function() {
-  var OSC_TYPE;
-
-  this.KEY_LIST = {
-    A: 55,
-    Bb: 58.27047018976124,
-    B: 61.7354126570155,
-    C: 32.70319566257483,
-    Db: 34.64782887210901,
-    D: 36.70809598967594,
-    Eb: 38.890872965260115,
-    E: 41.20344461410875,
-    F: 43.653528929125486,
-    Gb: 46.2493028389543,
-    G: 48.999429497718666,
-    Ab: 51.91308719749314
-  };
-
-  this.SCALE_LIST = {
-    IONIAN: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16],
-    DORIAN: [0, 2, 3, 5, 7, 9, 10, 12, 14, 15],
-    PHRYGIAN: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15],
-    LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
-    MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
-    AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
-    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15]
-  };
-
-  OSC_TYPE = {
-    RECT: 1,
-    SINE: 0,
-    SAW: 2,
-    TRIANGLE: 3
-  };
-
-  this.Noise = (function() {
-    function Noise(ctx) {
-      var _this = this;
-      this.ctx = ctx;
-      this.node = this.ctx.createScriptProcessor(STREAM_LENGTH);
-      this.node.onaudioprocess = function(event) {
-        var data_L, data_R, i, _i, _ref, _results;
-        data_L = event.outputBuffer.getChannelData(0);
-        data_R = event.outputBuffer.getChannelData(1);
-        _results = [];
-        for (i = _i = 0, _ref = data_L.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          _results.push(data_L[i] = data_R[i] = Math.random());
-        }
-        return _results;
-      };
-    }
-
-    Noise.prototype.connect = function(dst) {
-      return this.node.connect(dst);
-    };
-
-    Noise.prototype.setOctave = function(_) {
-      return null;
-    };
-
-    Noise.prototype.setFine = function(_) {
-      return null;
-    };
-
-    Noise.prototype.setNote = function() {
-      return null;
-    };
-
-    Noise.prototype.setInterval = function(_) {
-      return null;
-    };
-
-    Noise.prototype.setFreq = function() {
-      return null;
-    };
-
-    Noise.prototype.setKey = function() {
-      return null;
-    };
-
-    Noise.prototype.setShape = function(shape) {};
-
-    return Noise;
-
-  })();
-
   this.VCO = (function() {
     function VCO(ctx) {
       this.ctx = ctx;
@@ -131,10 +46,6 @@
 
     VCO.prototype.connect = function(dst) {
       return this.node.connect(dst);
-    };
-
-    VCO.prototype.disconnect = function() {
-      return this.node.disconnect();
     };
 
     return VCO;
@@ -212,8 +123,8 @@
 
   })();
 
-  this.SynthCore = (function() {
-    function SynthCore(parent, ctx, id) {
+  this.SamplerCore = (function() {
+    function SamplerCore(parent, ctx, id) {
       var i, _i;
       this.parent = parent;
       this.ctx = ctx;
@@ -235,10 +146,10 @@
       this.gain_res.gain.value = 0;
       this.vcos[2].connect(this.gain_res);
       this.gain_res.connect(this.node);
-      this.view = new SynthCoreView(this, id, this.parent.view.dom.find('.synth-core'));
+      this.view = new SamplerCoreView(this, id, this.parent.view.dom.find('.sampler-core'));
     }
 
-    SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
+    SamplerCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
       this.vcos[i].setShape(shape);
       this.vcos[i].setOctave(oct);
       this.vcos[i].setInterval(interval);
@@ -246,15 +157,15 @@
       return this.vcos[i].setFreq();
     };
 
-    SynthCore.prototype.setEGParam = function(a, d, s, r) {
+    SamplerCore.prototype.setEGParam = function(a, d, s, r) {
       return this.eg.setParam(a, d, s, r);
     };
 
-    SynthCore.prototype.setFEGParam = function(a, d, s, r) {
+    SamplerCore.prototype.setFEGParam = function(a, d, s, r) {
       return this.feg.setParam(a, d, s, r);
     };
 
-    SynthCore.prototype.setFilterParam = function(freq, q) {
+    SamplerCore.prototype.setFilterParam = function(freq, q) {
       this.feg.setRange(80, Math.pow(freq / 1000, 2.0) * 25000 + 80);
       this.filter.setQ(q);
       if (q > 1) {
@@ -262,30 +173,30 @@
       }
     };
 
-    SynthCore.prototype.setVCOGain = function(i, gain) {
+    SamplerCore.prototype.setVCOGain = function(i, gain) {
       return this.gains[i].gain.value = (gain / 100.0) * 0.3;
     };
 
-    SynthCore.prototype.setGain = function(gain) {
+    SamplerCore.prototype.setGain = function(gain) {
       this.gain = gain;
       return this.eg.setRange(0.0, this.gain);
     };
 
-    SynthCore.prototype.noteOn = function() {
+    SamplerCore.prototype.noteOn = function() {
       var t0;
       t0 = this.ctx.currentTime;
       this.eg.noteOn(t0);
       return this.feg.noteOn(t0);
     };
 
-    SynthCore.prototype.noteOff = function() {
+    SamplerCore.prototype.noteOff = function() {
       var t0;
       t0 = this.ctx.currentTime;
       this.eg.noteOff(t0);
       return this.feg.noteOff(t0);
     };
 
-    SynthCore.prototype.setKey = function(key) {
+    SamplerCore.prototype.setKey = function(key) {
       var freq_key, v, _i, _len, _ref, _results;
       freq_key = KEY_LIST[key];
       _ref = this.vcos;
@@ -297,21 +208,16 @@
       return _results;
     };
 
-    SynthCore.prototype.setScale = function(scale) {
+    SamplerCore.prototype.setScale = function(scale) {
       this.scale = scale;
     };
 
-    SynthCore.prototype.connect = function(dst) {
+    SamplerCore.prototype.connect = function(dst) {
       this.node.connect(this.filter.lpf);
       return this.filter.connect(dst);
     };
 
-    SynthCore.prototype.disconnect = function() {
-      this.filter.disconnect();
-      return this.node.disconnect();
-    };
-
-    SynthCore.prototype.setNote = function(note) {
+    SamplerCore.prototype.setNote = function(note) {
       var v, _i, _len, _ref, _results;
       _ref = this.vcos;
       _results = [];
@@ -323,128 +229,18 @@
       return _results;
     };
 
-    return SynthCore;
+    return SamplerCore;
 
   })();
 
-  this.SynthCoreView = (function() {
-    function SynthCoreView(model, id, dom) {
-      this.model = model;
-      this.id = id;
-      this.dom = dom;
-      this.vcos = $(this.dom.find('.RS_VCO'));
-      this.EG_inputs = this.dom.find('.RS_EG input');
-      this.FEG_inputs = this.dom.find('.RS_FEG input');
-      this.filter_inputs = this.dom.find(".RS_filter input");
-      this.gain_inputs = this.dom.find('.RS_mixer input');
-      this.canvasEG = this.dom.find(".RS_EG .canvasEG").get()[0];
-      this.canvasFEG = this.dom.find(".RS_FEG .canvasFEG").get()[0];
-      this.contextEG = this.canvasEG.getContext('2d');
-      this.contextFEG = this.canvasFEG.getContext('2d');
-      this.initEvent();
-    }
-
-    SynthCoreView.prototype.initEvent = function() {
-      var _this = this;
-      this.vcos.on("change", function() {
-        return _this.setVCOParam();
-      });
-      this.gain_inputs.on("change", function() {
-        return _this.setGains();
-      });
-      this.filter_inputs.on("change", function() {
-        return _this.setFilterParam();
-      });
-      this.EG_inputs.on("change", function() {
-        return _this.setEGParam();
-      });
-      this.FEG_inputs.on("change", function() {
-        return _this.setFEGParam();
-      });
-      return this.setParam();
-    };
-
-    SynthCoreView.prototype.updateCanvas = function(name) {
-      var adsr, canvas, context, h, w, w4;
-      canvas = null;
-      context = null;
-      adsr = null;
-      if (name === "EG") {
-        canvas = this.canvasEG;
-        context = this.contextEG;
-        adsr = this.model.eg.getParam();
-      } else {
-        canvas = this.canvasFEG;
-        context = this.contextFEG;
-        adsr = this.model.feg.getParam();
-      }
-      w = canvas.width = 180;
-      h = canvas.height = 50;
-      w4 = w / 4;
-      context.clearRect(0, 0, w, h);
-      context.beginPath();
-      context.moveTo(w4 * (1.0 - adsr[0]), h);
-      context.lineTo(w / 4, 0);
-      context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));
-      context.lineTo(w4 * 3, h * (1.0 - adsr[2]));
-      context.lineTo(w4 * (adsr[3] + 3), h);
-      context.strokeStyle = 'rgb(0, 220, 255)';
-      return context.stroke();
-    };
-
-    SynthCoreView.prototype.setParam = function() {
-      this.setVCOParam();
-      this.setEGParam();
-      this.setFEGParam();
-      this.setFilterParam();
-      return this.setGains();
-    };
-
-    SynthCoreView.prototype.setVCOParam = function() {
-      var i, vco, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        vco = this.vcos.eq(i);
-        _results.push(this.model.setVCOParam(i, vco.find('.shape').val(), parseInt(vco.find('.octave').val()), parseInt(vco.find('.interval').val()), parseInt(vco.find('.fine').val())));
-      }
-      return _results;
-    };
-
-    SynthCoreView.prototype.setEGParam = function() {
-      this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
-      return this.updateCanvas("EG");
-    };
-
-    SynthCoreView.prototype.setFEGParam = function() {
-      this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
-      return this.updateCanvas("FEG");
-    };
-
-    SynthCoreView.prototype.setFilterParam = function() {
-      return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
-    };
-
-    SynthCoreView.prototype.setGains = function() {
-      var i, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
-      }
-      return _results;
-    };
-
-    return SynthCoreView;
-
-  })();
-
-  this.Synth = (function() {
-    function Synth(ctx, id, player, name) {
+  this.Sampler = (function() {
+    function Sampler(ctx, id, player, name) {
       this.ctx = ctx;
       this.id = id;
       this.player = player;
       this.name = name;
       if (this.name == null) {
-        this.name = 'Synth #' + this.id;
+        this.name = 'Sampler #' + this.id;
       }
       this.pattern_name = 'pattern 0';
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -454,56 +250,54 @@
       };
       this.time = 0;
       this.scale = [];
-      this.view = new SynthView(this, this.id);
-      this.core = new SynthCore(this, this.ctx, this.id);
+      this.view = new SamplerView(this, this.id);
+      this.core = new SamplerCore(this, this.ctx, this.id);
       this.is_sustaining = false;
       this.session = this.player.session;
     }
 
-    Synth.prototype.connect = function(dst) {
+    Sampler.prototype.connect = function(dst) {
       return this.core.connect(dst);
     };
 
-    Synth.prototype.disconnect = function() {};
-
-    Synth.prototype.setDuration = function(duration) {
+    Sampler.prototype.setDuration = function(duration) {
       this.duration = duration;
     };
 
-    Synth.prototype.setKey = function(key) {
+    Sampler.prototype.setKey = function(key) {
       return this.core.setKey(key);
     };
 
-    Synth.prototype.setScale = function(scale_name) {
+    Sampler.prototype.setScale = function(scale_name) {
       return this.scale = SCALE_LIST[scale_name];
     };
 
-    Synth.prototype.setNote = function(note) {
+    Sampler.prototype.setNote = function(note) {
       return this.core.setNote(note);
     };
 
-    Synth.prototype.setGain = function(gain) {
+    Sampler.prototype.setGain = function(gain) {
       return this.core.setGain(gain);
     };
 
-    Synth.prototype.getGain = function() {
+    Sampler.prototype.getGain = function() {
       return this.core.gain;
     };
 
-    Synth.prototype.noteToSemitone = function(ival) {
+    Sampler.prototype.noteToSemitone = function(ival) {
       return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
     };
 
-    Synth.prototype.noteOn = function(note) {
+    Sampler.prototype.noteOn = function(note) {
       this.core.setNote(this.noteToSemitone(note));
       return this.core.noteOn();
     };
 
-    Synth.prototype.noteOff = function() {
+    Sampler.prototype.noteOff = function() {
       return this.core.noteOff();
     };
 
-    Synth.prototype.playAt = function(time) {
+    Sampler.prototype.playAt = function(time) {
       var mytime, n,
         _this = this;
       this.time = time;
@@ -531,51 +325,51 @@
       }
     };
 
-    Synth.prototype.play = function() {
+    Sampler.prototype.play = function() {
       return this.view.play();
     };
 
-    Synth.prototype.stop = function() {
+    Sampler.prototype.stop = function() {
       this.core.noteOff();
       return this.view.stop();
     };
 
-    Synth.prototype.pause = function(time) {
+    Sampler.prototype.pause = function(time) {
       return this.core.noteOff();
     };
 
-    Synth.prototype.readPattern = function(pattern_obj) {
+    Sampler.prototype.readPattern = function(pattern_obj) {
       this.pattern_obj = pattern_obj;
       this.pattern = this.pattern_obj.pattern;
       this.pattern_name = this.pattern_obj.name;
       return this.view.readPattern(this.pattern_obj);
     };
 
-    Synth.prototype.clearPattern = function() {
+    Sampler.prototype.clearPattern = function() {
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.pattern_obj.pattern = this.pattern;
       return this.view.readPattern(this.pattern_obj);
     };
 
-    Synth.prototype.plusPattern = function() {
+    Sampler.prototype.plusPattern = function() {
       this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
       return this.player.resetSceneLength();
     };
 
-    Synth.prototype.minusPattern = function() {
+    Sampler.prototype.minusPattern = function() {
       this.pattern = this.pattern.slice(0, this.pattern.length - 32);
       return this.player.resetSceneLength();
     };
 
-    Synth.prototype.addNote = function(time, note) {
+    Sampler.prototype.addNote = function(time, note) {
       return this.pattern[time] = note;
     };
 
-    Synth.prototype.removeNote = function(time) {
+    Sampler.prototype.removeNote = function(time) {
       return this.pattern[time] = 0;
     };
 
-    Synth.prototype.sustainNote = function(l, r, note) {
+    Sampler.prototype.sustainNote = function(l, r, note) {
       var i, _i;
       if (l === r) {
         this.pattern[l] = note;
@@ -588,40 +382,36 @@
       return this.pattern[r] = 'end';
     };
 
-    Synth.prototype.activate = function(i) {
+    Sampler.prototype.activate = function(i) {
       return this.view.activate(i);
     };
 
-    Synth.prototype.inactivate = function(i) {
+    Sampler.prototype.inactivate = function(i) {
       return this.view.inactivate(i);
     };
 
-    Synth.prototype.redraw = function(time) {
+    Sampler.prototype.redraw = function(time) {
       this.time = time;
       return this.view.drawPattern(this.time);
     };
 
-    Synth.prototype.setId = function(id) {
+    Sampler.prototype.setId = function(id) {
       this.id = id;
     };
 
-    Synth.prototype.setSynthName = function(name) {
+    Sampler.prototype.setSynthName = function(name) {
       this.name = name;
       this.session.setSynthName(this.id, this.name);
       return this.view.setSynthName(this.name);
     };
 
-    Synth.prototype.setPatternName = function(pattern_name) {
+    Sampler.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       this.session.setPatternName(this.id, this.pattern_name);
       return this.view.setPatternName(this.pattern_name);
     };
 
-    Synth.prototype.replaceWith = function(s_new) {
-      return this.view.dom.replaceWith(s_new.view.dom);
-    };
-
-    return Synth;
+    return Sampler;
 
   })();
 

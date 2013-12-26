@@ -1,54 +1,3 @@
-@KEY_LIST =
-    A:  55
-    Bb: 58.27047018976124
-    B:  61.7354126570155
-    C:  32.70319566257483
-    Db: 34.64782887210901
-    D:  36.70809598967594
-    Eb: 38.890872965260115
-    E:  41.20344461410875
-    F:  43.653528929125486
-    Gb: 46.2493028389543
-    G:  48.999429497718666
-    Ab: 51.91308719749314
-
-@SCALE_LIST =
-    IONIAN:     [0,2,4,5,7,9,11,12,14,16]
-    DORIAN:     [0,2,3,5,7,9,10,12,14,15]
-    PHRYGIAN:   [0,1,3,5,7,8,10,12,13,15]
-    LYDIAN:     [0,2,4,6,7,9,11,12,14,16]
-    MIXOLYDIAN: [0,2,4,5,7,9,10,12,14,16]
-    AEOLIAN:    [0,2,3,5,7,8,10,12,14,15]
-    LOCRIAN:    [0,1,3,5,6,8,10,12,13,15]
-
-OSC_TYPE =
-    RECT:     1
-    SINE:     0
-    SAW:      2
-    TRIANGLE: 3
-
-
-
-class @Noise
-    constructor: (@ctx) ->
-        @node = @ctx.createScriptProcessor(STREAM_LENGTH)
-        @node.onaudioprocess = (event) =>
-            data_L = event.outputBuffer.getChannelData(0);
-            data_R = event.outputBuffer.getChannelData(1);
-            for i in [0...data_L.length]
-                data_L[i] = data_R[i] = Math.random()
-
-    connect: (dst) -> @node.connect(dst)
-    setOctave: (_) -> null
-    setFine: (_) -> null
-    setNote: -> null
-    setInterval: (_) -> null
-    setFreq: -> null
-    setKey:  -> null
-    setShape: (shape) ->
-
-
-
 class @VCO
     constructor: (@ctx) ->
         @freq_key = 55
@@ -76,7 +25,7 @@ class @VCO
         @node.frequency.setValueAtTime(@freq, 0)
 
     connect: (dst) -> @node.connect(dst)
-    disconnect:    -> @node.disconnect()
+
 
 
 class @EG
@@ -120,7 +69,7 @@ class @ResFilter
 
 
 
-class @SynthCore
+class @SamplerCore
     constructor: (@parent, @ctx, @id) ->
         @node = @ctx.createGain()
         @node.gain.value = 0
@@ -144,7 +93,7 @@ class @SynthCore
         @vcos[2].connect(@gain_res)
         @gain_res.connect(@node)
 
-        @view = new SynthCoreView(this, id, @parent.view.dom.find('.synth-core'))
+        @view = new SamplerCoreView(this, id, @parent.view.dom.find('.sampler-core'))
 
     setVCOParam: (i, shape, oct, interval, fine) ->
         @vcos[i].setShape(shape)
@@ -188,10 +137,6 @@ class @SynthCore
         @node.connect(@filter.lpf)
         @filter.connect(dst)
 
-    disconnect: () ->
-        @filter.disconnect()
-        @node.disconnect()
-
     setNote: (note) ->
         for v in @vcos
             v.setNote(note)
@@ -199,121 +144,21 @@ class @SynthCore
 
 
 
-class @SynthCoreView
-    constructor: (@model, @id, @dom) ->
-
-        @vcos = $(@dom.find('.RS_VCO'))
-
-        @EG_inputs     = @dom.find('.RS_EG input')
-        @FEG_inputs    = @dom.find('.RS_FEG input')
-        @filter_inputs = @dom.find(".RS_filter input")
-        @gain_inputs   = @dom.find('.RS_mixer input')
-
-        @canvasEG   = @dom.find(".RS_EG .canvasEG").get()[0]
-        @canvasFEG  = @dom.find(".RS_FEG .canvasFEG").get()[0]
-        @contextEG  = @canvasEG.getContext('2d')
-        @contextFEG = @canvasFEG.getContext('2d')
-
-        @initEvent()
-
-    initEvent: ->
-        @vcos.on("change",          () => @setVCOParam())
-        @gain_inputs.on("change",   () => @setGains())
-        @filter_inputs.on("change", () => @setFilterParam())
-        @EG_inputs.on("change",     () => @setEGParam())
-        @FEG_inputs.on("change",    () => @setFEGParam())
-        @setParam()
-
-    updateCanvas: (name) ->
-        canvas  = null
-        context = null
-        adsr    = null
-        if name == "EG"
-            canvas  = @canvasEG
-            context = @contextEG
-            adsr    = @model.eg.getParam()
-        else
-            canvas  = @canvasFEG
-            context = @contextFEG
-            adsr    = @model.feg.getParam()
-
-        w = canvas.width = 180
-        h = canvas.height = 50
-        w4 = w/4
-        context.clearRect(0,0,w,h)
-        context.beginPath();
-        context.moveTo(w4 * (1.0 - adsr[0]), h)
-        context.lineTo(w / 4,0)                                  # attack
-        context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]))  # decay
-        context.lineTo(w4 * 3, h * (1.0 - adsr[2]))              # sustain
-        context.lineTo(w4 * (adsr[3] + 3), h)                    # release
-        context.strokeStyle = 'rgb(0, 220, 255)'
-        context.stroke()
-
-    setParam: ->
-        @setVCOParam()
-        @setEGParam()
-        @setFEGParam()
-        @setFilterParam()
-        @setGains()
-
-    setVCOParam: ->
-        for i in [0...@vcos.length]
-            vco = @vcos.eq(i)
-            @model.setVCOParam(
-                i,
-                vco.find('.shape').val(),
-                parseInt(vco.find('.octave').val()),
-                parseInt(vco.find('.interval').val()),
-                parseInt(vco.find('.fine').val())
-            )
-
-    setEGParam: ->
-        @model.setEGParam(
-            parseFloat(@EG_inputs.eq(0).val()),
-            parseFloat(@EG_inputs.eq(1).val()),
-            parseFloat(@EG_inputs.eq(2).val()),
-            parseFloat(@EG_inputs.eq(3).val())
-        )
-        @updateCanvas("EG");
-
-    setFEGParam: ->
-        @model.setFEGParam(
-            parseFloat(@FEG_inputs.eq(0).val()),
-            parseFloat(@FEG_inputs.eq(1).val()),
-            parseFloat(@FEG_inputs.eq(2).val()),
-            parseFloat(@FEG_inputs.eq(3).val())
-        );
-        @updateCanvas("FEG");
-
-    setFilterParam: ->
-        @model.setFilterParam(
-            parseFloat(@filter_inputs.eq(0).val()),
-            parseFloat(@filter_inputs.eq(1).val())
-        )
-
-    setGains: ->
-        for i in [0... @gain_inputs.length]
-            @model.setVCOGain(i, parseInt(@gain_inputs.eq(i).val()))
-
-
-
-class @Synth
+class @Sampler
     constructor: (@ctx, @id, @player, @name) ->
-        @name = 'Synth #' + @id if not @name?
+        @name = 'Sampler #' + @id if not @name?
         @pattern_name = 'pattern 0'
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @pattern_obj = name: @pattern_name, pattern: @pattern
         @time = 0
         @scale = []
-        @view = new SynthView(this, @id)
-        @core = new SynthCore(this, @ctx, @id)
+        @view = new SamplerView(this, @id)
+        @core = new SamplerCore(this, @ctx, @id)
 
         @is_sustaining = false
         @session = @player.session
 
     connect: (dst) -> @core.connect(dst)
-    disconnect: () -> #@core.disconnect()
 
     setDuration: (@duration) ->
     setKey:  (key) -> @core.setKey(key)
@@ -413,6 +258,3 @@ class @Synth
     setPatternName: (@pattern_name) ->
         @session.setPatternName(@id, @pattern_name)
         @view.setPatternName(@pattern_name)
-
-    replaceWith: (s_new) ->
-        @view.dom.replaceWith(s_new.view.dom)

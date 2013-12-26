@@ -171,6 +171,31 @@
       return this.session.addSynth(s, scene_pos);
     };
 
+    Player.prototype.addSampler = function(scene_pos, name) {
+      var s;
+      s = new Sampler(this.context, this.num_id++, this, name);
+      this.synth.push(s);
+      this.mixer.addSynth(s);
+      return this.session.addSynth(s, scene_pos);
+    };
+
+    Player.prototype.changeSynth = function(id, type) {
+      var name, s_new, s_old;
+      s_old = this.synth[id];
+      name = s_old.name;
+      if (type === 'REZ') {
+        s_new = new Synth(this.context, id, this, name);
+        s_new.setScale(this.scene.scale);
+        s_new.setKey(this.scene.key);
+        this.session.addSynth(s, scene_pos);
+      } else if (type === 'SAMPLER') {
+        s_new = new Sampler(this.context, id, this, name);
+      }
+      this.synth[id] = s_new;
+      s_old.replaceWith(s_new);
+      return s_new;
+    };
+
     Player.prototype.moveRight = function(next_idx) {
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
