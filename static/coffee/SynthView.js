@@ -216,17 +216,20 @@
     };
 
     SynthView.prototype.addNote = function(pos) {
-      var i;
+      var i, y;
       if (this.pattern[pos.x_abs] === 'end' || this.pattern[pos.x_abs] === 'sustain') {
-        if (pos.x > 0) {
-          this.ctx_on.clearRect((pos.x - 1) * 26, 0, 26, 1000);
-          if (this.pattern[pos.x_abs - 1] < 0) {
-            this.pattern[pos.x_abs - 1] = -this.pattern[pos.x_abs - 1];
-            this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, (pos.x - 1) * 26, (this.cells_y - this.pattern[pos.x_abs - 1]) * 26, 26, 26);
-          } else {
-            this.pattern[pos.x_abs - 1] = 'end';
-            this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, (pos.x - 1) * 26, (this.cells_y - this.pattern[pos.x_abs - 1]) * 26, 26, 26);
-          }
+        i = pos.x_abs - 1;
+        while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
+          i--;
+        }
+        this.ctx_on.clearRect(((pos.x_abs - 1) % this.cells_x) * 26, 0, 26, 1000);
+        y = this.cells_y + this.pattern[i];
+        if (this.pattern[pos.x_abs - 1] < 0) {
+          this.pattern[pos.x_abs - 1] = -this.pattern[pos.x_abs - 1];
+          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
+        } else {
+          this.pattern[pos.x_abs - 1] = 'end';
+          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
         }
       }
       i = pos.x_abs + 1;
@@ -279,7 +282,7 @@
         y = this.cells_y + this.pattern[r];
         if (this.pattern[r + 1] === 'end') {
           this.pattern[r + 1] = -this.pattern[r];
-          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
+          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
         } else {
           this.pattern[r + 1] = this.pattern[r];
           this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);

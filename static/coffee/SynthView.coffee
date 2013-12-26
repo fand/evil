@@ -142,8 +142,6 @@ class @SynthView
         ).on('mouseup', (e) =>
             @is_clicked = false
             if not @is_step
-                # if @sustain_l == @sustain_r
-                #     @removeNotes(@sustain_l)
                 pos = @getPos(e)
                 @is_sustaining = false
             else
@@ -201,20 +199,23 @@ class @SynthView
 
     addNote: (pos) ->
         if @pattern[pos.x_abs] == 'end' or @pattern[pos.x_abs] == 'sustain'
-            if pos.x > 0
-                @ctx_on.clearRect((pos.x - 1) * 26, 0, 26, 1000)
-                if @pattern[pos.x_abs - 1] < 0
-                    @pattern[pos.x_abs - 1] = -(@pattern[pos.x_abs - 1])
-                    @ctx_on.drawImage(@cell,
-                        26, 0, 26, 26,
-                        (pos.x - 1) * 26, (@cells_y - @pattern[pos.x_abs - 1]) * 26, 26, 26
-                    )
-                else
-                    @pattern[pos.x_abs - 1] = 'end'
-                    @ctx_on.drawImage(@cell,
-                        156, 0, 26, 26,
-                        (pos.x - 1) * 26, (@cells_y - @pattern[pos.x_abs - 1]) * 26, 26, 26
-                    )
+            i = pos.x_abs - 1
+            while @pattern[i] == 'sustain' or @pattern[i] == 'end'
+                i--
+            @ctx_on.clearRect(((pos.x_abs-1) % @cells_x) * 26, 0, 26, 1000)
+            y = @cells_y + @pattern[i]
+            if @pattern[pos.x_abs-1] < 0
+                @pattern[pos.x_abs-1] = -(@pattern[pos.x_abs-1])
+                @ctx_on.drawImage(@cell,
+                    0, 0, 26, 26,
+                    ((pos.x_abs-1) % @cells_x) * 26, y * 26, 26, 26
+                )
+            else
+                @pattern[pos.x_abs-1] = 'end'
+                @ctx_on.drawImage(@cell,
+                    156, 0, 26, 26,
+                    ((pos.x_abs-1) % @cells_x) * 26, y * 26, 26, 26
+                )
 
         i = pos.x_abs + 1
         while @pattern[i] == 'end' or @pattern[i] == 'sustain'
@@ -276,7 +277,7 @@ class @SynthView
             if @pattern[r+1] == 'end'
                 @pattern[r+1] = -(@pattern[r])
                 @ctx_on.drawImage(@cell,
-                    0, 0, 26, 26,
+                    26, 0, 26, 26,
                     ((r+1) % @cells_x) * 26, y * 26, 26, 26
                 )
             else
