@@ -14,10 +14,10 @@
 
 
 class @BufferNode
-    constructor: (@ctx, num) ->
+    constructor: (@ctx, @id, @parent) ->
         @node = @ctx.createGain()
-        @node.gain.value = 0.0
-        sample = window.SAMPLES[num]
+        @node.gain.value = 1.0
+        sample = window.SAMPLES[@id]
         @setSample(sample)
 
         @head = 0.0
@@ -34,7 +34,10 @@ class @BufferNode
             req.onload = () =>
                 @ctx.decodeAudioData(
                     req.response,
-                    (@buffer) => @buffer_duration = (@buffer.length / window.SAMPLE_RATE),
+                    ((@buffer) =>
+                        @buffer_duration = (@buffer.length / window.SAMPLE_RATE)
+                        @parent.sampleLoaded(@id)
+                    ),
                     (err) => console.log('ajax error'); console.log(err)
                 )
                 sample.data = @buffer
@@ -46,15 +49,17 @@ class @BufferNode
         return if not @buffer?
         source = @ctx.createBufferSource()
         source.buffer = @buffer
-        source.connect(@node)
+        node = @ctx.createGain()
+        source.connect(node)
+        node.connect(@node)
 
         head_time = time + @buffer_duration * @head
         tail_time = time + @buffer_duration * @tail
         source.start(0)
-        @node.gain.setValueAtTime(0, time)
-        @node.gain.linearRampToValueAtTime(gain, head_time + 0.001)
-        @node.gain.setValueAtTime(gain, tail_time)
-        @node.gain.linearRampToValueAtTime(0, tail_time + 0.001)
+        node.gain.setValueAtTime(0, time)
+        node.gain.linearRampToValueAtTime(gain, head_time + 0.001)
+        node.gain.setValueAtTime(gain, tail_time)
+        node.gain.linearRampToValueAtTime(0, tail_time + 0.001)
 
     setParam: (@head, @tail, @speed) ->
     getParam: -> [@head, @tail, @speed]
@@ -80,7 +85,7 @@ class @SamplerCore
         @node.gain.value = 1.0
         @gain = 1.0
 
-        @nodes = (new BufferNode(@ctx, i) for i in [0...10])
+        @nodes = (new BufferNode(@ctx, i, this) for i in [0...10])
         @gains = (@ctx.createGain() for i in [0...10])
 
         for i in [0...10]
@@ -126,6 +131,9 @@ class @SamplerCore
 
     getSampleData: (i) ->
         @nodes[i].getData()
+
+    sampleLoaded: (id) ->
+        @view.updateCanvas(id)
 
 
 class @Sampler

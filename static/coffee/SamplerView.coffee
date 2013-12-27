@@ -12,34 +12,36 @@ class @SamplerCoreView
     initEvent: ->
         @sample.on("change", () =>
             @setSampleParam()
-            @updateCanvas()
+            @updateCanvas(@sample_num)
         )
         @setParam()
 
-    updateCanvas: () ->
+    updateCanvas: (@sample_num) ->
         canvas  = @canvas_waveform
         ctx = @ctx_waveform
 
-        hts = @model.getSampleParam(@sample_num)
-        wave = @model.getSampleData(@sample_num).getChannelData(0)
-
         w = canvas.width = 300
         h = canvas.height = 180
-
         ctx.clearRect(0, 0, w, h)
 
-        # Draw waveform
-        ctx.translate(0, 90)
-        ctx.beginPath()
+        hts = @model.getSampleParam(@sample_num)
+        _data = @model.getSampleData(@sample_num)
 
-        d = wave.length / w
-        for x in [0...w]
-            ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45)
+        if _data?
+            wave = _data.getChannelData(0)
 
-        ctx.closePath()
-        ctx.strokeStyle = 'rgb(255, 0, 220)'
-        ctx.stroke()
-        ctx.translate(0, -90)
+            # Draw waveform
+            ctx.translate(0, 90)
+            ctx.beginPath()
+
+            d = wave.length / w
+            for x in [0...w]
+                ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45)
+
+            ctx.closePath()
+            ctx.strokeStyle = 'rgb(255, 0, 220)'
+            ctx.stroke()
+            ctx.translate(0, -90)
 
         # Draw params
         left  = hts[0] * w

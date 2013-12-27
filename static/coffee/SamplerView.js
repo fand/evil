@@ -16,30 +16,34 @@
       var _this = this;
       this.sample.on("change", function() {
         _this.setSampleParam();
-        return _this.updateCanvas();
+        return _this.updateCanvas(_this.sample_num);
       });
       return this.setParam();
     };
 
-    SamplerCoreView.prototype.updateCanvas = function() {
-      var canvas, ctx, d, h, hts, left, right, w, wave, x, _i;
+    SamplerCoreView.prototype.updateCanvas = function(sample_num) {
+      var canvas, ctx, d, h, hts, left, right, w, wave, x, _data, _i;
+      this.sample_num = sample_num;
       canvas = this.canvas_waveform;
       ctx = this.ctx_waveform;
-      hts = this.model.getSampleParam(this.sample_num);
-      wave = this.model.getSampleData(this.sample_num).getChannelData(0);
       w = canvas.width = 300;
       h = canvas.height = 180;
       ctx.clearRect(0, 0, w, h);
-      ctx.translate(0, 90);
-      ctx.beginPath();
-      d = wave.length / w;
-      for (x = _i = 0; 0 <= w ? _i < w : _i > w; x = 0 <= w ? ++_i : --_i) {
-        ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45);
+      hts = this.model.getSampleParam(this.sample_num);
+      _data = this.model.getSampleData(this.sample_num);
+      if (_data != null) {
+        wave = _data.getChannelData(0);
+        ctx.translate(0, 90);
+        ctx.beginPath();
+        d = wave.length / w;
+        for (x = _i = 0; 0 <= w ? _i < w : _i > w; x = 0 <= w ? ++_i : --_i) {
+          ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = 'rgb(255, 0, 220)';
+        ctx.stroke();
+        ctx.translate(0, -90);
       }
-      ctx.closePath();
-      ctx.strokeStyle = 'rgb(255, 0, 220)';
-      ctx.stroke();
-      ctx.translate(0, -90);
       left = hts[0] * w;
       right = hts[1] * w;
       if (left < right) {

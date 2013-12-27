@@ -34,12 +34,14 @@
   ];
 
   this.BufferNode = (function() {
-    function BufferNode(ctx, num) {
+    function BufferNode(ctx, id, parent) {
       var sample;
       this.ctx = ctx;
+      this.id = id;
+      this.parent = parent;
       this.node = this.ctx.createGain();
-      this.node.gain.value = 0.0;
-      sample = window.SAMPLES[num];
+      this.node.gain.value = 1.0;
+      sample = window.SAMPLES[this.id];
       this.setSample(sample);
       this.head = 0.0;
       this.tail = 1.0;
@@ -56,10 +58,11 @@
         req.open('GET', sample.url, true);
         req.responseType = "arraybuffer";
         req.onload = function() {
-          _this.ctx.decodeAudioData(req.response, function(buffer) {
+          _this.ctx.decodeAudioData(req.response, (function(buffer) {
             _this.buffer = buffer;
-            return _this.buffer_duration = _this.buffer.length / window.SAMPLE_RATE;
-          }, function(err) {
+            _this.buffer_duration = _this.buffer.length / window.SAMPLE_RATE;
+            return _this.parent.sampleLoaded(_this.id);
+          }), function(err) {
             console.log('ajax error');
             return console.log(err);
           });
@@ -75,20 +78,22 @@
     };
 
     BufferNode.prototype.noteOn = function(gain, time) {
-      var head_time, source, tail_time;
+      var head_time, node, source, tail_time;
       if (this.buffer == null) {
         return;
       }
       source = this.ctx.createBufferSource();
       source.buffer = this.buffer;
-      source.connect(this.node);
+      node = this.ctx.createGain();
+      source.connect(node);
+      node.connect(this.node);
       head_time = time + this.buffer_duration * this.head;
       tail_time = time + this.buffer_duration * this.tail;
       source.start(0);
-      this.node.gain.setValueAtTime(0, time);
-      this.node.gain.linearRampToValueAtTime(gain, head_time + 0.001);
-      this.node.gain.setValueAtTime(gain, tail_time);
-      return this.node.gain.linearRampToValueAtTime(0, tail_time + 0.001);
+      node.gain.setValueAtTime(0, time);
+      node.gain.linearRampToValueAtTime(gain, head_time + 0.001);
+      node.gain.setValueAtTime(gain, tail_time);
+      return node.gain.linearRampToValueAtTime(0, tail_time + 0.001);
     };
 
     BufferNode.prototype.setParam = function(head, tail, speed) {
@@ -146,7 +151,7 @@
         var _i, _results;
         _results = [];
         for (i = _i = 0; _i < 10; i = ++_i) {
-          _results.push(new BufferNode(this.ctx, i));
+          _results.push(new BufferNode(this.ctx, i, this));
         }
         return _results;
       }).call(this);
@@ -225,6 +230,10 @@
 
     SamplerCore.prototype.getSampleData = function(i) {
       return this.nodes[i].getData();
+    };
+
+    SamplerCore.prototype.sampleLoaded = function(id) {
+      return this.view.updateCanvas(id);
     };
 
     return SamplerCore;
