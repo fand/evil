@@ -1371,51 +1371,116 @@ legend {
     position: absolute;
     top: 0px;
     left: 0px;
-    width: 130px;
-    height: 140px;
+    width: 470px;
+    height: 270px;
 }
-.Sampler_sample > div {
-    margin: 0px 15px;
+.Sampler_sample > .wave {
+    width: 400px;
+    height: 130px;
+    margin: 0px 15px 25px 15px;
 }
-.Sampler_sample label {
+.Sampler_sample .file-select {
     float: left;
-    width: 35px;
-    padding-right: 5px;
-    font-size: 12px;
-    text-align: right;
-}
-.Sampler_sample select {
-    float: right;
-    width: 55px;
-    font-size: 10px;
+    width: 90px;
+    height: 100px;
+    margin: 0px;
     text-align: left;
-    margin-top: 4px;
 }
-.Sampler_sample input {
+.Sampler_sample .file-select > label {
+    left: 0px;
+    width: 80px;
+    font-size: 12px;
+    text-align: left;
+}
+.Sampler_sample .file-select > select {
+    left: 0px;
+    width: 80px;
+    margin-right: 10px;
+    font-size: 12px;
+    text-align: left;
+}
+.Sampler_sample .waveform {
+    float: left;
+    width: 300px;
+    height: 120px;
+    border-left: 1px solid #f0d;
+    border-bottom: 1px solid #f0d;
+    margin: 4px 0px 4px 9px;
+}
+
+.Sampler_sample > .param {
+    width: 400px;
+    margin: 15px;
+}
+.Sampler_sample > .param label {
+    float: left;
+    width: 80px;
+    /* padding-right: 5px; */
+    font-size: 12px;
+    text-align: center;
+}
+.Sampler_sample > .param input {
     float: right;
-    width: 50px;
+    width: 290px;
     font-size: 10px;
     text-align: center;
     margin-top: 4px;
 }
-.Sampler_output {
+
+.Sampler_EQ {
     position: absolute;
     top: 0px;
-    right: 0px;
-    width: 90px;
+    left: 480px;
+    width: 300px;
     height: 270px;
     border: 1px solid #f0d;
     text-align: center;
     color: #f0d;
 }
-
-.sampler-waveform {
-    top: 0px;
-    left: 150px;
-    width: 300px;
-    height: 180px;
+.Sampler_EQ > .canvasEQ {
+    float: left;
+    width: 270px;
+    height: 100px;
+    margin: 10px;
+}
+.Sampler_EQ > .EQ-sliders {
+    top: 120px;
+    width: 270px;
+    height: 150px;
+    margin: 0px 15px;
+}
+.Sampler_EQ .EQ-slider {
+    float: left;
+    width: 90px;
+    height: 100px;
+    text-align: center;
+}
+.Sampler_EQ .EQ-slider > label {
+    width: 90px;
+    height: 20px;
+    text-align: center;
+    margin: 0px;
+    margin-left: -5px;
+}
+.Sampler_EQ .EQ-slider > .gain-slider {
+    width: 80px;
+    height: 80px;
+    margin: 0px;
 }
 
+.Sampler_output {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 100px;
+    height: 270px;
+    border: 1px solid #f0d;
+    text-align: center;
+    color: #f0d;
+}
+.Sampler_output > .gain-slider {
+    height: 180px;
+}
 
 
 

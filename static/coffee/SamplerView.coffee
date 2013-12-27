@@ -1,7 +1,7 @@
 class @SamplerCoreView
     constructor: (@model, @id, @dom) ->
         @sample = @dom.find('.Sampler_sample')
-        @canvas_waveform_dom = @dom.find('.sampler-waveform')
+        @canvas_waveform_dom = @dom.find('.waveform')
         @canvas_waveform = @canvas_waveform_dom[0]
         @ctx_waveform = @canvas_waveform.getContext('2d')
 

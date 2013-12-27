@@ -1175,7 +1175,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.id = id;
       this.dom = dom;
       this.sample = this.dom.find('.Sampler_sample');
-      this.canvas_waveform_dom = this.dom.find('.sampler-waveform');
+      this.canvas_waveform_dom = this.dom.find('.waveform');
       this.canvas_waveform = this.canvas_waveform_dom[0];
       this.ctx_waveform = this.canvas_waveform.getContext('2d');
       this.sample_num = 0;

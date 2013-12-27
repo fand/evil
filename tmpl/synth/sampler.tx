@@ -48,25 +48,36 @@
   <div class="sampler-core">
 
     <fieldset class="Sampler_module Sampler_sample">
-      <legend>OSC1</legend>
+      <legend>Sample</legend>
 
-      <div class="clearfix">
-        <label>SAMPLE</label>
-        <select class="sample">
-          <option selected="selected">Kick</option>
-          <option>Snare</option>
-          <option>Hat open</option>
-          <option>Hat closed</option>
-        </select>
+      <div class="clearfix wave">
+        <div class="file-select">
+          <label>SAMPLE</label>
+          <select class="sample">
+            <option selected="selected">Kick</option>
+            <option>Snare</option>
+            <option>Hat open</option>
+            <option>Hat closed</option>
+          </select>
+        </div>
+
+        <canvas class="waveform"></canvas>
       </div>
 
-      <div class="clearfix"><label>HEAD</label>  <input class="head" type="range" min="0" max="100" value="0"></div>
-      <div class="clearfix"><label>TAIL</label>  <input class="tail" type="range" min="0" max="100" value="100"></div>
-      <div class="clearfix"><label>SPEED</label> <input class="speed" type="range" min="0" max="100"   value="50"></div>
+      <div class="clearfix param"><label>BEGIN</label>  <input class="head" type="range" min="0" max="100" value="0"></div>
+      <div class="clearfix param"><label>END</label>  <input class="tail" type="range" min="0" max="100" value="100"></div>
+      <!-- <div class="clearfix"><label>SPEED</label> <input class="speed" type="range" min="0" max="100"   value="50"></div> -->
     </fieldset>
 
-
-    <canvas class="sampler-waveform"></canvas>
+    <fieldset class="Sampler_module Sampler_EQ">
+      <legend>EQ</legend>
+      <canvas class="canvasEQ"></canvas>
+      <div class="clearfix EQ-sliders">
+        <div class="EQ-slider"><label>LO</label><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>
+        <div class="EQ-slider"><label>MID</label><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>
+        <div class="EQ-slider"><label>HI</label><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>
+      </div>
+    </fieldset>
 
     <fieldset class="Sampler_module Sampler_output">
       <legend>output</legend>
