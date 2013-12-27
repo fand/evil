@@ -1352,7 +1352,6 @@ legend {
 }
 
 .Sampler_module {
-    color: #f0d;
     background-color: #fff;
     margin: 0px 10px;
     padding: 0px;
@@ -1361,7 +1360,7 @@ legend {
     vertical-align: top;
     line-height: 26px;
 
-    border: 1px solid #f0d;
+    border: 1px solid #f3e;
     border-radius: 3px;
 }
 legend {
@@ -1403,8 +1402,8 @@ legend {
     float: left;
     width: 300px;
     height: 120px;
-    border-left: 1px solid #f0d;
-    border-bottom: 1px solid #f0d;
+    border-left: 1px solid #f3e;
+    border-bottom: 1px solid #f3e;
     margin: 4px 0px 4px 9px;
 }
 
@@ -1415,7 +1414,6 @@ legend {
 .Sampler_sample > .param label {
     float: left;
     width: 80px;
-    /* padding-right: 5px; */
     font-size: 12px;
     text-align: center;
 }
@@ -1433,15 +1431,15 @@ legend {
     left: 480px;
     width: 300px;
     height: 270px;
-    border: 1px solid #f0d;
+    border: 1px solid #f3e;
     text-align: center;
-    color: #f0d;
+    color: #f3e;
 }
 .Sampler_EQ > .canvasEQ {
     float: left;
     width: 270px;
     height: 100px;
-    border: 1px solid #f0d;
+    border: 1px solid #f3e;
     border-top: none;
     margin: 9px 14px;
 }
@@ -1476,13 +1474,70 @@ legend {
     right: 0px;
     width: 100px;
     height: 270px;
-    border: 1px solid #f0d;
+    border: 1px solid #f3e;
     text-align: center;
-    color: #f0d;
 }
 .Sampler_output > .gain-slider {
     height: 180px;
 }
+
+
+.instrument.sampler {
+    border: 1px solid #f3e;
+}
+.sampler .header {
+    border-bottom: 1px solid #f3e;
+}
+.sampler * {
+    color: #f3e;
+    text-shadow: 0 0 1px #ecd;
+}
+.sampler .markers *{
+    color: #f8d;
+}
+.sampler .markers .marker {
+    color: #fafafa;
+}
+.sampler .markers .marker-active {
+    color: #f8d;
+}
+.sampler .marker-active:hover {
+    text-shadow: 0px 0px 4px #808;
+}
+.sampler .markers .marker-now {
+    color: #fff;
+    text-shadow: 0px 0px 5px #f3e;
+}
+.sampler .marker-now:hover {
+    cursor: default;
+    text-shadow: 0px 0px 10px #f3e;
+}
+.sampler .marker-prev:hover, .sampler .marker-next:hover {
+    text-shadow: 0px 0px 5px #f3e;
+}
+
+.sampler .names * {
+    color: #f3e;
+    text-shadow: 0 0 1px #ecd;
+}
+.sampler .names *:hover {
+    text-shadow: 0px 0px 10px #f9e;
+}
+.sampler .btn-true {
+    color: #f8d;
+}
+.sampler .btn-true:hover {
+    color: #fff;
+    text-shadow: 0px 0px 5px #f3e;
+}
+.sampler .btn-false {
+    color: #eee;
+}
+.sampler .btn-false:hover {
+    color: #fff;
+    text-shadow: 0px 0px 5px #f3e;
+}
+
 
 
 
