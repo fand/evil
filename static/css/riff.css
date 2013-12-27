@@ -1441,7 +1441,9 @@ legend {
     float: left;
     width: 270px;
     height: 100px;
-    margin: 10px;
+    border: 1px solid #f0d;
+    border-top: none;
+    margin: 9px 14px;
 }
 .Sampler_EQ > .EQ-sliders {
     top: 120px;

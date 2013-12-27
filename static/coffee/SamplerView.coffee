@@ -4,6 +4,10 @@ class @SamplerCoreView
         @canvas_waveform_dom = @dom.find('.waveform')
         @canvas_waveform = @canvas_waveform_dom[0]
         @ctx_waveform = @canvas_waveform.getContext('2d')
+        @canvas_EQ_dom = @dom.find('.canvasEQ')
+        @canvas_EQ = @canvas_EQ_dom[0]
+        @ctx_EQ = @canvas_EQ.getContext('2d')
+        @eq = @dom.find('.Sampler_EQ')
 
         @sample_num = 0
 
@@ -12,11 +16,15 @@ class @SamplerCoreView
     initEvent: ->
         @sample.on("change", () =>
             @setSampleParam()
-            @updateCanvas(@sample_num)
+            @updateWaveformCanvas(@sample_num)
+        )
+        @eq.on('change', () =>
+            @setSampleEQParam()
+            @updateEQCanvas()
         )
         @setParam()
 
-    updateCanvas: (@sample_num) ->
+    updateWaveformCanvas: (@sample_num) ->
         canvas  = @canvas_waveform
         ctx = @ctx_waveform
 
@@ -51,19 +59,51 @@ class @SamplerCoreView
             ctx.fillRect(left, 0, right-left, h)
 
 
+    updateEQCanvas: () ->
+        canvas  = @canvas_EQ
+        ctx = @ctx_EQ
+
+        w = canvas.width = 270
+        h = canvas.height = 100
+
+        # range is [-100, 100]
+        eq = @model.getSampleEQParam(@sample_num)
+
+        # Draw waveform
+        ctx.clearRect(0, 0, w, h)
+        ctx.translate(0, h / 2)
+        ctx.beginPath()
+        ctx.moveTo(0,       -(eq[0]/100.0) * (h / 2))
+        ctx.lineTo(w/3,     -(eq[1]/100.0) * (h / 2))
+        ctx.lineTo(w/3 * 2, -(eq[1]/100.0) * (h / 2))
+        ctx.lineTo(w,       -(eq[2]/100.0) * (h / 2))
+        ctx.strokeStyle = 'rgb(255, 0, 220)'
+        ctx.stroke()
+        ctx.closePath()
+        ctx.translate(0, -h / 2)
+
+
     setParam: ->
         # @setNodesParam()
         # @setGains()
 
     setSampleParam: ->
         i = @sample_num
-        for i in [0...10]
-            @model.setSampleParam(
-                i,
-                parseFloat(@sample.find('.head').val())  / 100.0,
-                parseFloat(@sample.find('.tail').val())  / 100.0,
-                parseFloat(@sample.find('.speed').val()) / 100.0
-            )
+        @model.setSampleParam(
+            i,
+            parseFloat(@sample.find('.head').val())  / 100.0,
+            parseFloat(@sample.find('.tail').val())  / 100.0,
+            parseFloat(@sample.find('.speed').val()) / 100.0
+        )
+
+    setSampleEQParam: ->
+        i = @sample_num
+        @model.setSampleEQParam(
+            i,
+            parseFloat(@eq.find('.EQ_lo').val())  - 100.0,
+            parseFloat(@eq.find('.EQ_mid').val()) - 100.0,
+            parseFloat(@eq.find('.EQ_hi').val())  - 100.0
+        )
 
     setGains: ->
         for i in [0... @gain_inputs.length]

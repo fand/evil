@@ -24,6 +24,22 @@ class @BufferNode
         @tail = 1.0
         @speed = 1.0
 
+        @eq_gains = [0.0, 0.0, 0.0]
+
+        [eq1, eq2, eq3] = [@ctx.createBiquadFilter(), @ctx.createBiquadFilter(), @ctx.createBiquadFilter()]
+        [eq1.type, eq2.type, eq3.type] = ['lowshelf', 'peaking', 'highshelf']
+        [eq1.Q.value, eq2.Q.value, eq3.Q.value] = [0.6, 0.6, 0.6]
+        [eq1.frequency.value, eq2.frequency.value, eq3.frequency.value] = [350, 2000, 4000]
+        [eq1.gain.value, eq2.gain.value, eq3.gain.value] = @eq_gains
+        @eq_nodes = [eq1, eq2, eq3]
+
+        @panner = @ctx.createPanner()
+
+        eq1.connect(eq2)
+        eq2.connect(eq3)
+        eq3.connect(@panner)
+        @panner.connect(@node)
+
     setSample: (sample) ->
         if sample.data?
             @buffer = sample.data
@@ -51,7 +67,7 @@ class @BufferNode
         source.buffer = @buffer
         node = @ctx.createGain()
         source.connect(node)
-        node.connect(@node)
+        node.connect(@eq_nodes[0])
 
         head_time = time + @buffer_duration * @head
         tail_time = time + @buffer_duration * @tail
@@ -63,6 +79,11 @@ class @BufferNode
 
     setParam: (@head, @tail, @speed) ->
     getParam: -> [@head, @tail, @speed]
+
+    setEQParam: (@eq_gains) ->
+        [@eq_nodes[0].gain.value, @eq_nodes[1].gain.value, @eq_nodes[2].gain.value] = (g * 0.2 for g in @eq_gains)
+
+    getEQParam: -> @eq_gains
 
     getData: -> @buffer
 
@@ -98,6 +119,9 @@ class @SamplerCore
     setSampleParam: (i, head, tail, speed) ->
         @nodes[i].setParam(head, tail, speed)
 
+    setSampleEQParam: (i, lo, mid, hi) ->
+        @nodes[i].setEQParam([lo, mid, hi])
+
     setSampleGain: (i, gain) ->
         ## Keep total gain <= 0.9
         @gains[i].gain.value = (gain / 100.0) * 0.11
@@ -132,8 +156,11 @@ class @SamplerCore
     getSampleData: (i) ->
         @nodes[i].getData()
 
+    getSampleEQParam: (i) ->
+        @nodes[i].getEQParam()
+
     sampleLoaded: (id) ->
-        @view.updateCanvas(id)
+        @view.updateWaveformCanvas(id)
 
 
 class @Sampler

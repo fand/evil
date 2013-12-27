@@ -240,7 +240,7 @@ class @SynthCoreView
         h = canvas.height = 50
         w4 = w/4
         context.clearRect(0,0,w,h)
-        context.beginPath();
+        context.beginPath()
         context.moveTo(w4 * (1.0 - adsr[0]), h)
         context.lineTo(w / 4,0)                                  # attack
         context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]))  # decay

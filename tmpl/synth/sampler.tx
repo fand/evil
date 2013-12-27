@@ -73,9 +73,9 @@
       <legend>EQ</legend>
       <canvas class="canvasEQ"></canvas>
       <div class="clearfix EQ-sliders">
-        <div class="EQ-slider"><label>LO</label><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>
-        <div class="EQ-slider"><label>MID</label><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>
-        <div class="EQ-slider"><label>HI</label><input class="gain-slider" type="range" min="0" max="100" value="100" /></div>
+        <div class="EQ-slider"><label>LO</label> <input class="gain-slider EQ_lo"  type="range" min="0" max="200" value="100" /></div>
+        <div class="EQ-slider"><label>MID</label><input class="gain-slider EQ_mid" type="range" min="0" max="200" value="100" /></div>
+        <div class="EQ-slider"><label>HI</label> <input class="gain-slider EQ_hi"  type="range" min="0" max="200" value="100" /></div>
       </div>
     </fieldset>
 

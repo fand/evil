@@ -8,6 +8,10 @@
       this.canvas_waveform_dom = this.dom.find('.waveform');
       this.canvas_waveform = this.canvas_waveform_dom[0];
       this.ctx_waveform = this.canvas_waveform.getContext('2d');
+      this.canvas_EQ_dom = this.dom.find('.canvasEQ');
+      this.canvas_EQ = this.canvas_EQ_dom[0];
+      this.ctx_EQ = this.canvas_EQ.getContext('2d');
+      this.eq = this.dom.find('.Sampler_EQ');
       this.sample_num = 0;
       this.initEvent();
     }
@@ -16,12 +20,16 @@
       var _this = this;
       this.sample.on("change", function() {
         _this.setSampleParam();
-        return _this.updateCanvas(_this.sample_num);
+        return _this.updateWaveformCanvas(_this.sample_num);
+      });
+      this.eq.on('change', function() {
+        _this.setSampleEQParam();
+        return _this.updateEQCanvas();
       });
       return this.setParam();
     };
 
-    SamplerCoreView.prototype.updateCanvas = function(sample_num) {
+    SamplerCoreView.prototype.updateWaveformCanvas = function(sample_num) {
       var canvas, ctx, d, h, hts, left, right, w, wave, x, _data, _i;
       this.sample_num = sample_num;
       canvas = this.canvas_waveform;
@@ -52,16 +60,38 @@
       }
     };
 
+    SamplerCoreView.prototype.updateEQCanvas = function() {
+      var canvas, ctx, eq, h, w;
+      canvas = this.canvas_EQ;
+      ctx = this.ctx_EQ;
+      w = canvas.width = 270;
+      h = canvas.height = 100;
+      eq = this.model.getSampleEQParam(this.sample_num);
+      ctx.clearRect(0, 0, w, h);
+      ctx.translate(0, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(0, -(eq[0] / 100.0) * (h / 2));
+      ctx.lineTo(w / 3, -(eq[1] / 100.0) * (h / 2));
+      ctx.lineTo(w / 3 * 2, -(eq[1] / 100.0) * (h / 2));
+      ctx.lineTo(w, -(eq[2] / 100.0) * (h / 2));
+      ctx.strokeStyle = 'rgb(255, 0, 220)';
+      ctx.stroke();
+      ctx.closePath();
+      return ctx.translate(0, -h / 2);
+    };
+
     SamplerCoreView.prototype.setParam = function() {};
 
     SamplerCoreView.prototype.setSampleParam = function() {
-      var i, _i, _results;
+      var i;
       i = this.sample_num;
-      _results = [];
-      for (i = _i = 0; _i < 10; i = ++_i) {
-        _results.push(this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0));
-      }
-      return _results;
+      return this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
+    };
+
+    SamplerCoreView.prototype.setSampleEQParam = function() {
+      var i;
+      i = this.sample_num;
+      return this.model.setSampleEQParam(i, parseFloat(this.eq.find('.EQ_lo').val()) - 100.0, parseFloat(this.eq.find('.EQ_mid').val()) - 100.0, parseFloat(this.eq.find('.EQ_hi').val()) - 100.0);
     };
 
     SamplerCoreView.prototype.setGains = function() {
