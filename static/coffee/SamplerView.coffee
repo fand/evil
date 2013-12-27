@@ -184,6 +184,7 @@ class @SamplerView
 
         # Flags / Params
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @pattern_obj = name: @pattern_name.val(), pattern: @pattern
         @page = 0
         @page_total = 1
 
@@ -195,6 +196,7 @@ class @SamplerView
         @click_pos = x:-1, y:-1
 
         @initEvent()
+        @initCanvas()
 
     initCanvas: ->
         @canvas_hover.width  = @canvas_on.width  = @canvas_off.width  = 832
@@ -236,8 +238,8 @@ class @SamplerView
 
             if @is_clicked and @click_pos != pos
                 if @is_adding
-                    @addNote(pos)
-                else if @pattern[pos.x_abs] == pos.note
+                    @addNote(pos, 1.0)
+                else
                     @removeNote(pos)
                 @click_pos = pos
 
@@ -245,22 +247,29 @@ class @SamplerView
             @is_clicked = true
             pos = @getPos(e)
 
-            if @pattern[pos.x_abs] == pos.note
+            remove = false
+            for note in @pattern[pos.x_abs]
+                if note[0] == pos.note
+                    remove = true
+
+            if remove
                 @removeNote(pos)
             else
                 @is_adding = true
-                @addNote(pos)
+                @addNote(pos, 1.0)
 
         ).on('mouseup', (e) =>
             @is_clicked = false
-            @is_adding = false
+            @is_adding  = false
+            @is_removing  = false
         ).on('mouseout', (e) =>
             @ctx_hover.clearRect(
                 @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
             )
             @hover_pos = x: -1, y: -1
-            @is_clicked = false
-            @is_adding = false
+            @is_clicked  = false
+            @is_adding   = false
+            @is_removing = false
         )
 
         # Headers
@@ -304,19 +313,32 @@ class @SamplerView
         )
 
 
-    addNote: (pos) ->
-        @pattern[pos.x_abs] = pos.note
-        @model.addNote(pos.x_abs, pos.note)
-        @ctx_on.clearRect(pos.x * 26, 0, 26, 1000)
+    addNote: (pos, gain) ->
+        if @pattern[pos.x_abs] == 0
+            @pattern[pos.x_abs] = []
+        if not Array.isArray(@pattern[pos.x_abs])
+            @pattern[pos.x_abs] = [[@pattern[pos.x_abs], 1.0]]
+
+        for i in [0...@pattern[pos.x_abs].length]
+            if @pattern[pos.x_abs][i][0] == pos.note
+                @pattern[pos.x_abs].splice(i, 1)
+        @pattern[pos.x_abs].push([pos.note, gain])
+
+        @model.addNote(pos.x_abs, pos.note, gain)
+        # @ctx_on.clearRect(pos.x * 26, 0, 26, 1000)
         @ctx_on.drawImage(@cell,
             26, 0, 26, 26,
             pos.x * 26, pos.y * 26, 26, 26
         )
+        console.log(@pattern)
 
     removeNote: (pos) ->
-        @pattern[pos.x_abs] = 0
+        for i in [0...@pattern[pos.x_abs].length]
+            if @pattern[pos.x_abs][i][0] == pos.note
+                @pattern[pos.x_abs].splice(i, 1)
+
         @ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26)
-        @model.removeNote(pos.x_abs)
+        @model.removeNote(pos)
 
     playAt: (@time) ->
         return if @is_nosync
@@ -348,12 +370,13 @@ class @SamplerView
         @ctx_on.clearRect(0, 0, 832, 262)
 
         for i in [0...@cells_x]
-            y = @cells_y - @pattern[@page * @cells_x + i]
-            @ctx_on.drawImage(
-                @cell,
-                26, 0, 26, 26,
-                i * 26, y * 26, 26, 26
-            )
+            for j in @pattern[@page * @cells_x + i]
+                y = @cells_y - j[0]
+                @ctx_on.drawImage(
+                    @cell,
+                    26, 0, 26, 26,
+                    i * 26, y * 26, 26, 26
+                )
         @setMarker()
 
     plusPattern: ->

@@ -168,6 +168,10 @@
       this.is_panel_opened = true;
       this.keyboard = new SamplerKeyboardView(this);
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern_obj = {
+        name: this.pattern_name.val(),
+        pattern: this.pattern
+      };
       this.page = 0;
       this.page_total = 1;
       this.last_time = 0;
@@ -182,6 +186,7 @@
         y: -1
       };
       this.initEvent();
+      this.initCanvas();
     }
 
     SamplerView.prototype.initCanvas = function() {
@@ -227,25 +232,34 @@
         }
         if (_this.is_clicked && _this.click_pos !== pos) {
           if (_this.is_adding) {
-            _this.addNote(pos);
-          } else if (_this.pattern[pos.x_abs] === pos.note) {
+            _this.addNote(pos, 1.0);
+          } else {
             _this.removeNote(pos);
           }
           return _this.click_pos = pos;
         }
       }).on('mousedown', function(e) {
-        var pos;
+        var note, pos, remove, _i, _len, _ref;
         _this.is_clicked = true;
         pos = _this.getPos(e);
-        if (_this.pattern[pos.x_abs] === pos.note) {
+        remove = false;
+        _ref = _this.pattern[pos.x_abs];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          note = _ref[_i];
+          if (note[0] === pos.note) {
+            remove = true;
+          }
+        }
+        if (remove) {
           return _this.removeNote(pos);
         } else {
           _this.is_adding = true;
-          return _this.addNote(pos);
+          return _this.addNote(pos, 1.0);
         }
       }).on('mouseup', function(e) {
         _this.is_clicked = false;
-        return _this.is_adding = false;
+        _this.is_adding = false;
+        return _this.is_removing = false;
       }).on('mouseout', function(e) {
         _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
         _this.hover_pos = {
@@ -253,7 +267,8 @@
           y: -1
         };
         _this.is_clicked = false;
-        return _this.is_adding = false;
+        _this.is_adding = false;
+        return _this.is_removing = false;
       });
       this.synth_type.on('change', function() {
         return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
@@ -310,17 +325,34 @@
       });
     };
 
-    SamplerView.prototype.addNote = function(pos) {
-      this.pattern[pos.x_abs] = pos.note;
-      this.model.addNote(pos.x_abs, pos.note);
-      this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
-      return this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
+    SamplerView.prototype.addNote = function(pos, gain) {
+      var i, _i, _ref;
+      if (this.pattern[pos.x_abs] === 0) {
+        this.pattern[pos.x_abs] = [];
+      }
+      if (!Array.isArray(this.pattern[pos.x_abs])) {
+        this.pattern[pos.x_abs] = [[this.pattern[pos.x_abs], 1.0]];
+      }
+      for (i = _i = 0, _ref = this.pattern[pos.x_abs].length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.pattern[pos.x_abs][i][0] === pos.note) {
+          this.pattern[pos.x_abs].splice(i, 1);
+        }
+      }
+      this.pattern[pos.x_abs].push([pos.note, gain]);
+      this.model.addNote(pos.x_abs, pos.note, gain);
+      this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
+      return console.log(this.pattern);
     };
 
     SamplerView.prototype.removeNote = function(pos) {
-      this.pattern[pos.x_abs] = 0;
+      var i, _i, _ref;
+      for (i = _i = 0, _ref = this.pattern[pos.x_abs].length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.pattern[pos.x_abs][i][0] === pos.note) {
+          this.pattern[pos.x_abs].splice(i, 1);
+        }
+      }
       this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
-      return this.model.removeNote(pos.x_abs);
+      return this.model.removeNote(pos);
     };
 
     SamplerView.prototype.playAt = function(time) {
@@ -350,15 +382,19 @@
     };
 
     SamplerView.prototype.drawPattern = function(time) {
-      var i, y, _i, _ref;
+      var i, j, y, _i, _j, _len, _ref, _ref1;
       if (time != null) {
         this.time = time;
       }
       this.page = Math.floor(this.time / this.cells_x);
       this.ctx_on.clearRect(0, 0, 832, 262);
       for (i = _i = 0, _ref = this.cells_x; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        y = this.cells_y - this.pattern[this.page * this.cells_x + i];
-        this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
+        _ref1 = this.pattern[this.page * this.cells_x + i];
+        for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
+          j = _ref1[_j];
+          y = this.cells_y - j[0];
+          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
+        }
       }
       return this.setMarker();
     };

@@ -180,7 +180,8 @@
     };
 
     EG.prototype.noteOff = function(time) {
-      return this.target.linearRampToValueAtTime(this.min, time + this.release);
+      this.target.linearRampToValueAtTime(this.min, time + this.release);
+      return this.target.linearRampToValueAtTime(0, time + this.release + 1);
     };
 
     return EG;
@@ -257,7 +258,7 @@
       this.feg.setRange(80, Math.pow(freq / 1000, 2.0) * 25000 + 80);
       this.filter.setQ(q);
       if (q > 1) {
-        return this.gain_res.value = 0.1 * (q / 1000.0);
+        return this.gain_res.gain.value = 0.1 * (q / 1000.0);
       }
     };
 

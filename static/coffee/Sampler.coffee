@@ -8,6 +8,7 @@
     {name: 'clap', url: 'static/wav/clap.wav'},
     {name: 'hat_closed', url: 'static/wav/hat_closed.wav'},
     {name: 'hat_open', url: 'static/wav/hat_open.wav'},
+    {name: 'ride', url: 'static/wav/ride.wav'},
     {name: 'ride', url: 'static/wav/ride.wav'}
 ]
 
@@ -89,8 +90,6 @@ class @BufferNode
     setOutputParam: (pan, gain) ->
         @panner.setPosition(pan[0], pan[1], pan[2])
         @node.gain.value = gain
-        console.log(pan)
-#        console.log(gain)
 
     getData: -> @buffer
 
@@ -141,9 +140,9 @@ class @SamplerCore
     noteOn: (notes) ->
         time = @ctx.currentTime
         if Array.isArray(notes)
-            @nodes[n[0]].noteOn(n[1], time) for n in notes
+            @nodes[n[0] - 1].noteOn(n[1], time) for n in notes
         else
-            @nodes[notes].noteOn(1, time)
+            @nodes[notes - 1].noteOn(1, time)
 
     noteOff: ->
         t0 = @ctx.currentTime
@@ -177,13 +176,11 @@ class @Sampler
         @name = 'Sampler #' + @id if not @name?
 
         @pattern_name = 'pattern 0'
-        # @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        @pattern = [
-            [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0,
-            [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0,
-            [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0,
-            [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0
-        ]
+        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        # @pattern = [
+        #     [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0,
+        #     [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0
+        # ]
         @pattern_obj = name: @pattern_name, pattern: @pattern
 
         @time = 0
@@ -228,6 +225,7 @@ class @Sampler
         @core.noteOff()
 
     readPattern: (@pattern_obj) ->
+        console.log(@pattern_obj)
         @pattern = @pattern_obj.pattern
         @pattern_name = @pattern_obj.name
         @view.readPattern(@pattern_obj)
@@ -245,11 +243,20 @@ class @Sampler
         @pattern = @pattern.slice(0, @pattern.length - 32)
         @player.resetSceneLength()
 
-    addNote: (time, note) ->
-        @pattern[time] = note
+    addNote: (time, note, gain) ->
+        if not Array.isArray(@pattern[time])
+            @pattern[time] = [[@pattern[time], 1.0]]
 
-    removeNote: (time) ->
-        @pattern[time] = 0
+        for i in [0...@pattern[time].length]
+            if @pattern[time][i][0] == note
+                @pattern[time].splice(i, 1)
+
+        @pattern[time].push([note, gain])
+
+    removeNote: (pos) ->
+        for i in [0...@pattern[pos.x_abs].length]
+            if @pattern[pos.x_abs][i][0] == pos.note
+                @pattern[pos.x_abs].splice(i, 1)
 
     activate: (i) -> @view.activate(i)
     inactivate: (i) -> @view.inactivate(i)

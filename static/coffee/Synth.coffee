@@ -104,6 +104,7 @@ class @EG
 
     noteOff: (time) ->
         @target.linearRampToValueAtTime(@min, time + @release)
+        @target.linearRampToValueAtTime(0, time + @release + 1)
 
 
 
@@ -158,7 +159,7 @@ class @SynthCore
     setFilterParam: (freq, q) ->
         @feg.setRange(80, Math.pow(freq/1000, 2.0) * 25000 + 80)
         @filter.setQ(q)
-        @gain_res.value = 0.1 * (q / 1000.0) if q > 1
+        @gain_res.gain.value = 0.1 * (q / 1000.0) if q > 1
 
     setVCOGain: (i, gain) ->
         ## Keep total gain <= 0.9

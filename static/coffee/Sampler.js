@@ -30,6 +30,9 @@
     }, {
       name: 'ride',
       url: 'static/wav/ride.wav'
+    }, {
+      name: 'ride',
+      url: 'static/wav/ride.wav'
     }
   ];
 
@@ -140,8 +143,7 @@
 
     BufferNode.prototype.setOutputParam = function(pan, gain) {
       this.panner.setPosition(pan[0], pan[1], pan[2]);
-      this.node.gain.value = gain;
-      return console.log(pan);
+      return this.node.gain.value = gain;
     };
 
     BufferNode.prototype.getData = function() {
@@ -229,11 +231,11 @@
         _results = [];
         for (_i = 0, _len = notes.length; _i < _len; _i++) {
           n = notes[_i];
-          _results.push(this.nodes[n[0]].noteOn(n[1], time));
+          _results.push(this.nodes[n[0] - 1].noteOn(n[1], time));
         }
         return _results;
       } else {
-        return this.nodes[notes].noteOn(1, time);
+        return this.nodes[notes - 1].noteOn(1, time);
       }
     };
 
@@ -292,7 +294,7 @@
         this.name = 'Sampler #' + this.id;
       }
       this.pattern_name = 'pattern 0';
-      this.pattern = [[[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0];
+      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.pattern_obj = {
         name: this.pattern_name,
         pattern: this.pattern
@@ -361,6 +363,7 @@
 
     Sampler.prototype.readPattern = function(pattern_obj) {
       this.pattern_obj = pattern_obj;
+      console.log(this.pattern_obj);
       this.pattern = this.pattern_obj.pattern;
       this.pattern_name = this.pattern_obj.name;
       return this.view.readPattern(this.pattern_obj);
@@ -382,12 +385,30 @@
       return this.player.resetSceneLength();
     };
 
-    Sampler.prototype.addNote = function(time, note) {
-      return this.pattern[time] = note;
+    Sampler.prototype.addNote = function(time, note, gain) {
+      var i, _i, _ref;
+      if (!Array.isArray(this.pattern[time])) {
+        this.pattern[time] = [[this.pattern[time], 1.0]];
+      }
+      for (i = _i = 0, _ref = this.pattern[time].length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.pattern[time][i][0] === note) {
+          this.pattern[time].splice(i, 1);
+        }
+      }
+      return this.pattern[time].push([note, gain]);
     };
 
-    Sampler.prototype.removeNote = function(time) {
-      return this.pattern[time] = 0;
+    Sampler.prototype.removeNote = function(pos) {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.pattern[pos.x_abs].length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.pattern[pos.x_abs][i][0] === pos.note) {
+          _results.push(this.pattern[pos.x_abs].splice(i, 1));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
     };
 
     Sampler.prototype.activate = function(i) {

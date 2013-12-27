@@ -270,6 +270,7 @@
         pan: 0.0
       };
       this.song.tracks[id] = s_obj;
+      console.log(pp);
       return s.readPattern(pp[this.scene_pos]);
     };
 

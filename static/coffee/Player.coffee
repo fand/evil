@@ -51,7 +51,6 @@ class @Player
         @is_playing = false
         @view.viewStop()
         @time = 0
-#        @readSong(@song)
 
     pause: ->
         s.pause(@time) for s in @synth
