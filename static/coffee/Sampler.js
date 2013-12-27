@@ -41,7 +41,7 @@
       this.node.gain.value = 0.0;
       sample = window.SAMPLES[num];
       this.setSample(sample);
-      this.head = 0;
+      this.head = 0.0;
       this.tail = 1.0;
       this.speed = 1.0;
     }
@@ -58,6 +58,7 @@
         req.onload = function() {
           _this.ctx.decodeAudioData(req.response, function(buffer) {
             _this.buffer = buffer;
+            return _this.buffer_duration = _this.buffer.length / window.SAMPLE_RATE;
           }, function(err) {
             console.log('ajax error');
             return console.log(err);
@@ -73,18 +74,21 @@
       return this.node.connect(this.dst);
     };
 
-    BufferNode.prototype.noteOn = function(gain) {
-      var source;
+    BufferNode.prototype.noteOn = function(gain, time) {
+      var head_time, source, tail_time;
       if (this.buffer == null) {
         return;
       }
       source = this.ctx.createBufferSource();
       source.buffer = this.buffer;
       source.connect(this.node);
-      if (gain != null) {
-        this.node.gain.value = gain;
-      }
-      return source.start(0, this.buffer.length * this.head, this.buffer.length * (1 - this.tail - this.head));
+      head_time = time + this.buffer_duration * this.head;
+      tail_time = time + this.buffer_duration * this.tail;
+      source.start(0);
+      this.node.gain.setValueAtTime(0, time);
+      this.node.gain.linearRampToValueAtTime(gain, head_time + 0.001);
+      this.node.gain.setValueAtTime(gain, tail_time);
+      return this.node.gain.linearRampToValueAtTime(0, tail_time + 0.001);
     };
 
     BufferNode.prototype.setParam = function(head, tail, speed) {
@@ -176,16 +180,17 @@
     };
 
     SamplerCore.prototype.noteOn = function(notes) {
-      var n, _i, _len, _results;
+      var n, time, _i, _len, _results;
+      time = this.ctx.currentTime;
       if (Array.isArray(notes)) {
         _results = [];
         for (_i = 0, _len = notes.length; _i < _len; _i++) {
           n = notes[_i];
-          _results.push(this.nodes[n[0]].noteOn(n[1]));
+          _results.push(this.nodes[n[0]].noteOn(n[1], time));
         }
         return _results;
       } else {
-        return this.nodes[notes].noteOn(1);
+        return this.nodes[notes].noteOn(1, time);
       }
     };
 

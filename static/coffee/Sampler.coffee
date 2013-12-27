@@ -20,7 +20,7 @@ class @BufferNode
         sample = window.SAMPLES[num]
         @setSample(sample)
 
-        @head = 0
+        @head = 0.0
         @tail = 1.0
         @speed = 1.0
 
@@ -34,21 +34,27 @@ class @BufferNode
             req.onload = () =>
                 @ctx.decodeAudioData(
                     req.response,
-                    (@buffer) =>,
+                    (@buffer) => @buffer_duration = (@buffer.length / window.SAMPLE_RATE),
                     (err) => console.log('ajax error'); console.log(err)
                 )
                 sample.data = @buffer
             req.send()
 
     connect: (@dst) -> @node.connect(@dst)
-    noteOn: (gain) ->
+
+    noteOn: (gain, time) ->
         return if not @buffer?
         source = @ctx.createBufferSource()
         source.buffer = @buffer
         source.connect(@node)
-        @node.gain.value = gain if gain?
-#        source.start(0)
-        source.start(0, @buffer.length * @head, @buffer.length * (1- @tail - @head))
+
+        head_time = time + @buffer_duration * @head
+        tail_time = time + @buffer_duration * @tail
+        source.start(0)
+        @node.gain.setValueAtTime(0, time)
+        @node.gain.linearRampToValueAtTime(gain, head_time + 0.001)
+        @node.gain.setValueAtTime(gain, tail_time)
+        @node.gain.linearRampToValueAtTime(0, tail_time + 0.001)
 
     setParam: (@head, @tail, @speed) ->
     getParam: -> [@head, @tail, @speed]
@@ -95,10 +101,11 @@ class @SamplerCore
         @node.gain.value = @gain
 
     noteOn: (notes) ->
+        time = @ctx.currentTime
         if Array.isArray(notes)
-            @nodes[n[0]].noteOn(n[1]) for n in notes
+            @nodes[n[0]].noteOn(n[1], time) for n in notes
         else
-            @nodes[notes].noteOn(1)
+            @nodes[notes].noteOn(1, time)
 
     noteOff: ->
         t0 = @ctx.currentTime

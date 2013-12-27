@@ -41,7 +41,7 @@
       ctx.stroke();
       ctx.translate(0, -90);
       left = hts[0] * w;
-      right = (1 - hts[1]) * w;
+      right = hts[1] * w;
       if (left < right) {
         ctx.fillStyle = 'rgba(255, 0, 160, 0.2)';
         return ctx.fillRect(left, 0, right - left, h);
@@ -51,9 +51,13 @@
     SamplerCoreView.prototype.setParam = function() {};
 
     SamplerCoreView.prototype.setSampleParam = function() {
-      var i;
+      var i, _i, _results;
       i = this.sample_num;
-      return this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()) / 100.0, 1 - parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
+      _results = [];
+      for (i = _i = 0; _i < 10; i = ++_i) {
+        _results.push(this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0));
+      }
+      return _results;
     };
 
     SamplerCoreView.prototype.setGains = function() {

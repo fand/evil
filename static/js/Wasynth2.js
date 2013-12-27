@@ -827,7 +827,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node.gain.value = 0.0;
       sample = window.SAMPLES[num];
       this.setSample(sample);
-      this.head = 0;
+      this.head = 0.0;
       this.tail = 1.0;
       this.speed = 1.0;
     }
@@ -844,6 +844,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         req.onload = function() {
           _this.ctx.decodeAudioData(req.response, function(buffer) {
             _this.buffer = buffer;
+            return _this.buffer_duration = _this.buffer.length / window.SAMPLE_RATE;
           }, function(err) {
             console.log('ajax error');
             return console.log(err);
@@ -859,18 +860,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.node.connect(this.dst);
     };
 
-    BufferNode.prototype.noteOn = function(gain) {
-      var source;
+    BufferNode.prototype.noteOn = function(gain, time) {
+      var head_time, source, tail_time;
       if (this.buffer == null) {
         return;
       }
       source = this.ctx.createBufferSource();
       source.buffer = this.buffer;
       source.connect(this.node);
-      if (gain != null) {
-        this.node.gain.value = gain;
-      }
-      return source.start(0, this.buffer.length * this.head, this.buffer.length * (1 - this.tail - this.head));
+      head_time = time + this.buffer_duration * this.head;
+      tail_time = time + this.buffer_duration * this.tail;
+      source.start(0);
+      this.node.gain.setValueAtTime(0, time);
+      this.node.gain.linearRampToValueAtTime(gain, head_time + 0.001);
+      this.node.gain.setValueAtTime(gain, tail_time);
+      return this.node.gain.linearRampToValueAtTime(0, tail_time + 0.001);
     };
 
     BufferNode.prototype.setParam = function(head, tail, speed) {
@@ -962,16 +966,17 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SamplerCore.prototype.noteOn = function(notes) {
-      var n, _i, _len, _results;
+      var n, time, _i, _len, _results;
+      time = this.ctx.currentTime;
       if (Array.isArray(notes)) {
         _results = [];
         for (_i = 0, _len = notes.length; _i < _len; _i++) {
           n = notes[_i];
-          _results.push(this.nodes[n[0]].noteOn(n[1]));
+          _results.push(this.nodes[n[0]].noteOn(n[1], time));
         }
         return _results;
       } else {
-        return this.nodes[notes].noteOn(1);
+        return this.nodes[notes].noteOn(1, time);
       }
     };
 
@@ -1197,7 +1202,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       ctx.stroke();
       ctx.translate(0, -90);
       left = hts[0] * w;
-      right = (1 - hts[1]) * w;
+      right = hts[1] * w;
       if (left < right) {
         ctx.fillStyle = 'rgba(255, 0, 160, 0.2)';
         return ctx.fillRect(left, 0, right - left, h);
@@ -1207,9 +1212,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SamplerCoreView.prototype.setParam = function() {};
 
     SamplerCoreView.prototype.setSampleParam = function() {
-      var i;
+      var i, _i, _results;
       i = this.sample_num;
-      return this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()) / 100.0, 1 - parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
+      _results = [];
+      for (i = _i = 0; _i < 10; i = ++_i) {
+        _results.push(this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0));
+      }
+      return _results;
     };
 
     SamplerCoreView.prototype.setGains = function() {

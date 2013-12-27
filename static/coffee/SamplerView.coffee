@@ -43,7 +43,7 @@ class @SamplerCoreView
 
         # Draw params
         left  = hts[0] * w
-        right = (1 - hts[1]) * w
+        right = hts[1] * w
         if left < right
             ctx.fillStyle = 'rgba(255, 0, 160, 0.2)'
             ctx.fillRect(left, 0, right-left, h)
@@ -55,12 +55,13 @@ class @SamplerCoreView
 
     setSampleParam: ->
         i = @sample_num
-        @model.setSampleParam(
-            i,
-            parseFloat(@sample.find('.head').val())  / 100.0,
-            1 - parseFloat(@sample.find('.tail').val())  / 100.0,
-            parseFloat(@sample.find('.speed').val()) / 100.0
-        )
+        for i in [0...10]
+            @model.setSampleParam(
+                i,
+                parseFloat(@sample.find('.head').val())  / 100.0,
+                parseFloat(@sample.find('.tail').val())  / 100.0,
+                parseFloat(@sample.find('.speed').val()) / 100.0
+            )
 
     setGains: ->
         for i in [0... @gain_inputs.length]
