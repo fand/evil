@@ -19,42 +19,35 @@ class @SamplerCoreView
     updateCanvas: () ->
         canvas  = @canvas_waveform
         ctx = @ctx_waveform
+
         hts = @model.getSampleParam(@sample_num)
-
-        _wave = @model.getSampleData(@sample_num)
-        wave = _wave.getChannelData(0)
-
-        console.log('w length: ' + wave.length)
+        wave = @model.getSampleData(@sample_num).getChannelData(0)
 
         w = canvas.width = 300
         h = canvas.height = 180
 
         ctx.clearRect(0, 0, w, h)
+
+        # Draw waveform
         ctx.translate(0, 90)
         ctx.beginPath()
 
         d = wave.length / w
-        x = 0
-        while x < w
-            y = wave[x * d] * h
-            console.log('y: ' + y)
-            ctx.lineTo(x, y)
-            x++
+        for x in [0...w]
+            ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45)
 
         ctx.closePath()
         ctx.strokeStyle = 'rgb(255, 0, 220)'
         ctx.stroke()
+        ctx.translate(0, -90)
 
-        # w4 = w/4
-        # context.clearRect(0,0,w,h)
-        # context.beginPath();
-        # context.moveTo(w4 * (1.0 - adsr[0]), h)
-        # context.lineTo(w / 4,0)                                  # attack
-        # context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]))  # decay
-        # context.lineTo(w4 * 3, h * (1.0 - adsr[2]))              # sustain
-        # context.lineTo(w4 * (adsr[3] + 3), h)                    # release
-        # context.strokeStyle = 'rgb(255, 0, 220)'
-        # context.stroke()
+        # Draw params
+        left  = hts[0] * w
+        right = (1 - hts[1]) * w
+        if left < right
+            ctx.fillStyle = 'rgba(255, 0, 160, 0.2)'
+            ctx.fillRect(left, 0, right-left, h)
+
 
     setParam: ->
         # @setNodesParam()
@@ -64,9 +57,9 @@ class @SamplerCoreView
         i = @sample_num
         @model.setSampleParam(
             i,
-            parseFloat(@sample.find('.head').val()),
-            parseFloat(@sample.find('.tail').val()),
-            parseFloat(@sample.find('.speed').val()),
+            parseFloat(@sample.find('.head').val())  / 100.0,
+            1 - parseFloat(@sample.find('.tail').val())  / 100.0,
+            parseFloat(@sample.find('.speed').val()) / 100.0
         )
 
     setGains: ->

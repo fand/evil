@@ -22,29 +22,30 @@
     };
 
     SamplerCoreView.prototype.updateCanvas = function() {
-      var canvas, ctx, d, h, hts, w, wave, x, y, _wave;
+      var canvas, ctx, d, h, hts, left, right, w, wave, x, _i;
       canvas = this.canvas_waveform;
       ctx = this.ctx_waveform;
       hts = this.model.getSampleParam(this.sample_num);
-      _wave = this.model.getSampleData(this.sample_num);
-      wave = _wave.getChannelData(0);
-      console.log('w length: ' + wave.length);
+      wave = this.model.getSampleData(this.sample_num).getChannelData(0);
       w = canvas.width = 300;
       h = canvas.height = 180;
       ctx.clearRect(0, 0, w, h);
       ctx.translate(0, 90);
       ctx.beginPath();
       d = wave.length / w;
-      x = 0;
-      while (x < w) {
-        y = wave[x * d] * h;
-        console.log('y: ' + y);
-        ctx.lineTo(x, y);
-        x++;
+      for (x = _i = 0; 0 <= w ? _i < w : _i > w; x = 0 <= w ? ++_i : --_i) {
+        ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45);
       }
       ctx.closePath();
       ctx.strokeStyle = 'rgb(255, 0, 220)';
-      return ctx.stroke();
+      ctx.stroke();
+      ctx.translate(0, -90);
+      left = hts[0] * w;
+      right = (1 - hts[1]) * w;
+      if (left < right) {
+        ctx.fillStyle = 'rgba(255, 0, 160, 0.2)';
+        return ctx.fillRect(left, 0, right - left, h);
+      }
     };
 
     SamplerCoreView.prototype.setParam = function() {};
@@ -52,7 +53,7 @@
     SamplerCoreView.prototype.setSampleParam = function() {
       var i;
       i = this.sample_num;
-      return this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()), parseFloat(this.sample.find('.tail').val()), parseFloat(this.sample.find('.speed').val()));
+      return this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()) / 100.0, 1 - parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
     };
 
     SamplerCoreView.prototype.setGains = function() {

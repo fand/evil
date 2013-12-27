@@ -42,7 +42,7 @@
       sample = window.SAMPLES[num];
       this.setSample(sample);
       this.head = 0;
-      this.tail = 100;
+      this.tail = 1.0;
       this.speed = 1.0;
     }
 
@@ -84,7 +84,7 @@
       if (gain != null) {
         this.node.gain.value = gain;
       }
-      return source.start(0);
+      return source.start(0, this.buffer.length * this.head, this.buffer.length * (1 - this.tail - this.head));
     };
 
     BufferNode.prototype.setParam = function(head, tail, speed) {

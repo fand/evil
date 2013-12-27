@@ -21,7 +21,7 @@ class @BufferNode
         @setSample(sample)
 
         @head = 0
-        @tail = 100
+        @tail = 1.0
         @speed = 1.0
 
     setSample: (sample) ->
@@ -47,7 +47,8 @@ class @BufferNode
         source.buffer = @buffer
         source.connect(@node)
         @node.gain.value = gain if gain?
-        source.start(0)
+#        source.start(0)
+        source.start(0, @buffer.length * @head, @buffer.length * (1- @tail - @head))
 
     setParam: (@head, @tail, @speed) ->
     getParam: -> [@head, @tail, @speed]

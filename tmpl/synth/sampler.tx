@@ -60,8 +60,8 @@
         </select>
       </div>
 
-      <div class="clearfix"><label>HEAD</label>  <input class="head" type="range" min="0" max="10000" value="0"></div>
-      <div class="clearfix"><label>TAIL</label>  <input class="tail" type="range" min="0" max="10000" value="0"></div>
+      <div class="clearfix"><label>HEAD</label>  <input class="head" type="range" min="0" max="100" value="0"></div>
+      <div class="clearfix"><label>TAIL</label>  <input class="tail" type="range" min="0" max="100" value="100"></div>
       <div class="clearfix"><label>SPEED</label> <input class="speed" type="range" min="0" max="100"   value="50"></div>
     </fieldset>
 
