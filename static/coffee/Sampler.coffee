@@ -36,6 +36,7 @@ class @BufferNode
 
         @panner = @ctx.createPanner()
         @panner.panningModel = "equalpower"
+        @pan_value = [0, 0, -1]
 
         eq1.connect(eq2)
         eq2.connect(eq3)
@@ -87,16 +88,14 @@ class @BufferNode
 
     getEQParam: -> @eq_gains
 
-    setOutputParam: (pan, gain) ->
-        @panner.setPosition(pan[0], pan[1], pan[2])
+    setOutputParam: (@pan_value, gain) ->
+        @panner.setPosition(@pan_value[0], @pan_value[1], @pan_value[2])
         @node.gain.value = gain
 
+    getOutputParam: ->
+        [@pan_value, @node.gain.value]
+
     getData: -> @buffer
-
-    pan2pos: (v) ->
-        theta = v * Math.PI
-        [Math.cos(theta), 0, -Math.sin(theta)]
-
 
 
 
@@ -125,6 +124,20 @@ class @SamplerCore
 
         @view = new SamplerCoreView(this, id, @parent.view.dom.find('.sampler-core'))
 
+    noteOn: (notes) ->
+        time = @ctx.currentTime
+        if Array.isArray(notes)
+            # return if notes.length == 0
+            @nodes[n[0] - 1].noteOn(n[1], time) for n in notes
+        else
+            @nodes[notes - 1].noteOn(1, time)
+
+    noteOff: ->
+        t0 = @ctx.currentTime
+
+    connect: (dst) ->
+        @node.connect(dst)
+
     setSampleParam: (i, head, tail, speed) ->
         @nodes[i].setParam(head, tail, speed)
 
@@ -137,28 +150,6 @@ class @SamplerCore
     setGain: (@gain) ->
         @node.gain.value = @gain
 
-    noteOn: (notes) ->
-        time = @ctx.currentTime
-        if Array.isArray(notes)
-            # return if notes.length == 0
-            @nodes[n[0] - 1].noteOn(n[1], time) for n in notes
-        else
-            @nodes[notes - 1].noteOn(1, time)
-
-    noteOff: ->
-        t0 = @ctx.currentTime
-
-    setKey: (key) ->
-    setScale: (scale) ->
-
-    connect: (dst) ->
-        @node.connect(dst)
-
-    setNote: (note) ->
-        for n in @nodes
-            n.setNote(note)
-            n.setFreq()
-
     getSampleParam: (i) ->
         @nodes[i].getParam()
 
@@ -168,8 +159,20 @@ class @SamplerCore
     getSampleEQParam: (i) ->
         @nodes[i].getEQParam()
 
+    getSampleOutputParam: (i) ->
+        @nodes[i].getOutputParam()
+
     sampleLoaded: (id) ->
         @view.updateWaveformCanvas(id)
+
+    bindSample: (sample_now) ->
+        console.log(sample_now)
+        @view.updateWaveformCanvas(sample_now)
+        @view.updateEQCanvas()
+        @view.readSampleParam(@getSampleParam(sample_now))
+        @view.readSampleEQParam(@getSampleEQParam(sample_now))
+        @view.readSampleOutputParam(@getSampleOutputParam(sample_now))
+
 
 
 class @Sampler
@@ -199,8 +202,7 @@ class @Sampler
     getGain: ()     -> @core.gain
 
     noteOn: (note) ->
-        @core.setNote(note)
-        @core.noteOn()
+        @core.noteOn([[note, 1.0]])
 
     noteOff: -> @core.noteOff()
 
@@ -269,3 +271,6 @@ class @Sampler
     setPatternName: (@pattern_name) ->
         @session.setPatternName(@id, @pattern_name)
         @view.setPatternName(@pattern_name)
+
+    selectSample: (sample_now) ->
+        @core.bindSample(sample_now)

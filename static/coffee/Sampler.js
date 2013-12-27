@@ -58,6 +58,7 @@
       this.eq_nodes = [eq1, eq2, eq3];
       this.panner = this.ctx.createPanner();
       this.panner.panningModel = "equalpower";
+      this.pan_value = [0, 0, -1];
       eq1.connect(eq2);
       eq2.connect(eq3);
       eq3.connect(this.panner);
@@ -141,19 +142,18 @@
       return this.eq_gains;
     };
 
-    BufferNode.prototype.setOutputParam = function(pan, gain) {
-      this.panner.setPosition(pan[0], pan[1], pan[2]);
+    BufferNode.prototype.setOutputParam = function(pan_value, gain) {
+      this.pan_value = pan_value;
+      this.panner.setPosition(this.pan_value[0], this.pan_value[1], this.pan_value[2]);
       return this.node.gain.value = gain;
+    };
+
+    BufferNode.prototype.getOutputParam = function() {
+      return [this.pan_value, this.node.gain.value];
     };
 
     BufferNode.prototype.getData = function() {
       return this.buffer;
-    };
-
-    BufferNode.prototype.pan2pos = function(v) {
-      var theta;
-      theta = v * Math.PI;
-      return [Math.cos(theta), 0, -Math.sin(theta)];
     };
 
     return BufferNode;
@@ -207,23 +207,6 @@
       this.view = new SamplerCoreView(this, id, this.parent.view.dom.find('.sampler-core'));
     }
 
-    SamplerCore.prototype.setSampleParam = function(i, head, tail, speed) {
-      return this.nodes[i].setParam(head, tail, speed);
-    };
-
-    SamplerCore.prototype.setSampleEQParam = function(i, lo, mid, hi) {
-      return this.nodes[i].setEQParam([lo, mid, hi]);
-    };
-
-    SamplerCore.prototype.setSampleOutputParam = function(i, pan, gain) {
-      return this.nodes[i].setOutputParam(pan, gain);
-    };
-
-    SamplerCore.prototype.setGain = function(gain) {
-      this.gain = gain;
-      return this.node.gain.value = this.gain;
-    };
-
     SamplerCore.prototype.noteOn = function(notes) {
       var n, time, _i, _len, _results;
       time = this.ctx.currentTime;
@@ -244,24 +227,25 @@
       return t0 = this.ctx.currentTime;
     };
 
-    SamplerCore.prototype.setKey = function(key) {};
-
-    SamplerCore.prototype.setScale = function(scale) {};
-
     SamplerCore.prototype.connect = function(dst) {
       return this.node.connect(dst);
     };
 
-    SamplerCore.prototype.setNote = function(note) {
-      var n, _i, _len, _ref, _results;
-      _ref = this.nodes;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        n = _ref[_i];
-        n.setNote(note);
-        _results.push(n.setFreq());
-      }
-      return _results;
+    SamplerCore.prototype.setSampleParam = function(i, head, tail, speed) {
+      return this.nodes[i].setParam(head, tail, speed);
+    };
+
+    SamplerCore.prototype.setSampleEQParam = function(i, lo, mid, hi) {
+      return this.nodes[i].setEQParam([lo, mid, hi]);
+    };
+
+    SamplerCore.prototype.setSampleOutputParam = function(i, pan, gain) {
+      return this.nodes[i].setOutputParam(pan, gain);
+    };
+
+    SamplerCore.prototype.setGain = function(gain) {
+      this.gain = gain;
+      return this.node.gain.value = this.gain;
     };
 
     SamplerCore.prototype.getSampleParam = function(i) {
@@ -276,8 +260,21 @@
       return this.nodes[i].getEQParam();
     };
 
+    SamplerCore.prototype.getSampleOutputParam = function(i) {
+      return this.nodes[i].getOutputParam();
+    };
+
     SamplerCore.prototype.sampleLoaded = function(id) {
       return this.view.updateWaveformCanvas(id);
+    };
+
+    SamplerCore.prototype.bindSample = function(sample_now) {
+      console.log(sample_now);
+      this.view.updateWaveformCanvas(sample_now);
+      this.view.updateEQCanvas();
+      this.view.readSampleParam(this.getSampleParam(sample_now));
+      this.view.readSampleEQParam(this.getSampleEQParam(sample_now));
+      return this.view.readSampleOutputParam(this.getSampleOutputParam(sample_now));
     };
 
     return SamplerCore;
@@ -329,8 +326,7 @@
     };
 
     Sampler.prototype.noteOn = function(note) {
-      this.core.setNote(note);
-      return this.core.noteOn();
+      return this.core.noteOn([[note, 1.0]]);
     };
 
     Sampler.prototype.noteOff = function() {
@@ -437,6 +433,10 @@
       this.pattern_name = pattern_name;
       this.session.setPatternName(this.id, this.pattern_name);
       return this.view.setPatternName(this.pattern_name);
+    };
+
+    Sampler.prototype.selectSample = function(sample_now) {
+      return this.core.bindSample(sample_now);
     };
 
     return Sampler;
