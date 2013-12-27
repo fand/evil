@@ -183,7 +183,7 @@ class @SamplerView
         @keyboard = new SamplerKeyboardView(this)
 
         # Flags / Params
-        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @pattern = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
         @pattern_obj = name: @pattern_name.val(), pattern: @pattern
         @page = 0
         @page_total = 1
@@ -200,14 +200,14 @@ class @SamplerView
 
     initCanvas: ->
         @canvas_hover.width  = @canvas_on.width  = @canvas_off.width  = 832
-        @canvas_hover.height = @canvas_on.height = @canvas_off.height = 262
+        @canvas_hover.height = @canvas_on.height = @canvas_off.height = 260
         @rect = @canvas_off.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top
 
         for i in [0...@cells_y]
             for j in [0...@cells_x]
                 @ctx_off.drawImage(@cell,
-                    0, 0, 26, 26,           # src (x, y, w, h)
+                    0, 26, 26, 26,           # src (x, y, w, h)
                     j * 26, i * 26, 26, 26  # dst (x, y, w, h)
                 )
         @readPattern(@pattern_obj)
@@ -216,6 +216,7 @@ class @SamplerView
         @rect = @canvas_off.getBoundingClientRect()
         _x = Math.floor((e.clientX - @rect.left) / 26)
         _y = Math.floor((e.clientY - @rect.top) / 26)
+        _y = Math.min(9, _y)  # assert (note != 0)
         x: _x
         y: _y
         x_abs: @page * @cells_x + _x
@@ -231,7 +232,7 @@ class @SamplerView
                     @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
                 )
                 @ctx_hover.drawImage(@cell,
-                    52, 0, 26, 26,
+                    52, 26, 26, 26,
                     pos.x * 26, pos.y * 26, 26, 26
                 )
                 @hover_pos = pos
@@ -325,12 +326,10 @@ class @SamplerView
         @pattern[pos.x_abs].push([pos.note, gain])
 
         @model.addNote(pos.x_abs, pos.note, gain)
-        # @ctx_on.clearRect(pos.x * 26, 0, 26, 1000)
         @ctx_on.drawImage(@cell,
-            26, 0, 26, 26,
+            26, 26, 26, 26,
             pos.x * 26, pos.y * 26, 26, 26
         )
-        console.log(@pattern)
 
     removeNote: (pos) ->
         for i in [0...@pattern[pos.x_abs].length]
@@ -347,11 +346,11 @@ class @SamplerView
             @drawPattern(@time)
         for i in [0...@cells_y]
             @ctx_off.drawImage(@cell,
-                0, 0, 26, 26,
+                0, 26, 26, 26,
                 (@last_time % @cells_x) * 26, i * 26, 26, 26
             )
             @ctx_off.drawImage(@cell,
-                78, 0, 26, 26,
+                78, 26, 26, 26,
                 (time % @cells_x) * 26, i * 26, 26, 26
             )
         @last_time = time
@@ -374,14 +373,14 @@ class @SamplerView
                 y = @cells_y - j[0]
                 @ctx_on.drawImage(
                     @cell,
-                    26, 0, 26, 26,
+                    26, 26, 26, 26,
                     i * 26, y * 26, 26, 26
                 )
         @setMarker()
 
     plusPattern: ->
         return if @page_total == 8
-        @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        @pattern = @pattern.concat([[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]])
         @page_total++
         @model.plusPattern()
         @drawPattern()
@@ -420,7 +419,7 @@ class @SamplerView
     stop: ->
         for i in [0...@cells_y]
             @ctx_off.drawImage(@cell,
-                0, 0, 26, 26,
+                0, 26, 26, 26,
                 (@last_time % @cells_x) * 26, i * 26, 26, 26
             )
 
@@ -443,7 +442,7 @@ class @SamplerView
             @nosync.removeClass('btn-false').addClass('btn-true')
             for i in [0...@cells_y]
                 @ctx_off.drawImage(@cell,
-                    0, 0, 26, 26,
+                    0, 26, 26, 26,
                     (@time % @cells_x) * 26, i * 26, 26, 26
                 )
 

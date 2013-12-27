@@ -140,6 +140,7 @@ class @SamplerCore
     noteOn: (notes) ->
         time = @ctx.currentTime
         if Array.isArray(notes)
+            # return if notes.length == 0
             @nodes[n[0] - 1].noteOn(n[1], time) for n in notes
         else
             @nodes[notes - 1].noteOn(1, time)
@@ -176,11 +177,7 @@ class @Sampler
         @name = 'Sampler #' + @id if not @name?
 
         @pattern_name = 'pattern 0'
-        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        # @pattern = [
-        #     [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0,
-        #     [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0
-        # ]
+        @pattern = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
         @pattern_obj = name: @pattern_name, pattern: @pattern
 
         @time = 0
@@ -225,18 +222,17 @@ class @Sampler
         @core.noteOff()
 
     readPattern: (@pattern_obj) ->
-        console.log(@pattern_obj)
         @pattern = @pattern_obj.pattern
         @pattern_name = @pattern_obj.name
         @view.readPattern(@pattern_obj)
 
     clearPattern: () ->
-        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @pattern = @pattern.concat([[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]])
         @pattern_obj.pattern = @pattern
         @view.readPattern(@pattern_obj)
 
     plusPattern: ->
-        @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        @pattern = @pattern.concat([[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]])
         @player.resetSceneLength()
 
     minusPattern: ->

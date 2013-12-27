@@ -294,7 +294,7 @@
         this.name = 'Sampler #' + this.id;
       }
       this.pattern_name = 'pattern 0';
-      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
       this.pattern_obj = {
         name: this.pattern_name,
         pattern: this.pattern
@@ -363,20 +363,19 @@
 
     Sampler.prototype.readPattern = function(pattern_obj) {
       this.pattern_obj = pattern_obj;
-      console.log(this.pattern_obj);
       this.pattern = this.pattern_obj.pattern;
       this.pattern_name = this.pattern_obj.name;
       return this.view.readPattern(this.pattern_obj);
     };
 
     Sampler.prototype.clearPattern = function() {
-      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern = this.pattern.concat([[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]);
       this.pattern_obj.pattern = this.pattern;
       return this.view.readPattern(this.pattern_obj);
     };
 
     Sampler.prototype.plusPattern = function() {
-      this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      this.pattern = this.pattern.concat([[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]);
       return this.player.resetSceneLength();
     };
 

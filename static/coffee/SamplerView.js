@@ -167,7 +167,7 @@
       this.core = this.dom.find('.sampler-core');
       this.is_panel_opened = true;
       this.keyboard = new SamplerKeyboardView(this);
-      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
       this.pattern_obj = {
         name: this.pattern_name.val(),
         pattern: this.pattern
@@ -192,7 +192,7 @@
     SamplerView.prototype.initCanvas = function() {
       var i, j, _i, _j, _ref, _ref1;
       this.canvas_hover.width = this.canvas_on.width = this.canvas_off.width = 832;
-      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 262;
+      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 260;
       this.rect = this.canvas_off.getBoundingClientRect();
       this.offset = {
         x: this.rect.left,
@@ -200,7 +200,7 @@
       };
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         for (j = _j = 0, _ref1 = this.cells_x; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; j = 0 <= _ref1 ? ++_j : --_j) {
-          this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
+          this.ctx_off.drawImage(this.cell, 0, 26, 26, 26, j * 26, i * 26, 26, 26);
         }
       }
       return this.readPattern(this.pattern_obj);
@@ -211,6 +211,7 @@
       this.rect = this.canvas_off.getBoundingClientRect();
       _x = Math.floor((e.clientX - this.rect.left) / 26);
       _y = Math.floor((e.clientY - this.rect.top) / 26);
+      _y = Math.min(9, _y);
       return {
         x: _x,
         y: _y,
@@ -227,7 +228,7 @@
         pos = _this.getPos(e);
         if (pos !== _this.hover_pos) {
           _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
-          _this.ctx_hover.drawImage(_this.cell, 52, 0, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
+          _this.ctx_hover.drawImage(_this.cell, 52, 26, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
           _this.hover_pos = pos;
         }
         if (_this.is_clicked && _this.click_pos !== pos) {
@@ -340,8 +341,7 @@
       }
       this.pattern[pos.x_abs].push([pos.note, gain]);
       this.model.addNote(pos.x_abs, pos.note, gain);
-      this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
-      return console.log(this.pattern);
+      return this.ctx_on.drawImage(this.cell, 26, 26, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
     };
 
     SamplerView.prototype.removeNote = function(pos) {
@@ -365,8 +365,8 @@
         this.drawPattern(this.time);
       }
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26);
-        this.ctx_off.drawImage(this.cell, 78, 0, 26, 26, (time % this.cells_x) * 26, i * 26, 26, 26);
+        this.ctx_off.drawImage(this.cell, 0, 26, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26);
+        this.ctx_off.drawImage(this.cell, 78, 26, 26, 26, (time % this.cells_x) * 26, i * 26, 26, 26);
       }
       return this.last_time = time;
     };
@@ -393,7 +393,7 @@
         for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
           j = _ref1[_j];
           y = this.cells_y - j[0];
-          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
+          this.ctx_on.drawImage(this.cell, 26, 26, 26, 26, i * 26, y * 26, 26, 26);
         }
       }
       return this.setMarker();
@@ -403,7 +403,7 @@
       if (this.page_total === 8) {
         return;
       }
-      this.pattern = this.pattern.concat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      this.pattern = this.pattern.concat([[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]);
       this.page_total++;
       this.model.plusPattern();
       this.drawPattern();
@@ -465,7 +465,7 @@
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26));
+        _results.push(this.ctx_off.drawImage(this.cell, 0, 26, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26));
       }
       return _results;
     };
@@ -498,7 +498,7 @@
         this.nosync.removeClass('btn-false').addClass('btn-true');
         _results = [];
         for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          _results.push(this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, (this.time % this.cells_x) * 26, i * 26, 26, 26));
+          _results.push(this.ctx_off.drawImage(this.cell, 0, 26, 26, 26, (this.time % this.cells_x) * 26, i * 26, 26, 26));
         }
         return _results;
       }
