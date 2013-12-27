@@ -1,101 +1,107 @@
 (function() {
-  this.VCO = (function() {
-    function VCO(ctx) {
+  this.SAMPLES = [
+    {
+      name: 'kick1',
+      url: 'static/wav/kick1.wav'
+    }, {
+      name: 'kick1',
+      url: 'static/wav/kick1.wav'
+    }, {
+      name: 'kick1',
+      url: 'static/wav/kick1.wav'
+    }, {
+      name: 'kick2',
+      url: 'static/wav/kick2.wav'
+    }, {
+      name: 'snare1',
+      url: 'static/wav/snare1.wav'
+    }, {
+      name: 'snare2',
+      url: 'static/wav/snare2.wav'
+    }, {
+      name: 'clap',
+      url: 'static/wav/clap.wav'
+    }, {
+      name: 'hat_closed',
+      url: 'static/wav/hat_closed.wav'
+    }, {
+      name: 'hat_open',
+      url: 'static/wav/hat_open.wav'
+    }, {
+      name: 'ride',
+      url: 'static/wav/ride.wav'
+    }
+  ];
+
+  this.BufferNode = (function() {
+    function BufferNode(ctx, num) {
+      var sample;
       this.ctx = ctx;
-      this.freq_key = 55;
-      this.octave = 4;
-      this.interval = 0;
-      this.fine = 0;
-      this.note = 0;
-      this.freq = Math.pow(2, this.octave) * this.freq_key;
-      this.node = this.ctx.createOscillator();
-      this.node.type = 'sine';
-      this.setFreq();
-      this.node.start(0);
+      this.node = this.ctx.createGain();
+      this.node.gain.value = 0.0;
+      sample = window.SAMPLES[num];
+      this.setSample(sample);
+      this.head = 0;
+      this.tail = 100;
+      this.speed = 1.0;
     }
 
-    VCO.prototype.setOctave = function(octave) {
-      this.octave = octave;
+    BufferNode.prototype.setSample = function(sample) {
+      var req,
+        _this = this;
+      if (sample.data != null) {
+        return this.buffer = sample.data;
+      } else {
+        req = new XMLHttpRequest();
+        req.open('GET', sample.url, true);
+        req.responseType = "arraybuffer";
+        req.onload = function() {
+          _this.ctx.decodeAudioData(req.response, function(buffer) {
+            _this.buffer = buffer;
+          }, function(err) {
+            console.log('ajax error');
+            return console.log(err);
+          });
+          return sample.data = _this.buffer;
+        };
+        return req.send();
+      }
     };
 
-    VCO.prototype.setFine = function(fine) {
-      this.fine = fine;
-      return this.node.detune.value = this.fine;
+    BufferNode.prototype.connect = function(dst) {
+      this.dst = dst;
+      return this.node.connect(this.dst);
     };
 
-    VCO.prototype.setNote = function(note) {
-      this.note = note;
+    BufferNode.prototype.noteOn = function(gain) {
+      var source;
+      if (this.buffer == null) {
+        return;
+      }
+      source = this.ctx.createBufferSource();
+      source.buffer = this.buffer;
+      source.connect(this.node);
+      if (gain != null) {
+        this.node.gain.value = gain;
+      }
+      return source.start(0);
     };
 
-    VCO.prototype.setKey = function(freq_key) {
-      this.freq_key = freq_key;
+    BufferNode.prototype.setParam = function(head, tail, speed) {
+      this.head = head;
+      this.tail = tail;
+      this.speed = speed;
     };
 
-    VCO.prototype.setInterval = function(interval) {
-      this.interval = interval;
+    BufferNode.prototype.getParam = function() {
+      return [this.head, this.tail, this.speed];
     };
 
-    VCO.prototype.setShape = function(shape) {
-      return this.node.type = OSC_TYPE[shape];
+    BufferNode.prototype.getData = function() {
+      return this.buffer;
     };
 
-    VCO.prototype.setFreq = function() {
-      this.freq = (Math.pow(2, this.octave) * Math.pow(SEMITONE, this.interval + this.note) * this.freq_key) + this.fine;
-      return this.node.frequency.setValueAtTime(this.freq, 0);
-    };
-
-    VCO.prototype.connect = function(dst) {
-      return this.node.connect(dst);
-    };
-
-    return VCO;
-
-  })();
-
-  this.EG = (function() {
-    function EG(target, min, max) {
-      this.target = target;
-      this.min = min;
-      this.max = max;
-      this.attack = 0;
-      this.decay = 0;
-      this.sustain = 0.0;
-      this.release = 0;
-    }
-
-    EG.prototype.getParam = function() {
-      return [this.attack, this.decay, this.sustain, this.release];
-    };
-
-    EG.prototype.setParam = function(attack, decay, sustain, release) {
-      this.attack = attack / 50000.0;
-      this.decay = decay / 50000.0;
-      this.sustain = sustain / 100.0;
-      return this.release = release / 50000.0;
-    };
-
-    EG.prototype.setRange = function(min, max) {
-      this.min = min;
-      this.max = max;
-    };
-
-    EG.prototype.getRange = function() {
-      return [this.min, this.max];
-    };
-
-    EG.prototype.noteOn = function(time) {
-      this.target.cancelScheduledValues(time);
-      this.target.setValueAtTime(this.min, time);
-      this.target.linearRampToValueAtTime(this.max, time + this.attack);
-      return this.target.linearRampToValueAtTime(this.sustain * (this.max - this.min) + this.min, time + this.attack + this.decay);
-    };
-
-    EG.prototype.noteOff = function(time) {
-      this.target.cancelScheduledValues(time);
-      return this.target.linearRampToValueAtTime(this.min, time + this.release);
-    };
-
-    return EG;
+    return BufferNode;
 
   })();
 
@@ -130,103 +136,90 @@
       this.ctx = ctx;
       this.id = id;
       this.node = this.ctx.createGain();
-      this.node.gain.value = 0;
+      this.node.gain.value = 1.0;
       this.gain = 1.0;
-      this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
-      this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
-      for (i = _i = 0; _i < 3; i = ++_i) {
-        this.vcos[i].connect(this.gains[i]);
-        this.gains[i].gain.value = 0;
+      this.nodes = (function() {
+        var _i, _results;
+        _results = [];
+        for (i = _i = 0; _i < 10; i = ++_i) {
+          _results.push(new BufferNode(this.ctx, i));
+        }
+        return _results;
+      }).call(this);
+      this.gains = (function() {
+        var _i, _results;
+        _results = [];
+        for (i = _i = 0; _i < 10; i = ++_i) {
+          _results.push(this.ctx.createGain());
+        }
+        return _results;
+      }).call(this);
+      for (i = _i = 0; _i < 10; i = ++_i) {
+        this.nodes[i].connect(this.gains[i]);
+        this.gains[i].gain.value = 1.0;
         this.gains[i].connect(this.node);
       }
-      this.filter = new ResFilter(this.ctx);
-      this.eg = new EG(this.node.gain, 0.0, this.gain);
-      this.feg = new EG(this.filter.lpf.frequency, 0, 0);
-      this.gain_res = this.ctx.createGain();
-      this.gain_res.gain.value = 0;
-      this.vcos[2].connect(this.gain_res);
-      this.gain_res.connect(this.node);
       this.view = new SamplerCoreView(this, id, this.parent.view.dom.find('.sampler-core'));
     }
 
-    SamplerCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
-      this.vcos[i].setShape(shape);
-      this.vcos[i].setOctave(oct);
-      this.vcos[i].setInterval(interval);
-      this.vcos[i].setFine(fine);
-      return this.vcos[i].setFreq();
+    SamplerCore.prototype.setSampleParam = function(i, head, tail, speed) {
+      return this.nodes[i].setParam(head, tail, speed);
     };
 
-    SamplerCore.prototype.setEGParam = function(a, d, s, r) {
-      return this.eg.setParam(a, d, s, r);
-    };
-
-    SamplerCore.prototype.setFEGParam = function(a, d, s, r) {
-      return this.feg.setParam(a, d, s, r);
-    };
-
-    SamplerCore.prototype.setFilterParam = function(freq, q) {
-      this.feg.setRange(80, Math.pow(freq / 1000, 2.0) * 25000 + 80);
-      this.filter.setQ(q);
-      if (q > 1) {
-        return this.gain_res.value = 0.1 * (q / 1000.0);
-      }
-    };
-
-    SamplerCore.prototype.setVCOGain = function(i, gain) {
-      return this.gains[i].gain.value = (gain / 100.0) * 0.3;
+    SamplerCore.prototype.setSampleGain = function(i, gain) {
+      return this.gains[i].gain.value = (gain / 100.0) * 0.11;
     };
 
     SamplerCore.prototype.setGain = function(gain) {
       this.gain = gain;
-      return this.eg.setRange(0.0, this.gain);
+      return this.node.gain.value = this.gain;
     };
 
-    SamplerCore.prototype.noteOn = function() {
-      var t0;
-      t0 = this.ctx.currentTime;
-      this.eg.noteOn(t0);
-      return this.feg.noteOn(t0);
+    SamplerCore.prototype.noteOn = function(notes) {
+      var n, _i, _len, _results;
+      if (Array.isArray(notes)) {
+        _results = [];
+        for (_i = 0, _len = notes.length; _i < _len; _i++) {
+          n = notes[_i];
+          _results.push(this.nodes[n[0]].noteOn(n[1]));
+        }
+        return _results;
+      } else {
+        return this.nodes[notes].noteOn(1);
+      }
     };
 
     SamplerCore.prototype.noteOff = function() {
       var t0;
-      t0 = this.ctx.currentTime;
-      this.eg.noteOff(t0);
-      return this.feg.noteOff(t0);
+      return t0 = this.ctx.currentTime;
     };
 
-    SamplerCore.prototype.setKey = function(key) {
-      var freq_key, v, _i, _len, _ref, _results;
-      freq_key = KEY_LIST[key];
-      _ref = this.vcos;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        v = _ref[_i];
-        _results.push(v.setKey(freq_key));
-      }
-      return _results;
-    };
+    SamplerCore.prototype.setKey = function(key) {};
 
-    SamplerCore.prototype.setScale = function(scale) {
-      this.scale = scale;
-    };
+    SamplerCore.prototype.setScale = function(scale) {};
 
     SamplerCore.prototype.connect = function(dst) {
-      this.node.connect(this.filter.lpf);
-      return this.filter.connect(dst);
+      return this.node.connect(dst);
     };
 
     SamplerCore.prototype.setNote = function(note) {
-      var v, _i, _len, _ref, _results;
-      _ref = this.vcos;
+      var n, _i, _len, _ref, _results;
+      _ref = this.nodes;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        v = _ref[_i];
-        v.setNote(note);
-        _results.push(v.setFreq());
+        n = _ref[_i];
+        n.setNote(note);
+        _results.push(n.setFreq());
       }
       return _results;
+    };
+
+    SamplerCore.prototype.getSampleParam = function(i) {
+      return this.nodes[i].getParam();
+    };
+
+    SamplerCore.prototype.getSampleData = function(i) {
+      return this.nodes[i].getData();
     };
 
     return SamplerCore;
@@ -243,13 +236,12 @@
         this.name = 'Sampler #' + this.id;
       }
       this.pattern_name = 'pattern 0';
-      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern = [[[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0];
       this.pattern_obj = {
         name: this.pattern_name,
         pattern: this.pattern
       };
       this.time = 0;
-      this.scale = [];
       this.view = new SamplerView(this, this.id);
       this.core = new SamplerCore(this, this.ctx, this.id);
       this.is_sustaining = false;
@@ -260,17 +252,11 @@
       return this.core.connect(dst);
     };
 
-    Sampler.prototype.setDuration = function(duration) {
-      this.duration = duration;
-    };
+    Sampler.prototype.setDuration = function() {};
 
-    Sampler.prototype.setKey = function(key) {
-      return this.core.setKey(key);
-    };
+    Sampler.prototype.setKey = function() {};
 
-    Sampler.prototype.setScale = function(scale_name) {
-      return this.scale = SCALE_LIST[scale_name];
-    };
+    Sampler.prototype.setScale = function() {};
 
     Sampler.prototype.setNote = function(note) {
       return this.core.setNote(note);
@@ -284,12 +270,8 @@
       return this.core.gain;
     };
 
-    Sampler.prototype.noteToSemitone = function(ival) {
-      return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
-    };
-
     Sampler.prototype.noteOn = function(note) {
-      this.core.setNote(this.noteToSemitone(note));
+      this.core.setNote(note);
       return this.core.noteOn();
     };
 
@@ -298,30 +280,13 @@
     };
 
     Sampler.prototype.playAt = function(time) {
-      var mytime, n,
-        _this = this;
+      var mytime, notes;
       this.time = time;
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
-      if (this.pattern[mytime] === 0) {
-        return this.core.noteOff();
-      } else if (this.pattern[mytime] === 'end') {
-        return T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
-      } else if (this.pattern[mytime] === 'sustain') {
-
-      } else if (this.pattern[mytime] < 0) {
-        this.is_sustaining = true;
-        n = -this.pattern[mytime];
-        this.core.setNote(this.noteToSemitone(n));
-        return this.core.noteOn();
-      } else {
-        this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
-        this.core.noteOn();
-        return T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
+      if (this.pattern[mytime] !== 0) {
+        notes = this.pattern[mytime];
+        return this.core.noteOn(notes);
       }
     };
 
@@ -367,19 +332,6 @@
 
     Sampler.prototype.removeNote = function(time) {
       return this.pattern[time] = 0;
-    };
-
-    Sampler.prototype.sustainNote = function(l, r, note) {
-      var i, _i;
-      if (l === r) {
-        this.pattern[l] = note;
-        return;
-      }
-      for (i = _i = l; l <= r ? _i < r : _i > r; i = l <= r ? ++_i : --_i) {
-        this.pattern[i] = 'sustain';
-      }
-      this.pattern[l] = -note;
-      return this.pattern[r] = 'end';
     };
 
     Sampler.prototype.activate = function(i) {

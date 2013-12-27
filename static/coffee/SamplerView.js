@@ -4,103 +4,62 @@
       this.model = model;
       this.id = id;
       this.dom = dom;
-      this.vcos = $(this.dom.find('.Sampler_VCO'));
-      this.EG_inputs = this.dom.find('.Sampler_EG input');
-      this.FEG_inputs = this.dom.find('.Sampler_FEG input');
-      this.filter_inputs = this.dom.find(".Sampler_filter input");
-      this.gain_inputs = this.dom.find('.Sampler_mixer input');
-      this.canvasEG = this.dom.find(".Sampler_EG .canvasEG").get()[0];
-      this.canvasFEG = this.dom.find(".Sampler_FEG .canvasFEG").get()[0];
-      this.contextEG = this.canvasEG.getContext('2d');
-      this.contextFEG = this.canvasFEG.getContext('2d');
+      this.sample = this.dom.find('.Sampler_sample');
+      this.canvas_waveform_dom = this.dom.find('.sampler-waveform');
+      this.canvas_waveform = this.canvas_waveform_dom[0];
+      this.ctx_waveform = this.canvas_waveform.getContext('2d');
+      this.sample_num = 0;
       this.initEvent();
     }
 
     SamplerCoreView.prototype.initEvent = function() {
       var _this = this;
-      this.vcos.on("change", function() {
-        return _this.setVCOParam();
-      });
-      this.gain_inputs.on("change", function() {
-        return _this.setGains();
-      });
-      this.filter_inputs.on("change", function() {
-        return _this.setFilterParam();
-      });
-      this.EG_inputs.on("change", function() {
-        return _this.setEGParam();
-      });
-      this.FEG_inputs.on("change", function() {
-        return _this.setFEGParam();
+      this.sample.on("change", function() {
+        _this.setSampleParam();
+        return _this.updateCanvas();
       });
       return this.setParam();
     };
 
-    SamplerCoreView.prototype.updateCanvas = function(name) {
-      var adsr, canvas, context, h, w, w4;
-      canvas = null;
-      context = null;
-      adsr = null;
-      if (name === "EG") {
-        canvas = this.canvasEG;
-        context = this.contextEG;
-        adsr = this.model.eg.getParam();
-      } else {
-        canvas = this.canvasFEG;
-        context = this.contextFEG;
-        adsr = this.model.feg.getParam();
+    SamplerCoreView.prototype.updateCanvas = function() {
+      var canvas, ctx, d, h, hts, w, wave, x, y, _wave;
+      canvas = this.canvas_waveform;
+      ctx = this.ctx_waveform;
+      hts = this.model.getSampleParam(this.sample_num);
+      _wave = this.model.getSampleData(this.sample_num);
+      wave = _wave.getChannelData(0);
+      console.log('w length: ' + wave.length);
+      w = canvas.width = 300;
+      h = canvas.height = 180;
+      ctx.clearRect(0, 0, w, h);
+      ctx.translate(0, 90);
+      ctx.beginPath();
+      d = wave.length / w;
+      x = 0;
+      while (x < w) {
+        y = wave[x * d] * h;
+        console.log('y: ' + y);
+        ctx.lineTo(x, y);
+        x++;
       }
-      w = canvas.width = 180;
-      h = canvas.height = 50;
-      w4 = w / 4;
-      context.clearRect(0, 0, w, h);
-      context.beginPath();
-      context.moveTo(w4 * (1.0 - adsr[0]), h);
-      context.lineTo(w / 4, 0);
-      context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));
-      context.lineTo(w4 * 3, h * (1.0 - adsr[2]));
-      context.lineTo(w4 * (adsr[3] + 3), h);
-      context.strokeStyle = 'rgb(0, 220, 255)';
-      return context.stroke();
+      ctx.closePath();
+      ctx.strokeStyle = 'rgb(255, 0, 220)';
+      return ctx.stroke();
     };
 
-    SamplerCoreView.prototype.setParam = function() {
-      this.setVCOParam();
-      this.setEGParam();
-      this.setFEGParam();
-      this.setFilterParam();
-      return this.setGains();
-    };
+    SamplerCoreView.prototype.setParam = function() {};
 
-    SamplerCoreView.prototype.setVCOParam = function() {
-      var i, vco, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        vco = this.vcos.eq(i);
-        _results.push(this.model.setVCOParam(i, vco.find('.shape').val(), parseInt(vco.find('.octave').val()), parseInt(vco.find('.interval').val()), parseInt(vco.find('.fine').val())));
-      }
-      return _results;
-    };
-
-    SamplerCoreView.prototype.setEGParam = function() {
-      this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
-      return this.updateCanvas("EG");
-    };
-
-    SamplerCoreView.prototype.setFEGParam = function() {
-      this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
-      return this.updateCanvas("FEG");
-    };
-
-    SamplerCoreView.prototype.setFilterParam = function() {
-      return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
+    SamplerCoreView.prototype.setSampleParam = function() {
+      var i;
+      i = this.sample_num;
+      return this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()), parseFloat(this.sample.find('.tail').val()), parseFloat(this.sample.find('.speed').val()));
     };
 
     SamplerCoreView.prototype.setGains = function() {
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
+        _results.push(this.model.setNodeGain(i, parseInt(this.gain_inputs.eq(i).val())));
       }
       return _results;
     };
@@ -122,9 +81,6 @@
       this.pattern_name = this.dom.find('.pattern-name');
       this.pattern_name.val(this.model.pattern_name);
       this.synth_type = this.dom.find('.synth-type');
-      this.pencil = this.dom.find('.sequencer-pencil');
-      this.step = this.dom.find('.sequencer-step');
-      this.is_step = false;
       this.header = this.dom.find('.header');
       this.markers = this.dom.find('.markers');
       this.pos_markers = this.dom.find('.marker');
@@ -151,11 +107,11 @@
         return _this.initCanvas();
       };
       this.cells_x = 32;
-      this.cells_y = 20;
+      this.cells_y = 10;
       this.fold = this.dom.find('.btn-fold-core');
       this.core = this.dom.find('.sampler-core');
       this.is_panel_opened = true;
-      this.keyboard = new KeyboardView(this);
+      this.keyboard = new SamplerKeyboardView(this);
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.page = 0;
       this.page_total = 1;
@@ -176,7 +132,7 @@
     SamplerView.prototype.initCanvas = function() {
       var i, j, _i, _j, _ref, _ref1;
       this.canvas_hover.width = this.canvas_on.width = this.canvas_off.width = 832;
-      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 520;
+      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 262;
       this.rect = this.canvas_off.getBoundingClientRect();
       this.offset = {
         x: this.rect.left,
@@ -215,16 +171,10 @@
           _this.hover_pos = pos;
         }
         if (_this.is_clicked && _this.click_pos !== pos) {
-          if (_this.is_sustaining) {
-            _this.sustain_l = Math.min(pos.x_abs, _this.sustain_l);
-            _this.sustain_r = Math.max(pos.x_abs, _this.sustain_r);
-            _this.sustainNote(_this.sustain_l, _this.sustain_r, pos);
-          } else {
-            if (_this.is_adding) {
-              _this.addNote(pos);
-            } else if (_this.pattern[pos.x_abs] === pos.note) {
-              _this.removeNote(pos);
-            }
+          if (_this.is_adding) {
+            _this.addNote(pos);
+          } else if (_this.pattern[pos.x_abs] === pos.note) {
+            _this.removeNote(pos);
           }
           return _this.click_pos = pos;
         }
@@ -232,33 +182,15 @@
         var pos;
         _this.is_clicked = true;
         pos = _this.getPos(e);
-        if (!_this.is_step) {
-          if (_this.pattern[pos.x_abs] === 'sustain' || _this.pattern[pos.x_abs] === 'end') {
-            _this.addNote(pos);
-            _this.sustain_l = _this.sustain_r = pos.x_abs;
-            return _this.is_sustaining = true;
-          } else {
-            _this.addNote(pos);
-            _this.sustain_l = _this.sustain_r = pos.x_abs;
-            return _this.is_sustaining = true;
-          }
+        if (_this.pattern[pos.x_abs] === pos.note) {
+          return _this.removeNote(pos);
         } else {
-          if (_this.pattern[pos.x_abs] === pos.note) {
-            return _this.removeNote(pos);
-          } else {
-            _this.is_adding = true;
-            return _this.addNote(pos);
-          }
+          _this.is_adding = true;
+          return _this.addNote(pos);
         }
       }).on('mouseup', function(e) {
-        var pos;
         _this.is_clicked = false;
-        if (!_this.is_step) {
-          pos = _this.getPos(e);
-          return _this.is_sustaining = false;
-        } else {
-          return _this.is_adding = false;
-        }
+        return _this.is_adding = false;
       }).on('mouseout', function(e) {
         _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
         _this.hover_pos = {
@@ -285,12 +217,6 @@
       })).on('change', (function() {
         return _this.model.setPatternName(_this.pattern_name.val());
       }));
-      this.pencil.on('click', (function() {
-        return _this.pencilMode();
-      }));
-      this.step.on('click', (function() {
-        return _this.stepMode();
-      }));
       this.marker_prev.on('click', (function() {
         return _this.model.player.backward(true);
       }));
@@ -311,7 +237,7 @@
       return this.fold.on('mousedown', function() {
         if (_this.is_panel_opened) {
           _this.core.css('height', '0px');
-          _this.table_wrapper.css('height', '524px');
+          _this.table_wrapper.css('height', '262px');
           _this.fold.css({
             top: '-22px',
             padding: '0px 5px 0px 0px'
@@ -330,28 +256,6 @@
     };
 
     SamplerView.prototype.addNote = function(pos) {
-      var i, y;
-      if (this.pattern[pos.x_abs] === 'end' || this.pattern[pos.x_abs] === 'sustain') {
-        i = pos.x_abs - 1;
-        while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
-          i--;
-        }
-        this.ctx_on.clearRect(((pos.x_abs - 1) % this.cells_x) * 26, 0, 26, 1000);
-        y = this.cells_y + this.pattern[i];
-        if (this.pattern[pos.x_abs - 1] < 0) {
-          this.pattern[pos.x_abs - 1] = -this.pattern[pos.x_abs - 1];
-          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
-        } else {
-          this.pattern[pos.x_abs - 1] = 'end';
-          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
-        }
-      }
-      i = pos.x_abs + 1;
-      while (this.pattern[i] === 'end' || this.pattern[i] === 'sustain') {
-        this.pattern[i] = 0;
-        i++;
-      }
-      this.ctx_on.clearRect(pos.x * 26, 0, (i - pos.x_abs) * 26, 1000);
       this.pattern[pos.x_abs] = pos.note;
       this.model.addNote(pos.x_abs, pos.note);
       this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
@@ -364,62 +268,6 @@
       return this.model.removeNote(pos.x_abs);
     };
 
-    SamplerView.prototype.sustainNote = function(l, r, pos) {
-      var i, y, _i, _j, _ref;
-      if (l === r) {
-        this.addNote(pos);
-        return;
-      }
-      for (i = _i = l; l <= r ? _i <= r : _i >= r; i = l <= r ? ++_i : --_i) {
-        this.ctx_on.clearRect((i % this.cells_x) * 26, 0, 26, 1000);
-      }
-      for (i = _j = _ref = l + 1; _ref <= r ? _j < r : _j > r; i = _ref <= r ? ++_j : --_j) {
-        this.pattern[i] = 'sustain';
-        this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, (i % this.cells_x) * 26, pos.y * 26, 26, 26);
-      }
-      if (this.pattern[l] === 'sustain' || this.pattern[l] === 'end') {
-        i = l - 1;
-        while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
-          i--;
-        }
-        this.ctx_on.clearRect(((l - 1) % this.cells_x) * 26, 0, 26, 1000);
-        y = this.cells_y + this.pattern[i];
-        if (this.pattern[l - 1] < 0) {
-          this.pattern[l - 1] = -this.pattern[l - 1];
-          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((l - 1) % this.cells_x) * 26, y * 26, 26, 26);
-        } else {
-          this.pattern[l - 1] = 'end';
-          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, ((l - 1) % this.cells_x) * 26, y * 26, 26, 26);
-        }
-      }
-      if (this.pattern[r] < 0) {
-        y = this.cells_y + this.pattern[r];
-        if (this.pattern[r + 1] === 'end') {
-          this.pattern[r + 1] = -this.pattern[r];
-          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
-        } else {
-          this.pattern[r + 1] = this.pattern[r];
-          this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
-        }
-      }
-      this.pattern[l] = -pos.note;
-      this.pattern[r] = 'end';
-      this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, (l % this.cells_x) * 26, pos.y * 26, 26, 26);
-      this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, (r % this.cells_x) * 26, pos.y * 26, 26, 26);
-      return this.model.sustainNote(l, r, pos.note);
-    };
-
-    SamplerView.prototype.endSustain = function(time) {
-      if (this.is_sustaining) {
-        if (this.pattern[time - 1] === 'sustain') {
-          this.pattern[time - 1] = 'end';
-        } else {
-          this.pattern[time - 1] *= -1;
-        }
-        return this.is_sustaining = false;
-      }
-    };
-
     SamplerView.prototype.playAt = function(time) {
       var i, _i, _ref;
       this.time = time;
@@ -427,7 +275,6 @@
         return;
       }
       if (this.time % this.cells_x === 0) {
-        this.endSustain();
         this.drawPattern(this.time);
       }
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -448,29 +295,15 @@
     };
 
     SamplerView.prototype.drawPattern = function(time) {
-      var i, last_y, note, y, _i, _ref;
+      var i, y, _i, _ref;
       if (time != null) {
         this.time = time;
       }
       this.page = Math.floor(this.time / this.cells_x);
-      this.ctx_on.clearRect(0, 0, 832, 520);
-      last_y = 0;
+      this.ctx_on.clearRect(0, 0, 832, 262);
       for (i = _i = 0, _ref = this.cells_x; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        note = this.pattern[this.page * this.cells_x + i];
-        if (note === 'sustain') {
-          this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, i * 26, last_y * 26, 26, 26);
-        } else if (note === 'end') {
-          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, i * 26, last_y * 26, 26, 26);
-          last_y = 0;
-        } else if (note < 0) {
-          y = this.cells_y + note;
-          this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, i * 26, y * 26, 26, 26);
-          last_y = y;
-        } else {
-          y = this.cells_y - note;
-          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
-          last_y = y;
-        }
+        y = this.cells_y - this.pattern[this.page * this.cells_x + i];
+        this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
       }
       return this.setMarker();
     };
@@ -580,31 +413,19 @@
       }
     };
 
-    SamplerView.prototype.pencilMode = function() {
-      this.is_step = false;
-      this.pencil.removeClass('btn-false').addClass('btn-true');
-      return this.step.removeClass('btn-true').addClass('btn-false');
-    };
-
-    SamplerView.prototype.stepMode = function() {
-      this.is_step = true;
-      this.step.removeClass('btn-false').addClass('btn-true');
-      return this.pencil.removeClass('btn-true').addClass('btn-false');
-    };
-
     return SamplerView;
 
   })();
 
-  this.KeyboardView = (function() {
-    function KeyboardView(sequencer) {
+  this.SamplerKeyboardView = (function() {
+    function SamplerKeyboardView(sequencer) {
       this.sequencer = sequencer;
       this.dom = this.sequencer.dom.find('.keyboard');
       this.canvas = this.dom[0];
       this.ctx = this.canvas.getContext('2d');
       this.w = 48;
       this.h = 26;
-      this.num = 20;
+      this.num = 10;
       this.color = ['rgba(230, 230, 230, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
       this.is_clicked = false;
       this.hover_pos = {
@@ -619,7 +440,7 @@
       this.initEvent();
     }
 
-    KeyboardView.prototype.initCanvas = function() {
+    SamplerKeyboardView.prototype.initCanvas = function() {
       var i, _i, _ref, _results;
       this.canvas.width = this.w;
       this.canvas.height = this.h * this.num;
@@ -637,12 +458,12 @@
       return _results;
     };
 
-    KeyboardView.prototype.getPos = function(e) {
+    SamplerKeyboardView.prototype.getPos = function(e) {
       this.rect = this.canvas.getBoundingClientRect();
       return Math.floor((e.clientY - this.rect.top) / this.h);
     };
 
-    KeyboardView.prototype.initEvent = function() {
+    SamplerKeyboardView.prototype.initEvent = function() {
       var _this = this;
       return this.dom.on('mousemove', function(e) {
         var pos;
@@ -688,7 +509,7 @@
       });
     };
 
-    KeyboardView.prototype.drawNormal = function(i) {
+    SamplerKeyboardView.prototype.drawNormal = function(i) {
       this.clearNormal(i);
       this.ctx.fillStyle = this.color[0];
       this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
@@ -696,13 +517,13 @@
       return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
     };
 
-    KeyboardView.prototype.drawHover = function(i) {
+    SamplerKeyboardView.prototype.drawHover = function(i) {
       this.ctx.fillStyle = this.color[1];
       this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
       return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
     };
 
-    KeyboardView.prototype.drawActive = function(i) {
+    SamplerKeyboardView.prototype.drawActive = function(i) {
       this.clearNormal(i);
       this.ctx.fillStyle = this.color[2];
       this.ctx.fillRect(0, i * this.h, this.w, this.h);
@@ -710,22 +531,22 @@
       return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
     };
 
-    KeyboardView.prototype.clearNormal = function(i) {
+    SamplerKeyboardView.prototype.clearNormal = function(i) {
       return this.ctx.clearRect(0, i * this.h, this.w, this.h);
     };
 
-    KeyboardView.prototype.clearActive = function(i) {
+    SamplerKeyboardView.prototype.clearActive = function(i) {
       this.clearNormal(i);
       this.drawNormal(i);
       return this.drawText(i);
     };
 
-    KeyboardView.prototype.drawText = function(i) {
+    SamplerKeyboardView.prototype.drawText = function(i) {
       this.ctx.fillStyle = this.color[3];
       return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
     };
 
-    return KeyboardView;
+    return SamplerKeyboardView;
 
   })();
 

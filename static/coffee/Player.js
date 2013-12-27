@@ -190,9 +190,11 @@
         this.session.addSynth(s, scene_pos);
       } else if (type === 'SAMPLER') {
         s_new = new Sampler(this.context, id, this, name);
+        this.mixer.changeSynth(id, s_new);
       }
       this.synth[id] = s_new;
       s_old.replaceWith(s_new);
+      s_old.noteOff();
       return s_new;
     };
 

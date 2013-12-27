@@ -462,9 +462,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.session.addSynth(s, scene_pos);
       } else if (type === 'SAMPLER') {
         s_new = new Sampler(this.context, id, this, name);
+        this.mixer.changeSynth(id, s_new);
       }
       this.synth[id] = s_new;
       s_old.replaceWith(s_new);
+      s_old.noteOff();
       return s_new;
     };
 
@@ -783,103 +785,109 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
-  this.VCO = (function() {
-    function VCO(ctx) {
+  this.SAMPLES = [
+    {
+      name: 'kick1',
+      url: 'static/wav/kick1.wav'
+    }, {
+      name: 'kick1',
+      url: 'static/wav/kick1.wav'
+    }, {
+      name: 'kick1',
+      url: 'static/wav/kick1.wav'
+    }, {
+      name: 'kick2',
+      url: 'static/wav/kick2.wav'
+    }, {
+      name: 'snare1',
+      url: 'static/wav/snare1.wav'
+    }, {
+      name: 'snare2',
+      url: 'static/wav/snare2.wav'
+    }, {
+      name: 'clap',
+      url: 'static/wav/clap.wav'
+    }, {
+      name: 'hat_closed',
+      url: 'static/wav/hat_closed.wav'
+    }, {
+      name: 'hat_open',
+      url: 'static/wav/hat_open.wav'
+    }, {
+      name: 'ride',
+      url: 'static/wav/ride.wav'
+    }
+  ];
+
+  this.BufferNode = (function() {
+    function BufferNode(ctx, num) {
+      var sample;
       this.ctx = ctx;
-      this.freq_key = 55;
-      this.octave = 4;
-      this.interval = 0;
-      this.fine = 0;
-      this.note = 0;
-      this.freq = Math.pow(2, this.octave) * this.freq_key;
-      this.node = this.ctx.createOscillator();
-      this.node.type = 'sine';
-      this.setFreq();
-      this.node.start(0);
+      this.node = this.ctx.createGain();
+      this.node.gain.value = 0.0;
+      sample = window.SAMPLES[num];
+      this.setSample(sample);
+      this.head = 0;
+      this.tail = 100;
+      this.speed = 1.0;
     }
 
-    VCO.prototype.setOctave = function(octave) {
-      this.octave = octave;
+    BufferNode.prototype.setSample = function(sample) {
+      var req,
+        _this = this;
+      if (sample.data != null) {
+        return this.buffer = sample.data;
+      } else {
+        req = new XMLHttpRequest();
+        req.open('GET', sample.url, true);
+        req.responseType = "arraybuffer";
+        req.onload = function() {
+          _this.ctx.decodeAudioData(req.response, function(buffer) {
+            _this.buffer = buffer;
+          }, function(err) {
+            console.log('ajax error');
+            return console.log(err);
+          });
+          return sample.data = _this.buffer;
+        };
+        return req.send();
+      }
     };
 
-    VCO.prototype.setFine = function(fine) {
-      this.fine = fine;
-      return this.node.detune.value = this.fine;
+    BufferNode.prototype.connect = function(dst) {
+      this.dst = dst;
+      return this.node.connect(this.dst);
     };
 
-    VCO.prototype.setNote = function(note) {
-      this.note = note;
+    BufferNode.prototype.noteOn = function(gain) {
+      var source;
+      if (this.buffer == null) {
+        return;
+      }
+      source = this.ctx.createBufferSource();
+      source.buffer = this.buffer;
+      source.connect(this.node);
+      if (gain != null) {
+        this.node.gain.value = gain;
+      }
+      return source.start(0);
     };
 
-    VCO.prototype.setKey = function(freq_key) {
-      this.freq_key = freq_key;
+    BufferNode.prototype.setParam = function(head, tail, speed) {
+      this.head = head;
+      this.tail = tail;
+      this.speed = speed;
     };
 
-    VCO.prototype.setInterval = function(interval) {
-      this.interval = interval;
+    BufferNode.prototype.getParam = function() {
+      return [this.head, this.tail, this.speed];
     };
 
-    VCO.prototype.setShape = function(shape) {
-      return this.node.type = OSC_TYPE[shape];
+    BufferNode.prototype.getData = function() {
+      return this.buffer;
     };
 
-    VCO.prototype.setFreq = function() {
-      this.freq = (Math.pow(2, this.octave) * Math.pow(SEMITONE, this.interval + this.note) * this.freq_key) + this.fine;
-      return this.node.frequency.setValueAtTime(this.freq, 0);
-    };
-
-    VCO.prototype.connect = function(dst) {
-      return this.node.connect(dst);
-    };
-
-    return VCO;
-
-  })();
-
-  this.EG = (function() {
-    function EG(target, min, max) {
-      this.target = target;
-      this.min = min;
-      this.max = max;
-      this.attack = 0;
-      this.decay = 0;
-      this.sustain = 0.0;
-      this.release = 0;
-    }
-
-    EG.prototype.getParam = function() {
-      return [this.attack, this.decay, this.sustain, this.release];
-    };
-
-    EG.prototype.setParam = function(attack, decay, sustain, release) {
-      this.attack = attack / 50000.0;
-      this.decay = decay / 50000.0;
-      this.sustain = sustain / 100.0;
-      return this.release = release / 50000.0;
-    };
-
-    EG.prototype.setRange = function(min, max) {
-      this.min = min;
-      this.max = max;
-    };
-
-    EG.prototype.getRange = function() {
-      return [this.min, this.max];
-    };
-
-    EG.prototype.noteOn = function(time) {
-      this.target.cancelScheduledValues(time);
-      this.target.setValueAtTime(this.min, time);
-      this.target.linearRampToValueAtTime(this.max, time + this.attack);
-      return this.target.linearRampToValueAtTime(this.sustain * (this.max - this.min) + this.min, time + this.attack + this.decay);
-    };
-
-    EG.prototype.noteOff = function(time) {
-      this.target.cancelScheduledValues(time);
-      return this.target.linearRampToValueAtTime(this.min, time + this.release);
-    };
-
-    return EG;
+    return BufferNode;
 
   })();
 
@@ -914,103 +922,90 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx = ctx;
       this.id = id;
       this.node = this.ctx.createGain();
-      this.node.gain.value = 0;
+      this.node.gain.value = 1.0;
       this.gain = 1.0;
-      this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
-      this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
-      for (i = _i = 0; _i < 3; i = ++_i) {
-        this.vcos[i].connect(this.gains[i]);
-        this.gains[i].gain.value = 0;
+      this.nodes = (function() {
+        var _i, _results;
+        _results = [];
+        for (i = _i = 0; _i < 10; i = ++_i) {
+          _results.push(new BufferNode(this.ctx, i));
+        }
+        return _results;
+      }).call(this);
+      this.gains = (function() {
+        var _i, _results;
+        _results = [];
+        for (i = _i = 0; _i < 10; i = ++_i) {
+          _results.push(this.ctx.createGain());
+        }
+        return _results;
+      }).call(this);
+      for (i = _i = 0; _i < 10; i = ++_i) {
+        this.nodes[i].connect(this.gains[i]);
+        this.gains[i].gain.value = 1.0;
         this.gains[i].connect(this.node);
       }
-      this.filter = new ResFilter(this.ctx);
-      this.eg = new EG(this.node.gain, 0.0, this.gain);
-      this.feg = new EG(this.filter.lpf.frequency, 0, 0);
-      this.gain_res = this.ctx.createGain();
-      this.gain_res.gain.value = 0;
-      this.vcos[2].connect(this.gain_res);
-      this.gain_res.connect(this.node);
       this.view = new SamplerCoreView(this, id, this.parent.view.dom.find('.sampler-core'));
     }
 
-    SamplerCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
-      this.vcos[i].setShape(shape);
-      this.vcos[i].setOctave(oct);
-      this.vcos[i].setInterval(interval);
-      this.vcos[i].setFine(fine);
-      return this.vcos[i].setFreq();
+    SamplerCore.prototype.setSampleParam = function(i, head, tail, speed) {
+      return this.nodes[i].setParam(head, tail, speed);
     };
 
-    SamplerCore.prototype.setEGParam = function(a, d, s, r) {
-      return this.eg.setParam(a, d, s, r);
-    };
-
-    SamplerCore.prototype.setFEGParam = function(a, d, s, r) {
-      return this.feg.setParam(a, d, s, r);
-    };
-
-    SamplerCore.prototype.setFilterParam = function(freq, q) {
-      this.feg.setRange(80, Math.pow(freq / 1000, 2.0) * 25000 + 80);
-      this.filter.setQ(q);
-      if (q > 1) {
-        return this.gain_res.value = 0.1 * (q / 1000.0);
-      }
-    };
-
-    SamplerCore.prototype.setVCOGain = function(i, gain) {
-      return this.gains[i].gain.value = (gain / 100.0) * 0.3;
+    SamplerCore.prototype.setSampleGain = function(i, gain) {
+      return this.gains[i].gain.value = (gain / 100.0) * 0.11;
     };
 
     SamplerCore.prototype.setGain = function(gain) {
       this.gain = gain;
-      return this.eg.setRange(0.0, this.gain);
+      return this.node.gain.value = this.gain;
     };
 
-    SamplerCore.prototype.noteOn = function() {
-      var t0;
-      t0 = this.ctx.currentTime;
-      this.eg.noteOn(t0);
-      return this.feg.noteOn(t0);
+    SamplerCore.prototype.noteOn = function(notes) {
+      var n, _i, _len, _results;
+      if (Array.isArray(notes)) {
+        _results = [];
+        for (_i = 0, _len = notes.length; _i < _len; _i++) {
+          n = notes[_i];
+          _results.push(this.nodes[n[0]].noteOn(n[1]));
+        }
+        return _results;
+      } else {
+        return this.nodes[notes].noteOn(1);
+      }
     };
 
     SamplerCore.prototype.noteOff = function() {
       var t0;
-      t0 = this.ctx.currentTime;
-      this.eg.noteOff(t0);
-      return this.feg.noteOff(t0);
+      return t0 = this.ctx.currentTime;
     };
 
-    SamplerCore.prototype.setKey = function(key) {
-      var freq_key, v, _i, _len, _ref, _results;
-      freq_key = KEY_LIST[key];
-      _ref = this.vcos;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        v = _ref[_i];
-        _results.push(v.setKey(freq_key));
-      }
-      return _results;
-    };
+    SamplerCore.prototype.setKey = function(key) {};
 
-    SamplerCore.prototype.setScale = function(scale) {
-      this.scale = scale;
-    };
+    SamplerCore.prototype.setScale = function(scale) {};
 
     SamplerCore.prototype.connect = function(dst) {
-      this.node.connect(this.filter.lpf);
-      return this.filter.connect(dst);
+      return this.node.connect(dst);
     };
 
     SamplerCore.prototype.setNote = function(note) {
-      var v, _i, _len, _ref, _results;
-      _ref = this.vcos;
+      var n, _i, _len, _ref, _results;
+      _ref = this.nodes;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        v = _ref[_i];
-        v.setNote(note);
-        _results.push(v.setFreq());
+        n = _ref[_i];
+        n.setNote(note);
+        _results.push(n.setFreq());
       }
       return _results;
+    };
+
+    SamplerCore.prototype.getSampleParam = function(i) {
+      return this.nodes[i].getParam();
+    };
+
+    SamplerCore.prototype.getSampleData = function(i) {
+      return this.nodes[i].getData();
     };
 
     return SamplerCore;
@@ -1027,13 +1022,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.name = 'Sampler #' + this.id;
       }
       this.pattern_name = 'pattern 0';
-      this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern = [[[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0, [[1, 1], [6, 1]], 0, 0, 0, [[7, 1]], 0, 0, 0];
       this.pattern_obj = {
         name: this.pattern_name,
         pattern: this.pattern
       };
       this.time = 0;
-      this.scale = [];
       this.view = new SamplerView(this, this.id);
       this.core = new SamplerCore(this, this.ctx, this.id);
       this.is_sustaining = false;
@@ -1044,17 +1038,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.core.connect(dst);
     };
 
-    Sampler.prototype.setDuration = function(duration) {
-      this.duration = duration;
-    };
+    Sampler.prototype.setDuration = function() {};
 
-    Sampler.prototype.setKey = function(key) {
-      return this.core.setKey(key);
-    };
+    Sampler.prototype.setKey = function() {};
 
-    Sampler.prototype.setScale = function(scale_name) {
-      return this.scale = SCALE_LIST[scale_name];
-    };
+    Sampler.prototype.setScale = function() {};
 
     Sampler.prototype.setNote = function(note) {
       return this.core.setNote(note);
@@ -1068,12 +1056,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.core.gain;
     };
 
-    Sampler.prototype.noteToSemitone = function(ival) {
-      return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
-    };
-
     Sampler.prototype.noteOn = function(note) {
-      this.core.setNote(this.noteToSemitone(note));
+      this.core.setNote(note);
       return this.core.noteOn();
     };
 
@@ -1082,30 +1066,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Sampler.prototype.playAt = function(time) {
-      var mytime, n,
-        _this = this;
+      var mytime, notes;
       this.time = time;
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
-      if (this.pattern[mytime] === 0) {
-        return this.core.noteOff();
-      } else if (this.pattern[mytime] === 'end') {
-        return T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
-      } else if (this.pattern[mytime] === 'sustain') {
-
-      } else if (this.pattern[mytime] < 0) {
-        this.is_sustaining = true;
-        n = -this.pattern[mytime];
-        this.core.setNote(this.noteToSemitone(n));
-        return this.core.noteOn();
-      } else {
-        this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
-        this.core.noteOn();
-        return T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
+      if (this.pattern[mytime] !== 0) {
+        notes = this.pattern[mytime];
+        return this.core.noteOn(notes);
       }
     };
 
@@ -1153,19 +1120,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.pattern[time] = 0;
     };
 
-    Sampler.prototype.sustainNote = function(l, r, note) {
-      var i, _i;
-      if (l === r) {
-        this.pattern[l] = note;
-        return;
-      }
-      for (i = _i = l; l <= r ? _i < r : _i > r; i = l <= r ? ++_i : --_i) {
-        this.pattern[i] = 'sustain';
-      }
-      this.pattern[l] = -note;
-      return this.pattern[r] = 'end';
-    };
-
     Sampler.prototype.activate = function(i) {
       return this.view.activate(i);
     };
@@ -1206,103 +1160,62 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.model = model;
       this.id = id;
       this.dom = dom;
-      this.vcos = $(this.dom.find('.Sampler_VCO'));
-      this.EG_inputs = this.dom.find('.Sampler_EG input');
-      this.FEG_inputs = this.dom.find('.Sampler_FEG input');
-      this.filter_inputs = this.dom.find(".Sampler_filter input");
-      this.gain_inputs = this.dom.find('.Sampler_mixer input');
-      this.canvasEG = this.dom.find(".Sampler_EG .canvasEG").get()[0];
-      this.canvasFEG = this.dom.find(".Sampler_FEG .canvasFEG").get()[0];
-      this.contextEG = this.canvasEG.getContext('2d');
-      this.contextFEG = this.canvasFEG.getContext('2d');
+      this.sample = this.dom.find('.Sampler_sample');
+      this.canvas_waveform_dom = this.dom.find('.sampler-waveform');
+      this.canvas_waveform = this.canvas_waveform_dom[0];
+      this.ctx_waveform = this.canvas_waveform.getContext('2d');
+      this.sample_num = 0;
       this.initEvent();
     }
 
     SamplerCoreView.prototype.initEvent = function() {
       var _this = this;
-      this.vcos.on("change", function() {
-        return _this.setVCOParam();
-      });
-      this.gain_inputs.on("change", function() {
-        return _this.setGains();
-      });
-      this.filter_inputs.on("change", function() {
-        return _this.setFilterParam();
-      });
-      this.EG_inputs.on("change", function() {
-        return _this.setEGParam();
-      });
-      this.FEG_inputs.on("change", function() {
-        return _this.setFEGParam();
+      this.sample.on("change", function() {
+        _this.setSampleParam();
+        return _this.updateCanvas();
       });
       return this.setParam();
     };
 
-    SamplerCoreView.prototype.updateCanvas = function(name) {
-      var adsr, canvas, context, h, w, w4;
-      canvas = null;
-      context = null;
-      adsr = null;
-      if (name === "EG") {
-        canvas = this.canvasEG;
-        context = this.contextEG;
-        adsr = this.model.eg.getParam();
-      } else {
-        canvas = this.canvasFEG;
-        context = this.contextFEG;
-        adsr = this.model.feg.getParam();
+    SamplerCoreView.prototype.updateCanvas = function() {
+      var canvas, ctx, d, h, hts, w, wave, x, y, _wave;
+      canvas = this.canvas_waveform;
+      ctx = this.ctx_waveform;
+      hts = this.model.getSampleParam(this.sample_num);
+      _wave = this.model.getSampleData(this.sample_num);
+      wave = _wave.getChannelData(0);
+      console.log('w length: ' + wave.length);
+      w = canvas.width = 300;
+      h = canvas.height = 180;
+      ctx.clearRect(0, 0, w, h);
+      ctx.translate(0, 90);
+      ctx.beginPath();
+      d = wave.length / w;
+      x = 0;
+      while (x < w) {
+        y = wave[x * d] * h;
+        console.log('y: ' + y);
+        ctx.lineTo(x, y);
+        x++;
       }
-      w = canvas.width = 180;
-      h = canvas.height = 50;
-      w4 = w / 4;
-      context.clearRect(0, 0, w, h);
-      context.beginPath();
-      context.moveTo(w4 * (1.0 - adsr[0]), h);
-      context.lineTo(w / 4, 0);
-      context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));
-      context.lineTo(w4 * 3, h * (1.0 - adsr[2]));
-      context.lineTo(w4 * (adsr[3] + 3), h);
-      context.strokeStyle = 'rgb(0, 220, 255)';
-      return context.stroke();
+      ctx.closePath();
+      ctx.strokeStyle = 'rgb(255, 0, 220)';
+      return ctx.stroke();
     };
 
-    SamplerCoreView.prototype.setParam = function() {
-      this.setVCOParam();
-      this.setEGParam();
-      this.setFEGParam();
-      this.setFilterParam();
-      return this.setGains();
-    };
+    SamplerCoreView.prototype.setParam = function() {};
 
-    SamplerCoreView.prototype.setVCOParam = function() {
-      var i, vco, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        vco = this.vcos.eq(i);
-        _results.push(this.model.setVCOParam(i, vco.find('.shape').val(), parseInt(vco.find('.octave').val()), parseInt(vco.find('.interval').val()), parseInt(vco.find('.fine').val())));
-      }
-      return _results;
-    };
-
-    SamplerCoreView.prototype.setEGParam = function() {
-      this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
-      return this.updateCanvas("EG");
-    };
-
-    SamplerCoreView.prototype.setFEGParam = function() {
-      this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
-      return this.updateCanvas("FEG");
-    };
-
-    SamplerCoreView.prototype.setFilterParam = function() {
-      return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
+    SamplerCoreView.prototype.setSampleParam = function() {
+      var i;
+      i = this.sample_num;
+      return this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()), parseFloat(this.sample.find('.tail').val()), parseFloat(this.sample.find('.speed').val()));
     };
 
     SamplerCoreView.prototype.setGains = function() {
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
+        _results.push(this.model.setNodeGain(i, parseInt(this.gain_inputs.eq(i).val())));
       }
       return _results;
     };
@@ -1324,9 +1237,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.pattern_name = this.dom.find('.pattern-name');
       this.pattern_name.val(this.model.pattern_name);
       this.synth_type = this.dom.find('.synth-type');
-      this.pencil = this.dom.find('.sequencer-pencil');
-      this.step = this.dom.find('.sequencer-step');
-      this.is_step = false;
       this.header = this.dom.find('.header');
       this.markers = this.dom.find('.markers');
       this.pos_markers = this.dom.find('.marker');
@@ -1353,11 +1263,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.initCanvas();
       };
       this.cells_x = 32;
-      this.cells_y = 20;
+      this.cells_y = 10;
       this.fold = this.dom.find('.btn-fold-core');
       this.core = this.dom.find('.sampler-core');
       this.is_panel_opened = true;
-      this.keyboard = new KeyboardView(this);
+      this.keyboard = new SamplerKeyboardView(this);
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.page = 0;
       this.page_total = 1;
@@ -1378,7 +1288,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SamplerView.prototype.initCanvas = function() {
       var i, j, _i, _j, _ref, _ref1;
       this.canvas_hover.width = this.canvas_on.width = this.canvas_off.width = 832;
-      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 520;
+      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 262;
       this.rect = this.canvas_off.getBoundingClientRect();
       this.offset = {
         x: this.rect.left,
@@ -1417,16 +1327,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           _this.hover_pos = pos;
         }
         if (_this.is_clicked && _this.click_pos !== pos) {
-          if (_this.is_sustaining) {
-            _this.sustain_l = Math.min(pos.x_abs, _this.sustain_l);
-            _this.sustain_r = Math.max(pos.x_abs, _this.sustain_r);
-            _this.sustainNote(_this.sustain_l, _this.sustain_r, pos);
-          } else {
-            if (_this.is_adding) {
-              _this.addNote(pos);
-            } else if (_this.pattern[pos.x_abs] === pos.note) {
-              _this.removeNote(pos);
-            }
+          if (_this.is_adding) {
+            _this.addNote(pos);
+          } else if (_this.pattern[pos.x_abs] === pos.note) {
+            _this.removeNote(pos);
           }
           return _this.click_pos = pos;
         }
@@ -1434,33 +1338,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         var pos;
         _this.is_clicked = true;
         pos = _this.getPos(e);
-        if (!_this.is_step) {
-          if (_this.pattern[pos.x_abs] === 'sustain' || _this.pattern[pos.x_abs] === 'end') {
-            _this.addNote(pos);
-            _this.sustain_l = _this.sustain_r = pos.x_abs;
-            return _this.is_sustaining = true;
-          } else {
-            _this.addNote(pos);
-            _this.sustain_l = _this.sustain_r = pos.x_abs;
-            return _this.is_sustaining = true;
-          }
+        if (_this.pattern[pos.x_abs] === pos.note) {
+          return _this.removeNote(pos);
         } else {
-          if (_this.pattern[pos.x_abs] === pos.note) {
-            return _this.removeNote(pos);
-          } else {
-            _this.is_adding = true;
-            return _this.addNote(pos);
-          }
+          _this.is_adding = true;
+          return _this.addNote(pos);
         }
       }).on('mouseup', function(e) {
-        var pos;
         _this.is_clicked = false;
-        if (!_this.is_step) {
-          pos = _this.getPos(e);
-          return _this.is_sustaining = false;
-        } else {
-          return _this.is_adding = false;
-        }
+        return _this.is_adding = false;
       }).on('mouseout', function(e) {
         _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
         _this.hover_pos = {
@@ -1487,12 +1373,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       })).on('change', (function() {
         return _this.model.setPatternName(_this.pattern_name.val());
       }));
-      this.pencil.on('click', (function() {
-        return _this.pencilMode();
-      }));
-      this.step.on('click', (function() {
-        return _this.stepMode();
-      }));
       this.marker_prev.on('click', (function() {
         return _this.model.player.backward(true);
       }));
@@ -1513,7 +1393,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.fold.on('mousedown', function() {
         if (_this.is_panel_opened) {
           _this.core.css('height', '0px');
-          _this.table_wrapper.css('height', '524px');
+          _this.table_wrapper.css('height', '262px');
           _this.fold.css({
             top: '-22px',
             padding: '0px 5px 0px 0px'
@@ -1532,28 +1412,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SamplerView.prototype.addNote = function(pos) {
-      var i, y;
-      if (this.pattern[pos.x_abs] === 'end' || this.pattern[pos.x_abs] === 'sustain') {
-        i = pos.x_abs - 1;
-        while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
-          i--;
-        }
-        this.ctx_on.clearRect(((pos.x_abs - 1) % this.cells_x) * 26, 0, 26, 1000);
-        y = this.cells_y + this.pattern[i];
-        if (this.pattern[pos.x_abs - 1] < 0) {
-          this.pattern[pos.x_abs - 1] = -this.pattern[pos.x_abs - 1];
-          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
-        } else {
-          this.pattern[pos.x_abs - 1] = 'end';
-          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, ((pos.x_abs - 1) % this.cells_x) * 26, y * 26, 26, 26);
-        }
-      }
-      i = pos.x_abs + 1;
-      while (this.pattern[i] === 'end' || this.pattern[i] === 'sustain') {
-        this.pattern[i] = 0;
-        i++;
-      }
-      this.ctx_on.clearRect(pos.x * 26, 0, (i - pos.x_abs) * 26, 1000);
       this.pattern[pos.x_abs] = pos.note;
       this.model.addNote(pos.x_abs, pos.note);
       this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
@@ -1566,62 +1424,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.model.removeNote(pos.x_abs);
     };
 
-    SamplerView.prototype.sustainNote = function(l, r, pos) {
-      var i, y, _i, _j, _ref;
-      if (l === r) {
-        this.addNote(pos);
-        return;
-      }
-      for (i = _i = l; l <= r ? _i <= r : _i >= r; i = l <= r ? ++_i : --_i) {
-        this.ctx_on.clearRect((i % this.cells_x) * 26, 0, 26, 1000);
-      }
-      for (i = _j = _ref = l + 1; _ref <= r ? _j < r : _j > r; i = _ref <= r ? ++_j : --_j) {
-        this.pattern[i] = 'sustain';
-        this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, (i % this.cells_x) * 26, pos.y * 26, 26, 26);
-      }
-      if (this.pattern[l] === 'sustain' || this.pattern[l] === 'end') {
-        i = l - 1;
-        while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
-          i--;
-        }
-        this.ctx_on.clearRect(((l - 1) % this.cells_x) * 26, 0, 26, 1000);
-        y = this.cells_y + this.pattern[i];
-        if (this.pattern[l - 1] < 0) {
-          this.pattern[l - 1] = -this.pattern[l - 1];
-          this.ctx_on.drawImage(this.cell, 0, 0, 26, 26, ((l - 1) % this.cells_x) * 26, y * 26, 26, 26);
-        } else {
-          this.pattern[l - 1] = 'end';
-          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, ((l - 1) % this.cells_x) * 26, y * 26, 26, 26);
-        }
-      }
-      if (this.pattern[r] < 0) {
-        y = this.cells_y + this.pattern[r];
-        if (this.pattern[r + 1] === 'end') {
-          this.pattern[r + 1] = -this.pattern[r];
-          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
-        } else {
-          this.pattern[r + 1] = this.pattern[r];
-          this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, ((r + 1) % this.cells_x) * 26, y * 26, 26, 26);
-        }
-      }
-      this.pattern[l] = -pos.note;
-      this.pattern[r] = 'end';
-      this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, (l % this.cells_x) * 26, pos.y * 26, 26, 26);
-      this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, (r % this.cells_x) * 26, pos.y * 26, 26, 26);
-      return this.model.sustainNote(l, r, pos.note);
-    };
-
-    SamplerView.prototype.endSustain = function(time) {
-      if (this.is_sustaining) {
-        if (this.pattern[time - 1] === 'sustain') {
-          this.pattern[time - 1] = 'end';
-        } else {
-          this.pattern[time - 1] *= -1;
-        }
-        return this.is_sustaining = false;
-      }
-    };
-
     SamplerView.prototype.playAt = function(time) {
       var i, _i, _ref;
       this.time = time;
@@ -1629,7 +1431,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return;
       }
       if (this.time % this.cells_x === 0) {
-        this.endSustain();
         this.drawPattern(this.time);
       }
       for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -1650,29 +1451,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SamplerView.prototype.drawPattern = function(time) {
-      var i, last_y, note, y, _i, _ref;
+      var i, y, _i, _ref;
       if (time != null) {
         this.time = time;
       }
       this.page = Math.floor(this.time / this.cells_x);
-      this.ctx_on.clearRect(0, 0, 832, 520);
-      last_y = 0;
+      this.ctx_on.clearRect(0, 0, 832, 262);
       for (i = _i = 0, _ref = this.cells_x; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        note = this.pattern[this.page * this.cells_x + i];
-        if (note === 'sustain') {
-          this.ctx_on.drawImage(this.cell, 130, 0, 26, 26, i * 26, last_y * 26, 26, 26);
-        } else if (note === 'end') {
-          this.ctx_on.drawImage(this.cell, 156, 0, 26, 26, i * 26, last_y * 26, 26, 26);
-          last_y = 0;
-        } else if (note < 0) {
-          y = this.cells_y + note;
-          this.ctx_on.drawImage(this.cell, 104, 0, 26, 26, i * 26, y * 26, 26, 26);
-          last_y = y;
-        } else {
-          y = this.cells_y - note;
-          this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
-          last_y = y;
-        }
+        y = this.cells_y - this.pattern[this.page * this.cells_x + i];
+        this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
       }
       return this.setMarker();
     };
@@ -1782,31 +1569,19 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
-    SamplerView.prototype.pencilMode = function() {
-      this.is_step = false;
-      this.pencil.removeClass('btn-false').addClass('btn-true');
-      return this.step.removeClass('btn-true').addClass('btn-false');
-    };
-
-    SamplerView.prototype.stepMode = function() {
-      this.is_step = true;
-      this.step.removeClass('btn-false').addClass('btn-true');
-      return this.pencil.removeClass('btn-true').addClass('btn-false');
-    };
-
     return SamplerView;
 
   })();
 
-  this.KeyboardView = (function() {
-    function KeyboardView(sequencer) {
+  this.SamplerKeyboardView = (function() {
+    function SamplerKeyboardView(sequencer) {
       this.sequencer = sequencer;
       this.dom = this.sequencer.dom.find('.keyboard');
       this.canvas = this.dom[0];
       this.ctx = this.canvas.getContext('2d');
       this.w = 48;
       this.h = 26;
-      this.num = 20;
+      this.num = 10;
       this.color = ['rgba(230, 230, 230, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
       this.is_clicked = false;
       this.hover_pos = {
@@ -1821,7 +1596,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.initEvent();
     }
 
-    KeyboardView.prototype.initCanvas = function() {
+    SamplerKeyboardView.prototype.initCanvas = function() {
       var i, _i, _ref, _results;
       this.canvas.width = this.w;
       this.canvas.height = this.h * this.num;
@@ -1839,12 +1614,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
-    KeyboardView.prototype.getPos = function(e) {
+    SamplerKeyboardView.prototype.getPos = function(e) {
       this.rect = this.canvas.getBoundingClientRect();
       return Math.floor((e.clientY - this.rect.top) / this.h);
     };
 
-    KeyboardView.prototype.initEvent = function() {
+    SamplerKeyboardView.prototype.initEvent = function() {
       var _this = this;
       return this.dom.on('mousemove', function(e) {
         var pos;
@@ -1890,7 +1665,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
-    KeyboardView.prototype.drawNormal = function(i) {
+    SamplerKeyboardView.prototype.drawNormal = function(i) {
       this.clearNormal(i);
       this.ctx.fillStyle = this.color[0];
       this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
@@ -1898,13 +1673,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
     };
 
-    KeyboardView.prototype.drawHover = function(i) {
+    SamplerKeyboardView.prototype.drawHover = function(i) {
       this.ctx.fillStyle = this.color[1];
       this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
       return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
     };
 
-    KeyboardView.prototype.drawActive = function(i) {
+    SamplerKeyboardView.prototype.drawActive = function(i) {
       this.clearNormal(i);
       this.ctx.fillStyle = this.color[2];
       this.ctx.fillRect(0, i * this.h, this.w, this.h);
@@ -1912,22 +1687,22 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
     };
 
-    KeyboardView.prototype.clearNormal = function(i) {
+    SamplerKeyboardView.prototype.clearNormal = function(i) {
       return this.ctx.clearRect(0, i * this.h, this.w, this.h);
     };
 
-    KeyboardView.prototype.clearActive = function(i) {
+    SamplerKeyboardView.prototype.clearActive = function(i) {
       this.clearNormal(i);
       this.drawNormal(i);
       return this.drawText(i);
     };
 
-    KeyboardView.prototype.drawText = function(i) {
+    SamplerKeyboardView.prototype.drawText = function(i) {
       this.ctx.fillStyle = this.color[3];
       return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
     };
 
-    return KeyboardView;
+    return SamplerKeyboardView;
 
   })();
 
@@ -2903,7 +2678,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     EG.prototype.noteOff = function(time) {
-      this.target.cancelScheduledValues(time);
       return this.target.linearRampToValueAtTime(this.min, time + this.release);
     };
 

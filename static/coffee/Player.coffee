@@ -124,10 +124,11 @@ class @Player
 
         else if type == 'SAMPLER'
             s_new = new Sampler(@context, id, this, name)
-
+            @mixer.changeSynth(id, s_new)
 
         @synth[id] = s_new
         s_old.replaceWith(s_new)
+        s_old.noteOff()
         return s_new
 
 

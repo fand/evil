@@ -180,7 +180,6 @@
     };
 
     EG.prototype.noteOff = function(time) {
-      this.target.cancelScheduledValues(time);
       return this.target.linearRampToValueAtTime(this.min, time + this.release);
     };
 

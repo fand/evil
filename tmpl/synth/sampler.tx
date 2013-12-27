@@ -46,96 +46,32 @@
 
 
   <div class="sampler-core">
-    <i class="fa fa-angle-down btn-fold-core"></i>
 
-    <fieldset class="Sampler_module Sampler_vco0 Sampler_VCO">
+    <fieldset class="Sampler_module Sampler_sample">
       <legend>OSC1</legend>
 
       <div class="clearfix">
-        <label>WAVE</label>
-        <select class="shape">
-          <option>SINE</option>
-          <option>TRIANGLE</option>
-          <option>SAW</option>
-          <option selected="selected">RECT</option>
+        <label>SAMPLE</label>
+        <select class="sample">
+          <option selected="selected">Kick</option>
+          <option>Snare</option>
+          <option>Hat open</option>
+          <option>Hat closed</option>
         </select>
       </div>
 
-      <div class="clearfix"><label>OCT</label>   <input class="octave"   type="number" min="0" max="5" value="0"></div>
-      <div class="clearfix"><label>SHIFT</label> <input class="interval" type="number" min="-12" max="12" value="0"></div>
-      <div class="clearfix"><label>TUNE</label>  <input class="fine"     type="number" min="-50" max="50" value="0"></div>
+      <div class="clearfix"><label>HEAD</label>  <input class="head" type="range" min="0" max="10000" value="0"></div>
+      <div class="clearfix"><label>TAIL</label>  <input class="tail" type="range" min="0" max="10000" value="0"></div>
+      <div class="clearfix"><label>SPEED</label> <input class="speed" type="range" min="0" max="100"   value="50"></div>
     </fieldset>
 
-    <fieldset class="Sampler_module Sampler_vco1 Sampler_VCO">
-      <legend>OSC2</legend>
 
-      <div class="clearfix">
-        <label>WAVE</label>
-        <select class="shape">
-          <option>SINE</option>
-          <option>TRIANGLE</option>
-          <option selected="selected">SAW</option>
-          <option>RECT</option>
-        </select>
-      </div>
+    <canvas class="sampler-waveform"></canvas>
 
-      <div class="clearfix"><label>OCT</label>   <input class="octave"   type="number" min="0" max="5" value="0"></div>
-      <div class="clearfix"><label>SHIFT</label> <input class="interval" type="number" min="-12" max="12" value="7"></div>
-      <div class="clearfix"><label>TUNE</label>  <input class="fine"     type="number" min="-50" max="50" value="1"></div>
-    </fieldset>
-
-    <fieldset class="Sampler_module Sampler_vco2 Sampler_VCO">
-      <legend>OSC3</legend>
-
-      <div class="clearfix">
-        <label>WAVE</label>
-        <select class="shape">
-          <option>SINE</option>
-          <option>TRIANGLE</option>
-          <option>SAW</option>
-          <option>RECT</option>
-          <option selected="selected">NOISE</option>
-        </select>
-      </div>
-
-      <div class="clearfix"><label>OCT</label>   <input class="octave"   min="0" max="5" value="3" type="number"></div>
-      <div class="clearfix"><label>SHIFT</label> <input class="interval" type="number" min="-12" max="12" value="0"></div>
-      <div class="clearfix"><label>TUNE</label>  <input class="fine"     min="-50" max="50" value="0" type="number"></div>
-    </fieldset>
-
-    <fieldset class="Sampler_module Sampler_mixer gain">
-      <legend>Mixer</legend>
-      <div class="clearfix"><label>OSC1</label>  <input type="range" min="0" max="99" value="50"></div>
-      <div class="clearfix"><label>OSC2</label>  <input type="range" min="0" max="99" value="40"></div>
-      <div class="clearfix"><label>NOISE</label> <input type="range" min="0" max="99" value="1"></div>
-    </fieldset>
-
-    <fieldset class="Sampler_module Sampler_EG EG">
-      <legend>Envelope</legend>
-      <canvas class="canvasEG"></canvas>
-      <div class="clearfix"><label>ATTACK</label>  <input name="attack"  type="range" min="0" max="50000" value="0"></div>
-      <div class="clearfix"><label>DECAY</label>   <input name="decay"   type="range" min="0" max="50000" value="18000"></div>
-      <div class="clearfix"><label>SUSTAIN</label> <input name="sustain" type="range" min="0" max="100"   value="40"></div>
-      <div class="clearfix"><label>RELEASE</label> <input name="release" type="range" min="0" max="50000" value="10000"></div>
-    </fieldset>
-
-    <fieldset class="Sampler_module Sampler_filter filter clearfix">
-      <legend>Filter</legend>
-      <div class="Sampler_filter_freq">
-        <label>FREQ</label><input class="filter_slider freq" type="range" min="10" max="1000" value="400">
-      </div>
-      <div class="Sampler_filter_Q">
-        <label>REZ</label><input class="filter_slider q" type="range" min="0" max="40" value="6">
-      </div>
-    </fieldset>
-
-    <fieldset class="Sampler_module Sampler_FEG FEG">
-      <legend>FilterEnvelope</legend>
-      <canvas class="canvasFEG"></canvas>
-      <div class="clearfix"><label>ATTACK</label>  <input name="attack"  type="range" min="0" max="50000" value="0"></div>
-      <div class="clearfix"><label>DECAY</label>   <input name="decay"   type="range" min="0" max="50000" value="0"></div>
-      <div class="clearfix"><label>SUSTAIN</label> <input name="sustain" type="range" min="0" max="100"   value="100"></div>
-      <div class="clearfix"><label>RELEASE</label> <input name="release" type="range" min="0" max="50000" value="10000"></div>
+    <fieldset class="Sampler_module Sampler_output">
+      <legend>output</legend>
+      L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
+      <input class="gain-slider" type="range" min="0" max="100" value="100" />
     </fieldset>
 
   </div>

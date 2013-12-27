@@ -35,4 +35,4 @@ class @Mixer
             @panners[i].setPosition(p[0], p[1], p[2])
 
     changeSynth: (id, synth) ->
-        synth.connect(@panners[id])
+         synth.connect(@panners[id])

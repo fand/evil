@@ -1,66 +1,64 @@
-class @VCO
-    constructor: (@ctx) ->
-        @freq_key = 55
-        @octave = 4
-        @interval = 0
-        @fine = 0
-        @note = 0
-        @freq = Math.pow(2, @octave) * @freq_key
-
-        @node = @ctx.createOscillator()
-        @node.type = 'sine'
-        @setFreq()
-        @node.start(0)
-
-    setOctave: (@octave) ->
-    setFine: (@fine) -> @node.detune.value = @fine
-    setNote: (@note) ->
-    setKey: (@freq_key) ->
-    setInterval: (@interval) ->
-    setShape: (shape) ->
-        @node.type = OSC_TYPE[shape]
-
-    setFreq: ->
-        @freq = (Math.pow(2, @octave) * Math.pow(SEMITONE, @interval + @note) * @freq_key) + @fine
-        @node.frequency.setValueAtTime(@freq, 0)
-
-    connect: (dst) -> @node.connect(dst)
+@SAMPLES = [
+    {name: 'kick1', url: 'static/wav/kick1.wav'},
+    {name: 'kick1', url: 'static/wav/kick1.wav'},
+    {name: 'kick1', url: 'static/wav/kick1.wav'},
+    {name: 'kick2', url: 'static/wav/kick2.wav'},
+    {name: 'snare1', url: 'static/wav/snare1.wav'},
+    {name: 'snare2', url: 'static/wav/snare2.wav'},
+    {name: 'clap', url: 'static/wav/clap.wav'},
+    {name: 'hat_closed', url: 'static/wav/hat_closed.wav'},
+    {name: 'hat_open', url: 'static/wav/hat_open.wav'},
+    {name: 'ride', url: 'static/wav/ride.wav'}
+]
 
 
 
-class @EG
-    constructor: (@target, @min, @max) ->
-        @attack  = 0
-        @decay   = 0
-        @sustain = 0.0
-        @release = 0
+class @BufferNode
+    constructor: (@ctx, num) ->
+        @node = @ctx.createGain()
+        @node.gain.value = 0.0
+        sample = window.SAMPLES[num]
+        @setSample(sample)
 
-    getParam: -> [@attack, @decay, @sustain, @release]
-    setParam: (attack, decay, sustain, release) ->
-        @attack  = attack  / 50000.0
-        @decay   = decay   / 50000.0
-        @sustain = sustain / 100.0
-        @release = release / 50000.0
+        @head = 0
+        @tail = 100
+        @speed = 1.0
 
-    setRange: (@min, @max) ->
-    getRange: -> [@min, @max]
+    setSample: (sample) ->
+        if sample.data?
+            @buffer = sample.data
+        else
+            req = new XMLHttpRequest()
+            req.open('GET', sample.url, true)
+            req.responseType = "arraybuffer"
+            req.onload = () =>
+                @ctx.decodeAudioData(
+                    req.response,
+                    (@buffer) =>,
+                    (err) => console.log('ajax error'); console.log(err)
+                )
+                sample.data = @buffer
+            req.send()
 
-    noteOn: (time) ->
-        @target.cancelScheduledValues(time)
-        @target.setValueAtTime(@min, time)
-        @target.linearRampToValueAtTime(@max, time + @attack)
-        @target.linearRampToValueAtTime(@sustain * (@max - @min) + @min, (time + @attack + @decay))
+    connect: (@dst) -> @node.connect(@dst)
+    noteOn: (gain) ->
+        return if not @buffer?
+        source = @ctx.createBufferSource()
+        source.buffer = @buffer
+        source.connect(@node)
+        @node.gain.value = gain if gain?
+        source.start(0)
 
-    noteOff: (time) ->
-        @target.cancelScheduledValues(time)
-        @target.linearRampToValueAtTime(@min, time + @release)
+    setParam: (@head, @tail, @speed) ->
+    getParam: -> [@head, @tail, @speed]
 
+    getData: -> @buffer
 
 
 class @ResFilter
     constructor: (@ctx) ->
         @lpf = @ctx.createBiquadFilter()
-        @lpf.type = 'lowpass'  # lowpass == 0
+        @lpf.type = 'lowpass'  # lowpaegss == 0
         @lpf.gain.value = 1.0
 
     connect:    (dst)  -> @lpf.connect(dst)
@@ -72,107 +70,90 @@ class @ResFilter
 class @SamplerCore
     constructor: (@parent, @ctx, @id) ->
         @node = @ctx.createGain()
-        @node.gain.value = 0
+        @node.gain.value = 1.0
         @gain = 1.0
 
-        @vcos  = [new VCO(@ctx), new VCO(@ctx), new Noise(@ctx)]
-        @gains = [@ctx.createGain(), @ctx.createGain(), @ctx.createGain()]
-        for i in [0...3]
-            @vcos[i].connect(@gains[i])
-            @gains[i].gain.value = 0
+        @nodes = (new BufferNode(@ctx, i) for i in [0...10])
+        @gains = (@ctx.createGain() for i in [0...10])
+
+        for i in [0...10]
+            @nodes[i].connect(@gains[i])
+            @gains[i].gain.value = 1.0
             @gains[i].connect(@node)
-
-        @filter = new ResFilter(@ctx)
-
-        @eg  = new EG(@node.gain, 0.0, @gain)
-        @feg = new EG(@filter.lpf.frequency, 0, 0)
-
-        # resonance用ノイズ生成
-        @gain_res = @ctx.createGain()
-        @gain_res.gain.value = 0
-        @vcos[2].connect(@gain_res)
-        @gain_res.connect(@node)
 
         @view = new SamplerCoreView(this, id, @parent.view.dom.find('.sampler-core'))
 
-    setVCOParam: (i, shape, oct, interval, fine) ->
-        @vcos[i].setShape(shape)
-        @vcos[i].setOctave(oct)
-        @vcos[i].setInterval(interval)
-        @vcos[i].setFine(fine)
-        @vcos[i].setFreq()
+    setSampleParam: (i, head, tail, speed) ->
+        @nodes[i].setParam(head, tail, speed)
 
-    setEGParam:  (a, d, s, r) -> @eg.setParam(a, d, s, r)
-    setFEGParam: (a, d, s, r) -> @feg.setParam(a, d, s, r)
-
-    setFilterParam: (freq, q) ->
-        @feg.setRange(80, Math.pow(freq/1000, 2.0) * 25000 + 80)
-        @filter.setQ(q)
-        @gain_res.value = 0.1 * (q / 1000.0) if q > 1
-
-    setVCOGain: (i, gain) ->
+    setSampleGain: (i, gain) ->
         ## Keep total gain <= 0.9
-        @gains[i].gain.value = (gain / 100.0) * 0.3
+        @gains[i].gain.value = (gain / 100.0) * 0.11
 
     setGain: (@gain) ->
-        @eg.setRange(0.0, @gain)
+        @node.gain.value = @gain
 
-    noteOn: ->
-        t0 = @ctx.currentTime
-        @eg.noteOn(t0)
-        @feg.noteOn(t0)
+    noteOn: (notes) ->
+        if Array.isArray(notes)
+            @nodes[n[0]].noteOn(n[1]) for n in notes
+        else
+            @nodes[notes].noteOn(1)
 
     noteOff: ->
         t0 = @ctx.currentTime
-        @eg.noteOff(t0)
-        @feg.noteOff(t0)
 
     setKey: (key) ->
-        freq_key = KEY_LIST[key]
-        v.setKey(freq_key) for v in @vcos
-
-    setScale: (@scale) ->
+    setScale: (scale) ->
 
     connect: (dst) ->
-        @node.connect(@filter.lpf)
-        @filter.connect(dst)
+        @node.connect(dst)
 
     setNote: (note) ->
-        for v in @vcos
-            v.setNote(note)
-            v.setFreq()
+        for n in @nodes
+            n.setNote(note)
+            n.setFreq()
 
+    getSampleParam: (i) ->
+        @nodes[i].getParam()
+
+    getSampleData: (i) ->
+        @nodes[i].getData()
 
 
 class @Sampler
     constructor: (@ctx, @id, @player, @name) ->
         @name = 'Sampler #' + @id if not @name?
+
         @pattern_name = 'pattern 0'
-        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        # @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @pattern = [
+            [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0,
+            [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0,
+            [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0,
+            [[1,1]],0,0,0,[[7,1]],0,0,0,[[1,1],[6,1]],0,0,0,[[7,1]],0,0,0
+        ]
         @pattern_obj = name: @pattern_name, pattern: @pattern
+
         @time = 0
-        @scale = []
         @view = new SamplerView(this, @id)
         @core = new SamplerCore(this, @ctx, @id)
 
         @is_sustaining = false
         @session = @player.session
 
-    connect: (dst) -> @core.connect(dst)
+    connect: (dst) ->
+        @core.connect(dst)
 
-    setDuration: (@duration) ->
-    setKey:  (key) -> @core.setKey(key)
-    setScale: (scale_name) -> @scale = SCALE_LIST[scale_name]
+    setDuration: ->
+    setKey:  ->
+    setScale: ->
     setNote: (note) -> @core.setNote(note)
 
     setGain: (gain) -> @core.setGain(gain)
     getGain: ()     -> @core.gain
 
-    noteToSemitone: (ival) ->
-        Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]
-
     noteOn: (note) ->
-        @core.setNote(@noteToSemitone(note))
+        @core.setNote(note)
         @core.noteOn()
 
     noteOff: -> @core.noteOff()
@@ -180,25 +161,9 @@ class @Sampler
     playAt: (@time) ->
         mytime = @time % @pattern.length
         @view.playAt(mytime)
-        if @pattern[mytime] == 0
-            @core.noteOff()
-        else if @pattern[mytime] == 'end'
-            T.setTimeout(( =>
-                @core.noteOff()
-                ), @duration - 10)
-        else if @pattern[mytime] == 'sustain'
-            return
-        else if @pattern[mytime] < 0
-            @is_sustaining = true
-            n = -( @pattern[mytime] )
-            @core.setNote(@noteToSemitone(n))
-            @core.noteOn()
-        else
-            @core.setNote(@noteToSemitone(@pattern[mytime]))
-            @core.noteOn()
-            T.setTimeout(( =>
-                @core.noteOff()
-                ), @duration - 10)
+        if @pattern[mytime] != 0
+            notes = @pattern[mytime]
+            @core.noteOn(notes)
 
     play: () ->
         @view.play()
@@ -233,15 +198,6 @@ class @Sampler
 
     removeNote: (time) ->
         @pattern[time] = 0
-
-    sustainNote: (l, r, note) ->
-        if l == r
-            @pattern[l] = note
-            return
-        for i in [l...r]
-            @pattern[i] = 'sustain'
-        @pattern[l] = -(note)
-        @pattern[r] = 'end'
 
     activate: (i) -> @view.activate(i)
     inactivate: (i) -> @view.inactivate(i)

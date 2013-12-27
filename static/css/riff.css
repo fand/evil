@@ -1304,6 +1304,122 @@ legend {
 }
 
 
+
+/* Sampler */
+
+.sampler .sequencer-table {
+    position: absolute;
+    margin: 0px 7px;
+    padding: 0px;
+    top: 45px;
+    left: 0px;
+    width: 896px;
+    height: 262px;
+    transition: all 0.2s ease 0s;
+}
+.sampler .table {
+    position: absolute;
+    margin: 0px;
+    padding: 0px;
+    top: 0px;
+    left: 50px;
+    overflow-y: hidden;
+}
+.table-hover {
+    z-index: 100;
+}
+.sampler .table-on {
+    z-index: 10;
+}
+.sampler .table-off {
+    z-index: 1;
+}
+.sampler .keyboard {
+    position: absolute;
+    margin: 0px;
+    padding: 0px;
+    top: 2px;
+    left: 0px;
+}
+
+.sampler-core {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    height: 280px;
+    left: 0px;
+    transition: all 0.2s ease 0s;
+}
+
+.Sampler_module {
+    color: #f0d;
+    background-color: #fff;
+    margin: 0px 10px;
+    padding: 0px;
+    font-size: 12px;
+    text-align: center;
+    vertical-align: top;
+    line-height: 26px;
+
+    border: 1px solid #f0d;
+    border-radius: 3px;
+}
+legend {
+    font-size:12px;
+}
+.Sampler_sample {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 130px;
+    height: 140px;
+}
+.Sampler_sample > div {
+    margin: 0px 15px;
+}
+.Sampler_sample label {
+    float: left;
+    width: 35px;
+    padding-right: 5px;
+    font-size: 12px;
+    text-align: right;
+}
+.Sampler_sample select {
+    float: right;
+    width: 55px;
+    font-size: 10px;
+    text-align: left;
+    margin-top: 4px;
+}
+.Sampler_sample input {
+    float: right;
+    width: 50px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 4px;
+}
+.Sampler_output {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 90px;
+    height: 270px;
+    border: 1px solid #f0d;
+    text-align: center;
+    color: #f0d;
+}
+
+.sampler-waveform {
+    top: 0px;
+    left: 150px;
+    width: 300px;
+    height: 180px;
+}
+
+
+
+
+
 #templates {
     display: none;
 }
