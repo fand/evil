@@ -12,6 +12,9 @@
       this.canvas_EQ = this.canvas_EQ_dom[0];
       this.ctx_EQ = this.canvas_EQ.getContext('2d');
       this.eq = this.dom.find('.Sampler_EQ');
+      this.output = this.dom.find('.Sampler_output');
+      this.panner = this.output.find('.pan-slider');
+      this.gain = this.output.find('.gain-slider');
       this.sample_num = 0;
       this.initEvent();
     }
@@ -25,6 +28,9 @@
       this.eq.on('change', function() {
         _this.setSampleEQParam();
         return _this.updateEQCanvas();
+      });
+      this.output.on('change', function() {
+        return _this.setSampleOutputParam();
       });
       return this.setParam();
     };
@@ -94,6 +100,10 @@
       return this.model.setSampleEQParam(i, parseFloat(this.eq.find('.EQ_lo').val()) - 100.0, parseFloat(this.eq.find('.EQ_mid').val()) - 100.0, parseFloat(this.eq.find('.EQ_hi').val()) - 100.0);
     };
 
+    SamplerCoreView.prototype.setSampleOutputParam = function() {
+      return this.model.setSampleOutputParam(this.sample_num, this.pan2pos(1.0 - (parseFloat(this.panner.val()) / 100.0)), parseFloat(this.gain.val()) / 100.0);
+    };
+
     SamplerCoreView.prototype.setGains = function() {
       var i, _i, _ref, _results;
       _results = [];
@@ -101,6 +111,12 @@
         _results.push(this.model.setNodeGain(i, parseInt(this.gain_inputs.eq(i).val())));
       }
       return _results;
+    };
+
+    SamplerCoreView.prototype.pan2pos = function(v) {
+      var theta;
+      theta = v * Math.PI;
+      return [Math.cos(theta), 0, -Math.sin(theta)];
     };
 
     return SamplerCoreView;

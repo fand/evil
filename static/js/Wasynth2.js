@@ -840,6 +840,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       _ref4 = this.eq_gains, eq1.gain.value = _ref4[0], eq2.gain.value = _ref4[1], eq3.gain.value = _ref4[2];
       this.eq_nodes = [eq1, eq2, eq3];
       this.panner = this.ctx.createPanner();
+      this.panner.panningModel = "equalpower";
       eq1.connect(eq2);
       eq2.connect(eq3);
       eq3.connect(this.panner);
@@ -923,8 +924,20 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.eq_gains;
     };
 
+    BufferNode.prototype.setOutputParam = function(pan, gain) {
+      this.panner.setPosition(pan[0], pan[1], pan[2]);
+      this.node.gain.value = gain;
+      return console.log(pan);
+    };
+
     BufferNode.prototype.getData = function() {
       return this.buffer;
+    };
+
+    BufferNode.prototype.pan2pos = function(v) {
+      var theta;
+      theta = v * Math.PI;
+      return [Math.cos(theta), 0, -Math.sin(theta)];
     };
 
     return BufferNode;
@@ -972,18 +985,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
         return _results;
       }).call(this);
-      this.gains = (function() {
-        var _i, _results;
-        _results = [];
-        for (i = _i = 0; _i < 10; i = ++_i) {
-          _results.push(this.ctx.createGain());
-        }
-        return _results;
-      }).call(this);
       for (i = _i = 0; _i < 10; i = ++_i) {
-        this.nodes[i].connect(this.gains[i]);
-        this.gains[i].gain.value = 1.0;
-        this.gains[i].connect(this.node);
+        this.nodes[i].connect(this.node);
       }
       this.view = new SamplerCoreView(this, id, this.parent.view.dom.find('.sampler-core'));
     }
@@ -996,8 +999,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.nodes[i].setEQParam([lo, mid, hi]);
     };
 
-    SamplerCore.prototype.setSampleGain = function(i, gain) {
-      return this.gains[i].gain.value = (gain / 100.0) * 0.11;
+    SamplerCore.prototype.setSampleOutputParam = function(i, pan, gain) {
+      return this.nodes[i].setOutputParam(pan, gain);
     };
 
     SamplerCore.prototype.setGain = function(gain) {
@@ -1221,6 +1224,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.canvas_EQ = this.canvas_EQ_dom[0];
       this.ctx_EQ = this.canvas_EQ.getContext('2d');
       this.eq = this.dom.find('.Sampler_EQ');
+      this.output = this.dom.find('.Sampler_output');
+      this.panner = this.output.find('.pan-slider');
+      this.gain = this.output.find('.gain-slider');
       this.sample_num = 0;
       this.initEvent();
     }
@@ -1234,6 +1240,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.eq.on('change', function() {
         _this.setSampleEQParam();
         return _this.updateEQCanvas();
+      });
+      this.output.on('change', function() {
+        return _this.setSampleOutputParam();
       });
       return this.setParam();
     };
@@ -1303,6 +1312,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.model.setSampleEQParam(i, parseFloat(this.eq.find('.EQ_lo').val()) - 100.0, parseFloat(this.eq.find('.EQ_mid').val()) - 100.0, parseFloat(this.eq.find('.EQ_hi').val()) - 100.0);
     };
 
+    SamplerCoreView.prototype.setSampleOutputParam = function() {
+      return this.model.setSampleOutputParam(this.sample_num, this.pan2pos(1.0 - (parseFloat(this.panner.val()) / 100.0)), parseFloat(this.gain.val()) / 100.0);
+    };
+
     SamplerCoreView.prototype.setGains = function() {
       var i, _i, _ref, _results;
       _results = [];
@@ -1310,6 +1323,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _results.push(this.model.setNodeGain(i, parseInt(this.gain_inputs.eq(i).val())));
       }
       return _results;
+    };
+
+    SamplerCoreView.prototype.pan2pos = function(v) {
+      var theta;
+      theta = v * Math.PI;
+      return [Math.cos(theta), 0, -Math.sin(theta)];
     };
 
     return SamplerCoreView;

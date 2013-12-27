@@ -54,6 +54,7 @@
       _ref4 = this.eq_gains, eq1.gain.value = _ref4[0], eq2.gain.value = _ref4[1], eq3.gain.value = _ref4[2];
       this.eq_nodes = [eq1, eq2, eq3];
       this.panner = this.ctx.createPanner();
+      this.panner.panningModel = "equalpower";
       eq1.connect(eq2);
       eq2.connect(eq3);
       eq3.connect(this.panner);
@@ -137,8 +138,20 @@
       return this.eq_gains;
     };
 
+    BufferNode.prototype.setOutputParam = function(pan, gain) {
+      this.panner.setPosition(pan[0], pan[1], pan[2]);
+      this.node.gain.value = gain;
+      return console.log(pan);
+    };
+
     BufferNode.prototype.getData = function() {
       return this.buffer;
+    };
+
+    BufferNode.prototype.pan2pos = function(v) {
+      var theta;
+      theta = v * Math.PI;
+      return [Math.cos(theta), 0, -Math.sin(theta)];
     };
 
     return BufferNode;
@@ -186,18 +199,8 @@
         }
         return _results;
       }).call(this);
-      this.gains = (function() {
-        var _i, _results;
-        _results = [];
-        for (i = _i = 0; _i < 10; i = ++_i) {
-          _results.push(this.ctx.createGain());
-        }
-        return _results;
-      }).call(this);
       for (i = _i = 0; _i < 10; i = ++_i) {
-        this.nodes[i].connect(this.gains[i]);
-        this.gains[i].gain.value = 1.0;
-        this.gains[i].connect(this.node);
+        this.nodes[i].connect(this.node);
       }
       this.view = new SamplerCoreView(this, id, this.parent.view.dom.find('.sampler-core'));
     }
@@ -210,8 +213,8 @@
       return this.nodes[i].setEQParam([lo, mid, hi]);
     };
 
-    SamplerCore.prototype.setSampleGain = function(i, gain) {
-      return this.gains[i].gain.value = (gain / 100.0) * 0.11;
+    SamplerCore.prototype.setSampleOutputParam = function(i, pan, gain) {
+      return this.nodes[i].setOutputParam(pan, gain);
     };
 
     SamplerCore.prototype.setGain = function(gain) {

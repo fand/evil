@@ -9,6 +9,10 @@ class @SamplerCoreView
         @ctx_EQ = @canvas_EQ.getContext('2d')
         @eq = @dom.find('.Sampler_EQ')
 
+        @output = @dom.find('.Sampler_output')
+        @panner = @output.find('.pan-slider')
+        @gain = @output.find('.gain-slider')
+
         @sample_num = 0
 
         @initEvent()
@@ -21,6 +25,9 @@ class @SamplerCoreView
         @eq.on('change', () =>
             @setSampleEQParam()
             @updateEQCanvas()
+        )
+        @output.on('change', () =>
+            @setSampleOutputParam()
         )
         @setParam()
 
@@ -105,9 +112,20 @@ class @SamplerCoreView
             parseFloat(@eq.find('.EQ_hi').val())  - 100.0
         )
 
+    setSampleOutputParam: ->
+        @model.setSampleOutputParam(
+            @sample_num,
+            @pan2pos(1.0 - (parseFloat(@panner.val())/100.0)),
+            parseFloat(@gain.val()) / 100.0
+        )
+
     setGains: ->
         for i in [0... @gain_inputs.length]
             @model.setNodeGain(i, parseInt(@gain_inputs.eq(i).val()))
+
+    pan2pos: (v) ->
+        theta = v * Math.PI
+        [Math.cos(theta), 0, -Math.sin(theta)]
 
 
 

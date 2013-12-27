@@ -34,6 +34,7 @@ class @BufferNode
         @eq_nodes = [eq1, eq2, eq3]
 
         @panner = @ctx.createPanner()
+        @panner.panningModel = "equalpower"
 
         eq1.connect(eq2)
         eq2.connect(eq3)
@@ -85,7 +86,19 @@ class @BufferNode
 
     getEQParam: -> @eq_gains
 
+    setOutputParam: (pan, gain) ->
+        @panner.setPosition(pan[0], pan[1], pan[2])
+        @node.gain.value = gain
+        console.log(pan)
+#        console.log(gain)
+
     getData: -> @buffer
+
+    pan2pos: (v) ->
+        theta = v * Math.PI
+        [Math.cos(theta), 0, -Math.sin(theta)]
+
+
 
 
 class @ResFilter
@@ -107,12 +120,9 @@ class @SamplerCore
         @gain = 1.0
 
         @nodes = (new BufferNode(@ctx, i, this) for i in [0...10])
-        @gains = (@ctx.createGain() for i in [0...10])
 
         for i in [0...10]
-            @nodes[i].connect(@gains[i])
-            @gains[i].gain.value = 1.0
-            @gains[i].connect(@node)
+            @nodes[i].connect(@node)
 
         @view = new SamplerCoreView(this, id, @parent.view.dom.find('.sampler-core'))
 
@@ -122,9 +132,8 @@ class @SamplerCore
     setSampleEQParam: (i, lo, mid, hi) ->
         @nodes[i].setEQParam([lo, mid, hi])
 
-    setSampleGain: (i, gain) ->
-        ## Keep total gain <= 0.9
-        @gains[i].gain.value = (gain / 100.0) * 0.11
+    setSampleOutputParam: (i, pan, gain) ->
+        @nodes[i].setOutputParam(pan, gain)
 
     setGain: (@gain) ->
         @node.gain.value = @gain
