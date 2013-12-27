@@ -133,6 +133,10 @@
       return this.node.connect(dst);
     };
 
+    VCO.prototype.disconnect = function() {
+      return this.node.disconnect();
+    };
+
     return VCO;
 
   })();
@@ -176,8 +180,8 @@
     };
 
     EG.prototype.noteOff = function(time) {
-      this.target.cancelScheduledValues(time);
-      return this.target.linearRampToValueAtTime(this.min, time + this.release);
+      this.target.linearRampToValueAtTime(this.min, time + this.release);
+      return this.target.linearRampToValueAtTime(0, time + this.release + 1);
     };
 
     return EG;
@@ -254,7 +258,7 @@
       this.feg.setRange(80, Math.pow(freq / 1000, 2.0) * 25000 + 80);
       this.filter.setQ(q);
       if (q > 1) {
-        return this.gain_res.value = 0.1 * (q / 1000.0);
+        return this.gain_res.gain.value = 0.1 * (q / 1000.0);
       }
     };
 
@@ -300,6 +304,11 @@
     SynthCore.prototype.connect = function(dst) {
       this.node.connect(this.filter.lpf);
       return this.filter.connect(dst);
+    };
+
+    SynthCore.prototype.disconnect = function() {
+      this.filter.disconnect();
+      return this.node.disconnect();
     };
 
     SynthCore.prototype.setNote = function(note) {
@@ -455,6 +464,8 @@
       return this.core.connect(dst);
     };
 
+    Synth.prototype.disconnect = function() {};
+
     Synth.prototype.setDuration = function(duration) {
       this.duration = duration;
     };
@@ -604,6 +615,10 @@
       this.pattern_name = pattern_name;
       this.session.setPatternName(this.id, this.pattern_name);
       return this.view.setPatternName(this.pattern_name);
+    };
+
+    Synth.prototype.replaceWith = function(s_new) {
+      return this.view.dom.replaceWith(s_new.view.dom);
     };
 
     return Synth;

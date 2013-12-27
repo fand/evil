@@ -51,7 +51,6 @@ class @Player
         @is_playing = false
         @view.viewStop()
         @time = 0
-#        @readSong(@song)
 
     pause: ->
         s.pause(@time) for s in @synth
@@ -104,6 +103,33 @@ class @Player
         @synth.push(s)
         @mixer.addSynth(s)
         @session.addSynth(s, scene_pos)
+
+    addSampler: (scene_pos, name) ->
+        s = new Sampler(@context, @num_id++, this, name)
+        @synth.push(s)
+        @mixer.addSynth(s)
+        @session.addSynth(s, scene_pos)
+
+    changeSynth: (id, type) ->
+        s_old  = @synth[id]
+        name = s_old.name
+
+        if type == 'REZ'
+            s_new = new Synth(@context, id, this, name)
+            s_new.setScale(@scene.scale)
+            s_new.setKey(@scene.key)
+            # @mixer.addSynth(s)
+            @session.addSynth(s, scene_pos)
+
+        else if type == 'SAMPLER'
+            s_new = new Sampler(@context, id, this, name)
+            @mixer.changeSynth(id, s_new)
+
+        @synth[id] = s_new
+        s_old.replaceWith(s_new)
+        s_old.noteOff()
+        return s_new
+
 
     moveRight: (next_idx) ->
         @synth[next_idx - 1].inactivate()

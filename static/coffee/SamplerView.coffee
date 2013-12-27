@@ -1,8 +1,139 @@
-class @SynthView
+class @SamplerCoreView
+    constructor: (@model, @id, @dom) ->
+        @sample = @dom.find('.Sampler_sample')
+        @canvas_waveform_dom = @dom.find('.waveform')
+        @canvas_waveform = @canvas_waveform_dom[0]
+        @ctx_waveform = @canvas_waveform.getContext('2d')
+        @canvas_EQ_dom = @dom.find('.canvasEQ')
+        @canvas_EQ = @canvas_EQ_dom[0]
+        @ctx_EQ = @canvas_EQ.getContext('2d')
+        @eq = @dom.find('.Sampler_EQ')
+
+        @output = @dom.find('.Sampler_output')
+        @panner = @output.find('.pan-slider')
+        @gain = @output.find('.gain-slider')
+
+        @sample_num = 0
+
+        @initEvent()
+
+    initEvent: ->
+        @sample.on("change", () =>
+            @setSampleParam()
+            @updateWaveformCanvas(@sample_num)
+        )
+        @eq.on('change', () =>
+            @setSampleEQParam()
+            @updateEQCanvas()
+        )
+        @output.on('change', () =>
+            @setSampleOutputParam()
+        )
+        @setParam()
+
+    updateWaveformCanvas: (@sample_num) ->
+        canvas  = @canvas_waveform
+        ctx = @ctx_waveform
+
+        w = canvas.width = 300
+        h = canvas.height = 180
+        ctx.clearRect(0, 0, w, h)
+
+        hts = @model.getSampleParam(@sample_num)
+        _data = @model.getSampleData(@sample_num)
+
+        if _data?
+            wave = _data.getChannelData(0)
+
+            # Draw waveform
+            ctx.translate(0, 90)
+            ctx.beginPath()
+
+            d = wave.length / w
+            for x in [0...w]
+                ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45)
+
+            ctx.closePath()
+            ctx.strokeStyle = 'rgb(255, 0, 220)'
+            ctx.stroke()
+            ctx.translate(0, -90)
+
+        # Draw params
+        left  = hts[0] * w
+        right = hts[1] * w
+        if left < right
+            ctx.fillStyle = 'rgba(255, 0, 160, 0.2)'
+            ctx.fillRect(left, 0, right-left, h)
+
+
+    updateEQCanvas: () ->
+        canvas  = @canvas_EQ
+        ctx = @ctx_EQ
+
+        w = canvas.width = 270
+        h = canvas.height = 100
+
+        # range is [-100, 100]
+        eq = @model.getSampleEQParam(@sample_num)
+
+        # Draw waveform
+        ctx.clearRect(0, 0, w, h)
+        ctx.translate(0, h / 2)
+        ctx.beginPath()
+        ctx.moveTo(0,       -(eq[0]/100.0) * (h / 2))
+        ctx.lineTo(w/3,     -(eq[1]/100.0) * (h / 2))
+        ctx.lineTo(w/3 * 2, -(eq[1]/100.0) * (h / 2))
+        ctx.lineTo(w,       -(eq[2]/100.0) * (h / 2))
+        ctx.strokeStyle = 'rgb(255, 0, 220)'
+        ctx.stroke()
+        ctx.closePath()
+        ctx.translate(0, -h / 2)
+
+
+    setParam: ->
+        # @setNodesParam()
+        # @setGains()
+
+    setSampleParam: ->
+        i = @sample_num
+        @model.setSampleParam(
+            i,
+            parseFloat(@sample.find('.head').val())  / 100.0,
+            parseFloat(@sample.find('.tail').val())  / 100.0,
+            parseFloat(@sample.find('.speed').val()) / 100.0
+        )
+
+    setSampleEQParam: ->
+        i = @sample_num
+        @model.setSampleEQParam(
+            i,
+            parseFloat(@eq.find('.EQ_lo').val())  - 100.0,
+            parseFloat(@eq.find('.EQ_mid').val()) - 100.0,
+            parseFloat(@eq.find('.EQ_hi').val())  - 100.0
+        )
+
+    setSampleOutputParam: ->
+        @model.setSampleOutputParam(
+            @sample_num,
+            @pan2pos(1.0 - (parseFloat(@panner.val())/100.0)),
+            parseFloat(@gain.val()) / 100.0
+        )
+
+    setGains: ->
+        for i in [0... @gain_inputs.length]
+            @model.setNodeGain(i, parseInt(@gain_inputs.eq(i).val()))
+
+    pan2pos: (v) ->
+        theta = v * Math.PI
+        [Math.cos(theta), 0, -Math.sin(theta)]
+
+
+
+class @SamplerView
     constructor: (@model, @id) ->
 
-        @dom = $('#tmpl_synth').clone()
-        @dom.attr('id', 'synth' + id)
+        @dom = $('#tmpl_sampler').clone()
+        @dom.attr('id', 'sampler' + id)
         $("#instruments").append(@dom)
 
         @synth_name = @dom.find('.synth-name')
@@ -12,9 +143,6 @@ class @SynthView
 
         # header DOM
         @synth_type = @dom.find('.synth-type')
-        @pencil = @dom.find('.sequencer-pencil')
-        @step   = @dom.find('.sequencer-step')
-        @is_step = false
 
         @header = @dom.find('.header')
         @markers = @dom.find('.markers')
@@ -46,16 +174,17 @@ class @SynthView
         @cell.onload = () => @initCanvas()
 
         @cells_x = 32
-        @cells_y = 20
+        @cells_y = 10
 
         @fold = @dom.find('.btn-fold-core')
-        @core = @dom.find('.synth-core')
+        @core = @dom.find('.sampler-core')
         @is_panel_opened = true
 
-        @keyboard = new KeyboardView(this)
+        @keyboard = new SamplerKeyboardView(this)
 
         # Flags / Params
-        @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @pattern = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+        @pattern_obj = name: @pattern_name.val(), pattern: @pattern
         @page = 0
         @page_total = 1
 
@@ -67,17 +196,18 @@ class @SynthView
         @click_pos = x:-1, y:-1
 
         @initEvent()
+        @initCanvas()
 
     initCanvas: ->
         @canvas_hover.width  = @canvas_on.width  = @canvas_off.width  = 832
-        @canvas_hover.height = @canvas_on.height = @canvas_off.height = 520
+        @canvas_hover.height = @canvas_on.height = @canvas_off.height = 260
         @rect = @canvas_off.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top
 
         for i in [0...@cells_y]
             for j in [0...@cells_x]
                 @ctx_off.drawImage(@cell,
-                    0, 0, 26, 26,           # src (x, y, w, h)
+                    0, 26, 26, 26,           # src (x, y, w, h)
                     j * 26, i * 26, 26, 26  # dst (x, y, w, h)
                 )
         @readPattern(@pattern_obj)
@@ -86,6 +216,7 @@ class @SynthView
         @rect = @canvas_off.getBoundingClientRect()
         _x = Math.floor((e.clientX - @rect.left) / 26)
         _y = Math.floor((e.clientY - @rect.top) / 26)
+        _y = Math.min(9, _y)  # assert (note != 0)
         x: _x
         y: _y
         x_abs: @page * @cells_x + _x
@@ -101,59 +232,45 @@ class @SynthView
                     @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
                 )
                 @ctx_hover.drawImage(@cell,
-                    52, 0, 26, 26,
+                    52, 26, 26, 26,
                     pos.x * 26, pos.y * 26, 26, 26
                 )
                 @hover_pos = pos
 
             if @is_clicked and @click_pos != pos
-                if @is_sustaining
-                    @sustain_l = Math.min(pos.x_abs, @sustain_l)
-                    @sustain_r = Math.max(pos.x_abs, @sustain_r)
-                    @sustainNote(@sustain_l, @sustain_r, pos)
+                if @is_adding
+                    @addNote(pos, 1.0)
                 else
-                    if @is_adding
-                        @addNote(pos)
-                    else if @pattern[pos.x_abs] == pos.note
-                        @removeNote(pos)
+                    @removeNote(pos)
                 @click_pos = pos
 
         ).on('mousedown', (e) =>
             @is_clicked = true
             pos = @getPos(e)
 
-            if not @is_step
-                # sustaining
-                if @pattern[pos.x_abs] == 'sustain' or @pattern[pos.x_abs] == 'end'
-                    @addNote(pos)
-                    @sustain_l = @sustain_r = pos.x_abs
-                    @is_sustaining = true
-                # not sustaining
-                else
-                    @addNote(pos)
-                    @sustain_l = @sustain_r = pos.x_abs
-                    @is_sustaining = true
+            remove = false
+            for note in @pattern[pos.x_abs]
+                if note[0] == pos.note
+                    remove = true
 
+            if remove
+                @removeNote(pos)
             else
-                if @pattern[pos.x_abs] == pos.note
-                    @removeNote(pos)
-                else
-                    @is_adding = true
-                    @addNote(pos)
+                @is_adding = true
+                @addNote(pos, 1.0)
+
         ).on('mouseup', (e) =>
             @is_clicked = false
-            if not @is_step
-                pos = @getPos(e)
-                @is_sustaining = false
-            else
-                @is_adding = false
+            @is_adding  = false
+            @is_removing  = false
         ).on('mouseout', (e) =>
             @ctx_hover.clearRect(
                 @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
             )
             @hover_pos = x: -1, y: -1
-            @is_clicked = false
-            @is_adding = false
+            @is_clicked  = false
+            @is_adding   = false
+            @is_removing = false
         )
 
         # Headers
@@ -172,8 +289,6 @@ class @SynthView
         ).on('change',
             ( => @model.setPatternName(@pattern_name.val()))
         )
-        @pencil.on('click', ( => @pencilMode()))
-        @step.on('click', ( => @stepMode()))
 
         @marker_prev.on('click', ( => @model.player.backward(true)))
         @marker_next.on('click', ( => @model.player.forward()))
@@ -188,7 +303,7 @@ class @SynthView
         @fold.on('mousedown', () =>
             if @is_panel_opened
                 @core.css('height', '0px')
-                @table_wrapper.css('height', '524px')
+                @table_wrapper.css('height', '262px')
                 @fold.css(top: '-22px', padding: '0px 5px 0px 0px').removeClass('fa-angle-down').addClass('fa-angle-up')
                 @is_panel_opened = false
             else
@@ -199,130 +314,43 @@ class @SynthView
         )
 
 
-    addNote: (pos) ->
-        if @pattern[pos.x_abs] == 'end' or @pattern[pos.x_abs] == 'sustain'
-            i = pos.x_abs - 1
-            while @pattern[i] == 'sustain' or @pattern[i] == 'end'
-                i--
-            @ctx_on.clearRect(((pos.x_abs-1) % @cells_x) * 26, 0, 26, 1000)
-            y = @cells_y + @pattern[i]
-            if @pattern[pos.x_abs-1] < 0
-                @pattern[pos.x_abs-1] = -(@pattern[pos.x_abs-1])
-                @ctx_on.drawImage(@cell,
-                    0, 0, 26, 26,
-                    ((pos.x_abs-1) % @cells_x) * 26, y * 26, 26, 26
-                )
-            else
-                @pattern[pos.x_abs-1] = 'end'
-                @ctx_on.drawImage(@cell,
-                    156, 0, 26, 26,
-                    ((pos.x_abs-1) % @cells_x) * 26, y * 26, 26, 26
-                )
+    addNote: (pos, gain) ->
+        if @pattern[pos.x_abs] == 0
+            @pattern[pos.x_abs] = []
+        if not Array.isArray(@pattern[pos.x_abs])
+            @pattern[pos.x_abs] = [[@pattern[pos.x_abs], 1.0]]
 
-        i = pos.x_abs + 1
-        while @pattern[i] == 'end' or @pattern[i] == 'sustain'
-            @pattern[i] = 0
-            i++
-        @ctx_on.clearRect(pos.x * 26, 0, (i - pos.x_abs) * 26, 1000)
+        for i in [0...@pattern[pos.x_abs].length]
+            if @pattern[pos.x_abs][i][0] == pos.note
+                @pattern[pos.x_abs].splice(i, 1)
+        @pattern[pos.x_abs].push([pos.note, gain])
 
-        @pattern[pos.x_abs] = pos.note
-        @model.addNote(pos.x_abs, pos.note)
-        @ctx_on.clearRect(pos.x * 26, 0, 26, 1000)
+        @model.addNote(pos.x_abs, pos.note, gain)
         @ctx_on.drawImage(@cell,
-            26, 0, 26, 26,
+            26, 26, 26, 26,
             pos.x * 26, pos.y * 26, 26, 26
         )
 
-
     removeNote: (pos) ->
-        @pattern[pos.x_abs] = 0
+        for i in [0...@pattern[pos.x_abs].length]
+            if @pattern[pos.x_abs][i][0] == pos.note
+                @pattern[pos.x_abs].splice(i, 1)
+
         @ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26)
-        @model.removeNote(pos.x_abs)
-
-
-    sustainNote: (l, r, pos) ->
-        if l == r
-            @addNote(pos)
-            return
-
-        for i in [l..r]
-            @ctx_on.clearRect((i % @cells_x) * 26, 0, 26, 1000)
-
-        for i in [(l+1)...r]
-            @pattern[i] = 'sustain'
-            @ctx_on.drawImage(@cell,
-                130, 0, 26, 26,
-                (i % @cells_x) * 26, pos.y * 26, 26, 26
-            )
-
-        if @pattern[l] == 'sustain' or @pattern[l] == 'end'
-            i = l - 1
-            while @pattern[i] == 'sustain' or @pattern[i] == 'end'
-                i--
-            @ctx_on.clearRect(((l-1) % @cells_x) * 26, 0, 26, 1000)
-            y = @cells_y + @pattern[i]
-            if @pattern[l-1] < 0
-                @pattern[l-1] = -(@pattern[l-1])
-                @ctx_on.drawImage(@cell,
-                    0, 0, 26, 26,
-                    ((l-1) % @cells_x) * 26, y * 26, 26, 26
-                )
-            else
-                @pattern[l-1] = 'end'
-                @ctx_on.drawImage(@cell,
-                    156, 0, 26, 26,
-                    ((l-1) % @cells_x) * 26, y * 26, 26, 26
-                )
-
-        if @pattern[r] < 0
-            y = @cells_y + @pattern[r]
-            if @pattern[r+1] == 'end'
-                @pattern[r+1] = -(@pattern[r])
-                @ctx_on.drawImage(@cell,
-                    26, 0, 26, 26,
-                    ((r+1) % @cells_x) * 26, y * 26, 26, 26
-                )
-            else
-                @pattern[r+1] = @pattern[r]
-                @ctx_on.drawImage(@cell,
-                    104, 0, 26, 26,
-                    ((r+1) % @cells_x) * 26, y * 26, 26, 26
-                )
-
-        @pattern[l] = -(pos.note)
-        @pattern[r] = 'end'
-
-        @ctx_on.drawImage(@cell,
-            104, 0, 26, 26,
-            (l % @cells_x) * 26, pos.y * 26, 26, 26
-        )
-        @ctx_on.drawImage(@cell,
-            156, 0, 26, 26,
-            (r % @cells_x) * 26, pos.y * 26, 26, 26
-        )
-        @model.sustainNote(l, r, pos.note)
-
-    endSustain: (time) ->
-        if @is_sustaining
-            if @pattern[time-1] == 'sustain'
-                @pattern[time-1] = 'end'
-            else
-                @pattern[time-1] *= -1
-            @is_sustaining = false
+        @model.removeNote(pos)
 
     playAt: (@time) ->
         return if @is_nosync
 
         if @time % @cells_x == 0
-            @endSustain()
             @drawPattern(@time)
         for i in [0...@cells_y]
             @ctx_off.drawImage(@cell,
-                0, 0, 26, 26,
+                0, 26, 26, 26,
                 (@last_time % @cells_x) * 26, i * 26, 26, 26
             )
             @ctx_off.drawImage(@cell,
-                78, 0, 26, 26,
+                78, 26, 26, 26,
                 (time % @cells_x) * 26, i * 26, 26, 26
             )
         @last_time = time
@@ -338,46 +366,21 @@ class @SynthView
     drawPattern: (time) ->
         @time = time if time?
         @page = Math.floor(@time / @cells_x)
-        @ctx_on.clearRect(0, 0, 832, 520)
-
-        last_y = 0
+        @ctx_on.clearRect(0, 0, 832, 262)
 
         for i in [0...@cells_x]
-            note = @pattern[@page * @cells_x + i]
-            if note == 'sustain'
+            for j in @pattern[@page * @cells_x + i]
+                y = @cells_y - j[0]
                 @ctx_on.drawImage(
                     @cell,
-                    130, 0, 26, 26,
-                    i * 26, last_y * 26, 26, 26
-                )
-            else if note == 'end'
-                @ctx_on.drawImage(
-                    @cell,
-                    156, 0, 26, 26,
-                    i * 26, last_y * 26, 26, 26
-                )
-                last_y = 0
-            else if note < 0
-                y = @cells_y + note    # @cells_y - (- note)
-                @ctx_on.drawImage(
-                    @cell,
-                    104, 0, 26, 26,
+                    26, 26, 26, 26,
                     i * 26, y * 26, 26, 26
                 )
-                last_y = y
-            else
-                y = @cells_y - note
-                @ctx_on.drawImage(
-                    @cell,
-                    26, 0, 26, 26,
-                    i * 26, y * 26, 26, 26
-                )
-                last_y = y
         @setMarker()
 
     plusPattern: ->
         return if @page_total == 8
-        @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        @pattern = @pattern.concat([[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]])
         @page_total++
         @model.plusPattern()
         @drawPattern()
@@ -416,7 +419,7 @@ class @SynthView
     stop: ->
         for i in [0...@cells_y]
             @ctx_off.drawImage(@cell,
-                0, 0, 26, 26,
+                0, 26, 26, 26,
                 (@last_time % @cells_x) * 26, i * 26, 26, 26
             )
 
@@ -439,24 +442,13 @@ class @SynthView
             @nosync.removeClass('btn-false').addClass('btn-true')
             for i in [0...@cells_y]
                 @ctx_off.drawImage(@cell,
-                    0, 0, 26, 26,
+                    0, 26, 26, 26,
                     (@time % @cells_x) * 26, i * 26, 26, 26
                 )
 
-    pencilMode: ->
-        @is_step = false
-        @pencil.removeClass('btn-false').addClass('btn-true')
-        @step.removeClass('btn-true').addClass('btn-false')
-
-    stepMode: ->
-        @is_step = true
-        @step.removeClass('btn-false').addClass('btn-true')
-        @pencil.removeClass('btn-true').addClass('btn-false')
 
 
-
-
-class @KeyboardView
+class @SamplerKeyboardView
     constructor: (@sequencer) ->
         # Keyboard
         @dom = @sequencer.dom.find('.keyboard')
@@ -465,7 +457,7 @@ class @KeyboardView
 
         @w = 48
         @h = 26
-        @num = 20
+        @num = 10
         @color = ['rgba(230, 230, 230, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
         @is_clicked = false
@@ -476,8 +468,8 @@ class @KeyboardView
         @initEvent()
 
     initCanvas: ->
-        @canvas.width = @w;
-        @canvas.height = @h * @num;
+        @canvas.width = @w
+        @canvas.height = @h * @num
         @rect = @canvas.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top
 

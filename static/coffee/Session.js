@@ -252,6 +252,28 @@
       return this.song.creator = this.view.song.creator = name;
     };
 
+    Session.prototype.changeSynth = function(id, type) {
+      var pp, s, s_obj;
+      s = this.player.changeSynth(id, type);
+      this.synth[id] = s;
+      pp = [];
+      pp[this.scene_pos] = {
+        name: s.id + '-' + this.scene_pos,
+        pattern: s.pattern
+      };
+      s_obj = {
+        id: s.id,
+        name: 'Synth #' + s.id,
+        patterns: pp,
+        params: [],
+        gain: 1.0,
+        pan: 0.0
+      };
+      this.song.tracks[id] = s_obj;
+      console.log(pp);
+      return s.readPattern(pp[this.scene_pos]);
+    };
+
     return Session;
 
   })();

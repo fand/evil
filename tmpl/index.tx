@@ -136,6 +136,7 @@
 
   <div id="templates">
     <: include 'synth/synth.tx' :>
+    <: include 'synth/sampler.tx' :>
 
     <div class="console-track">
       L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R

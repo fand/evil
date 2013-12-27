@@ -26,7 +26,6 @@ class @MixerView
         @pans.push(dom.find('.pan-slider'))
         @gains.push(dom.find('.gain-slider'))
         @console_tracks.css(width: (@gains.length * 80 + 2) + 'px')
-#        @canvas_tracks.css(width: (@gains.length * 80 + 2) + 'px')
         @console_tracks.on('change', () => @setGains())
 
         @setParams()

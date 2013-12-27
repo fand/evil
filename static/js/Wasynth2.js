@@ -76,6 +76,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
+    Mixer.prototype.changeSynth = function(id, synth) {
+      return synth.connect(this.panners[id]);
+    };
+
     return Mixer;
 
   })();
@@ -439,6 +443,33 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.session.addSynth(s, scene_pos);
     };
 
+    Player.prototype.addSampler = function(scene_pos, name) {
+      var s;
+      s = new Sampler(this.context, this.num_id++, this, name);
+      this.synth.push(s);
+      this.mixer.addSynth(s);
+      return this.session.addSynth(s, scene_pos);
+    };
+
+    Player.prototype.changeSynth = function(id, type) {
+      var name, s_new, s_old;
+      s_old = this.synth[id];
+      name = s_old.name;
+      if (type === 'REZ') {
+        s_new = new Synth(this.context, id, this, name);
+        s_new.setScale(this.scene.scale);
+        s_new.setKey(this.scene.key);
+        this.session.addSynth(s, scene_pos);
+      } else if (type === 'SAMPLER') {
+        s_new = new Sampler(this.context, id, this, name);
+        this.mixer.changeSynth(id, s_new);
+      }
+      this.synth[id] = s_new;
+      s_old.replaceWith(s_new);
+      s_old.noteOff();
+      return s_new;
+    };
+
     Player.prototype.moveRight = function(next_idx) {
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
@@ -754,6 +785,1096 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
+  this.SAMPLES = [
+    {
+      name: 'kick1',
+      url: 'static/wav/kick1.wav'
+    }, {
+      name: 'kick1',
+      url: 'static/wav/kick1.wav'
+    }, {
+      name: 'kick1',
+      url: 'static/wav/kick1.wav'
+    }, {
+      name: 'kick2',
+      url: 'static/wav/kick2.wav'
+    }, {
+      name: 'snare1',
+      url: 'static/wav/snare1.wav'
+    }, {
+      name: 'snare2',
+      url: 'static/wav/snare2.wav'
+    }, {
+      name: 'clap',
+      url: 'static/wav/clap.wav'
+    }, {
+      name: 'hat_closed',
+      url: 'static/wav/hat_closed.wav'
+    }, {
+      name: 'hat_open',
+      url: 'static/wav/hat_open.wav'
+    }, {
+      name: 'ride',
+      url: 'static/wav/ride.wav'
+    }, {
+      name: 'ride',
+      url: 'static/wav/ride.wav'
+    }
+  ];
+
+  this.BufferNode = (function() {
+    function BufferNode(ctx, id, parent) {
+      var eq1, eq2, eq3, sample, _ref, _ref1, _ref2, _ref3, _ref4;
+      this.ctx = ctx;
+      this.id = id;
+      this.parent = parent;
+      this.node = this.ctx.createGain();
+      this.node.gain.value = 1.0;
+      sample = window.SAMPLES[this.id];
+      this.setSample(sample);
+      this.head = 0.0;
+      this.tail = 1.0;
+      this.speed = 1.0;
+      this.eq_gains = [0.0, 0.0, 0.0];
+      _ref = [this.ctx.createBiquadFilter(), this.ctx.createBiquadFilter(), this.ctx.createBiquadFilter()], eq1 = _ref[0], eq2 = _ref[1], eq3 = _ref[2];
+      _ref1 = ['lowshelf', 'peaking', 'highshelf'], eq1.type = _ref1[0], eq2.type = _ref1[1], eq3.type = _ref1[2];
+      _ref2 = [0.6, 0.6, 0.6], eq1.Q.value = _ref2[0], eq2.Q.value = _ref2[1], eq3.Q.value = _ref2[2];
+      _ref3 = [350, 2000, 4000], eq1.frequency.value = _ref3[0], eq2.frequency.value = _ref3[1], eq3.frequency.value = _ref3[2];
+      _ref4 = this.eq_gains, eq1.gain.value = _ref4[0], eq2.gain.value = _ref4[1], eq3.gain.value = _ref4[2];
+      this.eq_nodes = [eq1, eq2, eq3];
+      this.panner = this.ctx.createPanner();
+      this.panner.panningModel = "equalpower";
+      eq1.connect(eq2);
+      eq2.connect(eq3);
+      eq3.connect(this.panner);
+      this.panner.connect(this.node);
+    }
+
+    BufferNode.prototype.setSample = function(sample) {
+      var req,
+        _this = this;
+      if (sample.data != null) {
+        return this.buffer = sample.data;
+      } else {
+        req = new XMLHttpRequest();
+        req.open('GET', sample.url, true);
+        req.responseType = "arraybuffer";
+        req.onload = function() {
+          _this.ctx.decodeAudioData(req.response, (function(buffer) {
+            _this.buffer = buffer;
+            _this.buffer_duration = _this.buffer.length / window.SAMPLE_RATE;
+            return _this.parent.sampleLoaded(_this.id);
+          }), function(err) {
+            console.log('ajax error');
+            return console.log(err);
+          });
+          return sample.data = _this.buffer;
+        };
+        return req.send();
+      }
+    };
+
+    BufferNode.prototype.connect = function(dst) {
+      this.dst = dst;
+      return this.node.connect(this.dst);
+    };
+
+    BufferNode.prototype.noteOn = function(gain, time) {
+      var head_time, node, source, tail_time;
+      if (this.buffer == null) {
+        return;
+      }
+      source = this.ctx.createBufferSource();
+      source.buffer = this.buffer;
+      node = this.ctx.createGain();
+      source.connect(node);
+      node.connect(this.eq_nodes[0]);
+      head_time = time + this.buffer_duration * this.head;
+      tail_time = time + this.buffer_duration * this.tail;
+      source.start(0);
+      node.gain.setValueAtTime(0, time);
+      node.gain.linearRampToValueAtTime(gain, head_time + 0.001);
+      node.gain.setValueAtTime(gain, tail_time);
+      return node.gain.linearRampToValueAtTime(0, tail_time + 0.001);
+    };
+
+    BufferNode.prototype.setParam = function(head, tail, speed) {
+      this.head = head;
+      this.tail = tail;
+      this.speed = speed;
+    };
+
+    BufferNode.prototype.getParam = function() {
+      return [this.head, this.tail, this.speed];
+    };
+
+    BufferNode.prototype.setEQParam = function(eq_gains) {
+      var g, _ref;
+      this.eq_gains = eq_gains;
+      return _ref = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.eq_gains;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          g = _ref[_i];
+          _results.push(g * 0.2);
+        }
+        return _results;
+      }).call(this), this.eq_nodes[0].gain.value = _ref[0], this.eq_nodes[1].gain.value = _ref[1], this.eq_nodes[2].gain.value = _ref[2], _ref;
+    };
+
+    BufferNode.prototype.getEQParam = function() {
+      return this.eq_gains;
+    };
+
+    BufferNode.prototype.setOutputParam = function(pan, gain) {
+      this.panner.setPosition(pan[0], pan[1], pan[2]);
+      return this.node.gain.value = gain;
+    };
+
+    BufferNode.prototype.getData = function() {
+      return this.buffer;
+    };
+
+    BufferNode.prototype.pan2pos = function(v) {
+      var theta;
+      theta = v * Math.PI;
+      return [Math.cos(theta), 0, -Math.sin(theta)];
+    };
+
+    return BufferNode;
+
+  })();
+
+  this.ResFilter = (function() {
+    function ResFilter(ctx) {
+      this.ctx = ctx;
+      this.lpf = this.ctx.createBiquadFilter();
+      this.lpf.type = 'lowpass';
+      this.lpf.gain.value = 1.0;
+    }
+
+    ResFilter.prototype.connect = function(dst) {
+      return this.lpf.connect(dst);
+    };
+
+    ResFilter.prototype.getResonance = function() {
+      return this.lpf.Q.value;
+    };
+
+    ResFilter.prototype.setQ = function(Q) {
+      return this.lpf.Q.value = Q;
+    };
+
+    return ResFilter;
+
+  })();
+
+  this.SamplerCore = (function() {
+    function SamplerCore(parent, ctx, id) {
+      var i, _i;
+      this.parent = parent;
+      this.ctx = ctx;
+      this.id = id;
+      this.node = this.ctx.createGain();
+      this.node.gain.value = 1.0;
+      this.gain = 1.0;
+      this.nodes = (function() {
+        var _i, _results;
+        _results = [];
+        for (i = _i = 0; _i < 10; i = ++_i) {
+          _results.push(new BufferNode(this.ctx, i, this));
+        }
+        return _results;
+      }).call(this);
+      for (i = _i = 0; _i < 10; i = ++_i) {
+        this.nodes[i].connect(this.node);
+      }
+      this.view = new SamplerCoreView(this, id, this.parent.view.dom.find('.sampler-core'));
+    }
+
+    SamplerCore.prototype.setSampleParam = function(i, head, tail, speed) {
+      return this.nodes[i].setParam(head, tail, speed);
+    };
+
+    SamplerCore.prototype.setSampleEQParam = function(i, lo, mid, hi) {
+      return this.nodes[i].setEQParam([lo, mid, hi]);
+    };
+
+    SamplerCore.prototype.setSampleOutputParam = function(i, pan, gain) {
+      return this.nodes[i].setOutputParam(pan, gain);
+    };
+
+    SamplerCore.prototype.setGain = function(gain) {
+      this.gain = gain;
+      return this.node.gain.value = this.gain;
+    };
+
+    SamplerCore.prototype.noteOn = function(notes) {
+      var n, time, _i, _len, _results;
+      time = this.ctx.currentTime;
+      if (Array.isArray(notes)) {
+        _results = [];
+        for (_i = 0, _len = notes.length; _i < _len; _i++) {
+          n = notes[_i];
+          _results.push(this.nodes[n[0] - 1].noteOn(n[1], time));
+        }
+        return _results;
+      } else {
+        return this.nodes[notes - 1].noteOn(1, time);
+      }
+    };
+
+    SamplerCore.prototype.noteOff = function() {
+      var t0;
+      return t0 = this.ctx.currentTime;
+    };
+
+    SamplerCore.prototype.setKey = function(key) {};
+
+    SamplerCore.prototype.setScale = function(scale) {};
+
+    SamplerCore.prototype.connect = function(dst) {
+      return this.node.connect(dst);
+    };
+
+    SamplerCore.prototype.setNote = function(note) {
+      var n, _i, _len, _ref, _results;
+      _ref = this.nodes;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        n = _ref[_i];
+        n.setNote(note);
+        _results.push(n.setFreq());
+      }
+      return _results;
+    };
+
+    SamplerCore.prototype.getSampleParam = function(i) {
+      return this.nodes[i].getParam();
+    };
+
+    SamplerCore.prototype.getSampleData = function(i) {
+      return this.nodes[i].getData();
+    };
+
+    SamplerCore.prototype.getSampleEQParam = function(i) {
+      return this.nodes[i].getEQParam();
+    };
+
+    SamplerCore.prototype.sampleLoaded = function(id) {
+      return this.view.updateWaveformCanvas(id);
+    };
+
+    return SamplerCore;
+
+  })();
+
+  this.Sampler = (function() {
+    function Sampler(ctx, id, player, name) {
+      this.ctx = ctx;
+      this.id = id;
+      this.player = player;
+      this.name = name;
+      if (this.name == null) {
+        this.name = 'Sampler #' + this.id;
+      }
+      this.pattern_name = 'pattern 0';
+      this.pattern = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
+      this.pattern_obj = {
+        name: this.pattern_name,
+        pattern: this.pattern
+      };
+      this.time = 0;
+      this.view = new SamplerView(this, this.id);
+      this.core = new SamplerCore(this, this.ctx, this.id);
+      this.is_sustaining = false;
+      this.session = this.player.session;
+    }
+
+    Sampler.prototype.connect = function(dst) {
+      return this.core.connect(dst);
+    };
+
+    Sampler.prototype.setDuration = function() {};
+
+    Sampler.prototype.setKey = function() {};
+
+    Sampler.prototype.setScale = function() {};
+
+    Sampler.prototype.setNote = function(note) {
+      return this.core.setNote(note);
+    };
+
+    Sampler.prototype.setGain = function(gain) {
+      return this.core.setGain(gain);
+    };
+
+    Sampler.prototype.getGain = function() {
+      return this.core.gain;
+    };
+
+    Sampler.prototype.noteOn = function(note) {
+      this.core.setNote(note);
+      return this.core.noteOn();
+    };
+
+    Sampler.prototype.noteOff = function() {
+      return this.core.noteOff();
+    };
+
+    Sampler.prototype.playAt = function(time) {
+      var mytime, notes;
+      this.time = time;
+      mytime = this.time % this.pattern.length;
+      this.view.playAt(mytime);
+      if (this.pattern[mytime] !== 0) {
+        notes = this.pattern[mytime];
+        return this.core.noteOn(notes);
+      }
+    };
+
+    Sampler.prototype.play = function() {
+      return this.view.play();
+    };
+
+    Sampler.prototype.stop = function() {
+      this.core.noteOff();
+      return this.view.stop();
+    };
+
+    Sampler.prototype.pause = function(time) {
+      return this.core.noteOff();
+    };
+
+    Sampler.prototype.readPattern = function(pattern_obj) {
+      this.pattern_obj = pattern_obj;
+      this.pattern = this.pattern_obj.pattern;
+      this.pattern_name = this.pattern_obj.name;
+      return this.view.readPattern(this.pattern_obj);
+    };
+
+    Sampler.prototype.clearPattern = function() {
+      this.pattern = this.pattern.concat([[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]);
+      this.pattern_obj.pattern = this.pattern;
+      return this.view.readPattern(this.pattern_obj);
+    };
+
+    Sampler.prototype.plusPattern = function() {
+      this.pattern = this.pattern.concat([[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]);
+      return this.player.resetSceneLength();
+    };
+
+    Sampler.prototype.minusPattern = function() {
+      this.pattern = this.pattern.slice(0, this.pattern.length - 32);
+      return this.player.resetSceneLength();
+    };
+
+    Sampler.prototype.addNote = function(time, note, gain) {
+      var i, _i, _ref;
+      if (!Array.isArray(this.pattern[time])) {
+        this.pattern[time] = [[this.pattern[time], 1.0]];
+      }
+      for (i = _i = 0, _ref = this.pattern[time].length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.pattern[time][i][0] === note) {
+          this.pattern[time].splice(i, 1);
+        }
+      }
+      return this.pattern[time].push([note, gain]);
+    };
+
+    Sampler.prototype.removeNote = function(pos) {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.pattern[pos.x_abs].length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.pattern[pos.x_abs][i][0] === pos.note) {
+          _results.push(this.pattern[pos.x_abs].splice(i, 1));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
+    Sampler.prototype.activate = function(i) {
+      return this.view.activate(i);
+    };
+
+    Sampler.prototype.inactivate = function(i) {
+      return this.view.inactivate(i);
+    };
+
+    Sampler.prototype.redraw = function(time) {
+      this.time = time;
+      return this.view.drawPattern(this.time);
+    };
+
+    Sampler.prototype.setId = function(id) {
+      this.id = id;
+    };
+
+    Sampler.prototype.setSynthName = function(name) {
+      this.name = name;
+      this.session.setSynthName(this.id, this.name);
+      return this.view.setSynthName(this.name);
+    };
+
+    Sampler.prototype.setPatternName = function(pattern_name) {
+      this.pattern_name = pattern_name;
+      this.session.setPatternName(this.id, this.pattern_name);
+      return this.view.setPatternName(this.pattern_name);
+    };
+
+    return Sampler;
+
+  })();
+
+}).call(this);
+;(function() {
+  this.SamplerCoreView = (function() {
+    function SamplerCoreView(model, id, dom) {
+      this.model = model;
+      this.id = id;
+      this.dom = dom;
+      this.sample = this.dom.find('.Sampler_sample');
+      this.canvas_waveform_dom = this.dom.find('.waveform');
+      this.canvas_waveform = this.canvas_waveform_dom[0];
+      this.ctx_waveform = this.canvas_waveform.getContext('2d');
+      this.canvas_EQ_dom = this.dom.find('.canvasEQ');
+      this.canvas_EQ = this.canvas_EQ_dom[0];
+      this.ctx_EQ = this.canvas_EQ.getContext('2d');
+      this.eq = this.dom.find('.Sampler_EQ');
+      this.output = this.dom.find('.Sampler_output');
+      this.panner = this.output.find('.pan-slider');
+      this.gain = this.output.find('.gain-slider');
+      this.sample_num = 0;
+      this.initEvent();
+    }
+
+    SamplerCoreView.prototype.initEvent = function() {
+      var _this = this;
+      this.sample.on("change", function() {
+        _this.setSampleParam();
+        return _this.updateWaveformCanvas(_this.sample_num);
+      });
+      this.eq.on('change', function() {
+        _this.setSampleEQParam();
+        return _this.updateEQCanvas();
+      });
+      this.output.on('change', function() {
+        return _this.setSampleOutputParam();
+      });
+      return this.setParam();
+    };
+
+    SamplerCoreView.prototype.updateWaveformCanvas = function(sample_num) {
+      var canvas, ctx, d, h, hts, left, right, w, wave, x, _data, _i;
+      this.sample_num = sample_num;
+      canvas = this.canvas_waveform;
+      ctx = this.ctx_waveform;
+      w = canvas.width = 300;
+      h = canvas.height = 180;
+      ctx.clearRect(0, 0, w, h);
+      hts = this.model.getSampleParam(this.sample_num);
+      _data = this.model.getSampleData(this.sample_num);
+      if (_data != null) {
+        wave = _data.getChannelData(0);
+        ctx.translate(0, 90);
+        ctx.beginPath();
+        d = wave.length / w;
+        for (x = _i = 0; 0 <= w ? _i < w : _i > w; x = 0 <= w ? ++_i : --_i) {
+          ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = 'rgb(255, 0, 220)';
+        ctx.stroke();
+        ctx.translate(0, -90);
+      }
+      left = hts[0] * w;
+      right = hts[1] * w;
+      if (left < right) {
+        ctx.fillStyle = 'rgba(255, 0, 160, 0.2)';
+        return ctx.fillRect(left, 0, right - left, h);
+      }
+    };
+
+    SamplerCoreView.prototype.updateEQCanvas = function() {
+      var canvas, ctx, eq, h, w;
+      canvas = this.canvas_EQ;
+      ctx = this.ctx_EQ;
+      w = canvas.width = 270;
+      h = canvas.height = 100;
+      eq = this.model.getSampleEQParam(this.sample_num);
+      ctx.clearRect(0, 0, w, h);
+      ctx.translate(0, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(0, -(eq[0] / 100.0) * (h / 2));
+      ctx.lineTo(w / 3, -(eq[1] / 100.0) * (h / 2));
+      ctx.lineTo(w / 3 * 2, -(eq[1] / 100.0) * (h / 2));
+      ctx.lineTo(w, -(eq[2] / 100.0) * (h / 2));
+      ctx.strokeStyle = 'rgb(255, 0, 220)';
+      ctx.stroke();
+      ctx.closePath();
+      return ctx.translate(0, -h / 2);
+    };
+
+    SamplerCoreView.prototype.setParam = function() {};
+
+    SamplerCoreView.prototype.setSampleParam = function() {
+      var i;
+      i = this.sample_num;
+      return this.model.setSampleParam(i, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
+    };
+
+    SamplerCoreView.prototype.setSampleEQParam = function() {
+      var i;
+      i = this.sample_num;
+      return this.model.setSampleEQParam(i, parseFloat(this.eq.find('.EQ_lo').val()) - 100.0, parseFloat(this.eq.find('.EQ_mid').val()) - 100.0, parseFloat(this.eq.find('.EQ_hi').val()) - 100.0);
+    };
+
+    SamplerCoreView.prototype.setSampleOutputParam = function() {
+      return this.model.setSampleOutputParam(this.sample_num, this.pan2pos(1.0 - (parseFloat(this.panner.val()) / 100.0)), parseFloat(this.gain.val()) / 100.0);
+    };
+
+    SamplerCoreView.prototype.setGains = function() {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.model.setNodeGain(i, parseInt(this.gain_inputs.eq(i).val())));
+      }
+      return _results;
+    };
+
+    SamplerCoreView.prototype.pan2pos = function(v) {
+      var theta;
+      theta = v * Math.PI;
+      return [Math.cos(theta), 0, -Math.sin(theta)];
+    };
+
+    return SamplerCoreView;
+
+  })();
+
+  this.SamplerView = (function() {
+    function SamplerView(model, id) {
+      var _this = this;
+      this.model = model;
+      this.id = id;
+      this.dom = $('#tmpl_sampler').clone();
+      this.dom.attr('id', 'sampler' + id);
+      $("#instruments").append(this.dom);
+      this.synth_name = this.dom.find('.synth-name');
+      this.synth_name.val(this.model.name);
+      this.pattern_name = this.dom.find('.pattern-name');
+      this.pattern_name.val(this.model.pattern_name);
+      this.synth_type = this.dom.find('.synth-type');
+      this.header = this.dom.find('.header');
+      this.markers = this.dom.find('.markers');
+      this.pos_markers = this.dom.find('.marker');
+      this.marker_prev = this.dom.find('.marker-prev');
+      this.marker_next = this.dom.find('.marker-next');
+      this.plus = this.dom.find('.pattern-plus');
+      this.minus = this.dom.find('.pattern-minus');
+      this.nosync = this.dom.find('.pattern-nosync');
+      this.is_nosync = false;
+      this.setMarker();
+      this.table_wrapper = this.dom.find('.sequencer-table');
+      this.canvas_hover_dom = this.dom.find('.table-hover');
+      this.canvas_on_dom = this.dom.find('.table-on');
+      this.canvas_off_dom = this.dom.find('.table-off');
+      this.canvas_hover = this.canvas_hover_dom[0];
+      this.canvas_on = this.canvas_on_dom[0];
+      this.canvas_off = this.canvas_off_dom[0];
+      this.ctx_hover = this.canvas_hover.getContext('2d');
+      this.ctx_on = this.canvas_on.getContext('2d');
+      this.ctx_off = this.canvas_off.getContext('2d');
+      this.cell = new Image();
+      this.cell.src = 'static/img/sequencer_cell.png';
+      this.cell.onload = function() {
+        return _this.initCanvas();
+      };
+      this.cells_x = 32;
+      this.cells_y = 10;
+      this.fold = this.dom.find('.btn-fold-core');
+      this.core = this.dom.find('.sampler-core');
+      this.is_panel_opened = true;
+      this.keyboard = new SamplerKeyboardView(this);
+      this.pattern = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
+      this.pattern_obj = {
+        name: this.pattern_name.val(),
+        pattern: this.pattern
+      };
+      this.page = 0;
+      this.page_total = 1;
+      this.last_time = 0;
+      this.last_page = 0;
+      this.is_clicked = false;
+      this.hover_pos = {
+        x: -1,
+        y: -1
+      };
+      this.click_pos = {
+        x: -1,
+        y: -1
+      };
+      this.initEvent();
+      this.initCanvas();
+    }
+
+    SamplerView.prototype.initCanvas = function() {
+      var i, j, _i, _j, _ref, _ref1;
+      this.canvas_hover.width = this.canvas_on.width = this.canvas_off.width = 832;
+      this.canvas_hover.height = this.canvas_on.height = this.canvas_off.height = 260;
+      this.rect = this.canvas_off.getBoundingClientRect();
+      this.offset = {
+        x: this.rect.left,
+        y: this.rect.top
+      };
+      for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        for (j = _j = 0, _ref1 = this.cells_x; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; j = 0 <= _ref1 ? ++_j : --_j) {
+          this.ctx_off.drawImage(this.cell, 0, 26, 26, 26, j * 26, i * 26, 26, 26);
+        }
+      }
+      return this.readPattern(this.pattern_obj);
+    };
+
+    SamplerView.prototype.getPos = function(e) {
+      var _x, _y;
+      this.rect = this.canvas_off.getBoundingClientRect();
+      _x = Math.floor((e.clientX - this.rect.left) / 26);
+      _y = Math.floor((e.clientY - this.rect.top) / 26);
+      _y = Math.min(9, _y);
+      return {
+        x: _x,
+        y: _y,
+        x_abs: this.page * this.cells_x + _x,
+        y_abs: _y,
+        note: this.cells_y - _y
+      };
+    };
+
+    SamplerView.prototype.initEvent = function() {
+      var _this = this;
+      this.canvas_hover_dom.on('mousemove', function(e) {
+        var pos;
+        pos = _this.getPos(e);
+        if (pos !== _this.hover_pos) {
+          _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
+          _this.ctx_hover.drawImage(_this.cell, 52, 26, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
+          _this.hover_pos = pos;
+        }
+        if (_this.is_clicked && _this.click_pos !== pos) {
+          if (_this.is_adding) {
+            _this.addNote(pos, 1.0);
+          } else {
+            _this.removeNote(pos);
+          }
+          return _this.click_pos = pos;
+        }
+      }).on('mousedown', function(e) {
+        var note, pos, remove, _i, _len, _ref;
+        _this.is_clicked = true;
+        pos = _this.getPos(e);
+        remove = false;
+        _ref = _this.pattern[pos.x_abs];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          note = _ref[_i];
+          if (note[0] === pos.note) {
+            remove = true;
+          }
+        }
+        if (remove) {
+          return _this.removeNote(pos);
+        } else {
+          _this.is_adding = true;
+          return _this.addNote(pos, 1.0);
+        }
+      }).on('mouseup', function(e) {
+        _this.is_clicked = false;
+        _this.is_adding = false;
+        return _this.is_removing = false;
+      }).on('mouseout', function(e) {
+        _this.ctx_hover.clearRect(_this.hover_pos.x * 26, _this.hover_pos.y * 26, 26, 26);
+        _this.hover_pos = {
+          x: -1,
+          y: -1
+        };
+        _this.is_clicked = false;
+        _this.is_adding = false;
+        return _this.is_removing = false;
+      });
+      this.synth_type.on('change', function() {
+        return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
+      });
+      this.synth_name.on('focus', (function() {
+        return window.is_input_mode = true;
+      })).on('blur', (function() {
+        return window.is_input_mode = false;
+      })).on('change', (function() {
+        return _this.model.setSynthName(_this.synth_name.val());
+      }));
+      this.pattern_name.on('focus', (function() {
+        return window.is_input_mode = true;
+      })).on('blur', (function() {
+        return window.is_input_mode = false;
+      })).on('change', (function() {
+        return _this.model.setPatternName(_this.pattern_name.val());
+      }));
+      this.marker_prev.on('click', (function() {
+        return _this.model.player.backward(true);
+      }));
+      this.marker_next.on('click', (function() {
+        return _this.model.player.forward();
+      }));
+      this.nosync.on('click', (function() {
+        return _this.toggleNoSync();
+      }));
+      this.plus.on('click', (function() {
+        return _this.plusPattern();
+      }));
+      this.minus.on('click', (function() {
+        if (_this.pattern.length > _this.cells_x) {
+          return _this.minusPattern();
+        }
+      }));
+      return this.fold.on('mousedown', function() {
+        if (_this.is_panel_opened) {
+          _this.core.css('height', '0px');
+          _this.table_wrapper.css('height', '262px');
+          _this.fold.css({
+            top: '-22px',
+            padding: '0px 5px 0px 0px'
+          }).removeClass('fa-angle-down').addClass('fa-angle-up');
+          return _this.is_panel_opened = false;
+        } else {
+          _this.core.css('height', '280px');
+          _this.table_wrapper.css('height', '262px');
+          _this.fold.css({
+            top: '0px',
+            padding: '5px 5px 5px 5px'
+          }).removeClass('fa-angle-up').addClass('fa-angle-down');
+          return _this.is_panel_opened = true;
+        }
+      });
+    };
+
+    SamplerView.prototype.addNote = function(pos, gain) {
+      var i, _i, _ref;
+      if (this.pattern[pos.x_abs] === 0) {
+        this.pattern[pos.x_abs] = [];
+      }
+      if (!Array.isArray(this.pattern[pos.x_abs])) {
+        this.pattern[pos.x_abs] = [[this.pattern[pos.x_abs], 1.0]];
+      }
+      for (i = _i = 0, _ref = this.pattern[pos.x_abs].length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.pattern[pos.x_abs][i][0] === pos.note) {
+          this.pattern[pos.x_abs].splice(i, 1);
+        }
+      }
+      this.pattern[pos.x_abs].push([pos.note, gain]);
+      this.model.addNote(pos.x_abs, pos.note, gain);
+      return this.ctx_on.drawImage(this.cell, 26, 26, 26, 26, pos.x * 26, pos.y * 26, 26, 26);
+    };
+
+    SamplerView.prototype.removeNote = function(pos) {
+      var i, _i, _ref;
+      for (i = _i = 0, _ref = this.pattern[pos.x_abs].length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (this.pattern[pos.x_abs][i][0] === pos.note) {
+          this.pattern[pos.x_abs].splice(i, 1);
+        }
+      }
+      this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
+      return this.model.removeNote(pos);
+    };
+
+    SamplerView.prototype.playAt = function(time) {
+      var i, _i, _ref;
+      this.time = time;
+      if (this.is_nosync) {
+        return;
+      }
+      if (this.time % this.cells_x === 0) {
+        this.drawPattern(this.time);
+      }
+      for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.ctx_off.drawImage(this.cell, 0, 26, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26);
+        this.ctx_off.drawImage(this.cell, 78, 26, 26, 26, (time % this.cells_x) * 26, i * 26, 26, 26);
+      }
+      return this.last_time = time;
+    };
+
+    SamplerView.prototype.readPattern = function(pattern_obj) {
+      this.pattern_obj = pattern_obj;
+      this.pattern = this.pattern_obj.pattern;
+      this.page = 0;
+      this.page_total = this.pattern.length / this.cells_x;
+      this.drawPattern(0);
+      this.setMarker();
+      return this.setPatternName(this.pattern_obj.name);
+    };
+
+    SamplerView.prototype.drawPattern = function(time) {
+      var i, j, y, _i, _j, _len, _ref, _ref1;
+      if (time != null) {
+        this.time = time;
+      }
+      this.page = Math.floor(this.time / this.cells_x);
+      this.ctx_on.clearRect(0, 0, 832, 262);
+      for (i = _i = 0, _ref = this.cells_x; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _ref1 = this.pattern[this.page * this.cells_x + i];
+        for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
+          j = _ref1[_j];
+          y = this.cells_y - j[0];
+          this.ctx_on.drawImage(this.cell, 26, 26, 26, 26, i * 26, y * 26, 26, 26);
+        }
+      }
+      return this.setMarker();
+    };
+
+    SamplerView.prototype.plusPattern = function() {
+      if (this.page_total === 8) {
+        return;
+      }
+      this.pattern = this.pattern.concat([[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]);
+      this.page_total++;
+      this.model.plusPattern();
+      this.drawPattern();
+      this.minus.removeClass('btn-false').addClass('btn-true');
+      if (this.page_total === 8) {
+        return this.plus.removeClass('btn-true').addClass('btn-false');
+      }
+    };
+
+    SamplerView.prototype.minusPattern = function() {
+      if (this.page_total === 1) {
+        return;
+      }
+      this.pattern = this.pattern.slice(0, this.pattern.length - this.cells_x);
+      this.page_total--;
+      this.model.minusPattern();
+      this.drawPattern();
+      this.plus.removeClass('btn-false').addClass('btn-true');
+      if (this.page_total === 1) {
+        return this.minus.removeClass('btn-true').addClass('btn-false');
+      }
+    };
+
+    SamplerView.prototype.setMarker = function() {
+      var _this = this;
+      this.pos_markers.filter(function(i) {
+        return i < _this.page_total;
+      }).addClass('marker-active');
+      this.pos_markers.filter(function(i) {
+        return _this.page_total <= i;
+      }).removeClass('marker-active');
+      this.pos_markers.removeClass('marker-now').eq(this.page).addClass('marker-now');
+      this.markers.find('.marker-pos').text(this.page + 1);
+      this.markers.find('.marker-total').text(this.page_total);
+      return this.pos_markers.filter(function(i) {
+        return i < _this.page_total;
+      }).each(function(i) {
+        return _this.pos_markers.eq(i).on('mousedown', function() {
+          var _results;
+          if (_this.page < i) {
+            while (_this.page !== i) {
+              _this.model.player.forward();
+            }
+          }
+          if (_this.page > i) {
+            _results = [];
+            while (_this.page !== i) {
+              _results.push(_this.model.player.backward(true));
+            }
+            return _results;
+          }
+        });
+      });
+    };
+
+    SamplerView.prototype.play = function() {};
+
+    SamplerView.prototype.stop = function() {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.ctx_off.drawImage(this.cell, 0, 26, 26, 26, (this.last_time % this.cells_x) * 26, i * 26, 26, 26));
+      }
+      return _results;
+    };
+
+    SamplerView.prototype.activate = function(i) {
+      this.is_active = true;
+      return this.initCanvas();
+    };
+
+    SamplerView.prototype.inactivate = function() {
+      return this.is_active = false;
+    };
+
+    SamplerView.prototype.setSynthName = function(name) {
+      return this.synth_name.val(name);
+    };
+
+    SamplerView.prototype.setPatternName = function(name) {
+      return this.pattern_name.val(name);
+    };
+
+    SamplerView.prototype.toggleNoSync = function() {
+      var i, _i, _ref, _results;
+      if (this.is_nosync) {
+        this.is_nosync = false;
+        this.nosync.removeClass('btn-true').addClass('btn-false');
+        return this.drawPattern(this.time);
+      } else {
+        this.is_nosync = true;
+        this.nosync.removeClass('btn-false').addClass('btn-true');
+        _results = [];
+        for (i = _i = 0, _ref = this.cells_y; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          _results.push(this.ctx_off.drawImage(this.cell, 0, 26, 26, 26, (this.time % this.cells_x) * 26, i * 26, 26, 26));
+        }
+        return _results;
+      }
+    };
+
+    return SamplerView;
+
+  })();
+
+  this.SamplerKeyboardView = (function() {
+    function SamplerKeyboardView(sequencer) {
+      this.sequencer = sequencer;
+      this.dom = this.sequencer.dom.find('.keyboard');
+      this.canvas = this.dom[0];
+      this.ctx = this.canvas.getContext('2d');
+      this.w = 48;
+      this.h = 26;
+      this.num = 10;
+      this.color = ['rgba(230, 230, 230, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
+      this.is_clicked = false;
+      this.hover_pos = {
+        x: -1,
+        y: -1
+      };
+      this.click_pos = {
+        x: -1,
+        y: -1
+      };
+      this.initCanvas();
+      this.initEvent();
+    }
+
+    SamplerKeyboardView.prototype.initCanvas = function() {
+      var i, _i, _ref, _results;
+      this.canvas.width = this.w;
+      this.canvas.height = this.h * this.num;
+      this.rect = this.canvas.getBoundingClientRect();
+      this.offset = {
+        x: this.rect.left,
+        y: this.rect.top
+      };
+      this.ctx.fillStyle = this.color[0];
+      _results = [];
+      for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.drawNormal(i);
+        _results.push(this.drawText(i));
+      }
+      return _results;
+    };
+
+    SamplerKeyboardView.prototype.getPos = function(e) {
+      this.rect = this.canvas.getBoundingClientRect();
+      return Math.floor((e.clientY - this.rect.top) / this.h);
+    };
+
+    SamplerKeyboardView.prototype.initEvent = function() {
+      var _this = this;
+      return this.dom.on('mousemove', function(e) {
+        var pos;
+        pos = _this.getPos(e);
+        if (pos !== _this.hover_pos) {
+          _this.drawNormal(_this.hover_pos);
+          _this.drawHover(pos);
+          _this.hover_pos = pos;
+        }
+        if (_this.is_clicked && _this.click_pos !== pos) {
+          _this.clearActive(_this.click_pos);
+          _this.drawActive(pos);
+          _this.sequencer.model.noteOff();
+          _this.sequencer.model.noteOn(_this.num - pos);
+          return _this.click_pos = pos;
+        }
+      }).on('mousedown', function(e) {
+        var pos;
+        _this.is_clicked = true;
+        pos = _this.getPos(e);
+        _this.drawActive(pos);
+        _this.sequencer.model.noteOn(_this.num - pos);
+        return _this.click_pos = pos;
+      }).on('mouseup', function(e) {
+        _this.is_clicked = false;
+        _this.clearActive(_this.click_pos);
+        _this.sequencer.model.noteOff();
+        return _this.click_pos = {
+          x: -1,
+          y: -1
+        };
+      }).on('mouseout', function(e) {
+        _this.clearActive(_this.hover_pos);
+        _this.sequencer.model.noteOff();
+        _this.hover_pos = {
+          x: -1,
+          y: -1
+        };
+        return _this.click_pos = {
+          x: -1,
+          y: -1
+        };
+      });
+    };
+
+    SamplerKeyboardView.prototype.drawNormal = function(i) {
+      this.clearNormal(i);
+      this.ctx.fillStyle = this.color[0];
+      this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
+      this.ctx.fillStyle = this.color[3];
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    SamplerKeyboardView.prototype.drawHover = function(i) {
+      this.ctx.fillStyle = this.color[1];
+      this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    SamplerKeyboardView.prototype.drawActive = function(i) {
+      this.clearNormal(i);
+      this.ctx.fillStyle = this.color[2];
+      this.ctx.fillRect(0, i * this.h, this.w, this.h);
+      this.ctx.fillStyle = this.color[4];
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    SamplerKeyboardView.prototype.clearNormal = function(i) {
+      return this.ctx.clearRect(0, i * this.h, this.w, this.h);
+    };
+
+    SamplerKeyboardView.prototype.clearActive = function(i) {
+      this.clearNormal(i);
+      this.drawNormal(i);
+      return this.drawText(i);
+    };
+
+    SamplerKeyboardView.prototype.drawText = function(i) {
+      this.ctx.fillStyle = this.color[3];
+      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    };
+
+    return SamplerKeyboardView;
+
+  })();
+
+}).call(this);
+;(function() {
   this.Session = (function() {
     function Session(ctx, player) {
       this.ctx = ctx;
@@ -1005,6 +2126,28 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Session.prototype.setCreatorName = function(name) {
       return this.song.creator = this.view.song.creator = name;
+    };
+
+    Session.prototype.changeSynth = function(id, type) {
+      var pp, s, s_obj;
+      s = this.player.changeSynth(id, type);
+      this.synth[id] = s;
+      pp = [];
+      pp[this.scene_pos] = {
+        name: s.id + '-' + this.scene_pos,
+        pattern: s.pattern
+      };
+      s_obj = {
+        id: s.id,
+        name: 'Synth #' + s.id,
+        patterns: pp,
+        params: [],
+        gain: 1.0,
+        pan: 0.0
+      };
+      this.song.tracks[id] = s_obj;
+      console.log(pp);
+      return s.readPattern(pp[this.scene_pos]);
     };
 
     return Session;
@@ -1656,6 +2799,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.node.connect(dst);
     };
 
+    VCO.prototype.disconnect = function() {
+      return this.node.disconnect();
+    };
+
     return VCO;
 
   })();
@@ -1699,8 +2846,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     EG.prototype.noteOff = function(time) {
-      this.target.cancelScheduledValues(time);
-      return this.target.linearRampToValueAtTime(this.min, time + this.release);
+      this.target.linearRampToValueAtTime(this.min, time + this.release);
+      return this.target.linearRampToValueAtTime(0, time + this.release + 1);
     };
 
     return EG;
@@ -1777,7 +2924,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.feg.setRange(80, Math.pow(freq / 1000, 2.0) * 25000 + 80);
       this.filter.setQ(q);
       if (q > 1) {
-        return this.gain_res.value = 0.1 * (q / 1000.0);
+        return this.gain_res.gain.value = 0.1 * (q / 1000.0);
       }
     };
 
@@ -1823,6 +2970,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SynthCore.prototype.connect = function(dst) {
       this.node.connect(this.filter.lpf);
       return this.filter.connect(dst);
+    };
+
+    SynthCore.prototype.disconnect = function() {
+      this.filter.disconnect();
+      return this.node.disconnect();
     };
 
     SynthCore.prototype.setNote = function(note) {
@@ -1978,6 +3130,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.core.connect(dst);
     };
 
+    Synth.prototype.disconnect = function() {};
+
     Synth.prototype.setDuration = function(duration) {
       this.duration = duration;
     };
@@ -2129,6 +3283,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.view.setPatternName(this.pattern_name);
     };
 
+    Synth.prototype.replaceWith = function(s_new) {
+      return this.view.dom.replaceWith(s_new.view.dom);
+    };
+
     return Synth;
 
   })();
@@ -2147,6 +3305,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth_name.val(this.model.name);
       this.pattern_name = this.dom.find('.pattern-name');
       this.pattern_name.val(this.model.pattern_name);
+      this.synth_type = this.dom.find('.synth-type');
       this.pencil = this.dom.find('.sequencer-pencil');
       this.step = this.dom.find('.sequencer-step');
       this.is_step = false;
@@ -2292,6 +3451,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         };
         _this.is_clicked = false;
         return _this.is_adding = false;
+      });
+      this.synth_type.on('change', function() {
+        return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
         return window.is_input_mode = true;

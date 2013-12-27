@@ -56,6 +56,10 @@
       return _results;
     };
 
+    Mixer.prototype.changeSynth = function(id, synth) {
+      return synth.connect(this.panners[id]);
+    };
+
     return Mixer;
 
   })();

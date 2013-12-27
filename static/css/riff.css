@@ -1304,6 +1304,244 @@ legend {
 }
 
 
+
+/* Sampler */
+
+.sampler .sequencer-table {
+    position: absolute;
+    margin: 0px 7px;
+    padding: 0px;
+    top: 45px;
+    left: 0px;
+    width: 896px;
+    height: 262px;
+    transition: all 0.2s ease 0s;
+}
+.sampler .table {
+    position: absolute;
+    margin: 0px;
+    padding: 0px;
+    top: 0px;
+    left: 50px;
+    overflow-y: hidden;
+}
+.table-hover {
+    z-index: 100;
+}
+.sampler .table-on {
+    z-index: 10;
+}
+.sampler .table-off {
+    z-index: 1;
+}
+.sampler .keyboard {
+    position: absolute;
+    margin: 0px;
+    padding: 0px;
+    top: 2px;
+    left: 0px;
+}
+
+.sampler-core {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    height: 280px;
+    left: 0px;
+    transition: all 0.2s ease 0s;
+}
+
+.Sampler_module {
+    background-color: #fff;
+    margin: 0px 10px;
+    padding: 0px;
+    font-size: 12px;
+    text-align: center;
+    vertical-align: top;
+    line-height: 26px;
+
+    border: 1px solid #f3e;
+    border-radius: 3px;
+}
+legend {
+    font-size:12px;
+}
+.Sampler_sample {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 470px;
+    height: 270px;
+}
+.Sampler_sample > .wave {
+    width: 400px;
+    height: 130px;
+    margin: 0px 15px 25px 15px;
+}
+.Sampler_sample .file-select {
+    float: left;
+    width: 90px;
+    height: 100px;
+    margin: 0px;
+    text-align: left;
+}
+.Sampler_sample .file-select > label {
+    left: 0px;
+    width: 80px;
+    font-size: 12px;
+    text-align: left;
+}
+.Sampler_sample .file-select > select {
+    left: 0px;
+    width: 80px;
+    margin-right: 10px;
+    font-size: 12px;
+    text-align: left;
+}
+.Sampler_sample .waveform {
+    float: left;
+    width: 300px;
+    height: 120px;
+    border-left: 1px solid #f3e;
+    border-bottom: 1px solid #f3e;
+    margin: 4px 0px 4px 9px;
+}
+
+.Sampler_sample > .param {
+    width: 400px;
+    margin: 15px;
+}
+.Sampler_sample > .param label {
+    float: left;
+    width: 80px;
+    font-size: 12px;
+    text-align: center;
+}
+.Sampler_sample > .param input {
+    float: right;
+    width: 290px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 4px;
+}
+
+.Sampler_EQ {
+    position: absolute;
+    top: 0px;
+    left: 480px;
+    width: 300px;
+    height: 270px;
+    border: 1px solid #f3e;
+    text-align: center;
+    color: #f3e;
+}
+.Sampler_EQ > .canvasEQ {
+    float: left;
+    width: 270px;
+    height: 100px;
+    border: 1px solid #f3e;
+    border-top: none;
+    margin: 9px 14px;
+}
+.Sampler_EQ > .EQ-sliders {
+    top: 120px;
+    width: 270px;
+    height: 150px;
+    margin: 0px 15px;
+}
+.Sampler_EQ .EQ-slider {
+    float: left;
+    width: 90px;
+    height: 100px;
+    text-align: center;
+}
+.Sampler_EQ .EQ-slider > label {
+    width: 90px;
+    height: 20px;
+    text-align: center;
+    margin: 0px;
+    margin-left: -5px;
+}
+.Sampler_EQ .EQ-slider > .gain-slider {
+    width: 80px;
+    height: 80px;
+    margin: 0px;
+}
+
+.Sampler_output {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 100px;
+    height: 270px;
+    border: 1px solid #f3e;
+    text-align: center;
+}
+.Sampler_output > .gain-slider {
+    height: 180px;
+}
+
+
+.instrument.sampler {
+    border: 1px solid #f3e;
+}
+.sampler .header {
+    border-bottom: 1px solid #f3e;
+}
+.sampler * {
+    color: #f3e;
+    text-shadow: 0 0 1px #ecd;
+}
+.sampler .markers *{
+    color: #f8d;
+}
+.sampler .markers .marker {
+    color: #fafafa;
+}
+.sampler .markers .marker-active {
+    color: #f8d;
+}
+.sampler .marker-active:hover {
+    text-shadow: 0px 0px 4px #808;
+}
+.sampler .markers .marker-now {
+    color: #fff;
+    text-shadow: 0px 0px 5px #f3e;
+}
+.sampler .marker-now:hover {
+    cursor: default;
+    text-shadow: 0px 0px 10px #f3e;
+}
+.sampler .marker-prev:hover, .sampler .marker-next:hover {
+    text-shadow: 0px 0px 5px #f3e;
+}
+
+.sampler .names * {
+    color: #f3e;
+    text-shadow: 0 0 1px #ecd;
+}
+.sampler .names *:hover {
+    text-shadow: 0px 0px 10px #f9e;
+}
+.sampler .btn-true {
+    color: #f8d;
+}
+.sampler .btn-true:hover {
+    color: #fff;
+    text-shadow: 0px 0px 5px #f3e;
+}
+.sampler .btn-false {
+    color: #eee;
+}
+.sampler .btn-false:hover {
+    color: #fff;
+    text-shadow: 0px 0px 5px #f3e;
+}
+
+
+
+
+
 #templates {
     display: none;
 }

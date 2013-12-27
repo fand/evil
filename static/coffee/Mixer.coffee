@@ -33,3 +33,6 @@ class @Mixer
         for i in [0...pans.length]
             p = pans[i]
             @panners[i].setPosition(p[0], p[1], p[2])
+
+    changeSynth: (id, synth) ->
+         synth.connect(@panners[id])

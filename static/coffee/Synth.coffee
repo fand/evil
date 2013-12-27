@@ -76,7 +76,7 @@ class @VCO
         @node.frequency.setValueAtTime(@freq, 0)
 
     connect: (dst) -> @node.connect(dst)
-
+    disconnect:    -> @node.disconnect()
 
 
 class @EG
@@ -103,8 +103,8 @@ class @EG
         @target.linearRampToValueAtTime(@sustain * (@max - @min) + @min, (time + @attack + @decay))
 
     noteOff: (time) ->
-        @target.cancelScheduledValues(time)
         @target.linearRampToValueAtTime(@min, time + @release)
+        @target.linearRampToValueAtTime(0, time + @release + 1)
 
 
 
@@ -159,7 +159,7 @@ class @SynthCore
     setFilterParam: (freq, q) ->
         @feg.setRange(80, Math.pow(freq/1000, 2.0) * 25000 + 80)
         @filter.setQ(q)
-        @gain_res.value = 0.1 * (q / 1000.0) if q > 1
+        @gain_res.gain.value = 0.1 * (q / 1000.0) if q > 1
 
     setVCOGain: (i, gain) ->
         ## Keep total gain <= 0.9
@@ -187,6 +187,10 @@ class @SynthCore
     connect: (dst) ->
         @node.connect(@filter.lpf)
         @filter.connect(dst)
+
+    disconnect: () ->
+        @filter.disconnect()
+        @node.disconnect()
 
     setNote: (note) ->
         for v in @vcos
@@ -237,7 +241,7 @@ class @SynthCoreView
         h = canvas.height = 50
         w4 = w/4
         context.clearRect(0,0,w,h)
-        context.beginPath();
+        context.beginPath()
         context.moveTo(w4 * (1.0 - adsr[0]), h)
         context.lineTo(w / 4,0)                                  # attack
         context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]))  # decay
@@ -309,6 +313,7 @@ class @Synth
         @session = @player.session
 
     connect: (dst) -> @core.connect(dst)
+    disconnect: () -> #@core.disconnect()
 
     setDuration: (@duration) ->
     setKey:  (key) -> @core.setKey(key)
@@ -408,3 +413,6 @@ class @Synth
     setPatternName: (@pattern_name) ->
         @session.setPatternName(@id, @pattern_name)
         @view.setPatternName(@pattern_name)
+
+    replaceWith: (s_new) ->
+        @view.dom.replaceWith(s_new.view.dom)

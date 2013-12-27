@@ -4,8 +4,8 @@
     <div class="header">
 
       <select class="synth-type">
-        <option selected="selected">SYNTH</option>
-        <option>DRUM</option>
+        <option selected="selected">REZ</option>
+        <option>SAMPLER</option>
       </select>
 
       <div class="names clearfix">
