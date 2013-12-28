@@ -428,7 +428,7 @@ class @SynthView
     inactivate: -> @is_active = false
 
     setSynthName:   (name) -> @synth_name.val(name)
-    setPatternName: (name) -> @pattern_name.val(name)
+    setPatternName: (name) -> @pattern_name.val(name); @pattern_obj.name = name
 
     toggleNoSync: ->
         if @is_nosync

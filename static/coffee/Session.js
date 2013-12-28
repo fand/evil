@@ -124,8 +124,10 @@
     };
 
     Session.prototype.addSynth = function(s, _pos) {
-      var pos, pp, s_obj;
+      var name, pos, pp, s_obj;
       pos = _pos ? _pos : this.scene_pos;
+      name = s.id + '-' + pos;
+      s.readPatternName(name);
       pp = [];
       pp[pos] = {
         name: s.pattern_name,

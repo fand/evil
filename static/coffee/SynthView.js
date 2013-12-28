@@ -454,7 +454,8 @@
     };
 
     SynthView.prototype.setPatternName = function(name) {
-      return this.pattern_name.val(name);
+      this.pattern_name.val(name);
+      return this.pattern_obj.name = name;
     };
 
     SynthView.prototype.toggleNoSync = function() {

@@ -98,6 +98,9 @@ class @Session
     addSynth: (s, _pos) ->
         pos = if _pos then _pos else @scene_pos
 
+        name = s.id + '-' + pos
+        s.readPatternName(name)
+
         pp = []
         pp[pos] = name: s.pattern_name, pattern: s.pattern
         s_obj = id: s.id, type: 'REZ', name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0

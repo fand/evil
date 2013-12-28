@@ -2023,8 +2023,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Session.prototype.addSynth = function(s, _pos) {
-      var pos, pp, s_obj;
+      var name, pos, pp, s_obj;
       pos = _pos ? _pos : this.scene_pos;
+      name = s.id + '-' + pos;
+      s.readPatternName(name);
       pp = [];
       pp[pos] = {
         name: s.pattern_name,
@@ -3806,7 +3808,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SynthView.prototype.setPatternName = function(name) {
-      return this.pattern_name.val(name);
+      this.pattern_name.val(name);
+      return this.pattern_obj.name = name;
     };
 
     SynthView.prototype.toggleNoSync = function() {
