@@ -453,6 +453,7 @@ class @SamplerView
                 )
 
     selectSample: (@sample_now) ->
+        @keyboard.selectSample(@sample_now)
         @model.selectSample(@sample_now)
 
 
@@ -460,9 +461,12 @@ class @SamplerView
 class @SamplerKeyboardView
     constructor: (@sequencer) ->
         # Keyboard
-        @dom = @sequencer.dom.find('.keyboard')
-        @canvas = @dom[0]
-        @ctx = @canvas.getContext('2d')
+        @on_dom  = @sequencer.dom.find('.keyboard-off')
+        @off_dom = @sequencer.dom.find('.keyboard-on')
+        @canvas_on  = @on_dom[0]
+        @canvas_off = @off_dom[0]
+        @ctx_on  = @canvas_on.getContext('2d')
+        @ctx_off = @canvas_off.getContext('2d')
 
         @w = 64
         @h = 26
@@ -477,22 +481,22 @@ class @SamplerKeyboardView
         @initEvent()
 
     initCanvas: ->
-        @canvas.width = @w
-        @canvas.height = @h * @cells_y
-        @rect = @canvas.getBoundingClientRect()
+        @canvas_on.width  = @canvas_off.width  = @w
+        @canvas_on.height = @canvas_off.height = @h * @cells_y
+        @rect = @canvas_off.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top
 
-        @ctx.fillStyle = @color[0]
+        @ctx_off.fillStyle = @color[0]
         for i in [0...@cells_y]
             @drawNormal(i)
             @drawText(i)
 
     getPos: (e) ->
-        @rect = @canvas.getBoundingClientRect()
+        @rect = @canvas_off.getBoundingClientRect()
         Math.floor((e.clientY - @rect.top) / @h)
 
     initEvent: ->
-        @dom.on('mousemove', (e) =>
+        @off_dom.on('mousemove', (e) =>
             pos = @getPos(e)
 
             if pos != @hover_pos
@@ -529,25 +533,25 @@ class @SamplerKeyboardView
 
     drawNormal: (i) ->
         @clearNormal(i)
-        @ctx.fillStyle = @color[0]
-        @ctx.fillRect(0, (i+1) * @h - 3, @w, 2)
-        @ctx.fillStyle = @color[3]
-        @ctx.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx_off.fillStyle = @color[0]
+        @ctx_off.fillRect(0, (i+1) * @h - 3, @w, 2)
+        @ctx_off.fillStyle = @color[3]
+        @ctx_off.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
 
     drawHover: (i) ->
-        @ctx.fillStyle = @color[1]
-        @ctx.fillRect(0, (i+1) * @h - 3, @w, 2)
-        @ctx.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx_off.fillStyle = @color[1]
+        @ctx_off.fillRect(0, (i+1) * @h - 3, @w, 2)
+        @ctx_off.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
 
     drawActive: (i) ->
         @clearNormal(i)
-        @ctx.fillStyle = @color[2]
-        @ctx.fillRect(0, i * @h, @w, @h)
-        @ctx.fillStyle = @color[4]
-        @ctx.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx_off.fillStyle = @color[2]
+        @ctx_off.fillRect(0, i * @h, @w, @h)
+        @ctx_off.fillStyle = @color[4]
+        @ctx_off.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
 
     clearNormal: (i) ->
-        @ctx.clearRect(0, i * @h, @w, @h)
+        @ctx_off.clearRect(0, i * @h, @w, @h)
 
     clearActive: (i) ->
         @clearNormal(i)
@@ -555,5 +559,11 @@ class @SamplerKeyboardView
         @drawText(i)
 
     drawText: (i) ->
-        @ctx.fillStyle = @color[3]
-        @ctx.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx_off.fillStyle = @color[3]
+        @ctx_off.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+
+    selectSample: (sample_now) ->
+        @ctx_on.clearRect(0, (@cells_y - @sample_last - 1) * @h, @w, @h)
+        @ctx_on.fillStyle = 'rgba(255, 200, 230, 0.3)'
+        @ctx_on.fillRect(0, (@cells_y - sample_now - 1) * @h, @w, @h)
+        @sample_last = sample_now

@@ -269,7 +269,6 @@
     };
 
     SamplerCore.prototype.bindSample = function(sample_now) {
-      console.log(sample_now);
       this.view.updateWaveformCanvas(sample_now);
       this.view.updateEQCanvas();
       this.view.readSampleParam(this.getSampleParam(sample_now));

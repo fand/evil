@@ -102,7 +102,7 @@ class @BufferNode
 class @ResFilter
     constructor: (@ctx) ->
         @lpf = @ctx.createBiquadFilter()
-        @lpf.type = 'lowpass'  # lowpaegss == 0
+        @lpf.type = 'lowpass'
         @lpf.gain.value = 1.0
 
     connect:    (dst)  -> @lpf.connect(dst)
@@ -166,7 +166,6 @@ class @SamplerCore
         @view.updateWaveformCanvas(id)
 
     bindSample: (sample_now) ->
-        console.log(sample_now)
         @view.updateWaveformCanvas(sample_now)
         @view.updateEQCanvas()
         @view.readSampleParam(@getSampleParam(sample_now))

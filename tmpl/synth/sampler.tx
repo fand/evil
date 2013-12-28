@@ -37,7 +37,8 @@
     </div>
 
     <div class="sequencer-table">
-      <canvas class="keyboard"></canvas>
+      <canvas class="keyboard keyboard-off"></canvas>
+      <canvas class="keyboard keyboard-on"></canvas>
       <canvas class="table table-hover"></canvas>
       <canvas class="table table-on"></canvas>
       <canvas class="table table-off"></canvas>
