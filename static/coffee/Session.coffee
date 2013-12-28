@@ -154,6 +154,12 @@ class @Session
             else
                 @song.tracks[i].patterns[@current_cells[i]] = pattern: @player.synth[i].pattern
 
+#    saveTracks: ->
+
+    saveMaster: ->
+        if @song.master = []
+            @song.master.push(@player.getScene())
+
     readSong: (@song) ->
         @scene_pos = 0
         @song_length = 0
@@ -171,6 +177,7 @@ class @Session
 
     saveSong: () ->
         @savePatterns()
+        @saveMaster()
         song_json = JSON.stringify(@song)
         csrf_token = $('#ajax-form > input[name=csrf_token]').val()
         $.ajax(

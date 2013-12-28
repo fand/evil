@@ -140,6 +140,7 @@ $(() ->
         player.readSong(song2)
 
 
+#    console.log(song_read.master)
 
     # Read song
     player.readSong(song_read) if song_read?

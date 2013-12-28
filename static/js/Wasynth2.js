@@ -556,6 +556,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.view.readParam(this.bpm, this.freq_key, this.scale);
     };
 
+    Player.prototype.getScene = function() {
+      return this.scene;
+    };
+
     Player.prototype.setSceneLength = function(scene_length) {
       this.scene_length = scene_length;
     };
@@ -2130,6 +2134,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
+    Session.prototype.saveMaster = function() {
+      if (this.song.master = []) {
+        return this.song.master.push(this.player.getScene());
+      }
+    };
+
     Session.prototype.readSong = function(song) {
       var i, pat, _i, _ref;
       this.song = song;
@@ -2154,6 +2164,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var csrf_token, song_json,
         _this = this;
       this.savePatterns();
+      this.saveMaster();
       song_json = JSON.stringify(this.song);
       csrf_token = $('#ajax-form > input[name=csrf_token]').val();
       return $.ajax({

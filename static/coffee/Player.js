@@ -272,6 +272,10 @@
       return this.view.readParam(this.bpm, this.freq_key, this.scale);
     };
 
+    Player.prototype.getScene = function() {
+      return this.scene;
+    };
+
     Player.prototype.setSceneLength = function(scene_length) {
       this.scene_length = scene_length;
     };

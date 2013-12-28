@@ -181,6 +181,8 @@ class @Player
         @setScale(@scene.scale) if @scene.scale?
         @view.readParam(@bpm, @freq_key, @scale)
 
+    getScene: -> @scene
+
     setSceneLength: (@scene_length) ->
 
     resetSceneLength: (l) ->
