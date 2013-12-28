@@ -13,14 +13,19 @@ class @SamplerCoreView
         @panner = @output.find('.pan-slider')
         @gain = @output.find('.gain-slider')
 
-        @sample_num = 0
+        @sample_now = 0
 
         @initEvent()
+
+        # Do not @updateWaveformCanvas in constructor
+        # (wave is not loaded to model!!)
+        @updateEQCanvas()
+
 
     initEvent: ->
         @sample.on("change", () =>
             @setSampleParam()
-            @updateWaveformCanvas(@sample_num)
+            @updateWaveformCanvas(@sample_now)
         )
         @eq.on('change', () =>
             @setSampleEQParam()
@@ -31,7 +36,11 @@ class @SamplerCoreView
         )
         @setParam()
 
-    updateWaveformCanvas: (@sample_num) ->
+    bindSample: (@sample_now) ->
+        @updateWaveformParam(@sample_now)
+        @updateEQCanvas()
+
+    updateWaveformCanvas: (@sample_now) ->
         canvas  = @canvas_waveform
         ctx = @ctx_waveform
 
@@ -39,8 +48,8 @@ class @SamplerCoreView
         h = canvas.height = 180
         ctx.clearRect(0, 0, w, h)
 
-        hts = @model.getSampleParam(@sample_num)
-        _data = @model.getSampleData(@sample_num)
+        hts = @model.getSampleParam(@sample_now)
+        _data = @model.getSampleData(@sample_now)
 
         if _data?
             wave = _data.getChannelData(0)
@@ -65,7 +74,6 @@ class @SamplerCoreView
             ctx.fillStyle = 'rgba(255, 0, 160, 0.2)'
             ctx.fillRect(left, 0, right-left, h)
 
-
     updateEQCanvas: () ->
         canvas  = @canvas_EQ
         ctx = @ctx_EQ
@@ -74,7 +82,7 @@ class @SamplerCoreView
         h = canvas.height = 100
 
         # range is [-100, 100]
-        eq = @model.getSampleEQParam(@sample_num)
+        eq = @model.getSampleEQParam(@sample_now)
 
         # Draw waveform
         ctx.clearRect(0, 0, w, h)
@@ -95,18 +103,16 @@ class @SamplerCoreView
         # @setGains()
 
     setSampleParam: ->
-        i = @sample_num
         @model.setSampleParam(
-            i,
+            @sample_now,
             parseFloat(@sample.find('.head').val())  / 100.0,
             parseFloat(@sample.find('.tail').val())  / 100.0,
             parseFloat(@sample.find('.speed').val()) / 100.0
         )
 
     setSampleEQParam: ->
-        i = @sample_num
         @model.setSampleEQParam(
-            i,
+            @sample_now,
             parseFloat(@eq.find('.EQ_lo').val())  - 100.0,
             parseFloat(@eq.find('.EQ_mid').val()) - 100.0,
             parseFloat(@eq.find('.EQ_hi').val())  - 100.0
@@ -114,10 +120,25 @@ class @SamplerCoreView
 
     setSampleOutputParam: ->
         @model.setSampleOutputParam(
-            @sample_num,
+            @sample_now,
             @pan2pos(1.0 - (parseFloat(@panner.val())/100.0)),
             parseFloat(@gain.val()) / 100.0
         )
+
+    readSampleParam: (p) ->
+        @sample.find('.head' ).val(p[0] * 100.0)
+        @sample.find('.tail' ).val(p[1] * 100.0)
+        @sample.find('.speed').val(p[2] * 100.0)
+
+    readSampleEQParam: (p) ->
+        @eq.find('.EQ_lo' ).val(p[0] + 100.0)
+        @eq.find('.EQ_mid').val(p[1] + 100.0)
+        @eq.find('.EQ_hi' ).val(p[2] + 100.0)
+
+    readSampleOutputParam: (p) ->
+        [pan, g] = p
+        @panner.val((1.0 - Math.acos(pan[0])/Math.PI) * 100.0)
+        @gain.val(g * 100.0)
 
     setGains: ->
         for i in [0... @gain_inputs.length]
@@ -176,9 +197,7 @@ class @SamplerView
         @cells_x = 32
         @cells_y = 10
 
-        @fold = @dom.find('.btn-fold-core')
         @core = @dom.find('.sampler-core')
-        @is_panel_opened = true
 
         @keyboard = new SamplerKeyboardView(this)
 
@@ -300,19 +319,6 @@ class @SamplerView
                 @minusPattern()
         ))
 
-        @fold.on('mousedown', () =>
-            if @is_panel_opened
-                @core.css('height', '0px')
-                @table_wrapper.css('height', '262px')
-                @fold.css(top: '-22px', padding: '0px 5px 0px 0px').removeClass('fa-angle-down').addClass('fa-angle-up')
-                @is_panel_opened = false
-            else
-                @core.css('height', '280px')
-                @table_wrapper.css('height', '262px')
-                @fold.css(top: '0px', padding: '5px 5px 5px 5px').removeClass('fa-angle-up').addClass('fa-angle-down')
-                @is_panel_opened = true
-        )
-
 
     addNote: (pos, gain) ->
         if @pattern[pos.x_abs] == 0
@@ -366,7 +372,7 @@ class @SamplerView
     drawPattern: (time) ->
         @time = time if time?
         @page = Math.floor(@time / @cells_x)
-        @ctx_on.clearRect(0, 0, 832, 262)
+        @ctx_on.clearRect(0, 0, 832, 260)
 
         for i in [0...@cells_x]
             for j in @pattern[@page * @cells_x + i]
@@ -446,19 +452,26 @@ class @SamplerView
                     (@time % @cells_x) * 26, i * 26, 26, 26
                 )
 
+    selectSample: (@sample_now) ->
+        @keyboard.selectSample(@sample_now)
+        @model.selectSample(@sample_now)
+
 
 
 class @SamplerKeyboardView
     constructor: (@sequencer) ->
         # Keyboard
-        @dom = @sequencer.dom.find('.keyboard')
-        @canvas = @dom[0]
-        @ctx = @canvas.getContext('2d')
+        @on_dom  = @sequencer.dom.find('.keyboard-off')
+        @off_dom = @sequencer.dom.find('.keyboard-on')
+        @canvas_on  = @on_dom[0]
+        @canvas_off = @off_dom[0]
+        @ctx_on  = @canvas_on.getContext('2d')
+        @ctx_off = @canvas_off.getContext('2d')
 
-        @w = 48
+        @w = 64
         @h = 26
-        @num = 10
-        @color = ['rgba(230, 230, 230, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
+        @cells_y = 10
+        @color = ['rgba(230, 230, 230, 1.0)', 'rgba(  250, 50, 230, 0.7)', 'rgba(255, 100, 230, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
         @is_clicked = false
         @hover_pos = x: -1, y: -1
@@ -468,22 +481,22 @@ class @SamplerKeyboardView
         @initEvent()
 
     initCanvas: ->
-        @canvas.width = @w
-        @canvas.height = @h * @num
-        @rect = @canvas.getBoundingClientRect()
+        @canvas_on.width  = @canvas_off.width  = @w
+        @canvas_on.height = @canvas_off.height = @h * @cells_y
+        @rect = @canvas_off.getBoundingClientRect()
         @offset = x: @rect.left, y: @rect.top
 
-        @ctx.fillStyle = @color[0]
-        for i in [0...@num]
+        @ctx_off.fillStyle = @color[0]
+        for i in [0...@cells_y]
             @drawNormal(i)
             @drawText(i)
 
     getPos: (e) ->
-        @rect = @canvas.getBoundingClientRect()
+        @rect = @canvas_off.getBoundingClientRect()
         Math.floor((e.clientY - @rect.top) / @h)
 
     initEvent: ->
-        @dom.on('mousemove', (e) =>
+        @off_dom.on('mousemove', (e) =>
             pos = @getPos(e)
 
             if pos != @hover_pos
@@ -495,14 +508,16 @@ class @SamplerKeyboardView
                 @clearActive(@click_pos)
                 @drawActive(pos)
                 @sequencer.model.noteOff()
-                @sequencer.model.noteOn(@num - pos)
+                @sequencer.model.noteOn(@cells_y - pos)
                 @click_pos = pos
 
         ).on('mousedown', (e) =>
             @is_clicked = true
             pos = @getPos(e)
+            note = @cells_y - pos
+            @sequencer.selectSample(note - 1)
             @drawActive(pos)
-            @sequencer.model.noteOn(@num - pos)
+            @sequencer.model.noteOn(note)
             @click_pos = pos
         ).on('mouseup', (e) =>
             @is_clicked = false
@@ -518,25 +533,25 @@ class @SamplerKeyboardView
 
     drawNormal: (i) ->
         @clearNormal(i)
-        @ctx.fillStyle = @color[0]
-        @ctx.fillRect(0, (i+1) * @h - 3, @w, 2)
-        @ctx.fillStyle = @color[3]
-        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx_off.fillStyle = @color[0]
+        @ctx_off.fillRect(0, (i+1) * @h - 3, @w, 2)
+        @ctx_off.fillStyle = @color[3]
+        @ctx_off.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
 
     drawHover: (i) ->
-        @ctx.fillStyle = @color[1]
-        @ctx.fillRect(0, (i+1) * @h - 3, @w, 2)
-        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx_off.fillStyle = @color[1]
+        @ctx_off.fillRect(0, (i+1) * @h - 3, @w, 2)
+        @ctx_off.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
 
     drawActive: (i) ->
         @clearNormal(i)
-        @ctx.fillStyle = @color[2]
-        @ctx.fillRect(0, i * @h, @w, @h)
-        @ctx.fillStyle = @color[4]
-        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx_off.fillStyle = @color[2]
+        @ctx_off.fillRect(0, i * @h, @w, @h)
+        @ctx_off.fillStyle = @color[4]
+        @ctx_off.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
 
     clearNormal: (i) ->
-        @ctx.clearRect(0, i * @h, @w, @h)
+        @ctx_off.clearRect(0, i * @h, @w, @h)
 
     clearActive: (i) ->
         @clearNormal(i)
@@ -544,5 +559,11 @@ class @SamplerKeyboardView
         @drawText(i)
 
     drawText: (i) ->
-        @ctx.fillStyle = @color[3]
-        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx_off.fillStyle = @color[3]
+        @ctx_off.fillText((@cells_y - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+
+    selectSample: (sample_now) ->
+        @ctx_on.clearRect(0, (@cells_y - @sample_last - 1) * @h, @w, @h)
+        @ctx_on.fillStyle = 'rgba(255, 200, 230, 0.3)'
+        @ctx_on.fillRect(0, (@cells_y - sample_now - 1) * @h, @w, @h)
+        @sample_last = sample_now

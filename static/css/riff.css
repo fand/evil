@@ -1538,7 +1538,14 @@ legend {
     text-shadow: 0px 0px 5px #f3e;
 }
 
-
+.sampler .sequencer-table {
+    width: 896px;
+    height: 262px;
+    overflow-y: hidden;
+}
+.sampler .table {
+    left: 60px;
+}
 
 
 
