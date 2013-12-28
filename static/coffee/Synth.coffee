@@ -365,10 +365,15 @@ class @Synth
     pause: (time) ->
         @core.noteOff()
 
-    readPattern: (@pattern_obj) ->
+    readPattern: (_pattern_obj) ->
+        @pattern_obj = $.extend(true, {}, _pattern_obj)
         @pattern = @pattern_obj.pattern
         @pattern_name = @pattern_obj.name
         @view.readPattern(@pattern_obj)
+
+    getPattern: () ->
+        @pattern_obj = name: @pattern_name, pattern: @pattern
+        $.extend(true, {}, @pattern_obj)
 
     clearPattern: () ->
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -412,6 +417,8 @@ class @Synth
 
     setPatternName: (@pattern_name) ->
         @session.setPatternName(@id, @pattern_name)
+
+    readPatternName: (@pattern_name) ->
         @view.setPatternName(@pattern_name)
 
     replaceWith: (s_new) ->

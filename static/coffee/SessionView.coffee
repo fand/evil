@@ -171,9 +171,6 @@ class @SessionView
         @wrapper_master.on('scroll', (e) => @wrapper_tracks_sub.scrollTop(@wrapper_master.scrollTop()))
         @wrapper_tracks_sub.on('scroll', (e) => @wrapper_master.scrollTop(@wrapper_tracks_sub.scrollTop()))
 
-        @readSong(@song, @current_cells)
-
-
         # for Other view
         @btn_save.on('click', () => @model.saveSong())
         @dialog.on('mousedown', (e) =>
@@ -185,9 +182,12 @@ class @SessionView
         @song_title.on('focus', () => window.is_input_mode = true).on('change', () => @model.setSongTitle(@song_title.val())).on('blur', () => window.is_input_mode = false)
         @song_creator.on('focus', () => window.is_input_mode = true).on('change', () => @model.setCreatorName(@song_creator.val())).on('blur', () => window.is_input_mode = false)
 
-        @social_twitter.on('click',  () => @share('twitter'); console.log('clicked'))
+        @social_twitter.on('click',  () => @share('twitter'))
         @social_facebook.on('click', () => @share('facebook'))
         @social_hatena.on('click',   () => @share('hatena'))
+
+        @readSong(@song, @current_cells)
+
 
     readSong: (@song, @current_cells) ->
         @resize()
@@ -196,9 +196,7 @@ class @SessionView
             t = song.tracks[x]
             if t?
                 if t.type?
-                    console.log(t.type)
                     @track_color[x] = @color_schemes[t.type]
-                    console.log(@track_color[x])
 
                 @track_color[x] = @color_schemes[t.type] if t.type?
 
@@ -225,13 +223,11 @@ class @SessionView
 
     drawCell: (ctx, p, x, y) ->
         @clearCell(ctx, x, y)
-#        ctx.strokeStyle = @color[1]
         ctx.strokeStyle = @track_color[x][1]
         ctx.lineWidth = 2
         ctx.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
         ctx.drawImage(@img_play, 0, 0, 18, 18,  x*@w + 3, y*@h + 3, 16, 15)
 
-#        ctx.fillStyle = @color[1]
         ctx.fillStyle = @track_color[x][1]
         ctx.fillText(p.name, x * @w + 24, (y + 1) * @h - 6)
 
@@ -349,9 +345,11 @@ class @SessionView
                 @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18, c[0]*@w + 3, c[1]*@h + 3, 16, 15)
                 window.setTimeout(( => @ctx_tracks_on.clearRect(c[0]*@w+3, c[1]*@h+3, 16, 15)), 100)
 
+
     editPattern: (pos) ->
         pat = @model.editPattern(pos.x, pos.y)
         @drawCell(@ctx_tracks, pat[0], pat[1], pat[2])
+
 
     addSynth: (@song) ->
         @readSong(@song, @current_cells)

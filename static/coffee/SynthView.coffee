@@ -335,8 +335,6 @@ class @SynthView
         @drawPattern(0)
         @setMarker()
         @setPatternName(@pattern_obj.name)
-        console.log('paname')
-        console.log(@pattern_obj.name)
 
     drawPattern: (time) ->
         @time = time if time?
