@@ -1,7 +1,7 @@
 class @Mixer
     constructor: (@ctx, @player) ->
         @gain_master = 1.0
-        @gains = (s.getGain() for s in @player.synth)
+        @gain_tracks = (s.getGain() for s in @player.synth)
 
         @node = @ctx.createGain()
         @node.gain.value = @gain_master
@@ -12,7 +12,7 @@ class @Mixer
         @view = new MixerView(this)
 
     empty: ->
-        @gains = []
+        @gain_tracks = []
         @panners = []
         @view.empty()
 
@@ -29,15 +29,31 @@ class @Mixer
     removeSynth: (i) ->
         @panners.splice(i)
 
-    setGains: (@gains, @gain_master) ->
-        for i in [0...@gains.length]
-            @player.synth[i].setGain(@gains[i])
+    setGains: (@gain_tracks, @gain_master) ->
+        for i in [0...@gain_tracks.length]
+            @player.synth[i].setGain(@gain_tracks[i])
         @node.gain.value = @gain_master
 
-    setPans: (pans, pan_master) ->
-        for i in [0...pans.length]
-            p = pans[i]
+    setPans: (@pan_tracks, @pan_master) ->
+        for i in [0...@pan_tracks.length]
+            p = @pan_tracks[i]
             @panners[i].setPosition(p[0], p[1], p[2])
 
+    readGains: (@gain_tracks, @gain_master) ->
+        @setGains(@gain_tracks, @gain_master)
+        @view.readGains(@gain_tracks, @gain_master)
+
+    readPans: (@pan_tracks, @pan_master) ->
+        @setPans(@pan_tracks, @pan_master)
+        @view.readPans(@pan_tracks, @pan_master)
+
+    getParam: ->
+        gain_tracks: @gain_tracks, gain_master: @gain_master, pan_tracks: @pan_tracks, pan_master: @pan_master
+
+    readParam: (p) ->
+        return if not p?
+        @readGains(p.gain_tracks, p.gain_master)
+        @readPans(p.pan_tracks, p.pan_master)
+
     changeSynth: (id, synth) ->
-         synth.connect(@panners[id])
+        synth.connect(@panners[id])

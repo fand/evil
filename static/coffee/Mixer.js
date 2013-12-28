@@ -5,7 +5,7 @@
       this.ctx = ctx;
       this.player = player;
       this.gain_master = 1.0;
-      this.gains = (function() {
+      this.gain_tracks = (function() {
         var _i, _len, _ref, _results;
         _ref = this.player.synth;
         _results = [];
@@ -23,7 +23,7 @@
     }
 
     Mixer.prototype.empty = function() {
-      this.gains = [];
+      this.gain_tracks = [];
       this.panners = [];
       return this.view.empty();
     };
@@ -42,24 +42,57 @@
       return this.panners.splice(i);
     };
 
-    Mixer.prototype.setGains = function(gains, gain_master) {
+    Mixer.prototype.setGains = function(gain_tracks, gain_master) {
       var i, _i, _ref;
-      this.gains = gains;
+      this.gain_tracks = gain_tracks;
       this.gain_master = gain_master;
-      for (i = _i = 0, _ref = this.gains.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.player.synth[i].setGain(this.gains[i]);
+      for (i = _i = 0, _ref = this.gain_tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.player.synth[i].setGain(this.gain_tracks[i]);
       }
       return this.node.gain.value = this.gain_master;
     };
 
-    Mixer.prototype.setPans = function(pans, pan_master) {
+    Mixer.prototype.setPans = function(pan_tracks, pan_master) {
       var i, p, _i, _ref, _results;
+      this.pan_tracks = pan_tracks;
+      this.pan_master = pan_master;
       _results = [];
-      for (i = _i = 0, _ref = pans.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        p = pans[i];
+      for (i = _i = 0, _ref = this.pan_tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        p = this.pan_tracks[i];
         _results.push(this.panners[i].setPosition(p[0], p[1], p[2]));
       }
       return _results;
+    };
+
+    Mixer.prototype.readGains = function(gain_tracks, gain_master) {
+      this.gain_tracks = gain_tracks;
+      this.gain_master = gain_master;
+      this.setGains(this.gain_tracks, this.gain_master);
+      return this.view.readGains(this.gain_tracks, this.gain_master);
+    };
+
+    Mixer.prototype.readPans = function(pan_tracks, pan_master) {
+      this.pan_tracks = pan_tracks;
+      this.pan_master = pan_master;
+      this.setPans(this.pan_tracks, this.pan_master);
+      return this.view.readPans(this.pan_tracks, this.pan_master);
+    };
+
+    Mixer.prototype.getParam = function() {
+      return {
+        gain_tracks: this.gain_tracks,
+        gain_master: this.gain_master,
+        pan_tracks: this.pan_tracks,
+        pan_master: this.pan_master
+      };
+    };
+
+    Mixer.prototype.readParam = function(p) {
+      if (p == null) {
+        return;
+      }
+      this.readGains(p.gain_tracks, p.gain_master);
+      return this.readPans(p.pan_tracks, p.pan_master);
     };
 
     Mixer.prototype.changeSynth = function(id, synth) {

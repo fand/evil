@@ -31,7 +31,7 @@ class @MixerView
         @setParams()
 
     setGains: ->
-        g = (parseFloat(_g.val()) / -100.0 for _g in @gains)
+        g = (parseFloat(_g.val()) / 100.0 for _g in @gains)
         g_master = parseFloat(@gain_master.val() / 100.0)
         @model.setGains(g, g_master)
 
@@ -39,6 +39,16 @@ class @MixerView
         p = (@pan2pos(1.0 - (parseFloat(_p.val())) / 100.0) for _p in @pans)
         p_master = @pan2pos(1.0 - parseFloat(@pan_master.val() / 100.0))
         @model.setPans(p, p_master)
+
+    readGains: (g, g_master) ->
+        for i in [0...g.length]
+            @gains[i].val(g[i] * 100.0)
+        @gain_master.val(g_master * 100.0)
+
+    readPans: (p, p_master)->
+        for i in [0...p.length]
+            @pans[i].val(@pos2pan(1.0 - (p[i] * 100.0)))
+        # @pan_master.val(@pos2pan(1.0 - (p_master[i] * 100.0)))
 
     setParams: ->
         @setGains()
@@ -50,6 +60,8 @@ class @MixerView
         theta = v * Math.PI
         [Math.cos(theta), 0, -Math.sin(theta)]
 
+    pos2pan: (v) ->
+        Math.acos(v[0]) / Math.PI
 
     empty: ->
         @console_tracks.empty()

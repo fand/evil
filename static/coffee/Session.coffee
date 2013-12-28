@@ -157,8 +157,14 @@ class @Session
 #    saveTracks: ->
 
     saveMaster: ->
-        if @song.master = []
+        @song.master[@scene_pos] = @player.getScene()
+
+    saveMasters: ->
+        if @song.master == []
             @song.master.push(@player.getScene())
+
+    saveMixer: ->
+        @song.mixer = @player.mixer.getParam()
 
     readSong: (@song) ->
         @scene_pos = 0
@@ -171,13 +177,15 @@ class @Session
                 @current_cells[i] = 0
             @song_length = Math.max(@song_length, song.tracks[i].patterns.length)
             @scene_length = Math.max(@scene_length, song.tracks[i].patterns[0].pattern.length)
-        @player.readScene(song.master[0])
+        @player.readScene(@song.master[0])
         @player.setSceneLength(@scene_length)
+        @player.mixer.readParam(@song.mixer)
         @view.readSong(song, @current_cells)
 
     saveSong: () ->
         @savePatterns()
-        @saveMaster()
+        @saveMasters()
+        @saveMixer()
         song_json = JSON.stringify(@song)
         csrf_token = $('#ajax-form > input[name=csrf_token]').val()
         $.ajax(
@@ -242,4 +250,4 @@ class @Session
 
         @cue_queue = []
 
-        @song = tracks: [], master: [], length: 0
+        @song = tracks: [], master: [], length: 0, mixer: []

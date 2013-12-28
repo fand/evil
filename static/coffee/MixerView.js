@@ -49,7 +49,7 @@
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           _g = _ref[_i];
-          _results.push(parseFloat(_g.val()) / -100.0);
+          _results.push(parseFloat(_g.val()) / 100.0);
         }
         return _results;
       }).call(this);
@@ -73,6 +73,23 @@
       return this.model.setPans(p, p_master);
     };
 
+    MixerView.prototype.readGains = function(g, g_master) {
+      var i, _i, _ref;
+      for (i = _i = 0, _ref = g.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.gains[i].val(g[i] * 100.0);
+      }
+      return this.gain_master.val(g_master * 100.0);
+    };
+
+    MixerView.prototype.readPans = function(p, p_master) {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.pans[i].val(this.pos2pan(1.0 - (p[i] * 100.0))));
+      }
+      return _results;
+    };
+
     MixerView.prototype.setParams = function() {
       this.setGains();
       return this.setPans();
@@ -84,6 +101,10 @@
       var theta;
       theta = v * Math.PI;
       return [Math.cos(theta), 0, -Math.sin(theta)];
+    };
+
+    MixerView.prototype.pos2pan = function(v) {
+      return Math.acos(v[0]) / Math.PI;
     };
 
     MixerView.prototype.empty = function() {
