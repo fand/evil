@@ -198,9 +198,17 @@
     };
 
     Session.prototype.saveMaster = function() {
-      if (this.song.master = []) {
+      return this.song.master[this.scene_pos] = this.player.getScene();
+    };
+
+    Session.prototype.saveMasters = function() {
+      if (this.song.master === []) {
         return this.song.master.push(this.player.getScene());
       }
+    };
+
+    Session.prototype.saveMixer = function() {
+      return this.song.mixer = this.player.mixer.getParam();
     };
 
     Session.prototype.readSong = function(song) {
@@ -218,8 +226,9 @@
         this.song_length = Math.max(this.song_length, song.tracks[i].patterns.length);
         this.scene_length = Math.max(this.scene_length, song.tracks[i].patterns[0].pattern.length);
       }
-      this.player.readScene(song.master[0]);
+      this.player.readScene(this.song.master[0]);
       this.player.setSceneLength(this.scene_length);
+      this.player.mixer.readParam(this.song.mixer);
       return this.view.readSong(song, this.current_cells);
     };
 
@@ -227,7 +236,8 @@
       var csrf_token, song_json,
         _this = this;
       this.savePatterns();
-      this.saveMaster();
+      this.saveMasters();
+      this.saveMixer();
       song_json = JSON.stringify(this.song);
       csrf_token = $('#ajax-form > input[name=csrf_token]').val();
       return $.ajax({
@@ -311,7 +321,8 @@
       return this.song = {
         tracks: [],
         master: [],
-        length: 0
+        length: 0,
+        mixer: []
       };
     };
 

@@ -25,7 +25,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx = ctx;
       this.player = player;
       this.gain_master = 1.0;
-      this.gains = (function() {
+      this.gain_tracks = (function() {
         var _i, _len, _ref, _results;
         _ref = this.player.synth;
         _results = [];
@@ -43,7 +43,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }
 
     Mixer.prototype.empty = function() {
-      this.gains = [];
+      this.gain_tracks = [];
       this.panners = [];
       return this.view.empty();
     };
@@ -62,24 +62,57 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.panners.splice(i);
     };
 
-    Mixer.prototype.setGains = function(gains, gain_master) {
+    Mixer.prototype.setGains = function(gain_tracks, gain_master) {
       var i, _i, _ref;
-      this.gains = gains;
+      this.gain_tracks = gain_tracks;
       this.gain_master = gain_master;
-      for (i = _i = 0, _ref = this.gains.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.player.synth[i].setGain(this.gains[i]);
+      for (i = _i = 0, _ref = this.gain_tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.player.synth[i].setGain(this.gain_tracks[i]);
       }
       return this.node.gain.value = this.gain_master;
     };
 
-    Mixer.prototype.setPans = function(pans, pan_master) {
+    Mixer.prototype.setPans = function(pan_tracks, pan_master) {
       var i, p, _i, _ref, _results;
+      this.pan_tracks = pan_tracks;
+      this.pan_master = pan_master;
       _results = [];
-      for (i = _i = 0, _ref = pans.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        p = pans[i];
+      for (i = _i = 0, _ref = this.pan_tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        p = this.pan_tracks[i];
         _results.push(this.panners[i].setPosition(p[0], p[1], p[2]));
       }
       return _results;
+    };
+
+    Mixer.prototype.readGains = function(gain_tracks, gain_master) {
+      this.gain_tracks = gain_tracks;
+      this.gain_master = gain_master;
+      this.setGains(this.gain_tracks, this.gain_master);
+      return this.view.readGains(this.gain_tracks, this.gain_master);
+    };
+
+    Mixer.prototype.readPans = function(pan_tracks, pan_master) {
+      this.pan_tracks = pan_tracks;
+      this.pan_master = pan_master;
+      this.setPans(this.pan_tracks, this.pan_master);
+      return this.view.readPans(this.pan_tracks, this.pan_master);
+    };
+
+    Mixer.prototype.getParam = function() {
+      return {
+        gain_tracks: this.gain_tracks,
+        gain_master: this.gain_master,
+        pan_tracks: this.pan_tracks,
+        pan_master: this.pan_master
+      };
+    };
+
+    Mixer.prototype.readParam = function(p) {
+      if (p == null) {
+        return;
+      }
+      this.readGains(p.gain_tracks, p.gain_master);
+      return this.readPans(p.pan_tracks, p.pan_master);
     };
 
     Mixer.prototype.changeSynth = function(id, synth) {
@@ -142,7 +175,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           _g = _ref[_i];
-          _results.push(parseFloat(_g.val()) / -100.0);
+          _results.push(parseFloat(_g.val()) / 100.0);
         }
         return _results;
       }).call(this);
@@ -166,6 +199,23 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.model.setPans(p, p_master);
     };
 
+    MixerView.prototype.readGains = function(g, g_master) {
+      var i, _i, _ref;
+      for (i = _i = 0, _ref = g.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.gains[i].val(g[i] * 100.0);
+      }
+      return this.gain_master.val(g_master * 100.0);
+    };
+
+    MixerView.prototype.readPans = function(p, p_master) {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.pans[i].val(this.pos2pan(1.0 - (p[i] * 100.0))));
+      }
+      return _results;
+    };
+
     MixerView.prototype.setParams = function() {
       this.setGains();
       return this.setPans();
@@ -177,6 +227,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var theta;
       theta = v * Math.PI;
       return [Math.cos(theta), 0, -Math.sin(theta)];
+    };
+
+    MixerView.prototype.pos2pan = function(v) {
+      return Math.acos(v[0]) / Math.PI;
     };
 
     MixerView.prototype.empty = function() {
@@ -2135,9 +2189,17 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Session.prototype.saveMaster = function() {
-      if (this.song.master = []) {
+      return this.song.master[this.scene_pos] = this.player.getScene();
+    };
+
+    Session.prototype.saveMasters = function() {
+      if (this.song.master === []) {
         return this.song.master.push(this.player.getScene());
       }
+    };
+
+    Session.prototype.saveMixer = function() {
+      return this.song.mixer = this.player.mixer.getParam();
     };
 
     Session.prototype.readSong = function(song) {
@@ -2155,8 +2217,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.song_length = Math.max(this.song_length, song.tracks[i].patterns.length);
         this.scene_length = Math.max(this.scene_length, song.tracks[i].patterns[0].pattern.length);
       }
-      this.player.readScene(song.master[0]);
+      this.player.readScene(this.song.master[0]);
       this.player.setSceneLength(this.scene_length);
+      this.player.mixer.readParam(this.song.mixer);
       return this.view.readSong(song, this.current_cells);
     };
 
@@ -2164,7 +2227,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var csrf_token, song_json,
         _this = this;
       this.savePatterns();
-      this.saveMaster();
+      this.saveMasters();
+      this.saveMixer();
       song_json = JSON.stringify(this.song);
       csrf_token = $('#ajax-form > input[name=csrf_token]').val();
       return $.ajax({
@@ -2248,7 +2312,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.song = {
         tracks: [],
         master: [],
-        length: 0
+        length: 0,
+        mixer: []
       };
     };
 
