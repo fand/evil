@@ -184,8 +184,6 @@ class @Player
         for s in @synth
             @scene_length = Math.max(@scene_length, s.pattern.length)
 
-        console.log(@scene_length)
-
     showSuccess: (url) ->
         console.log("success!")
         console.log(url)

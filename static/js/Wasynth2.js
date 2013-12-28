@@ -545,14 +545,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Player.prototype.resetSceneLength = function(l) {
-      var s, _i, _len, _ref;
+      var s, _i, _len, _ref, _results;
       this.scene_length = 0;
       _ref = this.synth;
+      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        this.scene_length = Math.max(this.scene_length, s.pattern.length);
+        _results.push(this.scene_length = Math.max(this.scene_length, s.pattern.length));
       }
-      return console.log(this.scene_length);
+      return _results;
     };
 
     Player.prototype.showSuccess = function(url) {
@@ -2151,7 +2152,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Session.prototype.setSynthName = function(synth_id, name) {
       this.song.tracks[synth_id].name = name;
-      return this.view.drawTrackName(synth_id, name);
+      return this.view.drawTrackName(synth_id, name, this.song.tracks[synth_id].type);
     };
 
     Session.prototype.setPatternName = function(synth_id, name) {
@@ -2207,7 +2208,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 ;(function() {
   this.SessionView = (function() {
     function SessionView(model, song) {
-      var _this = this;
+      var i,
+        _this = this;
       this.model = model;
       this.song = song;
       this.wrapper_mixer = $('#mixer-tracks');
@@ -2235,11 +2237,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.w = 80;
       this.h = 20;
       this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
-      this.track_color = [];
       this.color_schemes = {
         REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'],
         SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
       };
+      this.track_color = (function() {
+        var _i, _results;
+        _results = [];
+        for (i = _i = 0; _i < 8; i = ++_i) {
+          _results.push(this.color);
+        }
+        return _results;
+      }).call(this);
       this.img_play = new Image();
       this.img_play.src = 'static/img/play.png';
       this.img_play.onload = function() {
@@ -2485,7 +2494,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SessionView.prototype.drawCell = function(ctx, p, x, y) {
       this.clearCell(ctx, x, y);
       if (this.track_color[x] == null) {
-        console.log(x);
+        this.track_color[x] = this.color_schemes[this.song.tracks[x].type];
       }
       ctx.strokeStyle = this.track_color[x][1];
       ctx.lineWidth = 2;
@@ -2514,8 +2523,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
     };
 
-    SessionView.prototype.drawTrackName = function(x, name) {
+    SessionView.prototype.drawTrackName = function(x, name, type) {
       var dx, dy, m;
+      if (type != null) {
+        this.track_color[x] = this.color_schemes[type];
+      }
       this.ctx_tracks.fillStyle = this.track_color[x][1];
       this.ctx_tracks.fillRect(x * this.w + 2, -20, this.w - 2, 18);
       m = this.ctx_tracks.measureText(name);

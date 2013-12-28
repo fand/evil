@@ -187,7 +187,7 @@ class @Session
 
     setSynthName: (synth_id, name) ->
         @song.tracks[synth_id].name = name
-        @view.drawTrackName(synth_id, name)
+        @view.drawTrackName(synth_id, name, @song.tracks[synth_id].type)
 
     setPatternName: (synth_id, name) ->
         pat_num = @current_cells[synth_id]

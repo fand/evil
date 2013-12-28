@@ -1,7 +1,8 @@
 (function() {
   this.SessionView = (function() {
     function SessionView(model, song) {
-      var _this = this;
+      var i,
+        _this = this;
       this.model = model;
       this.song = song;
       this.wrapper_mixer = $('#mixer-tracks');
@@ -29,11 +30,18 @@
       this.w = 80;
       this.h = 20;
       this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
-      this.track_color = [];
       this.color_schemes = {
         REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'],
         SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
       };
+      this.track_color = (function() {
+        var _i, _results;
+        _results = [];
+        for (i = _i = 0; _i < 8; i = ++_i) {
+          _results.push(this.color);
+        }
+        return _results;
+      }).call(this);
       this.img_play = new Image();
       this.img_play.src = 'static/img/play.png';
       this.img_play.onload = function() {
@@ -279,7 +287,7 @@
     SessionView.prototype.drawCell = function(ctx, p, x, y) {
       this.clearCell(ctx, x, y);
       if (this.track_color[x] == null) {
-        console.log(x);
+        this.track_color[x] = this.color_schemes[this.song.tracks[x].type];
       }
       ctx.strokeStyle = this.track_color[x][1];
       ctx.lineWidth = 2;
@@ -308,8 +316,11 @@
       return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
     };
 
-    SessionView.prototype.drawTrackName = function(x, name) {
+    SessionView.prototype.drawTrackName = function(x, name, type) {
       var dx, dy, m;
+      if (type != null) {
+        this.track_color[x] = this.color_schemes[type];
+      }
       this.ctx_tracks.fillStyle = this.track_color[x][1];
       this.ctx_tracks.fillRect(x * this.w + 2, -20, this.w - 2, 18);
       m = this.ctx_tracks.measureText(name);
