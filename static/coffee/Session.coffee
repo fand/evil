@@ -170,6 +170,7 @@ class @Session
         @view.readSong(song, @current_cells)
 
     saveSong: () ->
+        @savePatterns()
         song_json = JSON.stringify(@song)
         csrf_token = $('#ajax-form > input[name=csrf_token]').val()
         $.ajax(
@@ -216,3 +217,22 @@ class @Session
         s.readPattern(pp[@scene_pos])
 
         @view.changeSynth(id, type)
+
+    empty: ->
+        @next_pattern_pos = []
+        @scenes = []
+        @scene_pos = 0
+        @scene = {}
+        @scene_length = 32
+
+        @current_cells = []
+        @next_pattern_pos = []
+        @next_scene_pos = undefined
+
+        @is_loop = true
+        @is_waiting_next_pattern = false
+        @is_waiting_next_scene = false
+
+        @cue_queue = []
+
+        @song = tracks: [], master: [], length: 0
