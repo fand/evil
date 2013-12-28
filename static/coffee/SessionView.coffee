@@ -31,13 +31,13 @@ class @SessionView
         @color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
 
-        @track_color = []
-
         @color_schemes =
             REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
             SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)',
                       'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
+
+        @track_color = (@color for i in [0...8])
 
         @img_play = new Image()
         @img_play.src = 'static/img/play.png'
@@ -225,7 +225,10 @@ class @SessionView
 
     drawCell: (ctx, p, x, y) ->
         @clearCell(ctx, x, y)
-        console.log(x) if not @track_color[x]?
+
+        if not @track_color[x]?
+            @track_color[x] = @color_schemes[@song.tracks[x].type]
+
         ctx.strokeStyle = @track_color[x][1]
         ctx.lineWidth = 2
         ctx.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
@@ -250,8 +253,10 @@ class @SessionView
     clearCell: (ctx, x, y) ->
         ctx.clearRect(x * @w, y * @h, @w, @h)
 
-    drawTrackName: (x, name) ->
-#        @ctx_tracks.fillStyle = @color[1]
+    drawTrackName: (x, name, type) ->
+        if type?
+            @track_color[x] = @color_schemes[type]
+
         @ctx_tracks.fillStyle = @track_color[x][1]
         @ctx_tracks.fillRect(x * @w + 2, -20, @w - 2, 18)
 

@@ -239,7 +239,7 @@
 
     Session.prototype.setSynthName = function(synth_id, name) {
       this.song.tracks[synth_id].name = name;
-      return this.view.drawTrackName(synth_id, name);
+      return this.view.drawTrackName(synth_id, name, this.song.tracks[synth_id].type);
     };
 
     Session.prototype.setPatternName = function(synth_id, name) {

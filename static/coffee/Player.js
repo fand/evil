@@ -273,14 +273,15 @@
     };
 
     Player.prototype.resetSceneLength = function(l) {
-      var s, _i, _len, _ref;
+      var s, _i, _len, _ref, _results;
       this.scene_length = 0;
       _ref = this.synth;
+      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        this.scene_length = Math.max(this.scene_length, s.pattern.length);
+        _results.push(this.scene_length = Math.max(this.scene_length, s.pattern.length));
       }
-      return console.log(this.scene_length);
+      return _results;
     };
 
     Player.prototype.showSuccess = function(url) {
