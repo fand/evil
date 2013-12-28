@@ -469,6 +469,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       s_old.replaceWith(s_new);
       s_old.noteOff();
       this.synth_now = s_new;
+      this.view.changeSynth(id, type);
       return s_new;
     };
 
@@ -779,6 +780,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.footer.css({
         height: space_h + 'px'
       });
+    };
+
+    PlayerView.prototype.changeSynth = function() {
+      if (this.synth_now === 0) {
+        this.btn_left.hide();
+      }
+      if (this.synth_now === (this.synth_total - 1)) {
+        return this.btn_right.attr('data-line1', 'new');
+      }
     };
 
     return PlayerView;
@@ -2078,7 +2088,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.player.synth[synth_num].readPatternName(name);
         this.song.tracks[synth_num].patterns[pat_num] = this.player.synth[synth_num].getPattern();
       }
-      console.log(this.player.synth[synth_num].pattern);
       this.current_cells[synth_num] = pat_num;
       this.view.readSong(this.song, this.current_cells);
       this.player.moveTo(synth_num);
@@ -2273,7 +2282,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx_tracks_hover.translate(0, this.offset_y);
       this.ctx_master_hover.translate(0, this.offset_y);
       this.font_size = 12;
-      this.ctx_tracks.font = this.ctx_master.font = this.font_size + 'px "ＭＳ Ｐゴシック"';
+      this.ctx_tracks.font = this.ctx_master.font = this.font_size + 'px "ＭＳ Ｐゴシック, ヒラギノ角ゴ Pro W3"';
       this.rect_tracks = this.canvas_tracks_hover.getBoundingClientRect();
       this.rect_master = this.canvas_master_hover.getBoundingClientRect();
       this.offset_translate = 700 + this.offset_y;

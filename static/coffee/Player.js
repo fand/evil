@@ -197,6 +197,7 @@
       s_old.replaceWith(s_new);
       s_old.noteOff();
       this.synth_now = s_new;
+      this.view.changeSynth(id, type);
       return s_new;
     };
 
