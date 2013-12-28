@@ -12,7 +12,12 @@ get '/' => sub {
         return $c->render( 'ie.tx' );
     }
     else  {
-        return $c->render( 'index.tx' );
+        if ($ENV{PLACK_ENV} =~ /pro/) {
+            return $c->render( 'index.tx' );
+        }
+        else {
+            return $c->render( 'index.tx', +{ debug => 1 } );
+        }
     }
 };
 

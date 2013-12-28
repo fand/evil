@@ -98,8 +98,8 @@ class @Session
     addSynth: (s, _pos) ->
         pos = if _pos then _pos else @scene_pos
         pp = []
-        pp[pos] = name: (s.id + '-' + pos), pattern: s.pattern
-        s_obj = id: s.id, name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
+        pp[pos] = name: (s.id + '-' + _pos), pattern: s.pattern
+        s_obj = id: s.id, type: 'REZ', name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
         @song.tracks.push(s_obj)
         @view.readSong(@song, @current_cells)
 
@@ -179,7 +179,10 @@ class @Session
 
     setPatternName: (synth_id, name) ->
         pat_num = @current_cells[synth_id]
-        @song.tracks[synth_id].patterns[pat_num].name = name
+        if @song.tracks[synth_id].patterns[pat_num]?
+            @song.tracks[synth_id].patterns[pat_num].name = name
+        else
+            @song.tracks[synth_id].patterns[pat_num] = name: name
         @view.drawPatternName(synth_id, pat_num, @song.tracks[synth_id].patterns[pat_num])
 
     setSongTitle: (title) -> @song.title = @view.song.title = title
@@ -191,7 +194,8 @@ class @Session
 
         pp = []
         pp[@scene_pos] = name: (s.id + '-' + @scene_pos), pattern: s.pattern
-        s_obj = id: s.id, name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
+        s_obj = id: s.id, type: type, name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
         @song.tracks[id] = s_obj
-        console.log(pp)
         s.readPattern(pp[@scene_pos])
+
+        @view.changeSynth(id, type)

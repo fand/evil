@@ -1,4 +1,4 @@
-: cascade "include/layout.tx"
+: cascade "include/layout.tx" { debug => $debug }
 
 : override content -> {
 
@@ -125,7 +125,7 @@
 
           <div class="clearfix">
             <label>bpm</label>
-            <input name="bpm"   type="number" min="0" max="50000" value="0">
+            <input name="bpm"   type="number" min="0" max="50000" value="120">
           </div>
 
         </fieldset>
@@ -173,7 +173,7 @@
       <option>AEOLIAN</option>
       <option>LOCRIAN</option>
     </select>
-    bpm: <input name="bpm" min="60" max="240" value="70" type="number">
+    bpm: <input name="bpm" min="60" max="1000" value="120" type="number">
   </div>
 
   <i id="control-play"      class="fa fa-play"></i>

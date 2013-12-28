@@ -30,6 +30,15 @@ class @SessionView
         @h = 20
         @color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
+
+        @track_color = []
+
+        @color_schemes =
+            REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
+                  'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
+            SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)',
+                      'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
+
         @img_play = new Image()
         @img_play.src = 'static/img/play.png'
         @img_play.onload = () => @initCanvas()
@@ -184,9 +193,17 @@ class @SessionView
         @resize()
 
         for x in [0...Math.max(song.tracks.length + 1, 8)]
-#        for x in [0...Math.max(song.tracks.length + 2, 8)]
             t = song.tracks[x]
-            @drawTrackName(x, t.name) if t? and t.name?
+            if t?
+                if t.type?
+                    console.log(t.type)
+                    @track_color[x] = @color_schemes[t.type]
+                    console.log(@track_color[x])
+
+                @track_color[x] = @color_schemes[t.type] if t.type?
+
+                @drawTrackName(x, t.name) if t.name?
+
             for y in [0...Math.max(song.length, 10)]
                 if t? and t.patterns[y]?
                     @drawCell(@ctx_tracks, t.patterns[y], x, y)
@@ -208,12 +225,14 @@ class @SessionView
 
     drawCell: (ctx, p, x, y) ->
         @clearCell(ctx, x, y)
-        ctx.strokeStyle = @color[1]
+#        ctx.strokeStyle = @color[1]
+        ctx.strokeStyle = @track_color[x][1]
         ctx.lineWidth = 2
         ctx.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
         ctx.drawImage(@img_play, 0, 0, 18, 18,  x*@w + 3, y*@h + 3, 16, 15)
 
-        ctx.fillStyle = @color[1]
+#        ctx.fillStyle = @color[1]
+        ctx.fillStyle = @track_color[x][1]
         ctx.fillText(p.name, x * @w + 24, (y + 1) * @h - 6)
 
     drawEmpty: (ctx, x, y) ->
@@ -233,7 +252,8 @@ class @SessionView
         ctx.clearRect(x * @w, y * @h, @w, @h)
 
     drawTrackName: (x, name) ->
-        @ctx_tracks.fillStyle = @color[1]
+#        @ctx_tracks.fillStyle = @color[1]
+        @ctx_tracks.fillStyle = @track_color[x][1]
         @ctx_tracks.fillRect(x * @w + 2, -20, @w - 2, 18)
 
         m = @ctx_tracks.measureText(name)
@@ -290,7 +310,6 @@ class @SessionView
     drawHover: (ctx, pos) ->
         @clearHover(ctx)
         ctx.fillStyle = 'rgba(255,255,255,0.4)'
-#        ctx.fillRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
         ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
         if ctx == @ctx_tracks_hover
             @hover_pos = pos
@@ -394,7 +413,9 @@ class @SessionView
             fb_url = 'http://www.facebook.com/sharer.php?&u=' + url
             window.open(fb_url, 'Share on facebook', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1')
         else
-            # hb_url = 'http://b.hatena.ne.jp/entry.touch/' + url.split('://')[1]
-            # window.open(hb_url, 'はてなブックマークに追加', 'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1')
             hb_url = 'http://b.hatena.ne.jp/entry/' + url.split('://')[1]
             window.open(hb_url)
+
+
+    changeSynth: (id, type) ->
+        #@readSong(@song, @current_cells)

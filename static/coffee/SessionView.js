@@ -29,6 +29,11 @@
       this.w = 80;
       this.h = 20;
       this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'];
+      this.track_color = [];
+      this.color_schemes = {
+        REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)'],
+        SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)']
+      };
       this.img_play = new Image();
       this.img_play.src = 'static/img/play.png';
       this.img_play.onload = function() {
@@ -241,8 +246,18 @@
       this.resize();
       for (x = _i = 0, _ref = Math.max(song.tracks.length + 1, 8); 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         t = song.tracks[x];
-        if ((t != null) && (t.name != null)) {
-          this.drawTrackName(x, t.name);
+        if (t != null) {
+          if (t.type != null) {
+            console.log(t.type);
+            this.track_color[x] = this.color_schemes[t.type];
+            console.log(this.track_color[x]);
+          }
+          if (t.type != null) {
+            this.track_color[x] = this.color_schemes[t.type];
+          }
+          if (t.name != null) {
+            this.drawTrackName(x, t.name);
+          }
         }
         for (y = _j = 0, _ref1 = Math.max(song.length, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           if ((t != null) && (t.patterns[y] != null)) {
@@ -266,11 +281,11 @@
 
     SessionView.prototype.drawCell = function(ctx, p, x, y) {
       this.clearCell(ctx, x, y);
-      ctx.strokeStyle = this.color[1];
+      ctx.strokeStyle = this.track_color[x][1];
       ctx.lineWidth = 2;
       ctx.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
       ctx.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
-      ctx.fillStyle = this.color[1];
+      ctx.fillStyle = this.track_color[x][1];
       return ctx.fillText(p.name, x * this.w + 24, (y + 1) * this.h - 6);
     };
 
@@ -295,7 +310,7 @@
 
     SessionView.prototype.drawTrackName = function(x, name) {
       var dx, dy, m;
-      this.ctx_tracks.fillStyle = this.color[1];
+      this.ctx_tracks.fillStyle = this.track_color[x][1];
       this.ctx_tracks.fillRect(x * this.w + 2, -20, this.w - 2, 18);
       m = this.ctx_tracks.measureText(name);
       dx = (this.w - m.width) / 2;
@@ -501,6 +516,8 @@
         return window.open(hb_url);
       }
     };
+
+    SessionView.prototype.changeSynth = function(id, type) {};
 
     return SessionView;
 

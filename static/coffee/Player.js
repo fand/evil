@@ -187,7 +187,7 @@
         s_new = new Synth(this.context, id, this, name);
         s_new.setScale(this.scene.scale);
         s_new.setKey(this.scene.key);
-        this.session.addSynth(s, scene_pos);
+        this.mixer.changeSynth(id, s_new);
       } else if (type === 'SAMPLER') {
         s_new = new Sampler(this.context, id, this, name);
         this.mixer.changeSynth(id, s_new);
@@ -195,6 +195,7 @@
       this.synth[id] = s_new;
       s_old.replaceWith(s_new);
       s_old.noteOff();
+      this.synth_now = s_new;
       return s_new;
     };
 

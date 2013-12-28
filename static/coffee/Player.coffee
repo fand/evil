@@ -118,8 +118,7 @@ class @Player
             s_new = new Synth(@context, id, this, name)
             s_new.setScale(@scene.scale)
             s_new.setKey(@scene.key)
-            # @mixer.addSynth(s)
-            @session.addSynth(s, scene_pos)
+            @mixer.changeSynth(id, s_new)
 
         else if type == 'SAMPLER'
             s_new = new Sampler(@context, id, this, name)
@@ -128,6 +127,10 @@ class @Player
         @synth[id] = s_new
         s_old.replaceWith(s_new)
         s_old.noteOff()
+
+        @synth_now = s_new
+#        @view.changeSynth(id, type)
+
         return s_new
 
 
