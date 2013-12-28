@@ -6,6 +6,7 @@
       this.scenes = [];
       this.scene_pos = 0;
       this.scene = {};
+      this.scene_length = 32;
       this.current_cells = [];
       this.next_pattern_pos = [];
       this.next_scene_pos = void 0;
@@ -178,7 +179,7 @@
       this.current_cells[synth_num] = pat_num;
       this.view.readSong(this.song, this.current_cells);
       this.player.moveTo(synth_num);
-      return [synth_num, pat_num, this.song.tracks[synth_num].patterns[pat_num].pattern];
+      return [synth_num, pat_num, this.song.tracks[synth_num].patterns[pat_num]];
     };
 
     Session.prototype.savePatterns = function() {
@@ -263,12 +264,13 @@
     };
 
     Session.prototype.changeSynth = function(id, type) {
-      var pp, s, s_obj;
+      var pat_name, pp, s, s_obj;
       s = this.player.changeSynth(id, type);
-      this.synth[id] = s;
+      pat_name = s.id + '-' + this.scene_pos;
+      s.readPatternName(pat_name);
       pp = [];
       pp[this.scene_pos] = {
-        name: s.id + '-' + this.scene_pos,
+        name: pat_name,
         pattern: s.pattern
       };
       s_obj = {

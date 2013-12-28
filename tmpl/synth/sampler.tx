@@ -14,12 +14,11 @@
         <input type="text" class="pattern-name" />
       </div>
 
-      <div class="sequencer-mode clearfix">
-        <span>input:</span>
-        <i class="fa fa-pencil sequencer-pencil btn-true"></i>
-        <i class="fa fa-ellipsis-h sequencer-step btn-false"></i>
-      </div>
-
+      <!-- <div class="sequencer-mode clearfix"> -->
+      <!--   <span>input:</span> -->
+      <!--   <i class="fa fa-pencil sequencer-pencil btn-true"></i> -->
+      <!--   <i class="fa fa-ellipsis-h sequencer-step btn-false"></i> -->
+      <!-- </div> -->
 
       <div class="markers clearfix">
         <i class="fa fa-angle-left marker-prev"></i>

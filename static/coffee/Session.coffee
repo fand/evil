@@ -3,6 +3,7 @@ class @Session
         @scenes = []
         @scene_pos = 0
         @scene = {}
+        @scene_length = 32
 
         @current_cells = []
         @next_pattern_pos = []
@@ -74,7 +75,8 @@ class @Session
 
     getScene: (i) -> @song.master[i]
 
-    play: () -> @view.drawScene(@scene_pos)
+    play: () ->
+        @view.drawScene(@scene_pos)
 
     beat: () ->
         if @is_waiting_next_scene
@@ -143,7 +145,7 @@ class @Session
         @view.readSong(@song, @current_cells)
         @player.moveTo(synth_num)
 
-        return [synth_num, pat_num, @song.tracks[synth_num].patterns[pat_num].pattern]
+        return [synth_num, pat_num, @song.tracks[synth_num].patterns[pat_num]]
 
     savePatterns: ->
         for i in [0...@current_cells.length]
@@ -202,10 +204,13 @@ class @Session
 
     changeSynth: (id, type) ->
         s = @player.changeSynth(id, type)
-        @synth[id] = s
+
+        pat_name = s.id + '-' + @scene_pos
+        s.readPatternName(pat_name)
 
         pp = []
-        pp[@scene_pos] = name: (s.id + '-' + @scene_pos), pattern: s.pattern
+        pp[@scene_pos] = name: pat_name, pattern: s.pattern
+
         s_obj = id: s.id, type: type, name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
         @song.tracks[id] = s_obj
         s.readPattern(pp[@scene_pos])

@@ -222,10 +222,15 @@ class @Sampler
     pause: (time) ->
         @core.noteOff()
 
-    readPattern: (@pattern_obj) ->
+    readPattern: (_pattern_obj) ->
+        @pattern_obj = $.extend(true, {}, _pattern_obj)
         @pattern = @pattern_obj.pattern
         @pattern_name = @pattern_obj.name
         @view.readPattern(@pattern_obj)
+
+    getPattern: () ->
+        @pattern_obj = name: @pattern_name, pattern: @pattern
+        $.extend(true, {}, @pattern_obj)
 
     clearPattern: () ->
         @pattern = @pattern.concat([[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]])
@@ -261,14 +266,10 @@ class @Sampler
     redraw: (@time) ->
         @view.drawPattern(@time)
 
-    setId: (@id) ->
-
-    setSynthName: (@name) ->
-        @session.setSynthName(@id, @name)
-        @view.setSynthName(@name)
-
     setPatternName: (@pattern_name) ->
         @session.setPatternName(@id, @pattern_name)
+
+    readPatternName: (@pattern_name) ->
         @view.setPatternName(@pattern_name)
 
     selectSample: (sample_now) ->

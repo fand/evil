@@ -192,6 +192,7 @@ class @SessionView
     readSong: (@song, @current_cells) ->
         @resize()
 
+        # Draw tracks
         for x in [0...Math.max(song.tracks.length + 1, 8)]
             t = song.tracks[x]
             if t?
@@ -208,6 +209,7 @@ class @SessionView
                 else
                     @drawEmpty(@ctx_tracks, x, y)
 
+        # Draw master
         for y in [0...Math.max(song.length, 10)]
             if song.master[y]?
                 @drawCell(@ctx_master, song.master[y], 0, y)
@@ -223,6 +225,7 @@ class @SessionView
 
     drawCell: (ctx, p, x, y) ->
         @clearCell(ctx, x, y)
+        console.log(x) if not @track_color[x]?
         ctx.strokeStyle = @track_color[x][1]
         ctx.lineWidth = 2
         ctx.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
@@ -348,8 +351,7 @@ class @SessionView
 
     editPattern: (pos) ->
         pat = @model.editPattern(pos.x, pos.y)
-        @drawCell(@ctx_tracks, pat[0], pat[1], pat[2])
-
+        @drawCell(@ctx_tracks, pat[2], pat[0], pat[1])
 
     addSynth: (@song) ->
         @readSong(@song, @current_cells)

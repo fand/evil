@@ -278,6 +278,9 @@
 
     SessionView.prototype.drawCell = function(ctx, p, x, y) {
       this.clearCell(ctx, x, y);
+      if (this.track_color[x] == null) {
+        console.log(x);
+      }
       ctx.strokeStyle = this.track_color[x][1];
       ctx.lineWidth = 2;
       ctx.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
@@ -428,7 +431,7 @@
     SessionView.prototype.editPattern = function(pos) {
       var pat;
       pat = this.model.editPattern(pos.x, pos.y);
-      return this.drawCell(this.ctx_tracks, pat[0], pat[1], pat[2]);
+      return this.drawCell(this.ctx_tracks, pat[2], pat[0], pat[1]);
     };
 
     SessionView.prototype.addSynth = function(song) {

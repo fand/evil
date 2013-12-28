@@ -409,8 +409,6 @@ class @Synth
     redraw: (@time) ->
         @view.drawPattern(@time)
 
-    setId: (@id) ->
-
     setSynthName: (@name) ->
         @session.setSynthName(@id, @name)
         @view.setSynthName(@name)

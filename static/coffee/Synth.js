@@ -609,10 +609,6 @@
       return this.view.drawPattern(this.time);
     };
 
-    Synth.prototype.setId = function(id) {
-      this.id = id;
-    };
-
     Synth.prototype.setSynthName = function(name) {
       this.name = name;
       this.session.setSynthName(this.id, this.name);
