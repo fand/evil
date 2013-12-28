@@ -233,7 +233,7 @@ class @Sampler
         $.extend(true, {}, @pattern_obj)
 
     clearPattern: () ->
-        @pattern = @pattern.concat([[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]])
+        @pattern = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
         @pattern_obj.pattern = @pattern
         @view.readPattern(@pattern_obj)
 

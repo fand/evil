@@ -372,7 +372,7 @@
     };
 
     Sampler.prototype.clearPattern = function() {
-      this.pattern = this.pattern.concat([[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]);
+      this.pattern = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
       this.pattern_obj.pattern = this.pattern;
       return this.view.readPattern(this.pattern_obj);
     };
