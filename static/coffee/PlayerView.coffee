@@ -165,3 +165,7 @@ class @PlayerView
             @btn_left.hide()
         if @synth_now == (@synth_total - 1)
             @btn_right.attr('data-line1', 'new')
+
+
+    empty: ->
+        @instruments.empty()

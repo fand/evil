@@ -86,6 +86,12 @@
       return [Math.cos(theta), 0, -Math.sin(theta)];
     };
 
+    MixerView.prototype.empty = function() {
+      this.console_tracks.empty();
+      this.pans = [];
+      return this.gains = [];
+    };
+
     return MixerView;
 
   })();

@@ -49,3 +49,9 @@ class @MixerView
     pan2pos: (v) ->
         theta = v * Math.PI
         [Math.cos(theta), 0, -Math.sin(theta)]
+
+
+    empty: ->
+        @console_tracks.empty()
+        @pans = []
+        @gains = []
