@@ -6,6 +6,7 @@
       this.scenes = [];
       this.scene_pos = 0;
       this.scene = {};
+      this.scene_length = 32;
       this.current_cells = [];
       this.next_pattern_pos = [];
       this.next_scene_pos = void 0;
@@ -124,11 +125,13 @@
     };
 
     Session.prototype.addSynth = function(s, _pos) {
-      var pos, pp, s_obj;
+      var name, pos, pp, s_obj;
       pos = _pos ? _pos : this.scene_pos;
+      name = s.id + '-' + pos;
+      s.readPatternName(name);
       pp = [];
       pp[pos] = {
-        name: s.id + '-' + _pos,
+        name: s.pattern_name,
         pattern: s.pattern
       };
       s_obj = {
@@ -141,7 +144,7 @@
         pan: 0.0
       };
       this.song.tracks.push(s_obj);
-      return this.view.readSong(this.song, this.current_cells);
+      return this.current_cells.push(pos);
     };
 
     Session.prototype.setSynth = function(synth) {
@@ -149,7 +152,7 @@
     };
 
     Session.prototype.editPattern = function(_synth_num, pat_num) {
-      var synth_num;
+      var name, synth_num;
       if (this.song.master[pat_num] == null) {
         this.song.master[pat_num] = {
           name: 'section-' + pat_num
@@ -167,14 +170,17 @@
       if (this.song.tracks[synth_num].patterns[pat_num] != null) {
         this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num]);
       } else {
+        this.song.tracks[synth_num].patterns[this.current_cells[synth_num]] = this.player.synth[synth_num].getPattern();
+        name = synth_num + '-' + pat_num;
         this.player.synth[synth_num].clearPattern();
-        this.player.synth[synth_num].setPatternName(synth_num + '-' + pat_num);
-        this.song.tracks[synth_num].patterns[pat_num] = this.player.synth[synth_num].pattern_obj;
+        this.player.synth[synth_num].readPatternName(name);
+        this.song.tracks[synth_num].patterns[pat_num] = this.player.synth[synth_num].getPattern();
       }
+      console.log(this.player.synth[synth_num].pattern);
       this.current_cells[synth_num] = pat_num;
       this.view.readSong(this.song, this.current_cells);
       this.player.moveTo(synth_num);
-      return [synth_num, pat_num, this.song.tracks[synth_num].patterns[pat_num].pattern];
+      return [synth_num, pat_num, this.song.tracks[synth_num].patterns[pat_num]];
     };
 
     Session.prototype.savePatterns = function() {
@@ -215,7 +221,6 @@
     Session.prototype.saveSong = function() {
       var csrf_token, song_json,
         _this = this;
-      console.log(this.song);
       song_json = JSON.stringify(this.song);
       csrf_token = $('#ajax-form > input[name=csrf_token]').val();
       return $.ajax({
@@ -260,12 +265,13 @@
     };
 
     Session.prototype.changeSynth = function(id, type) {
-      var pp, s, s_obj;
+      var pat_name, pp, s, s_obj;
       s = this.player.changeSynth(id, type);
-      this.synth[id] = s;
+      pat_name = s.id + '-' + this.scene_pos;
+      s.readPatternName(pat_name);
       pp = [];
       pp[this.scene_pos] = {
-        name: s.id + '-' + this.scene_pos,
+        name: pat_name,
         pattern: s.pattern
       };
       s_obj = {

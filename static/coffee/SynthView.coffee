@@ -335,8 +335,6 @@ class @SynthView
         @drawPattern(0)
         @setMarker()
         @setPatternName(@pattern_obj.name)
-        console.log('paname')
-        console.log(@pattern_obj.name)
 
     drawPattern: (time) ->
         @time = time if time?
@@ -430,7 +428,7 @@ class @SynthView
     inactivate: -> @is_active = false
 
     setSynthName:   (name) -> @synth_name.val(name)
-    setPatternName: (name) -> @pattern_name.val(name)
+    setPatternName: (name) -> @pattern_name.val(name); @pattern_obj.name = name
 
     toggleNoSync: ->
         if @is_nosync

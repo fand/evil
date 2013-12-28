@@ -544,11 +544,19 @@
       return this.core.noteOff();
     };
 
-    Synth.prototype.readPattern = function(pattern_obj) {
-      this.pattern_obj = pattern_obj;
+    Synth.prototype.readPattern = function(_pattern_obj) {
+      this.pattern_obj = $.extend(true, {}, _pattern_obj);
       this.pattern = this.pattern_obj.pattern;
       this.pattern_name = this.pattern_obj.name;
       return this.view.readPattern(this.pattern_obj);
+    };
+
+    Synth.prototype.getPattern = function() {
+      this.pattern_obj = {
+        name: this.pattern_name,
+        pattern: this.pattern
+      };
+      return $.extend(true, {}, this.pattern_obj);
     };
 
     Synth.prototype.clearPattern = function() {
@@ -601,10 +609,6 @@
       return this.view.drawPattern(this.time);
     };
 
-    Synth.prototype.setId = function(id) {
-      this.id = id;
-    };
-
     Synth.prototype.setSynthName = function(name) {
       this.name = name;
       this.session.setSynthName(this.id, this.name);
@@ -613,7 +617,11 @@
 
     Synth.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
-      this.session.setPatternName(this.id, this.pattern_name);
+      return this.session.setPatternName(this.id, this.pattern_name);
+    };
+
+    Synth.prototype.readPatternName = function(pattern_name) {
+      this.pattern_name = pattern_name;
       return this.view.setPatternName(this.pattern_name);
     };
 

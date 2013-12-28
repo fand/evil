@@ -356,15 +356,23 @@
       return this.core.noteOff();
     };
 
-    Sampler.prototype.readPattern = function(pattern_obj) {
-      this.pattern_obj = pattern_obj;
+    Sampler.prototype.readPattern = function(_pattern_obj) {
+      this.pattern_obj = $.extend(true, {}, _pattern_obj);
       this.pattern = this.pattern_obj.pattern;
       this.pattern_name = this.pattern_obj.name;
       return this.view.readPattern(this.pattern_obj);
     };
 
+    Sampler.prototype.getPattern = function() {
+      this.pattern_obj = {
+        name: this.pattern_name,
+        pattern: this.pattern
+      };
+      return $.extend(true, {}, this.pattern_obj);
+    };
+
     Sampler.prototype.clearPattern = function() {
-      this.pattern = this.pattern.concat([[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]);
+      this.pattern = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
       this.pattern_obj.pattern = this.pattern;
       return this.view.readPattern(this.pattern_obj);
     };
@@ -418,19 +426,13 @@
       return this.view.drawPattern(this.time);
     };
 
-    Sampler.prototype.setId = function(id) {
-      this.id = id;
-    };
-
-    Sampler.prototype.setSynthName = function(name) {
-      this.name = name;
-      this.session.setSynthName(this.id, this.name);
-      return this.view.setSynthName(this.name);
-    };
-
     Sampler.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
-      this.session.setPatternName(this.id, this.pattern_name);
+      return this.session.setPatternName(this.id, this.pattern_name);
+    };
+
+    Sampler.prototype.readPatternName = function(pattern_name) {
+      this.pattern_name = pattern_name;
       return this.view.setPatternName(this.pattern_name);
     };
 

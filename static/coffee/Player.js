@@ -16,6 +16,7 @@
       this.addSynth();
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
+      this.scene_length = 32;
       this.view = new PlayerView(this);
     }
 
@@ -243,7 +244,8 @@
       }
       this.session.setSynth(this.synth);
       this.session.readSong(this.song);
-      return this.view.setSynthNum(this.synth.length, this.synth_pos);
+      this.view.setSynthNum(this.synth.length, this.synth_pos);
+      return this.resetSceneLength();
     };
 
     Player.prototype.clearSong = function() {
@@ -270,15 +272,14 @@
     };
 
     Player.prototype.resetSceneLength = function(l) {
-      var s, _i, _len, _ref, _results;
+      var s, _i, _len, _ref;
       this.scene_length = 0;
       _ref = this.synth;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        _results.push(this.scene_length = Math.max(this.scene_length, s.pattern.length));
+        this.scene_length = Math.max(this.scene_length, s.pattern.length);
       }
-      return _results;
+      return console.log(this.scene_length);
     };
 
     Player.prototype.showSuccess = function(url) {

@@ -201,7 +201,6 @@
       this.wrapper_tracks_sub.on('scroll', function(e) {
         return _this.wrapper_master.scrollTop(_this.wrapper_tracks_sub.scrollTop());
       });
-      this.readSong(this.song, this.current_cells);
       this.btn_save.on('click', function() {
         return _this.model.saveSong();
       });
@@ -228,15 +227,15 @@
         return window.is_input_mode = false;
       });
       this.social_twitter.on('click', function() {
-        _this.share('twitter');
-        return console.log('clicked');
+        return _this.share('twitter');
       });
       this.social_facebook.on('click', function() {
         return _this.share('facebook');
       });
-      return this.social_hatena.on('click', function() {
+      this.social_hatena.on('click', function() {
         return _this.share('hatena');
       });
+      return this.readSong(this.song, this.current_cells);
     };
 
     SessionView.prototype.readSong = function(song, current_cells) {
@@ -248,9 +247,7 @@
         t = song.tracks[x];
         if (t != null) {
           if (t.type != null) {
-            console.log(t.type);
             this.track_color[x] = this.color_schemes[t.type];
-            console.log(this.track_color[x]);
           }
           if (t.type != null) {
             this.track_color[x] = this.color_schemes[t.type];
@@ -281,6 +278,9 @@
 
     SessionView.prototype.drawCell = function(ctx, p, x, y) {
       this.clearCell(ctx, x, y);
+      if (this.track_color[x] == null) {
+        console.log(x);
+      }
       ctx.strokeStyle = this.track_color[x][1];
       ctx.lineWidth = 2;
       ctx.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
@@ -431,7 +431,7 @@
     SessionView.prototype.editPattern = function(pos) {
       var pat;
       pat = this.model.editPattern(pos.x, pos.y);
-      return this.drawCell(this.ctx_tracks, pat[0], pat[1], pat[2]);
+      return this.drawCell(this.ctx_tracks, pat[2], pat[0], pat[1]);
     };
 
     SessionView.prototype.addSynth = function(song) {

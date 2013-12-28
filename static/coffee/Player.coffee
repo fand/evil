@@ -18,6 +18,7 @@ class @Player
         @addSynth()
         @synth_now = @synth[0]
         @synth_pos = 0
+        @scene_length = 32
 
         @view = new PlayerView(this)
 
@@ -164,6 +165,7 @@ class @Player
         @session.setSynth(@synth)
         @session.readSong(@song)
         @view.setSynthNum(@synth.length, @synth_pos)
+        @resetSceneLength()
 
     clearSong: () ->
         @synth = []
@@ -181,6 +183,8 @@ class @Player
         @scene_length = 0
         for s in @synth
             @scene_length = Math.max(@scene_length, s.pattern.length)
+
+        console.log(@scene_length)
 
     showSuccess: (url) ->
         console.log("success!")

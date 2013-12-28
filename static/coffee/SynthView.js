@@ -338,9 +338,7 @@
       this.page_total = this.pattern.length / this.cells_x;
       this.drawPattern(0);
       this.setMarker();
-      this.setPatternName(this.pattern_obj.name);
-      console.log('paname');
-      return console.log(this.pattern_obj.name);
+      return this.setPatternName(this.pattern_obj.name);
     };
 
     SynthView.prototype.drawPattern = function(time) {
@@ -456,7 +454,8 @@
     };
 
     SynthView.prototype.setPatternName = function(name) {
-      return this.pattern_name.val(name);
+      this.pattern_name.val(name);
+      return this.pattern_obj.name = name;
     };
 
     SynthView.prototype.toggleNoSync = function() {
