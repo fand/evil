@@ -38,7 +38,7 @@
 
 <!-- top left -->
 <div id="btn-save" class="fa fa-save"></div>
-<div id="btn-clear" class="fa fa-file-o"></div>
+<!-- <div id="btn-clear" class="fa fa-file-o"></div> -->
 <form id="ajax-form" method="POST"></form>
 <script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
 
