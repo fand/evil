@@ -162,11 +162,9 @@
       }
     };
 
-    Player.prototype.addSynth = function(scene_pos, name) {
+    Player.prototype.addSynth = function(scene_pos, name, type) {
       var s;
       s = new Synth(this.context, this.num_id++, this, name);
-      s.setScale(this.scene.scale);
-      s.setKey(this.scene.key);
       this.synth.push(s);
       this.mixer.addSynth(s);
       return this.session.addSynth(s, scene_pos);
@@ -236,11 +234,16 @@
     Player.prototype.readSong = function(song) {
       var i, _i, _ref;
       this.song = song;
+      this.synth = [];
+      this.num_id = 0;
+      this.mixer.empty();
+      this.view.empty();
       for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        if (this.synth[i] != null) {
-          this.synth[i].setSynthName(this.song.tracks[i].name);
-        } else {
+        if ((this.song.tracks[i].type == null) || this.song.tracks[i].type === 'REZ') {
           this.addSynth(this.song.tracks[i].name);
+        }
+        if (this.song.tracks[i].type === 'SAMPLER') {
+          this.addSampler(this.song.tracks[i].name);
         }
       }
       this.session.setSynth(this.synth);

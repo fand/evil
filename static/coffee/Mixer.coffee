@@ -11,6 +11,11 @@ class @Mixer
 
         @view = new MixerView(this)
 
+    empty: ->
+        @gains = []
+        @panners = []
+        @view.empty()
+
     addSynth: (synth) ->
         # Create new panner
         p = @ctx.createPanner()

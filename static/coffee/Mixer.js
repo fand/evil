@@ -22,6 +22,12 @@
       this.view = new MixerView(this);
     }
 
+    Mixer.prototype.empty = function() {
+      this.gains = [];
+      this.panners = [];
+      return this.view.empty();
+    };
+
     Mixer.prototype.addSynth = function(synth) {
       var p;
       p = this.ctx.createPanner();

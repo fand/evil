@@ -97,10 +97,16 @@ class @Player
         else
             @stop()
 
-    addSynth: (scene_pos, name) ->
+    addSynth: (scene_pos, name, type) ->
+        # type = 'REZ' if not type?
+        # if type == 'REZ'
+        #     s = new Synth(@context, @num_id++, this, name)
+        #     s.setScale(@scene.scale)
+        #     s.setKey(@scene.key)
+        # else if type == 'SAMPLER'
+        #     #s = new Sampler(@context, @num_id++, this, name)
+        #     @addSampler(scene_pos, name)
         s = new Synth(@context, @num_id++, this, name)
-        s.setScale(@scene.scale)
-        s.setKey(@scene.key)
         @synth.push(s)
         @mixer.addSynth(s)
         @session.addSynth(s, scene_pos)
@@ -157,11 +163,16 @@ class @Player
                 @view.moveRight()
 
     readSong: (@song) ->
+        @synth = []
+        @num_id = 0
+        @mixer.empty()
+        @view.empty()
+
         for i in [0...@song.tracks.length]
-            if @synth[i]?
-                @synth[i].setSynthName(@song.tracks[i].name)
-            else
+            if not @song.tracks[i].type? or @song.tracks[i].type == 'REZ'
                 @addSynth(@song.tracks[i].name)
+            if @song.tracks[i].type == 'SAMPLER'
+                @addSampler(@song.tracks[i].name)
         @session.setSynth(@synth)
         @session.readSong(@song)
         @view.setSynthNum(@synth.length, @synth_pos)

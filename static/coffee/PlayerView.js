@@ -220,6 +220,10 @@
       }
     };
 
+    PlayerView.prototype.empty = function() {
+      return this.instruments.empty();
+    };
+
     return PlayerView;
 
   })();

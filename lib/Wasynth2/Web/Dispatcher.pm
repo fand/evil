@@ -36,6 +36,11 @@ post '/' => sub {
 get '/:id' => sub {
     my ( $c, $args ) = @_;
 
+    my $ua = $c->req->headers->user_agent;
+    if ( $ua =~ /msie/i ) {
+        return $c->render( 'ie.tx' );
+    }
+
     my $song_id = $args->{id};
     my $song = $c->db->single( 'songs', +{ id => $song_id } );
 
@@ -46,7 +51,13 @@ get '/:id' => sub {
     my $json = $song->get('json');
     $json =~ s/([<>\/\+])/sprintf("\\u%04x",ord($1))/eg;
 
-    return $c->render( 'index.tx', +{ song => $json } );
+    if ($ENV{PLACK_ENV} =~ /pro/) {
+        return $c->render( 'index.tx', +{ song => $json } );
+    }
+    else {
+        return $c->render( 'index.tx', +{ song => $json, debug => 1 } );
+    }
+
 };
 
 1;
