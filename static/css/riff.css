@@ -650,6 +650,16 @@ html, body {
     background-color: #fff;
     border-radius: 0px 0px 3px 3px / 0px 0px 3px 3px;
 }
+#console-master div {
+    float: none;
+    width: 80px;
+    height: 12px;
+    margin: 4px auto;
+    text-align: center;
+}
+#console-master .gain-slider {
+    height: 110px;
+}
 .pan-slider {
     width: 50px;
     height: 25px;

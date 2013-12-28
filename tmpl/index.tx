@@ -79,7 +79,8 @@
         </div>
         <div id="console-master" class="clearfix">
           <div class="console-track">
-            L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
+            <!-- L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R -->
+            <div>MASTER</div>
             <input class="gain-slider" type="range" min="0" max="100" value="100" />
           </div>
         </div>
