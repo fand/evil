@@ -297,7 +297,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth = [];
       this.mixer = new Mixer(this.context, this);
       this.session = new Session(this.context, this);
-      this.addSynth();
+      this.addSynth(0);
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
       this.scene_length = 32;
@@ -521,13 +521,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth = [];
       this.num_id = 0;
       this.mixer.empty();
+      this.session.empty();
       this.view.empty();
       for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         if ((this.song.tracks[i].type == null) || this.song.tracks[i].type === 'REZ') {
-          this.addSynth(this.song.tracks[i].name);
+          this.addSynth(0, this.song.tracks[i].name);
         }
         if (this.song.tracks[i].type === 'SAMPLER') {
-          this.addSampler(this.song.tracks[i].name);
+          this.addSampler(0, this.song.tracks[i].name);
         }
       }
       this.session.setSynth(this.synth);
@@ -2152,6 +2153,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Session.prototype.saveSong = function() {
       var csrf_token, song_json,
         _this = this;
+      this.savePatterns();
       song_json = JSON.stringify(this.song);
       csrf_token = $('#ajax-form > input[name=csrf_token]').val();
       return $.ajax({
@@ -2217,6 +2219,26 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.song.tracks[id] = s_obj;
       s.readPattern(pp[this.scene_pos]);
       return this.view.changeSynth(id, type);
+    };
+
+    Session.prototype.empty = function() {
+      this.next_pattern_pos = [];
+      this.scenes = [];
+      this.scene_pos = 0;
+      this.scene = {};
+      this.scene_length = 32;
+      this.current_cells = [];
+      this.next_pattern_pos = [];
+      this.next_scene_pos = void 0;
+      this.is_loop = true;
+      this.is_waiting_next_pattern = false;
+      this.is_waiting_next_scene = false;
+      this.cue_queue = [];
+      return this.song = {
+        tracks: [],
+        master: [],
+        length: 0
+      };
     };
 
     return Session;

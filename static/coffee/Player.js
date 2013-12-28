@@ -13,7 +13,7 @@
       this.synth = [];
       this.mixer = new Mixer(this.context, this);
       this.session = new Session(this.context, this);
-      this.addSynth();
+      this.addSynth(0);
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
       this.scene_length = 32;
@@ -237,13 +237,14 @@
       this.synth = [];
       this.num_id = 0;
       this.mixer.empty();
+      this.session.empty();
       this.view.empty();
       for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         if ((this.song.tracks[i].type == null) || this.song.tracks[i].type === 'REZ') {
-          this.addSynth(this.song.tracks[i].name);
+          this.addSynth(0, this.song.tracks[i].name);
         }
         if (this.song.tracks[i].type === 'SAMPLER') {
-          this.addSampler(this.song.tracks[i].name);
+          this.addSampler(0, this.song.tracks[i].name);
         }
       }
       this.session.setSynth(this.synth);

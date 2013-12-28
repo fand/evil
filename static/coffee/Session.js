@@ -220,6 +220,7 @@
     Session.prototype.saveSong = function() {
       var csrf_token, song_json,
         _this = this;
+      this.savePatterns();
       song_json = JSON.stringify(this.song);
       csrf_token = $('#ajax-form > input[name=csrf_token]').val();
       return $.ajax({
@@ -285,6 +286,26 @@
       this.song.tracks[id] = s_obj;
       s.readPattern(pp[this.scene_pos]);
       return this.view.changeSynth(id, type);
+    };
+
+    Session.prototype.empty = function() {
+      this.next_pattern_pos = [];
+      this.scenes = [];
+      this.scene_pos = 0;
+      this.scene = {};
+      this.scene_length = 32;
+      this.current_cells = [];
+      this.next_pattern_pos = [];
+      this.next_scene_pos = void 0;
+      this.is_loop = true;
+      this.is_waiting_next_pattern = false;
+      this.is_waiting_next_scene = false;
+      this.cue_queue = [];
+      return this.song = {
+        tracks: [],
+        master: [],
+        length: 0
+      };
     };
 
     return Session;
