@@ -438,6 +438,10 @@
       return this.core.bindSample(sample_now);
     };
 
+    Sampler.prototype.replaceWith = function(s_new) {
+      return this.view.dom.replaceWith(s_new.view.dom);
+    };
+
     return Sampler;
 
   })();

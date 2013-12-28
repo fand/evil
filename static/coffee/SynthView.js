@@ -47,6 +47,10 @@
       this.is_panel_opened = true;
       this.keyboard = new KeyboardView(this);
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      this.pattern_obj = {
+        name: this.model.pattern_name,
+        pattern: this.pattern
+      };
       this.page = 0;
       this.page_total = 1;
       this.last_time = 0;
@@ -334,7 +338,9 @@
       this.page_total = this.pattern.length / this.cells_x;
       this.drawPattern(0);
       this.setMarker();
-      return this.setPatternName(this.pattern_obj.name);
+      this.setPatternName(this.pattern_obj.name);
+      console.log('paname');
+      return console.log(this.pattern_obj.name);
     };
 
     SynthView.prototype.drawPattern = function(time) {

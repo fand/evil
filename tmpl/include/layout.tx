@@ -11,7 +11,23 @@
       <link href="<: static_file('/static/css/main.css') :>" rel="stylesheet" type="text/css" media="screen" />
       <link href="<: static_file('/static/css/riff.css') :>" rel="stylesheet" type="text/css" media="screen" />
       <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" media="screen" />
-      <script src="<: uri_for('/static/js/Wasynth2.min.js') :>"></script>
+      <: if $debug { :>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="<: uri_for('/static/coffee/Player.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/Session.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/Mixer.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/Synth.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/Sampler.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/PlayerView.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/SessionView.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/MixerView.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/SynthView.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/SamplerView.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/MutekiTimer.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/main.js') :>"></script>
+      <: } else { :>
+        <script src="<: uri_for('/static/js/Wasynth2.min.js') :>"></script>
+      <: } :>
     <: } else { :>
       <link href="<: static_file('/static/css/ie.css') :>" rel="stylesheet" type="text/css" media="screen" />
     <: } :>

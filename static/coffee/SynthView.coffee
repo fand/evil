@@ -56,6 +56,7 @@ class @SynthView
 
         # Flags / Params
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        @pattern_obj = name: @model.pattern_name, pattern: @pattern
         @page = 0
         @page_total = 1
 
@@ -334,6 +335,8 @@ class @SynthView
         @drawPattern(0)
         @setMarker()
         @setPatternName(@pattern_obj.name)
+        console.log('paname')
+        console.log(@pattern_obj.name)
 
     drawPattern: (time) ->
         @time = time if time?

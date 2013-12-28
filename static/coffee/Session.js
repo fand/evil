@@ -128,11 +128,12 @@
       pos = _pos ? _pos : this.scene_pos;
       pp = [];
       pp[pos] = {
-        name: s.id + '-' + pos,
+        name: s.id + '-' + _pos,
         pattern: s.pattern
       };
       s_obj = {
         id: s.id,
+        type: 'REZ',
         name: 'Synth #' + s.id,
         patterns: pp,
         params: [],
@@ -240,7 +241,13 @@
     Session.prototype.setPatternName = function(synth_id, name) {
       var pat_num;
       pat_num = this.current_cells[synth_id];
-      this.song.tracks[synth_id].patterns[pat_num].name = name;
+      if (this.song.tracks[synth_id].patterns[pat_num] != null) {
+        this.song.tracks[synth_id].patterns[pat_num].name = name;
+      } else {
+        this.song.tracks[synth_id].patterns[pat_num] = {
+          name: name
+        };
+      }
       return this.view.drawPatternName(synth_id, pat_num, this.song.tracks[synth_id].patterns[pat_num]);
     };
 
@@ -263,6 +270,7 @@
       };
       s_obj = {
         id: s.id,
+        type: type,
         name: 'Synth #' + s.id,
         patterns: pp,
         params: [],
@@ -270,8 +278,8 @@
         pan: 0.0
       };
       this.song.tracks[id] = s_obj;
-      console.log(pp);
-      return s.readPattern(pp[this.scene_pos]);
+      s.readPattern(pp[this.scene_pos]);
+      return this.view.changeSynth(id, type);
     };
 
     return Session;
