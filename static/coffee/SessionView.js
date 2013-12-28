@@ -76,7 +76,7 @@
       this.ctx_tracks_hover.translate(0, this.offset_y);
       this.ctx_master_hover.translate(0, this.offset_y);
       this.font_size = 12;
-      this.ctx_tracks.font = this.ctx_master.font = this.font_size + 'px "ＭＳ Ｐゴシック"';
+      this.ctx_tracks.font = this.ctx_master.font = this.font_size + 'px "ＭＳ Ｐゴシック, ヒラギノ角ゴ Pro W3"';
       this.rect_tracks = this.canvas_tracks_hover.getBoundingClientRect();
       this.rect_master = this.canvas_master_hover.getBoundingClientRect();
       this.offset_translate = 700 + this.offset_y;

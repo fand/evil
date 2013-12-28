@@ -211,6 +211,15 @@
       });
     };
 
+    PlayerView.prototype.changeSynth = function() {
+      if (this.synth_now === 0) {
+        this.btn_left.hide();
+      }
+      if (this.synth_now === (this.synth_total - 1)) {
+        return this.btn_right.attr('data-line1', 'new');
+      }
+    };
+
     return PlayerView;
 
   })();

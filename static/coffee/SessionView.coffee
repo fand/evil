@@ -79,8 +79,8 @@ class @SessionView
         @ctx_master_hover.translate(0, @offset_y)
 
         @font_size = 12
-        @ctx_tracks.font = @ctx_master.font = @font_size + 'px "ＭＳ Ｐゴシック"';
-
+#        @ctx_tracks.font = @ctx_master.font = @font_size + 'px "ＭＳ Ｐゴシック"';
+        @ctx_tracks.font = @ctx_master.font = @font_size + 'px "ＭＳ Ｐゴシック, ヒラギノ角ゴ Pro W3"';
         @rect_tracks = @canvas_tracks_hover.getBoundingClientRect()
         @rect_master = @canvas_master_hover.getBoundingClientRect()
         @offset_translate = 700 + @offset_y

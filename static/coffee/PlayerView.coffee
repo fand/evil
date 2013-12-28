@@ -158,3 +158,10 @@ class @PlayerView
         @footer.css(
             height: space_h + 'px'
         )
+
+
+    changeSynth: ->
+        if @synth_now == 0
+            @btn_left.hide()
+        if @synth_now == (@synth_total - 1)
+            @btn_right.attr('data-line1', 'new')

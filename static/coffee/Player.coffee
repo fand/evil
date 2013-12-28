@@ -130,7 +130,7 @@ class @Player
         s_old.noteOff()
 
         @synth_now = s_new
-#        @view.changeSynth(id, type)
+        @view.changeSynth(id, type)
 
         return s_new
 
