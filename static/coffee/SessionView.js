@@ -167,13 +167,22 @@
       this.canvas_tracks_hover_dom.on('mousemove', function(e) {
         var pos;
         pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
-        return _this.drawHover(_this.ctx_tracks_hover, pos);
+        if (_this.is_clicked) {
+          return _this.drawDrag(_this.ctx_tracks_hover, pos);
+        } else {
+          return _this.drawHover(_this.ctx_tracks_hover, pos);
+        }
       }).on('mouseout', function(e) {
         _this.clearHover(_this.ctx_tracks_hover);
-        return _this.hover_pos = {
+        _this.hover_pos = {
           x: -1,
           y: -1
         };
+        _this.click_pos = {
+          x: -1,
+          y: -1
+        };
+        return _this.is_clicked = false;
       }).on('mousedown', function(e) {
         var now, pos;
         pos = _this.getPlayPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
@@ -184,11 +193,19 @@
           now = performance.now();
           if (now - _this.last_clicked < 500 && pos.y !== -1) {
             _this.editPattern(pos);
-            return _this.last_clicked = -10000;
+            _this.last_clicked = -10000;
           } else {
-            return _this.last_clicked = now;
+            _this.last_clicked = now;
           }
+          _this.click_pos = pos;
+          return _this.is_clicked = true;
         }
+      }).on('mouseup', function(e) {
+        _this.click_pos = {
+          x: -1,
+          y: -1
+        };
+        return _this.is_clicked = false;
       });
       this.canvas_master_hover_dom.on('mousemove', function(e) {
         var pos;
@@ -251,7 +268,7 @@
       this.song = song;
       this.current_cells = current_cells;
       this.resize();
-      for (x = _i = 0, _ref = Math.max(song.tracks.length + 1, 8); 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
+      for (x = _i = 0, _ref = Math.max(this.song.tracks.length + 1, 8); 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         t = song.tracks[x];
         if (t != null) {
           if (t.type != null) {
@@ -375,6 +392,32 @@
       this.ctx_master_on.lineWidth = 2;
       this.ctx_master_on.strokeRect(4, y * this.h + 4, this.w - 6, this.h - 6);
       return this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 3, y * this.h + 3, 16, 15);
+    };
+
+    SessionView.prototype.drawDrag = function(ctx, pos) {
+      var name;
+      this.clearHover(ctx);
+      if (this.song.tracks[this.click_pos.x] == null) {
+        return;
+      }
+      if (this.song.tracks[this.click_pos.x].patterns == null) {
+        return;
+      }
+      if (this.song.tracks[this.click_pos.x].patterns[this.click_pos.y] == null) {
+        return;
+      }
+      name = this.song.tracks[this.click_pos.x].patterns[this.click_pos.y].name;
+      if (this.track_color[pos.x] == null) {
+        this.track_color[pos.x] = this.color_schemes[this.song.tracks[pos.x].type];
+      }
+      ctx.strokeStyle = this.track_color[pos.x][1];
+      ctx.fillStyle = this.track_color[pos.x][1];
+      ctx.lineWidth = 2;
+      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
+      ctx.fillText(name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      return this.hover_pos = pos;
     };
 
     SessionView.prototype.drawHover = function(ctx, pos) {
