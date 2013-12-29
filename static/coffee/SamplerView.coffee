@@ -24,7 +24,7 @@ class @SamplerCoreView
 
     initEvent: ->
         @sample.on("change", () =>
-            @setSampleParam()
+            @setSampleTimeParam()
             @updateWaveformCanvas(@sample_now)
         )
         @eq.on('change', () =>
@@ -48,7 +48,7 @@ class @SamplerCoreView
         h = canvas.height = 180
         ctx.clearRect(0, 0, w, h)
 
-        hts = @model.getSampleParam(@sample_now)
+        hts = @model.getSampleTimeParam(@sample_now)
         _data = @model.getSampleData(@sample_now)
 
         if _data?
@@ -102,8 +102,8 @@ class @SamplerCoreView
         # @setNodesParam()
         # @setGains()
 
-    setSampleParam: ->
-        @model.setSampleParam(
+    setSampleTimeParam: ->
+        @model.setSampleTimeParam(
             @sample_now,
             parseFloat(@sample.find('.head').val())  / 100.0,
             parseFloat(@sample.find('.tail').val())  / 100.0,
@@ -125,7 +125,7 @@ class @SamplerCoreView
             parseFloat(@gain.val()) / 100.0
         )
 
-    readSampleParam: (p) ->
+    readSampleTimeParam: (p) ->
         @sample.find('.head' ).val(p[0] * 100.0)
         @sample.find('.tail' ).val(p[1] * 100.0)
         @sample.find('.speed').val(p[2] * 100.0)
@@ -147,6 +147,11 @@ class @SamplerCoreView
     pan2pos: (v) ->
         theta = v * Math.PI
         [Math.cos(theta), 0, -Math.sin(theta)]
+
+    readParam: (p) ->
+#        if p.samples?
+
+
 
 
 
