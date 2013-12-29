@@ -201,10 +201,11 @@
           return _this.is_clicked = true;
         }
       }).on('mouseup', function(e) {
-        _this.click_pos = {
-          x: -1,
-          y: -1
-        };
+        var pos;
+        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
+        if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
+          _this.copyCell(_this.click_pos, pos);
+        }
         return _this.is_clicked = false;
       });
       this.canvas_master_hover_dom.on('mousemove', function(e) {
@@ -269,7 +270,7 @@
       this.current_cells = current_cells;
       this.resize();
       for (x = _i = 0, _ref = Math.max(this.song.tracks.length + 1, 8); 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
-        t = song.tracks[x];
+        t = this.song.tracks[x];
         if (t != null) {
           if (t.type != null) {
             this.track_color[x] = this.color_schemes[t.type];
@@ -278,7 +279,7 @@
             this.drawTrackName(x, t.name);
           }
         }
-        for (y = _j = 0, _ref1 = Math.max(song.length, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
+        for (y = _j = 0, _ref1 = Math.max(this.song.length, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           if ((t != null) && (t.patterns[y] != null)) {
             this.drawCell(this.ctx_tracks, t.patterns[y], x, y);
           } else {
@@ -287,9 +288,9 @@
         }
       }
       this.drawMasterName();
-      for (y = _k = 0, _ref2 = Math.max(song.length, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
-        if (song.master[y] != null) {
-          this.drawCell(this.ctx_master, song.master[y], 0, y);
+      for (y = _k = 0, _ref2 = Math.max(this.song.length, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
+        if (this.song.master[y] != null) {
+          this.drawCell(this.ctx_master, this.song.master[y], 0, y);
         } else {
           this.drawEmptyMaster(y);
         }
@@ -407,6 +408,9 @@
         return;
       }
       name = this.song.tracks[this.click_pos.x].patterns[this.click_pos.y].name;
+      if (pos.y >= Math.max(this.song.length, 10)) {
+        return;
+      }
       if (this.track_color[pos.x] == null) {
         this.track_color[pos.x] = this.color_schemes[this.song.tracks[pos.x].type];
       }
@@ -415,7 +419,7 @@
       ctx.lineWidth = 2;
       ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
       ctx.fillText(name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
       ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
       return this.hover_pos = pos;
     };
@@ -581,6 +585,26 @@
     };
 
     SessionView.prototype.changeSynth = function(id, type) {};
+
+    SessionView.prototype.copyCell = function(src, dst) {
+      this.model.savePattern(src.x, src.y);
+      if (this.song.tracks[src.x] == null) {
+        return;
+      }
+      if (this.song.tracks[src.x].patterns[src.y] == null) {
+        return;
+      }
+      if (this.song.tracks[dst.x] == null) {
+        return;
+      }
+      if (this.song.tracks[src.x].type !== this.song.tracks[dst.x].type) {
+        return;
+      }
+      this.song.tracks[dst.x].patterns[dst.y] = $.extend(true, {}, this.song.tracks[src.x].patterns[src.y]);
+      this.drawCell(this.ctx_tracks, this.song.tracks[dst.x].patterns[dst.y], dst.x, dst.y);
+      this.model.setPattern(this.song.tracks[dst.x].patterns[dst.y], dst.x, dst.y);
+      return this.drawCell(this.ctx_master, this.song.master[dst.y], 0, dst.y);
+    };
 
     return SessionView;
 

@@ -170,8 +170,11 @@ class @SessionView
                 @click_pos = pos
                 @is_clicked = true
                 #@selectCell(pos)
+
         ).on('mouseup', (e) =>
-            @click_pos = x:-1, y:-1
+            pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
+            @copyCell(@click_pos, pos) if @click_pos.x != pos.x or @click_pos.y != pos.y
+
             @is_clicked = false
         )
 
@@ -213,12 +216,12 @@ class @SessionView
 
         # Draw tracks
         for x in [0...Math.max(@song.tracks.length + 1, 8)]
-            t = song.tracks[x]
+            t = @song.tracks[x]
             if t?
                 @track_color[x] = @color_schemes[t.type] if t.type?
                 @drawTrackName(x, t.name) if t.name?
 
-            for y in [0...Math.max(song.length, 10)]
+            for y in [0...Math.max(@song.length, 10)]
                 if t? and t.patterns[y]?
                     @drawCell(@ctx_tracks, t.patterns[y], x, y)
                 else
@@ -226,9 +229,9 @@ class @SessionView
 
         # Draw master
         @drawMasterName()
-        for y in [0...Math.max(song.length, 10)]
-            if song.master[y]?
-                @drawCell(@ctx_master, song.master[y], 0, y)
+        for y in [0...Math.max(@song.length, 10)]
+            if @song.master[y]?
+                @drawCell(@ctx_master, @song.master[y], 0, y)
             else
                 @drawEmptyMaster(y)
 
@@ -345,6 +348,8 @@ class @SessionView
         return if not @song.tracks[@click_pos.x].patterns[@click_pos.y]?
         name = @song.tracks[@click_pos.x].patterns[@click_pos.y].name
 
+        return if pos.y >= Math.max(@song.length, 10)
+
         if not @track_color[pos.x]?
             @track_color[pos.x] = @color_schemes[@song.tracks[pos.x].type]
 
@@ -355,11 +360,10 @@ class @SessionView
         ctx.strokeRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
         ctx.fillText(name, pos.x * @w + 24, (pos.y + 1) * @h - 6)
 
-        ctx.fillStyle = 'rgba(255,255,255,0.7)'
+        ctx.fillStyle = 'rgba(255,255,255,0.9)'
         ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
 
         @hover_pos = pos
-
 
     drawHover: (ctx, pos) ->
         @clearHover(ctx)
@@ -475,3 +479,22 @@ class @SessionView
 
     changeSynth: (id, type) ->
         #@readSong(@song, @current_cells)
+
+
+    copyCell: (src, dst) ->
+        @model.savePattern(src.x, src.y)
+
+        return if not @song.tracks[src.x]?
+        return if not @song.tracks[src.x].patterns[src.y]?
+
+        # TODO: addSynth when tracks[dst.x] is empty.
+        return if not @song.tracks[dst.x]?
+
+        return if @song.tracks[src.x].type != @song.tracks[dst.x].type
+
+        # Deep copy the pattern
+        @song.tracks[dst.x].patterns[dst.y] = $.extend(true, {}, @song.tracks[src.x].patterns[src.y])
+        @drawCell(@ctx_tracks, @song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
+
+        @model.setPattern(@song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
+        @drawCell(@ctx_master, @song.master[dst.y], 0, dst.y)

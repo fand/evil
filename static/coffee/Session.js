@@ -163,6 +163,19 @@
       this.synth = synth;
     };
 
+    Session.prototype.setPattern = function(pat, synth_num, pat_num) {
+      this.song.tracks[synth_num].patterns[pat_num] = pat;
+      if (this.song.master[pat_num] == null) {
+        this.song.master[pat_num] = {
+          name: 'section-' + pat_num
+        };
+      }
+      if (pat_num + 2 > this.song_length) {
+        this.song_length = pat_num + 2;
+        return this.song.length = pat_num + 2;
+      }
+    };
+
     Session.prototype.editPattern = function(_synth_num, pat_num) {
       var pat_name, synth_num;
       if (this.song.master[pat_num] == null) {
@@ -179,7 +192,7 @@
         synth_num = this.song.tracks.length;
         this.player.addSynth(pat_num);
       }
-      this.savePattern(synth_num);
+      this.savePattern(synth_num, this.current_cells[synth_num]);
       if (this.song.tracks[synth_num].patterns[pat_num] != null) {
         this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num]);
       } else {
@@ -198,17 +211,17 @@
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.current_cells.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.savePattern(i));
+        _results.push(this.savePattern(i, this.current_cells[i]));
       }
       return _results;
     };
 
-    Session.prototype.savePattern = function(i) {
-      if (this.song.tracks[i].patterns[this.current_cells[i]] != null) {
-        return this.song.tracks[i].patterns[this.current_cells[i]].pattern = this.player.synth[i].pattern;
+    Session.prototype.savePattern = function(x, y) {
+      if (this.song.tracks[x].patterns[y] != null) {
+        return this.song.tracks[x].patterns[y].pattern = this.player.synth[x].pattern;
       } else {
-        return this.song.tracks[i].patterns[this.current_cells[i]] = {
-          pattern: this.player.synth[i].pattern
+        return this.song.tracks[x].patterns[y] = {
+          pattern: this.player.synth[x].pattern
         };
       }
     };

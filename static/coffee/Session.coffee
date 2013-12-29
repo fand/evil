@@ -126,6 +126,14 @@ class @Session
 
     setSynth: (@synth) ->
 
+    setPattern: (pat, synth_num, pat_num) ->
+        @song.tracks[synth_num].patterns[pat_num] = pat
+        if not @song.master[pat_num]?
+            @song.master[pat_num] = name: 'section-' + pat_num
+        if pat_num + 2 > @song_length
+            @song_length = pat_num + 2
+            @song.length = pat_num + 2
+
     editPattern: (_synth_num, pat_num) ->
         # add master
         if not @song.master[pat_num]?
@@ -140,7 +148,8 @@ class @Session
             synth_num = @song.tracks.length
             @player.addSynth(pat_num)
 
-        @savePattern(synth_num)
+        # Save old pattern (for old @current_cells)
+        @savePattern(synth_num, @current_cells[synth_num])
 
         if @song.tracks[synth_num].patterns[pat_num]?
             @player.synth[synth_num].readPattern(@song.tracks[synth_num].patterns[pat_num])
@@ -160,13 +169,13 @@ class @Session
 
     savePatterns: ->
         for i in [0...@current_cells.length]
-            @savePattern(i)
+            @savePattern(i, @current_cells[i])
 
-    savePattern: (i) ->
-        if @song.tracks[i].patterns[@current_cells[i]]?
-            @song.tracks[i].patterns[@current_cells[i]].pattern = @player.synth[i].pattern
+    savePattern: (x, y) ->
+        if @song.tracks[x].patterns[y]?
+            @song.tracks[x].patterns[y].pattern = @player.synth[x].pattern
         else
-            @song.tracks[i].patterns[@current_cells[i]] = pattern: @player.synth[i].pattern
+            @song.tracks[x].patterns[y] = pattern: @player.synth[x].pattern
 
     saveTracks: ->
         for i in [0...@player.synth.length]
