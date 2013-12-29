@@ -1,11 +1,12 @@
+_master =
+    bpm: 120
+    key: 'A'
+    sclae: 'IONIAN'
+
 SONG_DEFAULT =
     tracks: []
     length: 1
-    master:
-        bpm: 120
-        key: 'A'
-        sclae: 'IONIAN'
-
+    master: [_master]
 
 
 class @Session

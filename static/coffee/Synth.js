@@ -182,7 +182,6 @@
     }
 
     EG.prototype.getADSR = function() {
-      console.log([this.attack, this.decay, this.sustain, this.release]);
       return [this.attack, this.decay, this.sustain, this.release];
     };
 
@@ -544,13 +543,10 @@
     };
 
     SynthCoreView.prototype.readEGParam = function(p) {
-      var i, _i, _ref, _results;
-      console.log(p);
-      _results = [];
-      for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.EG_inputs.eq(i).val(p[i]));
-      }
-      return _results;
+      this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
+      this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
+      this.EG_inputs.eq(2).val(p.adsr[2] * 100);
+      return this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
     };
 
     SynthCoreView.prototype.setFEGParam = function() {
@@ -562,7 +558,7 @@
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.FEG_inputs.eq(i).val(p[i]));
+        _results.push(this.FEG_inputs.eq(i).val(p.adsr[i]));
       }
       return _results;
     };
@@ -587,7 +583,6 @@
 
     SynthCoreView.prototype.readParam = function(p) {
       var i, _i, _ref;
-      console.log(p);
       if (p.vcos != null) {
         this.readVCOParam(p.vcos);
       }

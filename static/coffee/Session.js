@@ -1,14 +1,16 @@
 (function() {
-  var SONG_DEFAULT;
+  var SONG_DEFAULT, _master;
+
+  _master = {
+    bpm: 120,
+    key: 'A',
+    sclae: 'IONIAN'
+  };
 
   SONG_DEFAULT = {
     tracks: [],
     length: 1,
-    master: {
-      bpm: 120,
-      key: 'A',
-      sclae: 'IONIAN'
-    }
+    master: [_master]
   };
 
   this.Session = (function() {

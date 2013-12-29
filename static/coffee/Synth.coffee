@@ -104,7 +104,8 @@ class @EG
         @sustain = 0.0
         @release = 0
 
-    getADSR: -> console.log([@attack, @decay, @sustain, @release]); [@attack, @decay, @sustain, @release]
+#    getADSR: -> console.log([@attack, @decay, @sustain, @release]); [@attack, @decay, @sustain, @release]
+    getADSR: -> [@attack, @decay, @sustain, @release]
     setADSR: (attack, decay, sustain, release) ->
         @attack  = attack  / 50000.0
         @decay   = decay   / 50000.0
@@ -334,9 +335,11 @@ class @SynthCoreView
         @updateCanvas("EG");
 
     readEGParam: (p) ->
-        console.log(p)
-        for i in [0...p.length]
-            @EG_inputs.eq(i).val(p[i])
+#        console.log(p)
+          @EG_inputs.eq(0).val(p.adsr[0] * 50000)
+          @EG_inputs.eq(1).val(p.adsr[1] * 50000)
+          @EG_inputs.eq(2).val(p.adsr[2] * 100)
+          @EG_inputs.eq(3).val(p.adsr[3] * 50000)
 
     setFEGParam: ->
         @model.setFEGParam(
@@ -349,7 +352,7 @@ class @SynthCoreView
 
     readFEGParam: (p) ->
         for i in [0...p.length]
-            @FEG_inputs.eq(i).val(p[i])
+            @FEG_inputs.eq(i).val(p.adsr[i])
 
     setFilterParam: ->
         @model.setFilterParam(
@@ -366,7 +369,6 @@ class @SynthCoreView
             @model.setVCOGain(i, parseInt(@gain_inputs.eq(i).val()))
 
     readParam: (p) ->
-        console.log(p)
         if p.vcos?
             @readVCOParam(p.vcos)
         if p.gains?
