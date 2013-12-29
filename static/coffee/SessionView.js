@@ -257,9 +257,6 @@
           if (t.type != null) {
             this.track_color[x] = this.color_schemes[t.type];
           }
-          if (t.type != null) {
-            this.track_color[x] = this.color_schemes[t.type];
-          }
           if (t.name != null) {
             this.drawTrackName(x, t.name);
           }
@@ -272,6 +269,7 @@
           }
         }
       }
+      this.drawMasterName();
       for (y = _k = 0, _ref2 = Math.max(song.length, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
         if (song.master[y] != null) {
           this.drawCell(this.ctx_master, song.master[y], 0, y);
@@ -314,6 +312,15 @@
 
     SessionView.prototype.clearCell = function(ctx, x, y) {
       return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
+    };
+
+    SessionView.prototype.drawMasterName = function() {
+      var dx, dy, m;
+      m = this.ctx_master.measureText('MASTER');
+      dx = (this.w - m.width) / 2;
+      dy = (this.offset_y - this.font_size) / 2;
+      this.ctx_master.fillStyle = '#ccc';
+      return this.ctx_master.fillText('MASTER', dx + 2, -dy - 3);
     };
 
     SessionView.prototype.drawTrackName = function(x, name, type) {

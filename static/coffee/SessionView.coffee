@@ -200,11 +200,7 @@ class @SessionView
         for x in [0...Math.max(song.tracks.length + 1, 8)]
             t = song.tracks[x]
             if t?
-                if t.type?
-                    @track_color[x] = @color_schemes[t.type]
-
                 @track_color[x] = @color_schemes[t.type] if t.type?
-
                 @drawTrackName(x, t.name) if t.name?
 
             for y in [0...Math.max(song.length, 10)]
@@ -214,6 +210,7 @@ class @SessionView
                     @drawEmpty(@ctx_tracks, x, y)
 
         # Draw master
+        @drawMasterName()
         for y in [0...Math.max(song.length, 10)]
             if song.master[y]?
                 @drawCell(@ctx_master, song.master[y], 0, y)
@@ -256,6 +253,15 @@ class @SessionView
 
     clearCell: (ctx, x, y) ->
         ctx.clearRect(x * @w, y * @h, @w, @h)
+
+    drawMasterName: ->
+        m = @ctx_master.measureText('MASTER')
+        dx = (@w - m.width)  / 2
+        dy = (@offset_y - @font_size) / 2
+
+        @ctx_master.fillStyle   = '#ccc'
+        @ctx_master.fillText('MASTER', dx + 2, -dy-3)
+
 
     drawTrackName: (x, name, type) ->
         if type?
