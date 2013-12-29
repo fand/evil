@@ -166,6 +166,13 @@ class @Session
         else
             @song.tracks[i].patterns[@current_cells[i]] = pattern: @player.synth[i].pattern
 
+    saveTracks: ->
+        for i in [0...@player.synth.length]
+            param = @player.synth[i].getParam()
+            if @song.tracks[i].patterns?
+                param.patterns = @song.tracks[i].patterns
+            @song.tracks[i] = param
+
     saveMaster: ->
         @song.master[@scene_pos] = @player.getScene()
 
@@ -175,6 +182,10 @@ class @Session
 
     saveMixer: ->
         @song.mixer = @player.mixer.getParam()
+
+    readTracks: (tracks) ->
+        for i in [0...tracks.length]
+            @player.synth[i].readParam(tracks[i])
 
     readSong: (@song) ->
         @scene_pos = 0
@@ -189,11 +200,13 @@ class @Session
             @scene_length = Math.max(@scene_length, song.tracks[i].patterns[0].pattern.length)
         @player.readScene(@song.master[0])
         @player.setSceneLength(@scene_length)
+        @readTracks(@song.tracks)
         @player.mixer.readParam(@song.mixer)
         @view.readSong(song, @current_cells)
 
     saveSong: () ->
         @savePatterns()
+        @saveTracks()
         @saveMasters()
         @saveMixer()
         song_json = JSON.stringify(@song)

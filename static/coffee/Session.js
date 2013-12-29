@@ -210,6 +210,19 @@
       }
     };
 
+    Session.prototype.saveTracks = function() {
+      var i, param, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.player.synth.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        param = this.player.synth[i].getParam();
+        if (this.song.tracks[i].patterns != null) {
+          param.patterns = this.song.tracks[i].patterns;
+        }
+        _results.push(this.song.tracks[i] = param);
+      }
+      return _results;
+    };
+
     Session.prototype.saveMaster = function() {
       return this.song.master[this.scene_pos] = this.player.getScene();
     };
@@ -222,6 +235,15 @@
 
     Session.prototype.saveMixer = function() {
       return this.song.mixer = this.player.mixer.getParam();
+    };
+
+    Session.prototype.readTracks = function(tracks) {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.player.synth[i].readParam(tracks[i]));
+      }
+      return _results;
     };
 
     Session.prototype.readSong = function(song) {
@@ -241,6 +263,7 @@
       }
       this.player.readScene(this.song.master[0]);
       this.player.setSceneLength(this.scene_length);
+      this.readTracks(this.song.tracks);
       this.player.mixer.readParam(this.song.mixer);
       return this.view.readSong(song, this.current_cells);
     };
@@ -249,6 +272,7 @@
       var csrf_token, song_json,
         _this = this;
       this.savePatterns();
+      this.saveTracks();
       this.saveMasters();
       this.saveMixer();
       song_json = JSON.stringify(this.song);

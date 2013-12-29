@@ -39,13 +39,22 @@ class @Noise
                 data_L[i] = data_R[i] = Math.random()
 
     connect: (dst) -> @node.connect(dst)
-    setOctave: (_) -> null
-    setFine: (_) -> null
-    setNote: -> null
-    setInterval: (_) -> null
-    setFreq: -> null
-    setKey:  -> null
-    setShape: (shape) ->
+    setOctave: (@octae) ->
+    setFine: (@fine) ->
+    setNote: ->
+    setInterval: (@interval) ->
+    setFreq: ->
+    setKey:  ->
+    setShape: (@shape) ->
+
+    getParam: ->
+        shape: @shape, octave: @octave, interval: @interval, fine: @fine
+
+    readParam: (p) ->
+        @shape = p.shape
+        @octave = p.octave
+        @interval = p.interval
+        @fine = p.fine
 
 
 
@@ -68,7 +77,7 @@ class @VCO
     setNote: (@note) ->
     setKey: (@freq_key) ->
     setInterval: (@interval) ->
-    setShape: (shape) ->
+    setShape: (@shape) ->
         @node.type = OSC_TYPE[shape]
 
     setFreq: ->
@@ -78,6 +87,15 @@ class @VCO
     connect: (dst) -> @node.connect(dst)
     disconnect:    -> @node.disconnect()
 
+    getParam: ->
+        shape: @shape, octave: @octave, interval: @interval, fine: @fine
+
+    readParam: (p) ->
+        @shape = p.shape
+        @octave = p.octave
+        @interval = p.interval
+        @fine = p.fine
+
 
 class @EG
     constructor: (@target, @min, @max) ->
@@ -86,15 +104,22 @@ class @EG
         @sustain = 0.0
         @release = 0
 
-    getParam: -> [@attack, @decay, @sustain, @release]
-    setParam: (attack, decay, sustain, release) ->
+    getADSR: -> console.log([@attack, @decay, @sustain, @release]); [@attack, @decay, @sustain, @release]
+    setADSR: (attack, decay, sustain, release) ->
         @attack  = attack  / 50000.0
         @decay   = decay   / 50000.0
         @sustain = sustain / 100.0
         @release = release / 50000.0
+    readADSR: (@attack, @decay, @sustain, @release) ->
 
-    setRange: (@min, @max) ->
     getRange: -> [@min, @max]
+    setRange:  (@min, @max) ->
+    readRange: (@min, @max) ->
+
+    getParam: -> adsr: @getADSR(), range: @getRange()
+    readParam: (p) ->
+        @readADSR(p.adsr[0], p.adsr[1], p.adsr[2], p.adsr[3])
+        @readRange(p.range[0], p.range[1])
 
     noteOn: (time) ->
         @target.cancelScheduledValues(time)
@@ -117,6 +142,10 @@ class @ResFilter
     connect:    (dst)  -> @lpf.connect(dst)
     getResonance:      -> @lpf.Q.value
     setQ: (Q) -> @lpf.Q.value = Q
+
+
+    readParam: (p) -> @lpf.Q.value = p[1]
+    getParam: () -> @lpf.Q.value
 
 
 
@@ -146,6 +175,25 @@ class @SynthCore
 
         @view = new SynthCoreView(this, id, @parent.view.dom.find('.synth-core'))
 
+    getParam: ->
+        vcos: (v.getParam() for v in @vcos)
+        gains: (g.gain.value for g in @gains)
+        eg:  @eg.getParam()
+        feg: @feg.getParam()
+        filter: [@feg.getRange()[1], @filter.getParam()]
+
+    readParam: (p) ->
+        if p.vcos?
+            for i in [0...p.vcos.length]
+                @vcos[i].readParam(p.vcos[i])
+        if p.gains?
+            for i in [0...p.gains.length]
+                @gains[i].gain.value = p.gains[i]
+        @eg.readParam(p.eg) if p.eg?
+        @feg.readParam(p.feg) if p.feg?
+        @filter.readParam(p.filter) if p.filter?
+        @view.readParam(p)
+
     setVCOParam: (i, shape, oct, interval, fine) ->
         @vcos[i].setShape(shape)
         @vcos[i].setOctave(oct)
@@ -153,8 +201,8 @@ class @SynthCore
         @vcos[i].setFine(fine)
         @vcos[i].setFreq()
 
-    setEGParam:  (a, d, s, r) -> @eg.setParam(a, d, s, r)
-    setFEGParam: (a, d, s, r) -> @feg.setParam(a, d, s, r)
+    setEGParam:  (a, d, s, r) -> @eg.setADSR(a, d, s, r)
+    setFEGParam: (a, d, s, r) -> @feg.setADSR(a, d, s, r)
 
     setFilterParam: (freq, q) ->
         @feg.setRange(80, Math.pow(freq/1000, 2.0) * 25000 + 80)
@@ -231,11 +279,11 @@ class @SynthCoreView
         if name == "EG"
             canvas  = @canvasEG
             context = @contextEG
-            adsr    = @model.eg.getParam()
+            adsr    = @model.eg.getADSR()
         else
             canvas  = @canvasFEG
             context = @contextFEG
-            adsr    = @model.feg.getParam()
+            adsr    = @model.feg.getADSR()
 
         w = canvas.width = 180
         h = canvas.height = 50
@@ -268,6 +316,14 @@ class @SynthCoreView
                 parseInt(vco.find('.fine').val())
             )
 
+    readVCOParam: (p) ->
+        for i in [0...@vcos.length]
+            vco = @vcos.eq(i)
+            vco.find('.shape').val(p[i].shape)
+            vco.find('.octave').val(p[i].octave)
+            vco.find('.interval').val(p[i].interval)
+            vco.find('.fine').val(p[i].fine)
+
     setEGParam: ->
         @model.setEGParam(
             parseFloat(@EG_inputs.eq(0).val()),
@@ -276,6 +332,11 @@ class @SynthCoreView
             parseFloat(@EG_inputs.eq(3).val())
         )
         @updateCanvas("EG");
+
+    readEGParam: (p) ->
+        console.log(p)
+        for i in [0...p.length]
+            @EG_inputs.eq(i).val(p[i])
 
     setFEGParam: ->
         @model.setFEGParam(
@@ -286,15 +347,35 @@ class @SynthCoreView
         );
         @updateCanvas("FEG");
 
+    readFEGParam: (p) ->
+        for i in [0...p.length]
+            @FEG_inputs.eq(i).val(p[i])
+
     setFilterParam: ->
         @model.setFilterParam(
             parseFloat(@filter_inputs.eq(0).val()),
             parseFloat(@filter_inputs.eq(1).val())
         )
 
+    readFilterParam: (p) ->
+        @filter_inputs.eq(0).val(p[0])
+        @filter_inputs.eq(1).val(p[1])
+
     setGains: ->
         for i in [0... @gain_inputs.length]
             @model.setVCOGain(i, parseInt(@gain_inputs.eq(i).val()))
+
+    readParam: (p) ->
+        console.log(p)
+        if p.vcos?
+            @readVCOParam(p.vcos)
+        if p.gains?
+            for i in [0...p.gains.length]
+                @gain_inputs.eq(i).val(p.gains[i] / 0.3 * 100)
+        @readEGParam(p.eg) if p.eg?
+        @readFEGParam(p.feg) if p.feg?
+        @readFilterParam(p.filter) if p.filter?
+
 
 
 
@@ -421,3 +502,6 @@ class @Synth
 
     replaceWith: (s_new) ->
         @view.dom.replaceWith(s_new.view.dom)
+
+    getParam: -> @core.getParam()
+    readParam: (p) -> @core.readParam(p) if p?
