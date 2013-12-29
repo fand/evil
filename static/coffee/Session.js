@@ -176,10 +176,10 @@
         synth_num = this.song.tracks.length;
         this.player.addSynth(pat_num);
       }
+      this.savePattern(synth_num);
       if (this.song.tracks[synth_num].patterns[pat_num] != null) {
         this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num]);
       } else {
-        this.song.tracks[synth_num].patterns[this.current_cells[synth_num]] = this.player.synth[synth_num].getPattern();
         pat_name = synth_num + '-' + pat_num;
         this.player.synth[synth_num].clearPattern();
         this.player.synth[synth_num].readPatternName(pat_name);
@@ -195,15 +195,19 @@
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.current_cells.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        if (this.song.tracks[i].patterns[this.current_cells[i]] != null) {
-          _results.push(this.song.tracks[i].patterns[this.current_cells[i]].pattern = this.player.synth[i].pattern);
-        } else {
-          _results.push(this.song.tracks[i].patterns[this.current_cells[i]] = {
-            pattern: this.player.synth[i].pattern
-          });
-        }
+        _results.push(this.savePattern(i));
       }
       return _results;
+    };
+
+    Session.prototype.savePattern = function(i) {
+      if (this.song.tracks[i].patterns[this.current_cells[i]] != null) {
+        return this.song.tracks[i].patterns[this.current_cells[i]].pattern = this.player.synth[i].pattern;
+      } else {
+        return this.song.tracks[i].patterns[this.current_cells[i]] = {
+          pattern: this.player.synth[i].pattern
+        };
+      }
     };
 
     Session.prototype.saveMaster = function() {
