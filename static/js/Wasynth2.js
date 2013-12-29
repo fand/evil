@@ -540,6 +540,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Player.prototype.moveRight = function(next_idx) {
+      if (next_idx === this.synth.length) {
+        this.addSynth();
+        this.session.play();
+      }
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
       this.synth_now.activate(next_idx);
@@ -776,14 +780,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.is_mixer) {
         return;
       }
-      this.synth_total = this.model.synth.length;
-      if (this.synth_now === (this.synth_total - 1)) {
-        this.model.addSynth();
-        this.synth_total++;
-      }
       this.synth_now++;
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
       this.model.moveRight(this.synth_now);
+      this.synth_total = this.model.synth.length;
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
       this.btn_left.show();
       if (this.synth_now === (this.synth_total - 1)) {
         return this.btn_right.attr('data-line1', 'new');
@@ -817,7 +817,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     PlayerView.prototype.moveBottom = function() {
       this.is_mixer = false;
-      this.btn_left.show();
+      if (this.synth_now !== 0) {
+        this.btn_left.show();
+      }
       this.btn_right.show();
       this.btn_top.show();
       this.btn_bottom.hide();
@@ -1992,6 +1994,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
+  var SONG_DEFAULT;
+
+  SONG_DEFAULT = {
+    tracks: [],
+    length: 1,
+    master: {
+      bpm: 120,
+      key: 'A',
+      sclae: 'IONIAN'
+    }
+  };
+
   this.Session = (function() {
     function Session(ctx, player) {
       this.ctx = ctx;
@@ -2007,11 +2021,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.is_waiting_next_pattern = false;
       this.is_waiting_next_scene = false;
       this.cue_queue = [];
-      this.song = {
-        tracks: [],
-        master: [],
-        length: 0
-      };
+      this.song = SONG_DEFAULT;
       this.view = new SessionView(this, this.song);
     }
 
@@ -2137,7 +2147,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         pan: 0.0
       };
       this.song.tracks.push(s_obj);
-      return this.current_cells.push(pos);
+      this.current_cells.push(pos);
+      return this.view.addSynth(this.song);
     };
 
     Session.prototype.setSynth = function(synth) {

@@ -137,6 +137,10 @@ class @Player
 
 
     moveRight: (next_idx) ->
+        if next_idx == @synth.length
+            @addSynth()
+            @session.play()
+
         @synth[next_idx - 1].inactivate()
         @synth_now = @synth[next_idx]
         @synth_now.activate(next_idx)

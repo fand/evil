@@ -202,6 +202,10 @@
     };
 
     Player.prototype.moveRight = function(next_idx) {
+      if (next_idx === this.synth.length) {
+        this.addSynth();
+        this.session.play();
+      }
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
       this.synth_now.activate(next_idx);

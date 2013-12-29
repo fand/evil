@@ -128,14 +128,10 @@
       if (this.is_mixer) {
         return;
       }
-      this.synth_total = this.model.synth.length;
-      if (this.synth_now === (this.synth_total - 1)) {
-        this.model.addSynth();
-        this.synth_total++;
-      }
       this.synth_now++;
-      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
       this.model.moveRight(this.synth_now);
+      this.synth_total = this.model.synth.length;
+      this.instruments.css('-webkit-transform', 'translate3d(' + (-1110 * this.synth_now) + 'px, 0px, 0px)');
       this.btn_left.show();
       if (this.synth_now === (this.synth_total - 1)) {
         return this.btn_right.attr('data-line1', 'new');
@@ -169,7 +165,9 @@
 
     PlayerView.prototype.moveBottom = function() {
       this.is_mixer = false;
-      this.btn_left.show();
+      if (this.synth_now !== 0) {
+        this.btn_left.show();
+      }
       this.btn_right.show();
       this.btn_top.show();
       this.btn_bottom.hide();

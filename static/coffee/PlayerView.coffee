@@ -88,13 +88,12 @@ class @PlayerView
 
     moveRight: ->
         return if @is_mixer
-        @synth_total = @model.synth.length
-        if @synth_now == (@synth_total - 1)
-            @model.addSynth()
-            @synth_total++
+
         @synth_now++
-        @instruments.css('-webkit-transform', 'translate3d(' + (-1110 * @synth_now) + 'px, 0px, 0px)')
         @model.moveRight(@synth_now)
+        @synth_total = @model.synth.length
+
+        @instruments.css('-webkit-transform', 'translate3d(' + (-1110 * @synth_now) + 'px, 0px, 0px)')
         @btn_left.show()
         if @synth_now == (@synth_total - 1)
             @btn_right.attr('data-line1', 'new')
@@ -120,7 +119,7 @@ class @PlayerView
 
     moveBottom: ->
         @is_mixer = false
-        @btn_left.show()
+        @btn_left.show() if @synth_now != 0
         @btn_right.show()
         @btn_top.show()
         @btn_bottom.hide()
