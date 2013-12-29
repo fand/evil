@@ -25,7 +25,6 @@ class @Session
 
         @cue_queue = []
 
-#        @song = tracks: [], master: [], length: 0
         @song = SONG_DEFAULT
 
         @view = new SessionView(this, @song)
@@ -139,13 +138,12 @@ class @Session
             synth_num = @song.tracks.length
             @player.addSynth(pat_num)
 
+        @savePattern(synth_num)
+
         if @song.tracks[synth_num].patterns[pat_num]?
             @player.synth[synth_num].readPattern(@song.tracks[synth_num].patterns[pat_num])
         else
-            # save pattern
-            @song.tracks[synth_num].patterns[@current_cells[synth_num]] = @player.synth[synth_num].getPattern()
-
-            # and set new pattern
+            # set new pattern
             pat_name = synth_num + '-' + pat_num
             @player.synth[synth_num].clearPattern()
             @player.synth[synth_num].readPatternName(pat_name)
@@ -160,12 +158,13 @@ class @Session
 
     savePatterns: ->
         for i in [0...@current_cells.length]
-            if @song.tracks[i].patterns[@current_cells[i]]?
-                @song.tracks[i].patterns[@current_cells[i]].pattern = @player.synth[i].pattern
-            else
-                @song.tracks[i].patterns[@current_cells[i]] = pattern: @player.synth[i].pattern
+            @savePattern(i)
 
-#    saveTracks: ->
+    savePattern: (i) ->
+        if @song.tracks[i].patterns[@current_cells[i]]?
+            @song.tracks[i].patterns[@current_cells[i]].pattern = @player.synth[i].pattern
+        else
+            @song.tracks[i].patterns[@current_cells[i]] = pattern: @player.synth[i].pattern
 
     saveMaster: ->
         @song.master[@scene_pos] = @player.getScene()
