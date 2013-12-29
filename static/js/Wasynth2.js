@@ -500,9 +500,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
-    Player.prototype.addSynth = function(scene_pos, name, type) {
+    Player.prototype.addSynth = function(scene_pos, name) {
       var s;
       s = new Synth(this.context, this.num_id++, this, name);
+      s.setScale(this.scene.scale);
+      s.setKey(this.scene.key);
       this.synth.push(s);
       this.mixer.addSynth(s);
       return this.session.addSynth(s, scene_pos);
@@ -2143,7 +2145,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Session.prototype.editPattern = function(_synth_num, pat_num) {
-      var name, synth_num;
+      var pat_name, synth_num;
       if (this.song.master[pat_num] == null) {
         this.song.master[pat_num] = {
           name: 'section-' + pat_num
@@ -2162,9 +2164,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num]);
       } else {
         this.song.tracks[synth_num].patterns[this.current_cells[synth_num]] = this.player.synth[synth_num].getPattern();
-        name = synth_num + '-' + pat_num;
+        pat_name = synth_num + '-' + pat_num;
         this.player.synth[synth_num].clearPattern();
-        this.player.synth[synth_num].readPatternName(name);
+        this.player.synth[synth_num].readPatternName(pat_name);
         this.song.tracks[synth_num].patterns[pat_num] = this.player.synth[synth_num].getPattern();
       }
       this.current_cells[synth_num] = pat_num;

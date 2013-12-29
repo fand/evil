@@ -135,9 +135,9 @@ class @Session
             @song.tracks[synth_num].patterns[@current_cells[synth_num]] = @player.synth[synth_num].getPattern()
 
             # and set new pattern
-            name = synth_num + '-' + pat_num
+            pat_name = synth_num + '-' + pat_num
             @player.synth[synth_num].clearPattern()
-            @player.synth[synth_num].readPatternName(name)
+            @player.synth[synth_num].readPatternName(pat_name)
             @song.tracks[synth_num].patterns[pat_num] = @player.synth[synth_num].getPattern()
 
         # draw

@@ -152,7 +152,7 @@
     };
 
     Session.prototype.editPattern = function(_synth_num, pat_num) {
-      var name, synth_num;
+      var pat_name, synth_num;
       if (this.song.master[pat_num] == null) {
         this.song.master[pat_num] = {
           name: 'section-' + pat_num
@@ -171,9 +171,9 @@
         this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num]);
       } else {
         this.song.tracks[synth_num].patterns[this.current_cells[synth_num]] = this.player.synth[synth_num].getPattern();
-        name = synth_num + '-' + pat_num;
+        pat_name = synth_num + '-' + pat_num;
         this.player.synth[synth_num].clearPattern();
-        this.player.synth[synth_num].readPatternName(name);
+        this.player.synth[synth_num].readPatternName(pat_name);
         this.song.tracks[synth_num].patterns[pat_num] = this.player.synth[synth_num].getPattern();
       }
       this.current_cells[synth_num] = pat_num;

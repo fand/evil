@@ -162,9 +162,11 @@
       }
     };
 
-    Player.prototype.addSynth = function(scene_pos, name, type) {
+    Player.prototype.addSynth = function(scene_pos, name) {
       var s;
       s = new Synth(this.context, this.num_id++, this, name);
+      s.setScale(this.scene.scale);
+      s.setKey(this.scene.key);
       this.synth.push(s);
       this.mixer.addSynth(s);
       return this.session.addSynth(s, scene_pos);
