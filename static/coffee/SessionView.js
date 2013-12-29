@@ -199,7 +199,7 @@
       }).on('mousedown', function(e) {
         var pos;
         pos = _this.getPlayPos(_this.rect_master, _this.wrapper_master, e);
-        if (pos != null) {
+        if (pos.y >= 0) {
           return _this.cueMaster(pos.x, pos.y);
         }
       });
@@ -410,11 +410,13 @@
 
     SessionView.prototype.cueMaster = function(x, y) {
       var _this = this;
-      this.model.cueScene(y);
-      this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 4, y * this.h + 4, 15, 16);
-      return window.setTimeout((function() {
-        return _this.ctx_master_on.clearRect(4, y * _this.h + 4, 15, 16);
-      }), 100);
+      if (this.song.master[y] != null) {
+        this.model.cueScene(y);
+        this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 4, y * this.h + 4, 15, 16);
+        return window.setTimeout((function() {
+          return _this.ctx_master_on.clearRect(4, y * _this.h + 4, 15, 16);
+        }), 100);
+      }
     };
 
     SessionView.prototype.beat = function(is_master, cells) {

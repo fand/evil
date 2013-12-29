@@ -182,10 +182,10 @@ class @Player
         @synth = []
         @num_id = 0
 
-    readScene: (@scene) ->
-        @setBPM(@scene.bpm) if @scene.bpm?
-        @setKey(@scene.key) if @scene.key?
-        @setScale(@scene.scale) if @scene.scale?
+    readScene: (scene) ->
+        @setBPM(scene.bpm) if scene.bpm?
+        @setKey(scene.key) if scene.key?
+        @setScale(scene.scale) if scene.scale?
         @view.readParam(@bpm, @freq_key, @scale)
 
     getScene: -> @scene

@@ -603,15 +603,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Player.prototype.readScene = function(scene) {
-      this.scene = scene;
-      if (this.scene.bpm != null) {
-        this.setBPM(this.scene.bpm);
+      if (scene.bpm != null) {
+        this.setBPM(scene.bpm);
       }
-      if (this.scene.key != null) {
-        this.setKey(this.scene.key);
+      if (scene.key != null) {
+        this.setKey(scene.key);
       }
-      if (this.scene.scale != null) {
-        this.setScale(this.scene.scale);
+      if (scene.scale != null) {
+        this.setScale(scene.scale);
       }
       return this.view.readParam(this.bpm, this.freq_key, this.scale);
     };
@@ -2032,6 +2031,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   var SONG_DEFAULT, _master;
 
   _master = {
+    name: 'section-0',
     bpm: 120,
     key: 'A',
     sclae: 'IONIAN'
@@ -2601,7 +2601,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }).on('mousedown', function(e) {
         var pos;
         pos = _this.getPlayPos(_this.rect_master, _this.wrapper_master, e);
-        if (pos != null) {
+        if (pos.y >= 0) {
           return _this.cueMaster(pos.x, pos.y);
         }
       });
@@ -2812,11 +2812,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SessionView.prototype.cueMaster = function(x, y) {
       var _this = this;
-      this.model.cueScene(y);
-      this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 4, y * this.h + 4, 15, 16);
-      return window.setTimeout((function() {
-        return _this.ctx_master_on.clearRect(4, y * _this.h + 4, 15, 16);
-      }), 100);
+      if (this.song.master[y] != null) {
+        this.model.cueScene(y);
+        this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 4, y * this.h + 4, 15, 16);
+        return window.setTimeout((function() {
+          return _this.ctx_master_on.clearRect(4, y * _this.h + 4, 15, 16);
+        }), 100);
+      }
     };
 
     SessionView.prototype.beat = function(is_master, cells) {
