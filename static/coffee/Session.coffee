@@ -1,3 +1,13 @@
+SONG_DEFAULT =
+    tracks: []
+    length: 1
+    master:
+        bpm: 120
+        key: 'A'
+        sclae: 'IONIAN'
+
+
+
 class @Session
     constructor: (@ctx, @player) ->
         @scenes = []
@@ -15,7 +25,8 @@ class @Session
 
         @cue_queue = []
 
-        @song = tracks: [], master: [], length: 0
+#        @song = tracks: [], master: [], length: 0
+        @song = SONG_DEFAULT
 
         @view = new SessionView(this, @song)
 
@@ -110,9 +121,9 @@ class @Session
         @song.tracks.push(s_obj)
         @current_cells.push(pos)
 
+        @view.addSynth(@song)
 
     setSynth: (@synth) ->
-
 
     editPattern: (_synth_num, pat_num) ->
         # add master

@@ -1,4 +1,16 @@
 (function() {
+  var SONG_DEFAULT;
+
+  SONG_DEFAULT = {
+    tracks: [],
+    length: 1,
+    master: {
+      bpm: 120,
+      key: 'A',
+      sclae: 'IONIAN'
+    }
+  };
+
   this.Session = (function() {
     function Session(ctx, player) {
       this.ctx = ctx;
@@ -14,11 +26,7 @@
       this.is_waiting_next_pattern = false;
       this.is_waiting_next_scene = false;
       this.cue_queue = [];
-      this.song = {
-        tracks: [],
-        master: [],
-        length: 0
-      };
+      this.song = SONG_DEFAULT;
       this.view = new SessionView(this, this.song);
     }
 
@@ -144,7 +152,8 @@
         pan: 0.0
       };
       this.song.tracks.push(s_obj);
-      return this.current_cells.push(pos);
+      this.current_cells.push(pos);
+      return this.view.addSynth(this.song);
     };
 
     Session.prototype.setSynth = function(synth) {
