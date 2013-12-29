@@ -48,6 +48,7 @@ class @SessionView
 
         @hover_pos = x:-1, y:-1
         @click_pos = x:-1, y:-1
+        # @select_pos = x:-1, y:-1
         @last_clicked = performance.now()
 
         @dialog = $('#dialog')
@@ -138,10 +139,16 @@ class @SessionView
         # Tracks canvas
         @canvas_tracks_hover_dom.on('mousemove', (e) =>
             pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
-            @drawHover(@ctx_tracks_hover, pos)
+            if @is_clicked
+                @drawDrag(@ctx_tracks_hover, pos)
+            else
+                #pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
+                @drawHover(@ctx_tracks_hover, pos)
         ).on('mouseout', (e) =>
             @clearHover(@ctx_tracks_hover)
             @hover_pos = x:-1, y:-1
+            @click_pos = x:-1, y:-1
+            @is_clicked = false
         ).on('mousedown', (e) =>
             pos = @getPlayPos(@rect_tracks, @wrapper_tracks_sub, e)
             if pos.y >= 0
@@ -158,6 +165,17 @@ class @SessionView
                 # Clicked
                 else
                     @last_clicked = now
+
+                # Select cell
+                @click_pos = pos
+                @is_clicked = true
+                #@selectCell(pos)
+
+        ).on('mouseup', (e) =>
+            pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
+            @copyCell(@click_pos, pos) if @click_pos.x != pos.x or @click_pos.y != pos.y
+
+            @is_clicked = false
         )
 
         # Master canvas
@@ -197,13 +215,13 @@ class @SessionView
         @resize()
 
         # Draw tracks
-        for x in [0...Math.max(song.tracks.length + 1, 8)]
-            t = song.tracks[x]
+        for x in [0...Math.max(@song.tracks.length + 1, 8)]
+            t = @song.tracks[x]
             if t?
                 @track_color[x] = @color_schemes[t.type] if t.type?
                 @drawTrackName(x, t.name) if t.name?
 
-            for y in [0...Math.max(song.length, 10)]
+            for y in [0...Math.max(@song.length, 10)]
                 if t? and t.patterns[y]?
                     @drawCell(@ctx_tracks, t.patterns[y], x, y)
                 else
@@ -211,9 +229,9 @@ class @SessionView
 
         # Draw master
         @drawMasterName()
-        for y in [0...Math.max(song.length, 10)]
-            if song.master[y]?
-                @drawCell(@ctx_master, song.master[y], 0, y)
+        for y in [0...Math.max(@song.length, 10)]
+            if @song.master[y]?
+                @drawCell(@ctx_master, @song.master[y], 0, y)
             else
                 @drawEmptyMaster(y)
 
@@ -320,6 +338,32 @@ class @SessionView
 
         # inside cell
         @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  3, y*@h + 3, 16, 15)
+
+    drawDrag: (ctx, pos) ->
+        @clearHover(ctx)
+
+        # @click_pos is NOT empty
+        return if not @song.tracks[@click_pos.x]?
+        return if not @song.tracks[@click_pos.x].patterns?
+        return if not @song.tracks[@click_pos.x].patterns[@click_pos.y]?
+        name = @song.tracks[@click_pos.x].patterns[@click_pos.y].name
+
+        return if pos.y >= Math.max(@song.length, 10)
+
+        if not @track_color[pos.x]?
+            @track_color[pos.x] = @color_schemes[@song.tracks[pos.x].type]
+
+        ctx.strokeStyle = @track_color[pos.x][1]
+        ctx.fillStyle = @track_color[pos.x][1]
+
+        ctx.lineWidth = 2
+        ctx.strokeRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
+        ctx.fillText(name, pos.x * @w + 24, (pos.y + 1) * @h - 6)
+
+        ctx.fillStyle = 'rgba(255,255,255,0.9)'
+        ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
+
+        @hover_pos = pos
 
     drawHover: (ctx, pos) ->
         @clearHover(ctx)
@@ -435,3 +479,22 @@ class @SessionView
 
     changeSynth: (id, type) ->
         #@readSong(@song, @current_cells)
+
+
+    copyCell: (src, dst) ->
+        @model.savePattern(src.x, src.y)
+
+        return if not @song.tracks[src.x]?
+        return if not @song.tracks[src.x].patterns[src.y]?
+
+        # TODO: addSynth when tracks[dst.x] is empty.
+        return if not @song.tracks[dst.x]?
+
+        return if @song.tracks[src.x].type != @song.tracks[dst.x].type
+
+        # Deep copy the pattern
+        @song.tracks[dst.x].patterns[dst.y] = $.extend(true, {}, @song.tracks[src.x].patterns[src.y])
+        @drawCell(@ctx_tracks, @song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
+
+        @model.setPattern(@song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
+        @drawCell(@ctx_master, @song.master[dst.y], 0, dst.y)
