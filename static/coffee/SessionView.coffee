@@ -220,7 +220,7 @@ class @SessionView
             else
                 @drawEmptyMaster(y)
 
-        @drawScene(0, @current_cells)
+        @drawScene(@scene_pos, @current_cells)
 
         # set Global info
         @song_title.val(@song.title)

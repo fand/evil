@@ -279,7 +279,7 @@
           this.drawEmptyMaster(y);
         }
       }
-      this.drawScene(0, this.current_cells);
+      this.drawScene(this.scene_pos, this.current_cells);
       this.song_title.val(this.song.title);
       return this.song_creator.val(this.song.creator);
     };
