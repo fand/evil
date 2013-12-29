@@ -79,7 +79,6 @@ class @SessionView
         @ctx_master_hover.translate(0, @offset_y)
 
         @font_size = 12
-#        @ctx_tracks.font = @ctx_master.font = @font_size + 'px "ＭＳ Ｐゴシック"';
         @ctx_tracks.font = @ctx_master.font = @font_size + 'px "ＭＳ Ｐゴシック, ヒラギノ角ゴ Pro W3"';
         @rect_tracks = @canvas_tracks_hover.getBoundingClientRect()
         @rect_master = @canvas_master_hover.getBoundingClientRect()
@@ -127,12 +126,16 @@ class @SessionView
     getPlayPos: (rect, wrapper, e) ->
         _x = Math.floor((e.clientX - rect.left + @wrapper_mixer.scrollLeft()) / @w)
         _y = Math.floor((e.clientY - rect.top  + wrapper.scrollTop() - @offset_translate) / @h)
+
+        # inside canvas && not track name space
         if not ((e.clientX - rect.left + @wrapper_mixer.scrollLeft()) - _x * @w < 20 and (e.clientY - rect.top + wrapper.scrollTop() - @offset_translate) - _y * @h < 20)
             _y = -1
+
         x: _x
         y: _y
 
     initEvent: ->
+        # Tracks canvas
         @canvas_tracks_hover_dom.on('mousemove', (e) =>
             pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
             @drawHover(@ctx_tracks_hover, pos)
@@ -145,7 +148,7 @@ class @SessionView
                 @cueTracks(pos.x, pos.y)
             else
                 pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
-                now = performance.now()
+                now = performance.now()  # more accurate than Date.now()
 
                 # Double clicked
                 if now - @last_clicked < 500 and pos.y != -1
@@ -157,6 +160,7 @@ class @SessionView
                     @last_clicked = now
         )
 
+        # Master canvas
         @canvas_master_hover_dom.on('mousemove', (e) =>
             pos = @getPos(@rect_master, @wrapper_master, e)
             @drawHover(@ctx_master_hover, pos)
@@ -164,7 +168,7 @@ class @SessionView
             @clearHover(@ctx_master_hover)
         ).on('mousedown', (e) =>
             pos = @getPlayPos(@rect_master, @wrapper_master, e)
-            if pos?
+            if pos.y >= 0
                 @cueMaster(pos.x, pos.y)
         )
 
@@ -196,11 +200,7 @@ class @SessionView
         for x in [0...Math.max(song.tracks.length + 1, 8)]
             t = song.tracks[x]
             if t?
-                if t.type?
-                    @track_color[x] = @color_schemes[t.type]
-
                 @track_color[x] = @color_schemes[t.type] if t.type?
-
                 @drawTrackName(x, t.name) if t.name?
 
             for y in [0...Math.max(song.length, 10)]
@@ -210,13 +210,14 @@ class @SessionView
                     @drawEmpty(@ctx_tracks, x, y)
 
         # Draw master
+        @drawMasterName()
         for y in [0...Math.max(song.length, 10)]
             if song.master[y]?
                 @drawCell(@ctx_master, song.master[y], 0, y)
             else
                 @drawEmptyMaster(y)
 
-        @drawScene(0, @current_cells)
+        @drawScene(@scene_pos, @current_cells)
 
         # set Global info
         @song_title.val(@song.title)
@@ -252,6 +253,15 @@ class @SessionView
 
     clearCell: (ctx, x, y) ->
         ctx.clearRect(x * @w, y * @h, @w, @h)
+
+    drawMasterName: ->
+        m = @ctx_master.measureText('MASTER')
+        dx = (@w - m.width)  / 2
+        dy = (@offset_y - @font_size) / 2
+
+        @ctx_master.fillStyle   = '#ccc'
+        @ctx_master.fillText('MASTER', dx + 2, -dy-3)
+
 
     drawTrackName: (x, name, type) ->
         if type?
@@ -339,9 +349,10 @@ class @SessionView
             window.setTimeout(( => @ctx_tracks_on.clearRect(x*@w+4, y*@h+4, 15, 16)), 100)
 
     cueMaster: (x, y) ->
-        @model.cueScene(y)
-        @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  4, y*@h + 4, 15, 16)
-        window.setTimeout(( => @ctx_master_on.clearRect(4, y*@h + 4, 15, 16)), 100)
+        if @song.master[y]?
+            @model.cueScene(y)
+            @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  4, y*@h + 4, 15, 16)
+            window.setTimeout(( => @ctx_master_on.clearRect(4, y*@h + 4, 15, 16)), 100)
 
     beat: (is_master, cells) ->
         if is_master

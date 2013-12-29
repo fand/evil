@@ -265,15 +265,14 @@
     };
 
     Player.prototype.readScene = function(scene) {
-      this.scene = scene;
-      if (this.scene.bpm != null) {
-        this.setBPM(this.scene.bpm);
+      if (scene.bpm != null) {
+        this.setBPM(scene.bpm);
       }
-      if (this.scene.key != null) {
-        this.setKey(this.scene.key);
+      if (scene.key != null) {
+        this.setKey(scene.key);
       }
-      if (this.scene.scale != null) {
-        this.setScale(this.scene.scale);
+      if (scene.scale != null) {
+        this.setScale(scene.scale);
       }
       return this.view.readParam(this.bpm, this.freq_key, this.scale);
     };

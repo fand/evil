@@ -2,6 +2,7 @@
   var SONG_DEFAULT, _master;
 
   _master = {
+    name: 'section-0',
     bpm: 120,
     key: 'A',
     sclae: 'IONIAN'
