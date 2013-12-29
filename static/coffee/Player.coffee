@@ -97,8 +97,11 @@ class @Player
         else
             @stop()
 
-    addSynth: (scene_pos, name, type) ->
+    addSynth: (scene_pos, name) ->
         s = new Synth(@context, @num_id++, this, name)
+        s.setScale(@scene.scale)
+        s.setKey(@scene.key)
+
         @synth.push(s)
         @mixer.addSynth(s)
         @session.addSynth(s, scene_pos)
