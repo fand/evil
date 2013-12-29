@@ -160,30 +160,6 @@
 
   })();
 
-  this.ResFilter = (function() {
-    function ResFilter(ctx) {
-      this.ctx = ctx;
-      this.lpf = this.ctx.createBiquadFilter();
-      this.lpf.type = 'lowpass';
-      this.lpf.gain.value = 1.0;
-    }
-
-    ResFilter.prototype.connect = function(dst) {
-      return this.lpf.connect(dst);
-    };
-
-    ResFilter.prototype.getResonance = function() {
-      return this.lpf.Q.value;
-    };
-
-    ResFilter.prototype.setQ = function(Q) {
-      return this.lpf.Q.value = Q;
-    };
-
-    return ResFilter;
-
-  })();
-
   this.SamplerCore = (function() {
     function SamplerCore(parent, ctx, id) {
       var i, _i;
