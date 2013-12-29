@@ -302,6 +302,7 @@
     SynthCore.prototype.getParam = function() {
       var g, v;
       return {
+        type: 'REZ',
         vcos: (function() {
           var _i, _len, _ref, _results;
           _ref = this.vcos;

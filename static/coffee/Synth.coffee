@@ -177,6 +177,7 @@ class @SynthCore
         @view = new SynthCoreView(this, id, @parent.view.dom.find('.synth-core'))
 
     getParam: ->
+        type: 'REZ'
         vcos: (v.getParam() for v in @vcos)
         gains: (g.gain.value for g in @gains)
         eg:  @eg.getParam()

@@ -917,8 +917,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }
   ];
 
-  this.BufferNode = (function() {
-    function BufferNode(ctx, id, parent) {
+  this.SampleNode = (function() {
+    function SampleNode(ctx, id, parent) {
       var eq1, eq2, eq3, sample, _ref, _ref1, _ref2, _ref3, _ref4;
       this.ctx = ctx;
       this.id = id;
@@ -946,7 +946,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.panner.connect(this.node);
     }
 
-    BufferNode.prototype.setSample = function(sample) {
+    SampleNode.prototype.setSample = function(sample) {
       var req,
         _this = this;
       if (sample.data != null) {
@@ -970,12 +970,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
-    BufferNode.prototype.connect = function(dst) {
+    SampleNode.prototype.connect = function(dst) {
       this.dst = dst;
       return this.node.connect(this.dst);
     };
 
-    BufferNode.prototype.noteOn = function(gain, time) {
+    SampleNode.prototype.noteOn = function(gain, time) {
       var head_time, node, source, tail_time;
       if (this.buffer == null) {
         return;
@@ -994,17 +994,17 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return node.gain.linearRampToValueAtTime(0, tail_time + 0.001);
     };
 
-    BufferNode.prototype.setParam = function(head, tail, speed) {
+    SampleNode.prototype.setTimeParam = function(head, tail, speed) {
       this.head = head;
       this.tail = tail;
       this.speed = speed;
     };
 
-    BufferNode.prototype.getParam = function() {
+    SampleNode.prototype.getTimeParam = function() {
       return [this.head, this.tail, this.speed];
     };
 
-    BufferNode.prototype.setEQParam = function(eq_gains) {
+    SampleNode.prototype.setEQParam = function(eq_gains) {
       var g, _ref;
       this.eq_gains = eq_gains;
       return _ref = (function() {
@@ -1019,25 +1019,45 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }).call(this), this.eq_nodes[0].gain.value = _ref[0], this.eq_nodes[1].gain.value = _ref[1], this.eq_nodes[2].gain.value = _ref[2], _ref;
     };
 
-    BufferNode.prototype.getEQParam = function() {
+    SampleNode.prototype.getEQParam = function() {
       return this.eq_gains;
     };
 
-    BufferNode.prototype.setOutputParam = function(pan_value, gain) {
+    SampleNode.prototype.setOutputParam = function(pan_value, gain) {
       this.pan_value = pan_value;
       this.panner.setPosition(this.pan_value[0], this.pan_value[1], this.pan_value[2]);
       return this.node.gain.value = gain;
     };
 
-    BufferNode.prototype.getOutputParam = function() {
+    SampleNode.prototype.getOutputParam = function() {
       return [this.pan_value, this.node.gain.value];
     };
 
-    BufferNode.prototype.getData = function() {
+    SampleNode.prototype.getData = function() {
       return this.buffer;
     };
 
-    return BufferNode;
+    SampleNode.prototype.getParam = function() {
+      return {
+        time: this.getTimeParam(),
+        gains: this.eq_gains,
+        output: this.getOutputParam()
+      };
+    };
+
+    SampleNode.prototype.readParam = function(p) {
+      if (p.time != null) {
+        this.setTimeParam(p.time[0], p.time[1], p.time[2]);
+      }
+      if (p.gains != null) {
+        this.setEQParam(p.gains);
+      }
+      if (p.output != null) {
+        return this.setOutputParam(p.output[0], p.output[1]);
+      }
+    };
+
+    return SampleNode;
 
   })();
 
@@ -1050,16 +1070,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node = this.ctx.createGain();
       this.node.gain.value = 1.0;
       this.gain = 1.0;
-      this.nodes = (function() {
+      this.samples = (function() {
         var _i, _results;
         _results = [];
         for (i = _i = 0; _i < 10; i = ++_i) {
-          _results.push(new BufferNode(this.ctx, i, this));
+          _results.push(new SampleNode(this.ctx, i, this));
         }
         return _results;
       }).call(this);
       for (i = _i = 0; _i < 10; i = ++_i) {
-        this.nodes[i].connect(this.node);
+        this.samples[i].connect(this.node);
       }
       this.view = new SamplerCoreView(this, id, this.parent.view.dom.find('.sampler-core'));
     }
@@ -1071,11 +1091,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _results = [];
         for (_i = 0, _len = notes.length; _i < _len; _i++) {
           n = notes[_i];
-          _results.push(this.nodes[n[0] - 1].noteOn(n[1], time));
+          _results.push(this.samples[n[0] - 1].noteOn(n[1], time));
         }
         return _results;
       } else {
-        return this.nodes[notes - 1].noteOn(1, time);
+        return this.samples[notes - 1].noteOn(1, time);
       }
     };
 
@@ -1088,16 +1108,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.node.connect(dst);
     };
 
-    SamplerCore.prototype.setSampleParam = function(i, head, tail, speed) {
-      return this.nodes[i].setParam(head, tail, speed);
+    SamplerCore.prototype.setSampleTimeParam = function(i, head, tail, speed) {
+      return this.samples[i].setTimeParam(head, tail, speed);
     };
 
     SamplerCore.prototype.setSampleEQParam = function(i, lo, mid, hi) {
-      return this.nodes[i].setEQParam([lo, mid, hi]);
+      return this.samples[i].setEQParam([lo, mid, hi]);
     };
 
     SamplerCore.prototype.setSampleOutputParam = function(i, pan, gain) {
-      return this.nodes[i].setOutputParam(pan, gain);
+      return this.samples[i].setOutputParam(pan, gain);
     };
 
     SamplerCore.prototype.setGain = function(gain) {
@@ -1105,20 +1125,20 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.node.gain.value = this.gain;
     };
 
-    SamplerCore.prototype.getSampleParam = function(i) {
-      return this.nodes[i].getParam();
+    SamplerCore.prototype.getSampleTimeParam = function(i) {
+      return this.samples[i].getTimeParam();
     };
 
     SamplerCore.prototype.getSampleData = function(i) {
-      return this.nodes[i].getData();
+      return this.samples[i].getData();
     };
 
     SamplerCore.prototype.getSampleEQParam = function(i) {
-      return this.nodes[i].getEQParam();
+      return this.samples[i].getEQParam();
     };
 
     SamplerCore.prototype.getSampleOutputParam = function(i) {
-      return this.nodes[i].getOutputParam();
+      return this.samples[i].getOutputParam();
     };
 
     SamplerCore.prototype.sampleLoaded = function(id) {
@@ -1128,9 +1148,36 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SamplerCore.prototype.bindSample = function(sample_now) {
       this.view.updateWaveformCanvas(sample_now);
       this.view.updateEQCanvas();
-      this.view.readSampleParam(this.getSampleParam(sample_now));
+      this.view.readSampleTimeParam(this.getSampleTimeParam(sample_now));
       this.view.readSampleEQParam(this.getSampleEQParam(sample_now));
       return this.view.readSampleOutputParam(this.getSampleOutputParam(sample_now));
+    };
+
+    SamplerCore.prototype.getParam = function() {
+      var s;
+      return {
+        type: 'SAMPLER',
+        samples: (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.samples;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            s = _ref[_i];
+            _results.push(s.getParam());
+          }
+          return _results;
+        }).call(this)
+      };
+    };
+
+    SamplerCore.prototype.readParam = function(p) {
+      var i, _i, _ref;
+      if (p.samples != null) {
+        for (i = _i = 0, _ref = p.samples.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          this.samples[i].readParam(p.samples[i]);
+        }
+      }
+      return this.bindSample(0);
     };
 
     return SamplerCore;
@@ -1301,6 +1348,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.view.dom.replaceWith(s_new.view.dom);
     };
 
+    Sampler.prototype.getParam = function() {
+      return this.core.getParam();
+    };
+
+    Sampler.prototype.readParam = function(p) {
+      if (p != null) {
+        return this.core.readParam(p);
+      }
+    };
+
     return Sampler;
 
   })();
@@ -1331,7 +1388,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SamplerCoreView.prototype.initEvent = function() {
       var _this = this;
       this.sample.on("change", function() {
-        _this.setSampleParam();
+        _this.setSampleTimeParam();
         return _this.updateWaveformCanvas(_this.sample_now);
       });
       this.eq.on('change', function() {
@@ -1358,7 +1415,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       w = canvas.width = 300;
       h = canvas.height = 180;
       ctx.clearRect(0, 0, w, h);
-      hts = this.model.getSampleParam(this.sample_now);
+      hts = this.model.getSampleTimeParam(this.sample_now);
       _data = this.model.getSampleData(this.sample_now);
       if (_data != null) {
         wave = _data.getChannelData(0);
@@ -1403,8 +1460,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SamplerCoreView.prototype.setParam = function() {};
 
-    SamplerCoreView.prototype.setSampleParam = function() {
-      return this.model.setSampleParam(this.sample_now, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
+    SamplerCoreView.prototype.setSampleTimeParam = function() {
+      return this.model.setSampleTimeParam(this.sample_now, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
     };
 
     SamplerCoreView.prototype.setSampleEQParam = function() {
@@ -1415,7 +1472,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.model.setSampleOutputParam(this.sample_now, this.pan2pos(1.0 - (parseFloat(this.panner.val()) / 100.0)), parseFloat(this.gain.val()) / 100.0);
     };
 
-    SamplerCoreView.prototype.readSampleParam = function(p) {
+    SamplerCoreView.prototype.readSampleTimeParam = function(p) {
       this.sample.find('.head').val(p[0] * 100.0);
       this.sample.find('.tail').val(p[1] * 100.0);
       return this.sample.find('.speed').val(p[2] * 100.0);
@@ -1448,6 +1505,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       theta = v * Math.PI;
       return [Math.cos(theta), 0, -Math.sin(theta)];
     };
+
+    SamplerCoreView.prototype.readParam = function(p) {};
 
     return SamplerCoreView;
 
@@ -3182,6 +3241,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SynthCore.prototype.getParam = function() {
       var g, v;
       return {
+        type: 'REZ',
         vcos: (function() {
           var _i, _len, _ref, _results;
           _ref = this.vcos;

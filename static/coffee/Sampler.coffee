@@ -14,7 +14,7 @@
 
 
 
-class @BufferNode
+class @SampleNode
     constructor: (@ctx, @id, @parent) ->
         @node = @ctx.createGain()
         @node.gain.value = 1.0
@@ -80,8 +80,8 @@ class @BufferNode
         node.gain.setValueAtTime(gain, tail_time)
         node.gain.linearRampToValueAtTime(0, tail_time + 0.001)
 
-    setParam: (@head, @tail, @speed) ->
-    getParam: -> [@head, @tail, @speed]
+    setTimeParam: (@head, @tail, @speed) ->
+    getTimeParam: -> [@head, @tail, @speed]
 
     setEQParam: (@eq_gains) ->
         [@eq_nodes[0].gain.value, @eq_nodes[1].gain.value, @eq_nodes[2].gain.value] = (g * 0.2 for g in @eq_gains)
@@ -97,17 +97,14 @@ class @BufferNode
 
     getData: -> @buffer
 
+    getParam: ->
+        time: @getTimeParam(), gains: @eq_gains, output: @getOutputParam()
 
+    readParam: (p) ->
+        @setTimeParam(p.time[0], p.time[1], p.time[2]) if p.time?
+        @setEQParam(p.gains) if p.gains?
+        @setOutputParam(p.output[0], p.output[1]) if p.output?
 
-# class @ResFilter
-#     constructor: (@ctx) ->
-#         @lpf = @ctx.createBiquadFilter()
-#         @lpf.type = 'lowpass'
-#         @lpf.gain.value = 1.0
-
-#     connect:    (dst)  -> @lpf.connect(dst)
-#     getResonance:      -> @lpf.Q.value
-#     setQ: (Q) -> @lpf.Q.value = Q
 
 
 
@@ -117,10 +114,10 @@ class @SamplerCore
         @node.gain.value = 1.0
         @gain = 1.0
 
-        @nodes = (new BufferNode(@ctx, i, this) for i in [0...10])
+        @samples = (new SampleNode(@ctx, i, this) for i in [0...10])
 
         for i in [0...10]
-            @nodes[i].connect(@node)
+            @samples[i].connect(@node)
 
         @view = new SamplerCoreView(this, id, @parent.view.dom.find('.sampler-core'))
 
@@ -128,9 +125,9 @@ class @SamplerCore
         time = @ctx.currentTime
         if Array.isArray(notes)
             # return if notes.length == 0
-            @nodes[n[0] - 1].noteOn(n[1], time) for n in notes
+            @samples[n[0] - 1].noteOn(n[1], time) for n in notes
         else
-            @nodes[notes - 1].noteOn(1, time)
+            @samples[notes - 1].noteOn(1, time)
 
     noteOff: ->
         t0 = @ctx.currentTime
@@ -138,29 +135,29 @@ class @SamplerCore
     connect: (dst) ->
         @node.connect(dst)
 
-    setSampleParam: (i, head, tail, speed) ->
-        @nodes[i].setParam(head, tail, speed)
+    setSampleTimeParam: (i, head, tail, speed) ->
+        @samples[i].setTimeParam(head, tail, speed)
 
     setSampleEQParam: (i, lo, mid, hi) ->
-        @nodes[i].setEQParam([lo, mid, hi])
+        @samples[i].setEQParam([lo, mid, hi])
 
     setSampleOutputParam: (i, pan, gain) ->
-        @nodes[i].setOutputParam(pan, gain)
+        @samples[i].setOutputParam(pan, gain)
 
     setGain: (@gain) ->
         @node.gain.value = @gain
 
-    getSampleParam: (i) ->
-        @nodes[i].getParam()
+    getSampleTimeParam: (i) ->
+        @samples[i].getTimeParam()
 
     getSampleData: (i) ->
-        @nodes[i].getData()
+        @samples[i].getData()
 
     getSampleEQParam: (i) ->
-        @nodes[i].getEQParam()
+        @samples[i].getEQParam()
 
     getSampleOutputParam: (i) ->
-        @nodes[i].getOutputParam()
+        @samples[i].getOutputParam()
 
     sampleLoaded: (id) ->
         @view.updateWaveformCanvas(id)
@@ -168,9 +165,19 @@ class @SamplerCore
     bindSample: (sample_now) ->
         @view.updateWaveformCanvas(sample_now)
         @view.updateEQCanvas()
-        @view.readSampleParam(@getSampleParam(sample_now))
+        @view.readSampleTimeParam(@getSampleTimeParam(sample_now))
         @view.readSampleEQParam(@getSampleEQParam(sample_now))
         @view.readSampleOutputParam(@getSampleOutputParam(sample_now))
+
+    getParam: ->
+        type: 'SAMPLER'
+        samples: (s.getParam() for s in @samples)
+
+    readParam: (p) ->
+        if p.samples?
+            for i in [0...p.samples.length]
+                @samples[i].readParam(p.samples[i])
+        @bindSample(0)
 
 
 
@@ -277,3 +284,7 @@ class @Sampler
 
     replaceWith: (s_new) ->
         @view.dom.replaceWith(s_new.view.dom)
+
+
+    getParam: -> @core.getParam()
+    readParam: (p) -> @core.readParam(p) if p?

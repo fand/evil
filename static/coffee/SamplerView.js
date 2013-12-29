@@ -23,7 +23,7 @@
     SamplerCoreView.prototype.initEvent = function() {
       var _this = this;
       this.sample.on("change", function() {
-        _this.setSampleParam();
+        _this.setSampleTimeParam();
         return _this.updateWaveformCanvas(_this.sample_now);
       });
       this.eq.on('change', function() {
@@ -50,7 +50,7 @@
       w = canvas.width = 300;
       h = canvas.height = 180;
       ctx.clearRect(0, 0, w, h);
-      hts = this.model.getSampleParam(this.sample_now);
+      hts = this.model.getSampleTimeParam(this.sample_now);
       _data = this.model.getSampleData(this.sample_now);
       if (_data != null) {
         wave = _data.getChannelData(0);
@@ -95,8 +95,8 @@
 
     SamplerCoreView.prototype.setParam = function() {};
 
-    SamplerCoreView.prototype.setSampleParam = function() {
-      return this.model.setSampleParam(this.sample_now, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
+    SamplerCoreView.prototype.setSampleTimeParam = function() {
+      return this.model.setSampleTimeParam(this.sample_now, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
     };
 
     SamplerCoreView.prototype.setSampleEQParam = function() {
@@ -107,7 +107,7 @@
       return this.model.setSampleOutputParam(this.sample_now, this.pan2pos(1.0 - (parseFloat(this.panner.val()) / 100.0)), parseFloat(this.gain.val()) / 100.0);
     };
 
-    SamplerCoreView.prototype.readSampleParam = function(p) {
+    SamplerCoreView.prototype.readSampleTimeParam = function(p) {
       this.sample.find('.head').val(p[0] * 100.0);
       this.sample.find('.tail').val(p[1] * 100.0);
       return this.sample.find('.speed').val(p[2] * 100.0);
@@ -140,6 +140,8 @@
       theta = v * Math.PI;
       return [Math.cos(theta), 0, -Math.sin(theta)];
     };
+
+    SamplerCoreView.prototype.readParam = function(p) {};
 
     return SamplerCoreView;
 
