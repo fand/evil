@@ -164,7 +164,7 @@
       this.synth = synth;
     };
 
-    Session.prototype.setPattern = function(pat, synth_num, pat_num) {
+    Session.prototype.readPattern = function(pat, synth_num, pat_num) {
       this.song.tracks[synth_num].patterns[pat_num] = pat;
       if (this.song.master[pat_num] == null) {
         this.song.master[pat_num] = {
@@ -173,6 +173,13 @@
       }
       if (pat_num + 2 > this.song.length) {
         return this.song.length = pat_num + 2;
+      }
+    };
+
+    Session.prototype.readMaster = function(pat, pat_num) {
+      this.song.master[pat_num] = pat;
+      if (pat_num + 1 > this.song.length) {
+        return this.song.length = pat_num + 1;
       }
     };
 

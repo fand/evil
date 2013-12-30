@@ -164,15 +164,12 @@ class @SessionView
                 else
                     @last_clicked = now
 
-                # # Select cell
                 @is_clicked = true
-
-            @click_pos = pos
+                @click_pos = pos
 
         ).on('mouseup', (e) =>
             pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
             if @click_pos.x == pos.x and @click_pos.y == pos.y
-                # Select cell
                 @selectCell(pos)
             else
                 @copyCell(@click_pos, pos) if @click_pos.x != pos.x or @click_pos.y != pos.y
@@ -183,13 +180,30 @@ class @SessionView
         # Master canvas
         @canvas_master_hover_dom.on('mousemove', (e) =>
             pos = @getPos(@rect_master, @wrapper_master, e)
-            @drawHover(@ctx_master_hover, pos)
+            if @is_clicked
+                @drawDragMaster(@ctx_master_hover, pos) if @click_pos.x != pos.x or @click_pos.y != pos.y
+            else
+                @drawHover(@ctx_master_hover, pos) if @click_pos.x != pos.x or @click_pos.y != pos.y
         ).on('mouseout', (e) =>
             @clearHover(@ctx_master_hover)
+            @hover_pos = x:-1, y:-1
+            @is_clicked = false
         ).on('mousedown', (e) =>
             pos = @getPlayPos(@rect_master, @wrapper_master, e)
             if pos.y >= 0
                 @cueMaster(pos.x, pos.y)
+            else
+                pos = @getPos(@rect_master, @wrapper_master, e)
+                @is_clicked = true
+                @click_pos = pos
+        ).on('mouseup', (e) =>
+            pos = @getPos(@rect_master, @wrapper_master, e)
+            if @click_pos.x == pos.x and @click_pos.y == pos.y
+                @selectCellMaster(pos)
+            else
+                @copyCellMaster(@click_pos, pos) if @click_pos.x != pos.x or @click_pos.y != pos.y
+
+            @is_clicked = false
         )
 
         @wrapper_master.on('scroll', (e) => @wrapper_tracks_sub.scrollTop(@wrapper_master.scrollTop()))
@@ -367,12 +381,32 @@ class @SessionView
 
         @hover_pos = pos
 
+    drawDragMaster: (ctx, pos) ->
+        @clearHover(ctx)
+
+        # @click_pos is NOT empty
+        return if not @song.master[@click_pos.y]?
+        name = @song.master[@click_pos.y].name
+
+        return if pos.y >= Math.max(@song.length, 10)
+
+        ctx.strokeStyle = @color[1]
+        ctx.fillStyle = @color[1]
+
+        ctx.lineWidth = 2
+        ctx.strokeRect(pos.x * @w + 2, pos.y * @h + 2, @w-4, @h-4)
+        ctx.fillText(name, pos.x * @w + 24, (pos.y + 1) * @h - 6)
+
+        ctx.fillStyle = 'rgba(255,255,255,0.7)'
+        ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
+
+        @hover_pos = pos
+
     drawHover: (ctx, pos) ->
         @clearHover(ctx)
         ctx.fillStyle = 'rgba(255,255,255,0.6)'
         ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
-        if ctx == @ctx_tracks_hover
-            @hover_pos = pos
+        @hover_pos = pos
 
     clearHover: (ctx) ->
         # for tracks
@@ -382,7 +416,8 @@ class @SessionView
 
         # for master
         else
-            ctx.clearRect(0, 0, @w, 1000)
+            return if @hover_pos.x == @select_pos.x and @hover_pos.y == @select_pos.y
+            ctx.clearRect(0, @hover_pos.y * @h, @w, @h)
 
     clearActive: (x) ->
         @ctx_tracks_on.clearRect(x*@w, @last_active[x]*@h, @w, @h)
@@ -501,9 +536,21 @@ class @SessionView
         @song.tracks[dst.x].patterns[dst.y] = $.extend(true, {}, @song.tracks[src.x].patterns[src.y])
         @drawCell(@ctx_tracks, @song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
 
-        @model.setPattern(@song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
+        @model.readPattern(@song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
         @drawCell(@ctx_master, @song.master[dst.y], 0, dst.y)
 
+    copyCellMaster: (src, dst) ->
+        return if not @song.master[src.y]?
+
+        # TODO: save particular master
+        # @model.saveMaster(src.y)
+
+        # Deep copy the pattern
+        @song.master[dst.y] = $.extend(true, {}, @song.master[src.y])
+        @drawCell(@ctx_master, @song.master[dst.x], 0, dst.y)
+
+        # save @song.master to @session.song.master
+        @model.readMaster(@song.master[dst.y], dst.y)
 
     selectCell: (pos) ->
         return if not @song.tracks[pos.x]?
@@ -521,5 +568,21 @@ class @SessionView
 
         @ctx_tracks_hover.fillStyle = @track_color[pos.x][1]
         @ctx_tracks_hover.fillText(@song.tracks[pos.x].patterns[pos.y].name, pos.x * @w + 24, (pos.y + 1) * @h - 6)
+
+        @select_pos = pos
+
+
+    selectCellMaster: (pos) ->
+        return if not @song.master[pos.y]?
+
+        @ctx_master_hover.clearRect(@hover_pos.x * @w, @hover_pos.y * @h, @w, @h)
+        @ctx_master_hover.clearRect(@click_pos.x * @w, @click_pos.y * @h, @w, @h)
+        @ctx_master_hover.clearRect(@select_pos.x * @w, @select_pos.y * @h, @w, @h)
+
+        @ctx_master_hover.fillStyle = @color[5]
+        @ctx_master_hover.fillRect(pos.x * @w, pos.y * @h, @w, @h)
+
+        @ctx_master_hover.fillStyle = @color[1]
+        @ctx_master_hover.fillText(@song.master[pos.y].name, pos.x * @w + 24, (pos.y + 1) * @h - 6)
 
         @select_pos = pos

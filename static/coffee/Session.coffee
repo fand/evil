@@ -127,12 +127,17 @@ class @Session
 
     setSynth: (@synth) ->
 
-    setPattern: (pat, synth_num, pat_num) ->
+    readPattern: (pat, synth_num, pat_num) ->
         @song.tracks[synth_num].patterns[pat_num] = pat
         if not @song.master[pat_num]?
             @song.master[pat_num] = name: 'section-' + pat_num
         if pat_num + 2 > @song.length
             @song.length = pat_num + 2
+
+    readMaster: (pat, pat_num) ->
+        @song.master[pat_num] = pat
+        if pat_num + 1 > @song.length
+            @song.length = pat_num + 1
 
     editPattern: (_synth_num, pat_num) ->
         # add master
