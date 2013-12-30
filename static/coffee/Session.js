@@ -164,6 +164,30 @@
       this.synth = synth;
     };
 
+    Session.prototype.readTrack = function(song, src, dst) {
+      var name, synth_num;
+      this.song = song;
+      if (this.song.master[dst.y] == null) {
+        this.song.master[dst.y] = {
+          name: 'section-' + dst.y
+        };
+      }
+      if (dst.y + 1 > this.song.length) {
+        this.song.length = dst.y + 1;
+      }
+      name = this.song.tracks[src.x].patterns[src.y].name;
+      synth_num = dst.x;
+      if (this.song.tracks.length <= dst.x) {
+        synth_num = this.song.tracks.length;
+        if (this.song.tracks[src.x].type === 'REZ') {
+          this.player.addSynth(dst.y);
+        } else if (this.song.tracks[src.x].type === 'SAMPLER') {
+          this.player.addSampler(dst.y);
+        }
+      }
+      return this.song.tracks.length - 1;
+    };
+
     Session.prototype.readPattern = function(pat, synth_num, pat_num) {
       this.song.tracks[synth_num].patterns[pat_num] = pat;
       if (this.song.master[pat_num] == null) {
@@ -171,8 +195,11 @@
           name: 'section-' + pat_num
         };
       }
-      if (pat_num + 2 > this.song.length) {
-        return this.song.length = pat_num + 2;
+      if (pat_num + 1 > this.song.length) {
+        this.song.length = pat_num + 1;
+      }
+      if (this.current_cells[synth_num] = pat_num) {
+        return this.player.synth[synth_num].readPattern(pat);
       }
     };
 

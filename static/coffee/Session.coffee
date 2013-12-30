@@ -127,12 +127,35 @@ class @Session
 
     setSynth: (@synth) ->
 
+    readTrack: (@song, src, dst) ->
+        # add master
+        if not @song.master[dst.y]?
+            @song.master[dst.y] = name: 'section-' + dst.y
+        if dst.y + 1 > @song.length
+            @song.length = dst.y + 1
+
+        name = @song.tracks[src.x].patterns[src.y].name
+
+        # add track pattern
+        synth_num = dst.x
+        if @song.tracks.length <= dst.x
+            synth_num = @song.tracks.length
+
+            if @song.tracks[src.x].type == 'REZ'
+                @player.addSynth(dst.y)
+            else if @song.tracks[src.x].type == 'SAMPLER'
+                @player.addSampler(dst.y)
+
+        return @song.tracks.length - 1
+
     readPattern: (pat, synth_num, pat_num) ->
         @song.tracks[synth_num].patterns[pat_num] = pat
         if not @song.master[pat_num]?
             @song.master[pat_num] = name: 'section-' + pat_num
-        if pat_num + 2 > @song.length
-            @song.length = pat_num + 2
+        if pat_num + 1 > @song.length
+            @song.length = pat_num + 1
+        if @current_cells[synth_num] = pat_num
+            @player.synth[synth_num].readPattern(pat)
 
     readMaster: (pat, pat_num) ->
         @song.master[pat_num] = pat
