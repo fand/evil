@@ -310,3 +310,18 @@ class @Session
         @cue_queue = []
 
         @song = tracks: [], master: [], length: 0, mixer: []
+
+
+    deleteCell: ->
+        p = @view.getSelectPos()
+        return if not p?
+        if p.type == 'tracks'
+            @song.tracks[p.x].patterns[p.y] = undefined
+            if @current_cells[p.x] == p.y
+                @player.synth[p.x].clearPattern()
+                @current_cells[p.x] = undefined
+            @view.readSong(@song, @current_cells)
+        else if p.type == 'master'
+            # clear bpm, key, scale (except name)
+            @song.master[p.y] = name: @song.master[p.y].name
+            @view.readSong(@song, @current_cells)

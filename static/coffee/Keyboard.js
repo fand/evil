@@ -133,6 +133,9 @@
 
     Keyboard.prototype.onMixer = function(e) {
       var num;
+      if (e.keyCode === 8 || e.keyCode === 46) {
+        this.player.session.deleteCell();
+      }
       num = KEYCODE_TO_NUM[e.keyCode];
       if ((num != null) && num < 10) {
         if (__indexOf.call(this.solos, num) < 0) {

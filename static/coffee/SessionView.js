@@ -707,6 +707,12 @@
       return this.select_pos.type = 'master';
     };
 
+    SessionView.prototype.getSelectPos = function() {
+      if (this.select_pos.x !== -1 && this.select_pos.y !== -1) {
+        return this.select_pos;
+      }
+    };
+
     return SessionView;
 
   })();

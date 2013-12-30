@@ -100,6 +100,11 @@ class @Keyboard
         @player.noteOn(n) if n?
 
     onMixer: (e) ->
+        # Session
+        if e.keyCode == 8 or e.keyCode == 46
+            @player.session.deleteCell()
+
+        # Mute
         num = KEYCODE_TO_NUM[e.keyCode]
         if num? and num < 10
             @solos.push(num) if num not in @solos

@@ -596,3 +596,6 @@ class @SessionView
 
         @select_pos = pos
         @select_pos.type = 'master'
+
+
+    getSelectPos: -> @select_pos if @select_pos.x != -1 and @select_pos.y != -1

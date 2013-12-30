@@ -153,6 +153,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Keyboard.prototype.onMixer = function(e) {
       var num;
+      if (e.keyCode === 8 || e.keyCode === 46) {
+        this.player.session.deleteCell();
+      }
       num = KEYCODE_TO_NUM[e.keyCode];
       if ((num != null) && num < 10) {
         if (__indexOf.call(this.solos, num) < 0) {
@@ -2693,6 +2696,27 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       };
     };
 
+    Session.prototype.deleteCell = function() {
+      var p;
+      p = this.view.getSelectPos();
+      if (p == null) {
+        return;
+      }
+      if (p.type === 'tracks') {
+        this.song.tracks[p.x].patterns[p.y] = void 0;
+        if (this.current_cells[p.x] === p.y) {
+          this.player.synth[p.x].clearPattern();
+          this.current_cells[p.x] = void 0;
+        }
+        return this.view.readSong(this.song, this.current_cells);
+      } else if (p.type === 'master') {
+        this.song.master[p.y] = {
+          name: this.song.master[p.y].name
+        };
+        return this.view.readSong(this.song, this.current_cells);
+      }
+    };
+
     return Session;
 
   })();
@@ -3405,6 +3429,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx_master_hover.fillText(this.song.master[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       this.select_pos = pos;
       return this.select_pos.type = 'master';
+    };
+
+    SessionView.prototype.getSelectPos = function() {
+      if (this.select_pos.x !== -1 && this.select_pos.y !== -1) {
+        return this.select_pos;
+      }
     };
 
     return SessionView;

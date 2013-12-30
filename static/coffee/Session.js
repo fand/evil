@@ -410,6 +410,27 @@
       };
     };
 
+    Session.prototype.deleteCell = function() {
+      var p;
+      p = this.view.getSelectPos();
+      if (p == null) {
+        return;
+      }
+      if (p.type === 'tracks') {
+        this.song.tracks[p.x].patterns[p.y] = void 0;
+        if (this.current_cells[p.x] === p.y) {
+          this.player.synth[p.x].clearPattern();
+          this.current_cells[p.x] = void 0;
+        }
+        return this.view.readSong(this.song, this.current_cells);
+      } else if (p.type === 'master') {
+        this.song.master[p.y] = {
+          name: this.song.master[p.y].name
+        };
+        return this.view.readSong(this.song, this.current_cells);
+      }
+    };
+
     return Session;
 
   })();

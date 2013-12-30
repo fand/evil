@@ -339,10 +339,10 @@ class @SynthCoreView
         @updateCanvas("EG");
 
     readEGParam: (p) ->
-          @EG_inputs.eq(0).val(p.adsr[0] * 50000)
-          @EG_inputs.eq(1).val(p.adsr[1] * 50000)
-          @EG_inputs.eq(2).val(p.adsr[2] * 100)
-          @EG_inputs.eq(3).val(p.adsr[3] * 50000)
+        @EG_inputs.eq(0).val(p.adsr[0] * 50000)
+        @EG_inputs.eq(1).val(p.adsr[1] * 50000)
+        @EG_inputs.eq(2).val(p.adsr[2] * 100)
+        @EG_inputs.eq(3).val(p.adsr[3] * 50000)
 
     setFEGParam: ->
         @model.setFEGParam(
