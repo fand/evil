@@ -109,7 +109,7 @@
     };
 
     Session.prototype.play = function() {
-      return this.view.drawScene(this.scene_pos);
+      return this.view.drawScene(this.scene_pos, this.current_cells);
     };
 
     Session.prototype.beat = function() {

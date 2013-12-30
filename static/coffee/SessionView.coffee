@@ -29,13 +29,13 @@ class @SessionView
         @w = 80
         @h = 20
         @color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
-                  'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)',]
+                  'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.1)',]
 
         @color_schemes =
             REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
-                  'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)',]
+                  'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.1)',]
             SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)',
-                      'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(255, 160, 216, 0.2)']
+                      'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(255, 160, 216, 0.1)']
 
         @track_color = (@color for i in [0...8])
 
@@ -322,9 +322,9 @@ class @SessionView
         @clearActive(x)
 
         # outside cell
-        @ctx_tracks_on.strokeStyle = 'rgba(0, 230, 255, 0.3)'
-        @ctx_tracks_on.lineWidth = 2
-        @ctx_tracks_on.strokeRect(x*@w + 4, y*@h + 4, @w-6, @h-6)
+        @ctx_tracks_on.strokeStyle = @track_color[x][1]
+        @ctx_tracks_on.lineWidth = 1
+        @ctx_tracks_on.strokeRect(x*@w + 4, y*@h + 3, @w-5, @h-4)
 
         # inside cell
         @ctx_tracks_on.drawImage(@img_play, 36, 0, 18, 18,  x*@w + 3, y*@h + 3, 16, 15)
@@ -334,9 +334,9 @@ class @SessionView
         @ctx_master_on.clearRect(0, 0, @w, 10000)
 
         # outside cell
-        @ctx_master_on.strokeStyle = 'rgba(0, 230, 255, 0.3)'
-        @ctx_master_on.lineWidth = 2
-        @ctx_master_on.strokeRect(4, y*@h + 4, @w-6, @h-6)
+        @ctx_master_on.strokeStyle = @color[1]
+        @ctx_master_on.lineWidth = 1
+        @ctx_master_on.strokeRect(4, y*@h + 3, @w-5, @h-4)
 
         # inside cell
         @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  3, y*@h + 3, 16, 15)

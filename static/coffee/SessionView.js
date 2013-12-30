@@ -29,10 +29,10 @@
       this.ctx_master_hover = this.canvas_master_hover.getContext('2d');
       this.w = 80;
       this.h = 20;
-      this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'];
+      this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.1)'];
       this.color_schemes = {
-        REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'],
-        SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(255, 160, 216, 0.2)']
+        REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.1)'],
+        SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(255, 160, 216, 0.1)']
       };
       this.track_color = (function() {
         var _i, _results;
@@ -388,18 +388,18 @@
 
     SessionView.prototype.drawActive = function(x, y) {
       this.clearActive(x);
-      this.ctx_tracks_on.strokeStyle = 'rgba(0, 230, 255, 0.3)';
-      this.ctx_tracks_on.lineWidth = 2;
-      this.ctx_tracks_on.strokeRect(x * this.w + 4, y * this.h + 4, this.w - 6, this.h - 6);
+      this.ctx_tracks_on.strokeStyle = this.track_color[x][1];
+      this.ctx_tracks_on.lineWidth = 1;
+      this.ctx_tracks_on.strokeRect(x * this.w + 4, y * this.h + 3, this.w - 5, this.h - 4);
       this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
       return this.last_active[x] = y;
     };
 
     SessionView.prototype.drawActiveMaster = function(y) {
       this.ctx_master_on.clearRect(0, 0, this.w, 10000);
-      this.ctx_master_on.strokeStyle = 'rgba(0, 230, 255, 0.3)';
-      this.ctx_master_on.lineWidth = 2;
-      this.ctx_master_on.strokeRect(4, y * this.h + 4, this.w - 6, this.h - 6);
+      this.ctx_master_on.strokeStyle = this.color[1];
+      this.ctx_master_on.lineWidth = 1;
+      this.ctx_master_on.strokeRect(4, y * this.h + 3, this.w - 5, this.h - 4);
       return this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 3, y * this.h + 3, 16, 15);
     };
 

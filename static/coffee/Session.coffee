@@ -89,7 +89,7 @@ class @Session
     getScene: (i) -> @song.master[i]
 
     play: () ->
-        @view.drawScene(@scene_pos)
+        @view.drawScene(@scene_pos, @current_cells)
 
     beat: () ->
         if @is_waiting_next_scene
