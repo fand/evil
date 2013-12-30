@@ -267,18 +267,18 @@
         return _this.closeDialog();
       });
       this.song_title.on('focus', function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       }).on('change', function() {
         return _this.model.setSongTitle(_this.song_title.val());
       }).on('blur', function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       });
       this.song_creator.on('focus', function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       }).on('change', function() {
         return _this.model.setCreatorName(_this.song_creator.val());
       }).on('blur', function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       });
       this.social_twitter.on('click', function() {
         return _this.share('twitter');

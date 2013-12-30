@@ -1,5 +1,4 @@
-
-    # ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # CONSTANT
 
 #@CONTEXT = new webkitAudioContext()
@@ -7,49 +6,6 @@
 @SAMPLE_RATE = 48000
 @SEMITONE = 1.05946309
 @T = new MutekiTimer()
-
-
-@KEYCODE_TO_NOTE =
-    90:   1
-    88:   2
-    67:   3
-    86:   4
-    66:   5
-    78:   6
-    77:   7
-    65:   8
-    83:   9
-    68:  10
-    188:  8
-    190:  9
-    192: 10
-    70:  11
-    71:  12
-    72:  13
-    74:  14
-    75:  15
-    76:  16
-    187: 17
-    81:  15
-    87:  16
-    69:  17
-    82:  18
-    84:  19
-    89:  20
-    85:  21
-    73:  22
-    79:  23
-    80:  24
-    49:  22
-    50:  23
-    51:  24
-    52:  25
-    53:  26
-    54:  27
-    55:  28
-    56:  29
-    57:  30
-    48:  31
 
 
 
@@ -76,7 +32,9 @@ $(() ->
 
 @initEvil = ->
 
-    T.setTimeout((() =>
+    # Don't use MutekiTimer here!!
+    # (it causes freeze)
+    setTimeout((() =>
         $('#top').css(
             opacity: '0'
         ).delay(500).css('z-index', '-1')
@@ -87,37 +45,11 @@ $(() ->
     ), 1500)
 
     window.CONTEXT = new webkitAudioContext()
-
     window.player = new Player()
-
-    window.is_input_mode = false
-    is_key_pressed = false
-    $(window).keydown((e) ->
-        return if window.is_input_mode
-        if is_key_pressed == false
-            is_key_pressed = true
-            player.noteOff() if player.isPlaying()
-
-            n = KEYCODE_TO_NOTE[e.keyCode]
-            if n?
-                player.noteOn(n)
-            else
-                switch e.keyCode
-                    when 37 then player.view.moveLeft()
-                    when 38 then player.view.moveTop()
-                    when 39 then player.view.moveRight()
-                    when 40 then player.view.moveBottom()
-                    when 32 then player.view.viewPlay()
-                    when 13 then player.view.viewPlay()
-    )
-    $(window).keyup( ->
-        is_key_pressed = false
-        player.noteOff()
-    )
+    window.keyboard = new Keyboard(window.player)
 
     footer_size = $(window).height()/2 - 300
     $('footer').css('height', footer_size + 'px')
-
 
     if debug?
         # test song
@@ -139,8 +71,6 @@ $(() ->
 
         player.readSong(song2)
 
-
-#    console.log(song_read.master)
 
     # Read song
     player.readSong(song_read) if song_read?

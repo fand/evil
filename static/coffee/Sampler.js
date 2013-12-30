@@ -189,6 +189,7 @@
       this.node = this.ctx.createGain();
       this.node.gain.value = 1.0;
       this.gain = 1.0;
+      this.is_mute = false;
       this.samples = (function() {
         var _i, _results;
         _results = [];
@@ -205,6 +206,9 @@
 
     SamplerCore.prototype.noteOn = function(notes) {
       var n, time, _i, _len, _results;
+      if (this.is_mute) {
+        return;
+      }
       time = this.ctx.currentTime;
       if (Array.isArray(notes)) {
         _results = [];
@@ -297,6 +301,14 @@
         }
       }
       return this.bindSample(0);
+    };
+
+    SamplerCore.prototype.mute = function() {
+      return this.is_mute = true;
+    };
+
+    SamplerCore.prototype.demute = function() {
+      return this.is_mute = false;
     };
 
     return SamplerCore;
@@ -449,6 +461,12 @@
       return this.view.drawPattern(this.time);
     };
 
+    Sampler.prototype.setSynthName = function(name) {
+      this.name = name;
+      this.session.setSynthName(this.id, this.name);
+      return this.view.setSynthName(this.name);
+    };
+
     Sampler.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.session.setPatternName(this.id, this.pattern_name);
@@ -468,13 +486,24 @@
     };
 
     Sampler.prototype.getParam = function() {
-      return this.core.getParam();
+      var p;
+      p = this.core.getParam();
+      p.name = this.name;
+      return p;
     };
 
     Sampler.prototype.readParam = function(p) {
       if (p != null) {
         return this.core.readParam(p);
       }
+    };
+
+    Sampler.prototype.mute = function() {
+      return this.core.mute();
+    };
+
+    Sampler.prototype.demute = function() {
+      return this.core.demute();
     };
 
     return Sampler;

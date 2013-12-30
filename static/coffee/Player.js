@@ -1,4 +1,6 @@
 (function() {
+  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
   this.Player = (function() {
     function Player() {
       this.bpm = 120;
@@ -209,14 +211,24 @@
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
       this.synth_now.activate(next_idx);
-      return this.synth_pos++;
+      this.synth_pos++;
+      return window.keyboard.setMode('SYNTH');
     };
 
     Player.prototype.moveLeft = function(next_idx) {
       this.synth[next_idx + 1].inactivate();
       this.synth_now = this.synth[next_idx];
       this.synth_now.activate(next_idx);
-      return this.synth_pos--;
+      this.synth_pos--;
+      return window.keyboard.setMode('SYNTH');
+    };
+
+    Player.prototype.moveTop = function() {
+      return window.keyboard.setMode('MIXER');
+    };
+
+    Player.prototype.moveBottom = function() {
+      return window.keyboard.setMode('SYNTH');
     };
 
     Player.prototype.moveTo = function(synth_num) {
@@ -235,6 +247,29 @@
         }
         return _results1;
       }
+    };
+
+    Player.prototype.solo = function(solos) {
+      var s, _i, _j, _len, _len1, _ref, _ref1, _ref2, _results;
+      if (solos.length === 0) {
+        _ref = this.synth;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          s.demute();
+        }
+        return;
+      }
+      _ref1 = this.synth;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        s = _ref1[_j];
+        if (_ref2 = s.id + 1, __indexOf.call(solos, _ref2) >= 0) {
+          _results.push(s.demute());
+        } else {
+          _results.push(s.mute());
+        }
+      }
+      return _results;
     };
 
     Player.prototype.readSong = function(song) {

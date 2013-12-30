@@ -19,6 +19,179 @@ e(this).html(d);break;case "hatena_oldstyle":d=a.button||"http://d.hatena.ne.jp/
 b+'" style="border: none; vertical-align: text-bottom" /></a></span>');break;case "google_plusone":j=a;if(!(e.browser.msie&&8>parseInt(e.browser.version,10))){c=j.size||j.button||"";f=j.href||j.url||"";b=j.lang||"";h=j.parsetags||"";l=j.callback||"";j=void 0!=j.count?j.count:!0;switch(c){case "small":case "standard":case "medium":break;case "tall":j=!0;break;default:c="standard",j=!0}c=e("<div>").attr({"data-callback":l,"data-count":j?"true":"false","data-href":f,"data-size":c}).addClass("g-plusone");
 e(this).append(c);d==m&&(d="",""!=b&&(d+='lang: "'+k(b)+'"'),""!=h&&(d=d+(""!=d?",":"")+('parsetags: "'+k(h)+"'")),""!=d&&(d="{"+d+"}"),"undefined"===typeof gapi||"undefined"===typeof gapi.plusone?e("body").append('<script type="text/javascript" src="https://apis.google.com/js/plusone.js">'+d+"<\/script>"):gapi.plusone.go())}break;case "pinterest":b=a.url||t,h=a.button||"horizontal",c=void 0!=a.media?a.media:"",f=void 0!=a.description?a.description:"",b=o(decodeURIComponent(b)),c=o(decodeURIComponent(c)),
 f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p({url:b,media:c,description:f})+'" class="pin-it-button" count-layout="'+h+'"><img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" /></a>',e(this).html(b),d==m&&e("body").append('<script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"><\/script>')}return!0})}})(jQuery);;(function() {
+  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  this.KEYCODE_TO_NOTE = {
+    90: 1,
+    88: 2,
+    67: 3,
+    86: 4,
+    66: 5,
+    78: 6,
+    77: 7,
+    65: 8,
+    83: 9,
+    68: 10,
+    188: 8,
+    190: 9,
+    192: 10,
+    70: 11,
+    71: 12,
+    72: 13,
+    74: 14,
+    75: 15,
+    76: 16,
+    187: 17,
+    81: 15,
+    87: 16,
+    69: 17,
+    82: 18,
+    84: 19,
+    89: 20,
+    85: 21,
+    73: 22,
+    79: 23,
+    80: 24,
+    49: 22,
+    50: 23,
+    51: 24,
+    52: 25,
+    53: 26,
+    54: 27,
+    55: 28,
+    56: 29,
+    57: 30,
+    48: 31
+  };
+
+  this.KEYCODE_TO_NUM = {
+    49: 1,
+    50: 2,
+    51: 3,
+    52: 4,
+    53: 5,
+    54: 6,
+    55: 7,
+    56: 8,
+    57: 9,
+    48: 0
+  };
+
+  this.Keyboard = (function() {
+    function Keyboard(player) {
+      this.player = player;
+      this.mode = 'SYNTH';
+      this.is_writing = false;
+      this.is_pressed = false;
+      this.solos = [];
+      this.initEvent();
+    }
+
+    Keyboard.prototype.initEvent = function() {
+      var _this = this;
+      $(window).keydown(function(e) {
+        if (_this.is_writing) {
+          return;
+        }
+        if (_this.is_pressed === false) {
+          _this.is_pressed = true;
+        }
+        return _this.on(e);
+      });
+      return $(window).keyup(function(e) {
+        _this.is_pressed = false;
+        return _this.off(e);
+      });
+    };
+
+    Keyboard.prototype.beginInput = function() {
+      return this.is_writing = true;
+    };
+
+    Keyboard.prototype.endInput = function() {
+      return this.is_writing = false;
+    };
+
+    Keyboard.prototype.setMode = function(mode) {
+      this.mode = mode;
+    };
+
+    Keyboard.prototype.on = function(e) {
+      switch (e.keyCode) {
+        case 37:
+          return this.player.view.moveLeft();
+        case 38:
+          return this.player.view.moveTop();
+        case 39:
+          return this.player.view.moveRight();
+        case 40:
+          return this.player.view.moveBottom();
+        case 32:
+          return this.player.view.viewPlay();
+        case 13:
+          return this.player.view.viewPlay();
+        default:
+          if (this.mode === 'SYNTH') {
+            this.onPlayer(e);
+          }
+          if (this.mode === 'MIXER') {
+            return this.onMixer(e);
+          }
+      }
+    };
+
+    Keyboard.prototype.onPlayer = function(e) {
+      var n;
+      if (this.player.isPlaying()) {
+        this.player.noteOff();
+      }
+      n = KEYCODE_TO_NOTE[e.keyCode];
+      if (n != null) {
+        return this.player.noteOn(n);
+      }
+    };
+
+    Keyboard.prototype.onMixer = function(e) {
+      var num;
+      num = KEYCODE_TO_NUM[e.keyCode];
+      if ((num != null) && num < 10) {
+        if (__indexOf.call(this.solos, num) < 0) {
+          this.solos.push(num);
+        }
+        return this.player.solo(this.solos);
+      }
+    };
+
+    Keyboard.prototype.off = function(e) {
+      if (this.mode === 'SYNTH') {
+        this.offPlayer(e);
+      }
+      if (this.mode === 'MIXER') {
+        return this.offMixer(e);
+      }
+    };
+
+    Keyboard.prototype.offPlayer = function(e) {
+      return this.player.noteOff();
+    };
+
+    Keyboard.prototype.offMixer = function(e) {
+      var num;
+      num = KEYCODE_TO_NUM[e.keyCode];
+      if ((num != null) && num < 10) {
+        this.solos = this.solos.filter(function(n) {
+          return n !== num;
+        });
+        return this.player.solo(this.solos);
+      }
+    };
+
+    return Keyboard;
+
+  })();
+
+}).call(this);
+;(function() {
   this.Mixer = (function() {
     function Mixer(ctx, player) {
       var s;
@@ -337,6 +510,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
+  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
   this.Player = (function() {
     function Player() {
       this.bpm = 120;
@@ -547,14 +722,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
       this.synth_now.activate(next_idx);
-      return this.synth_pos++;
+      this.synth_pos++;
+      return window.keyboard.setMode('SYNTH');
     };
 
     Player.prototype.moveLeft = function(next_idx) {
       this.synth[next_idx + 1].inactivate();
       this.synth_now = this.synth[next_idx];
       this.synth_now.activate(next_idx);
-      return this.synth_pos--;
+      this.synth_pos--;
+      return window.keyboard.setMode('SYNTH');
+    };
+
+    Player.prototype.moveTop = function() {
+      return window.keyboard.setMode('MIXER');
+    };
+
+    Player.prototype.moveBottom = function() {
+      return window.keyboard.setMode('SYNTH');
     };
 
     Player.prototype.moveTo = function(synth_num) {
@@ -573,6 +758,29 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
         return _results1;
       }
+    };
+
+    Player.prototype.solo = function(solos) {
+      var s, _i, _j, _len, _len1, _ref, _ref1, _ref2, _results;
+      if (solos.length === 0) {
+        _ref = this.synth;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          s.demute();
+        }
+        return;
+      }
+      _ref1 = this.synth;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        s = _ref1[_j];
+        if (_ref2 = s.id + 1, __indexOf.call(solos, _ref2) >= 0) {
+          _results.push(s.demute());
+        } else {
+          _results.push(s.mute());
+        }
+      }
+      return _results;
     };
 
     Player.prototype.readSong = function(song) {
@@ -687,6 +895,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _this.setKey();
         return _this.setScale();
       });
+      this.bpm.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      }));
+      this.key.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      }));
+      this.scale.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      }));
       this.play.on('mousedown', function() {
         return _this.viewPlay();
       });
@@ -811,7 +1034,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_right.hide();
       this.btn_top.hide();
       this.btn_bottom.show();
-      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
+      this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
+      return this.model.moveTop();
     };
 
     PlayerView.prototype.moveBottom = function() {
@@ -822,7 +1046,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_right.show();
       this.btn_top.show();
       this.btn_bottom.hide();
-      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+      this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+      return this.model.moveBottom();
     };
 
     PlayerView.prototype.setSynthNum = function(total, now) {
@@ -1069,6 +1294,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node = this.ctx.createGain();
       this.node.gain.value = 1.0;
       this.gain = 1.0;
+      this.is_mute = false;
       this.samples = (function() {
         var _i, _results;
         _results = [];
@@ -1085,6 +1311,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SamplerCore.prototype.noteOn = function(notes) {
       var n, time, _i, _len, _results;
+      if (this.is_mute) {
+        return;
+      }
       time = this.ctx.currentTime;
       if (Array.isArray(notes)) {
         _results = [];
@@ -1177,6 +1406,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
       }
       return this.bindSample(0);
+    };
+
+    SamplerCore.prototype.mute = function() {
+      return this.is_mute = true;
+    };
+
+    SamplerCore.prototype.demute = function() {
+      return this.is_mute = false;
     };
 
     return SamplerCore;
@@ -1329,6 +1566,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.view.drawPattern(this.time);
     };
 
+    Sampler.prototype.setSynthName = function(name) {
+      this.name = name;
+      this.session.setSynthName(this.id, this.name);
+      return this.view.setSynthName(this.name);
+    };
+
     Sampler.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.session.setPatternName(this.id, this.pattern_name);
@@ -1348,13 +1591,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Sampler.prototype.getParam = function() {
-      return this.core.getParam();
+      var p;
+      p = this.core.getParam();
+      p.name = this.name;
+      return p;
     };
 
     Sampler.prototype.readParam = function(p) {
       if (p != null) {
         return this.core.readParam(p);
       }
+    };
+
+    Sampler.prototype.mute = function() {
+      return this.core.mute();
+    };
+
+    Sampler.prototype.demute = function() {
+      return this.core.demute();
     };
 
     return Sampler;
@@ -1661,16 +1915,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setSynthName(_this.synth_name.val());
       }));
       this.pattern_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setPatternName(_this.pattern_name.val());
       }));
@@ -2713,18 +2967,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.closeDialog();
       });
       this.song_title.on('focus', function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       }).on('change', function() {
         return _this.model.setSongTitle(_this.song_title.val());
       }).on('blur', function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       });
       this.song_creator.on('focus', function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       }).on('change', function() {
         return _this.model.setCreatorName(_this.song_creator.val());
       }).on('blur', function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       });
       this.social_twitter.on('click', function() {
         return _this.share('twitter');
@@ -3442,6 +3696,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node = this.ctx.createGain();
       this.node.gain.value = 0;
       this.gain = 1.0;
+      this.is_mute = false;
       this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
       this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
       for (i = _i = 0; _i < 3; i = ++_i) {
@@ -3548,6 +3803,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SynthCore.prototype.noteOn = function() {
       var t0;
+      if (this.is_mute) {
+        return;
+      }
       t0 = this.ctx.currentTime;
       this.eg.noteOn(t0);
       return this.feg.noteOn(t0);
@@ -3596,6 +3854,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _results.push(v.setFreq());
       }
       return _results;
+    };
+
+    SynthCore.prototype.mute = function() {
+      return this.is_mute = true;
+    };
+
+    SynthCore.prototype.demute = function() {
+      return this.is_mute = false;
     };
 
     return SynthCore;
@@ -3960,13 +4226,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Synth.prototype.getParam = function() {
-      return this.core.getParam();
+      var p;
+      p = this.core.getParam();
+      p.name = this.name;
+      return p;
     };
 
     Synth.prototype.readParam = function(p) {
       if (p != null) {
         return this.core.readParam(p);
       }
+    };
+
+    Synth.prototype.mute = function() {
+      return this.core.mute();
+    };
+
+    Synth.prototype.demute = function() {
+      return this.core.demute();
     };
 
     return Synth;
@@ -4142,16 +4419,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setSynthName(_this.synth_name.val());
       }));
       this.pattern_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setPatternName(_this.pattern_name.val());
       }));
@@ -4610,49 +4887,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   this.T = new MutekiTimer();
 
-  this.KEYCODE_TO_NOTE = {
-    90: 1,
-    88: 2,
-    67: 3,
-    86: 4,
-    66: 5,
-    78: 6,
-    77: 7,
-    65: 8,
-    83: 9,
-    68: 10,
-    188: 8,
-    190: 9,
-    192: 10,
-    70: 11,
-    71: 12,
-    72: 13,
-    74: 14,
-    75: 15,
-    76: 16,
-    187: 17,
-    81: 15,
-    87: 16,
-    69: 17,
-    82: 18,
-    84: 19,
-    89: 20,
-    85: 21,
-    73: 22,
-    79: 23,
-    80: 24,
-    49: 22,
-    50: 23,
-    51: 24,
-    52: 25,
-    53: 26,
-    54: 27,
-    55: 28,
-    56: 29,
-    57: 30,
-    48: 31
-  };
-
   $(function() {
     var ua;
     console.log('Welcome to evil!');
@@ -4670,9 +4904,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
   this.initEvil = function() {
-    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, song2, t1, t2,
+    var c1, c2, footer_size, p1, p2, p3, p4, song2, t1, t2,
       _this = this;
-    T.setTimeout((function() {
+    setTimeout((function() {
       $('#top').css({
         opacity: '0'
       }).delay(500).css('z-index', '-1');
@@ -4683,43 +4917,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }), 1500);
     window.CONTEXT = new webkitAudioContext();
     window.player = new Player();
-    window.is_input_mode = false;
-    is_key_pressed = false;
-    $(window).keydown(function(e) {
-      var n;
-      if (window.is_input_mode) {
-        return;
-      }
-      if (is_key_pressed === false) {
-        is_key_pressed = true;
-        if (player.isPlaying()) {
-          player.noteOff();
-        }
-        n = KEYCODE_TO_NOTE[e.keyCode];
-        if (n != null) {
-          return player.noteOn(n);
-        } else {
-          switch (e.keyCode) {
-            case 37:
-              return player.view.moveLeft();
-            case 38:
-              return player.view.moveTop();
-            case 39:
-              return player.view.moveRight();
-            case 40:
-              return player.view.moveBottom();
-            case 32:
-              return player.view.viewPlay();
-            case 13:
-              return player.view.viewPlay();
-          }
-        }
-      }
-    });
-    $(window).keyup(function() {
-      is_key_pressed = false;
-      return player.noteOff();
-    });
+    window.keyboard = new Keyboard(window.player);
     footer_size = $(window).height() / 2 - 300;
     $('footer').css('height', footer_size + 'px');
     if (typeof debug !== "undefined" && debug !== null) {

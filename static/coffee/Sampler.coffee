@@ -113,6 +113,7 @@ class @SamplerCore
         @node = @ctx.createGain()
         @node.gain.value = 1.0
         @gain = 1.0
+        @is_mute = false
 
         @samples = (new SampleNode(@ctx, i, this) for i in [0...10])
 
@@ -122,6 +123,7 @@ class @SamplerCore
         @view = new SamplerCoreView(this, id, @parent.view.dom.find('.sampler-core'))
 
     noteOn: (notes) ->
+        return if @is_mute
         time = @ctx.currentTime
         if Array.isArray(notes)
             # return if notes.length == 0
@@ -178,6 +180,10 @@ class @SamplerCore
             for i in [0...p.samples.length]
                 @samples[i].readParam(p.samples[i])
         @bindSample(0)
+
+
+    mute:   -> @is_mute = true
+    demute: -> @is_mute = false
 
 
 
@@ -273,6 +279,10 @@ class @Sampler
     redraw: (@time) ->
         @view.drawPattern(@time)
 
+    setSynthName: (@name) ->
+        @session.setSynthName(@id, @name)
+        @view.setSynthName(@name)
+
     setPatternName: (@pattern_name) ->
         @session.setPatternName(@id, @pattern_name)
 
@@ -286,5 +296,12 @@ class @Sampler
         @view.dom.replaceWith(s_new.view.dom)
 
 
-    getParam: -> @core.getParam()
+    getParam: ->
+        p = @core.getParam()
+        p.name = @name
+        return p
+
     readParam: (p) -> @core.readParam(p) if p?
+
+    mute:   -> @core.mute()
+    demute: -> @core.demute()

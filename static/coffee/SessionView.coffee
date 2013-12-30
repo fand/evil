@@ -221,8 +221,8 @@ class @SessionView
         )
         @dialog_close.on('mousedown', () => @closeDialog())
 
-        @song_title.on('focus', () => window.is_input_mode = true).on('change', () => @model.setSongTitle(@song_title.val())).on('blur', () => window.is_input_mode = false)
-        @song_creator.on('focus', () => window.is_input_mode = true).on('change', () => @model.setCreatorName(@song_creator.val())).on('blur', () => window.is_input_mode = false)
+        @song_title.on('focus', () => window.keyboard.beginInput()).on('change', () => @model.setSongTitle(@song_title.val())).on('blur', () => window.keyboard.endInput())
+        @song_creator.on('focus', () => window.keyboard.beginInput()).on('change', () => @model.setCreatorName(@song_creator.val())).on('blur', () => window.keyboard.endInput())
 
         @social_twitter.on('click',  () => @share('twitter'))
         @social_facebook.on('click', () => @share('facebook'))
