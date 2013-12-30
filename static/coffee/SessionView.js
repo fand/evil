@@ -57,6 +57,10 @@
         x: -1,
         y: -1
       };
+      this.select_pos = {
+        x: -1,
+        y: -1
+      };
       this.last_clicked = performance.now();
       this.dialog = $('#dialog');
       this.dialog_wrapper = $('#dialog-wrapper');
@@ -197,15 +201,18 @@
           } else {
             _this.last_clicked = now;
           }
-          _this.selectCell(pos);
           _this.is_clicked = true;
         }
         return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         var pos;
         pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
-        if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
-          _this.copyCell(_this.click_pos, pos);
+        if (_this.click_pos.x === pos.x && _this.click_pos.y === pos.y) {
+          _this.selectCell(pos);
+        } else {
+          if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
+            _this.copyCell(_this.click_pos, pos);
+          }
         }
         return _this.is_clicked = false;
       });
@@ -436,7 +443,7 @@
 
     SessionView.prototype.clearHover = function(ctx) {
       if (ctx === this.ctx_tracks_hover) {
-        if (this.hover_pos.x === this.click_pos.x && this.hover_pos.y === this.click_pos.y) {
+        if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y) {
           return;
         }
         return ctx.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
@@ -618,13 +625,15 @@
       }
       this.ctx_tracks_hover.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.click_pos.x * this.w, this.click_pos.y * this.h, this.w, this.h);
+      this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
       if (this.track_color[pos.x] == null) {
         this.track_color[pos.x] = this.color_schemes[this.song.tracks[pos.x].type];
       }
       this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][5];
       this.ctx_tracks_hover.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][1];
-      return this.ctx_tracks_hover.fillText(this.song.tracks[pos.x].patterns[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
+      this.ctx_tracks_hover.fillText(this.song.tracks[pos.x].patterns[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
+      return this.select_pos = pos;
     };
 
     return SessionView;

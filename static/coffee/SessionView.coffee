@@ -48,7 +48,7 @@ class @SessionView
 
         @hover_pos = x:-1, y:-1
         @click_pos = x:-1, y:-1
-        # @select_pos = x:-1, y:-1
+        @select_pos = x:-1, y:-1
         @last_clicked = performance.now()
 
         @dialog = $('#dialog')
@@ -164,15 +164,18 @@ class @SessionView
                 else
                     @last_clicked = now
 
-                # Select cell
-                @selectCell(pos)
+                # # Select cell
                 @is_clicked = true
 
             @click_pos = pos
 
         ).on('mouseup', (e) =>
             pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
-            @copyCell(@click_pos, pos) if @click_pos.x != pos.x or @click_pos.y != pos.y
+            if @click_pos.x == pos.x and @click_pos.y == pos.y
+                # Select cell
+                @selectCell(pos)
+            else
+                @copyCell(@click_pos, pos) if @click_pos.x != pos.x or @click_pos.y != pos.y
 
             @is_clicked = false
         )
@@ -374,7 +377,7 @@ class @SessionView
     clearHover: (ctx) ->
         # for tracks
         if ctx == @ctx_tracks_hover
-            return if @hover_pos.x == @click_pos.x and @hover_pos.y == @click_pos.y
+            return if @hover_pos.x == @select_pos.x and @hover_pos.y == @select_pos.y
             ctx.clearRect(@hover_pos.x * @w, @hover_pos.y * @h, @w, @h)
 
         # for master
@@ -508,6 +511,7 @@ class @SessionView
 
         @ctx_tracks_hover.clearRect(@hover_pos.x * @w, @hover_pos.y * @h, @w, @h)
         @ctx_tracks_hover.clearRect(@click_pos.x * @w, @click_pos.y * @h, @w, @h)
+        @ctx_tracks_hover.clearRect(@select_pos.x * @w, @select_pos.y * @h, @w, @h)
 
         if not @track_color[pos.x]?
             @track_color[pos.x] = @color_schemes[@song.tracks[pos.x].type]
@@ -517,3 +521,5 @@ class @SessionView
 
         @ctx_tracks_hover.fillStyle = @track_color[pos.x][1]
         @ctx_tracks_hover.fillText(@song.tracks[pos.x].patterns[pos.y].name, pos.x * @w + 24, (pos.y + 1) * @h - 6)
+
+        @select_pos = pos
