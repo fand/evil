@@ -166,16 +166,16 @@
         return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setSynthName(_this.synth_name.val());
       }));
       this.pattern_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setPatternName(_this.pattern_name.val());
       }));

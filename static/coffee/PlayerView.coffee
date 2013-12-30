@@ -39,6 +39,11 @@ class @PlayerView
             @setKey()
             @setScale()
         )
+
+        @bpm.on('focus', ( => window.keyboard.beginInput())).on('blur', ( => window.keyboard.endInput()))
+        @key.on('focus', ( => window.keyboard.beginInput())).on('blur', ( => window.keyboard.endInput()))
+        @scale.on('focus', ( => window.keyboard.beginInput())).on('blur', ( => window.keyboard.endInput()))
+
         @play.on('mousedown', () => @viewPlay())
         @stop.on('mousedown', () => @viewStop(@model))
         @forward.on('mousedown', () => @model.forward())
@@ -116,6 +121,7 @@ class @PlayerView
         @btn_top.hide()
         @btn_bottom.show()
         @wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)')
+        @model.moveTop()
 
     moveBottom: ->
         @is_mixer = false
@@ -124,6 +130,7 @@ class @PlayerView
         @btn_top.show()
         @btn_bottom.hide()
         @wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)')
+        @model.moveBottom()
 
     setSynthNum: (total, now)->
         @synth_total = total

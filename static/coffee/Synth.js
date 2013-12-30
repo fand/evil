@@ -282,6 +282,7 @@
       this.node = this.ctx.createGain();
       this.node.gain.value = 0;
       this.gain = 1.0;
+      this.is_mute = false;
       this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
       this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
       for (i = _i = 0; _i < 3; i = ++_i) {
@@ -388,6 +389,9 @@
 
     SynthCore.prototype.noteOn = function() {
       var t0;
+      if (this.is_mute) {
+        return;
+      }
       t0 = this.ctx.currentTime;
       this.eg.noteOn(t0);
       return this.feg.noteOn(t0);
@@ -436,6 +440,14 @@
         _results.push(v.setFreq());
       }
       return _results;
+    };
+
+    SynthCore.prototype.mute = function() {
+      return this.is_mute = true;
+    };
+
+    SynthCore.prototype.demute = function() {
+      return this.is_mute = false;
     };
 
     return SynthCore;
@@ -800,13 +812,24 @@
     };
 
     Synth.prototype.getParam = function() {
-      return this.core.getParam();
+      var p;
+      p = this.core.getParam();
+      p.name = this.name;
+      return p;
     };
 
     Synth.prototype.readParam = function(p) {
       if (p != null) {
         return this.core.readParam(p);
       }
+    };
+
+    Synth.prototype.mute = function() {
+      return this.core.mute();
+    };
+
+    Synth.prototype.demute = function() {
+      return this.core.demute();
     };
 
     return Synth;

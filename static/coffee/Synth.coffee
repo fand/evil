@@ -104,7 +104,6 @@ class @EG
         @sustain = 0.0
         @release = 0
 
-#    getADSR: -> console.log([@attack, @decay, @sustain, @release]); [@attack, @decay, @sustain, @release]
     getADSR: -> [@attack, @decay, @sustain, @release]
     setADSR: (attack, decay, sustain, release) ->
         @attack  = attack  / 50000.0
@@ -155,6 +154,7 @@ class @SynthCore
         @node = @ctx.createGain()
         @node.gain.value = 0
         @gain = 1.0
+        @is_mute = false
 
         @vcos  = [new VCO(@ctx), new VCO(@ctx), new Noise(@ctx)]
         @gains = [@ctx.createGain(), @ctx.createGain(), @ctx.createGain()]
@@ -219,6 +219,7 @@ class @SynthCore
         @eg.setRange(0.0, @gain)
 
     noteOn: ->
+        return if @is_mute
         t0 = @ctx.currentTime
         @eg.noteOn(t0)
         @feg.noteOn(t0)
@@ -247,6 +248,8 @@ class @SynthCore
             v.setNote(note)
             v.setFreq()
 
+    mute:   -> @is_mute = true
+    demute: -> @is_mute = false
 
 
 class @SynthCoreView
@@ -336,11 +339,10 @@ class @SynthCoreView
         @updateCanvas("EG");
 
     readEGParam: (p) ->
-#        console.log(p)
-          @EG_inputs.eq(0).val(p.adsr[0] * 50000)
-          @EG_inputs.eq(1).val(p.adsr[1] * 50000)
-          @EG_inputs.eq(2).val(p.adsr[2] * 100)
-          @EG_inputs.eq(3).val(p.adsr[3] * 50000)
+        @EG_inputs.eq(0).val(p.adsr[0] * 50000)
+        @EG_inputs.eq(1).val(p.adsr[1] * 50000)
+        @EG_inputs.eq(2).val(p.adsr[2] * 100)
+        @EG_inputs.eq(3).val(p.adsr[3] * 50000)
 
     setFEGParam: ->
         @model.setFEGParam(
@@ -506,5 +508,13 @@ class @Synth
     replaceWith: (s_new) ->
         @view.dom.replaceWith(s_new.view.dom)
 
-    getParam: -> @core.getParam()
+    getParam: ->
+        p = @core.getParam()
+        p.name = @name
+        return p
+
     readParam: (p) -> @core.readParam(p) if p?
+
+
+    mute:   -> @core.mute()
+    demute: -> @core.demute()

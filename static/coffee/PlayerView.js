@@ -36,6 +36,21 @@
         _this.setKey();
         return _this.setScale();
       });
+      this.bpm.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      }));
+      this.key.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      }));
+      this.scale.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      }));
       this.play.on('mousedown', function() {
         return _this.viewPlay();
       });
@@ -160,7 +175,8 @@
       this.btn_right.hide();
       this.btn_top.hide();
       this.btn_bottom.show();
-      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
+      this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
+      return this.model.moveTop();
     };
 
     PlayerView.prototype.moveBottom = function() {
@@ -171,7 +187,8 @@
       this.btn_right.show();
       this.btn_top.show();
       this.btn_bottom.hide();
-      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+      this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+      return this.model.moveBottom();
     };
 
     PlayerView.prototype.setSynthNum = function(total, now) {

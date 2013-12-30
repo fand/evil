@@ -33,6 +33,7 @@
         <script src="<: uri_for('/static/coffee/MixerView.js') :>"></script>
         <script src="<: uri_for('/static/coffee/SynthView.js') :>"></script>
         <script src="<: uri_for('/static/coffee/SamplerView.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/Keyboard.js') :>"></script>
         <script src="<: uri_for('/static/coffee/MutekiTimer.js') :>"></script>
         <script src="<: uri_for('/static/coffee/main.js') :>"></script>
       <: } else { :>

@@ -145,12 +145,20 @@ class @Player
         @synth_now = @synth[next_idx]
         @synth_now.activate(next_idx)
         @synth_pos++
+        window.keyboard.setMode('SYNTH')
 
     moveLeft: (next_idx) ->
         @synth[next_idx + 1].inactivate()
         @synth_now = @synth[next_idx]
         @synth_now.activate(next_idx)
         @synth_pos--
+        window.keyboard.setMode('SYNTH')
+
+    moveTop: () ->
+        window.keyboard.setMode('MIXER')
+
+    moveBottom: () ->
+        window.keyboard.setMode('SYNTH')
 
     moveTo: (synth_num) ->
         @view.moveBottom()
@@ -160,6 +168,16 @@ class @Player
         else
             while synth_num != @synth_pos
                 @view.moveRight()
+
+    solo: (solos) ->
+        if solos.length == 0
+            s.demute() for s in @synth
+            return
+        for s in @synth
+            if (s.id + 1) in solos
+                s.demute()
+            else
+                s.mute()
 
     readSong: (@song) ->
         @synth = []

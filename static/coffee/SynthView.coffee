@@ -160,16 +160,16 @@ class @SynthView
         # Headers
         @synth_type.on('change', () => @model.session.changeSynth(@id, @synth_type.val()))
         @synth_name.on('focus',
-            ( => window.is_input_mode = true)
+            ( => window.keyboard.beginInput())
         ).on('blur',
-            ( => window.is_input_mode = false)
+            ( => window.keyboard.endInput())
         ).on('change',
             ( => @model.setSynthName(@synth_name.val()))
         )
         @pattern_name.on('focus',
-            ( => window.is_input_mode = true)
+            ( => window.keyboard.beginInput())
         ).on('blur',
-            ( => window.is_input_mode = false)
+            ( => window.keyboard.endInput())
         ).on('change',
             ( => @model.setPatternName(@pattern_name.val()))
         )

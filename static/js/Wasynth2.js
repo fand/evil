@@ -19,6 +19,182 @@ e(this).html(d);break;case "hatena_oldstyle":d=a.button||"http://d.hatena.ne.jp/
 b+'" style="border: none; vertical-align: text-bottom" /></a></span>');break;case "google_plusone":j=a;if(!(e.browser.msie&&8>parseInt(e.browser.version,10))){c=j.size||j.button||"";f=j.href||j.url||"";b=j.lang||"";h=j.parsetags||"";l=j.callback||"";j=void 0!=j.count?j.count:!0;switch(c){case "small":case "standard":case "medium":break;case "tall":j=!0;break;default:c="standard",j=!0}c=e("<div>").attr({"data-callback":l,"data-count":j?"true":"false","data-href":f,"data-size":c}).addClass("g-plusone");
 e(this).append(c);d==m&&(d="",""!=b&&(d+='lang: "'+k(b)+'"'),""!=h&&(d=d+(""!=d?",":"")+('parsetags: "'+k(h)+"'")),""!=d&&(d="{"+d+"}"),"undefined"===typeof gapi||"undefined"===typeof gapi.plusone?e("body").append('<script type="text/javascript" src="https://apis.google.com/js/plusone.js">'+d+"<\/script>"):gapi.plusone.go())}break;case "pinterest":b=a.url||t,h=a.button||"horizontal",c=void 0!=a.media?a.media:"",f=void 0!=a.description?a.description:"",b=o(decodeURIComponent(b)),c=o(decodeURIComponent(c)),
 f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p({url:b,media:c,description:f})+'" class="pin-it-button" count-layout="'+h+'"><img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" /></a>',e(this).html(b),d==m&&e("body").append('<script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"><\/script>')}return!0})}})(jQuery);;(function() {
+  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  this.KEYCODE_TO_NOTE = {
+    90: 1,
+    88: 2,
+    67: 3,
+    86: 4,
+    66: 5,
+    78: 6,
+    77: 7,
+    65: 8,
+    83: 9,
+    68: 10,
+    188: 8,
+    190: 9,
+    192: 10,
+    70: 11,
+    71: 12,
+    72: 13,
+    74: 14,
+    75: 15,
+    76: 16,
+    187: 17,
+    81: 15,
+    87: 16,
+    69: 17,
+    82: 18,
+    84: 19,
+    89: 20,
+    85: 21,
+    73: 22,
+    79: 23,
+    80: 24,
+    49: 22,
+    50: 23,
+    51: 24,
+    52: 25,
+    53: 26,
+    54: 27,
+    55: 28,
+    56: 29,
+    57: 30,
+    48: 31
+  };
+
+  this.KEYCODE_TO_NUM = {
+    49: 1,
+    50: 2,
+    51: 3,
+    52: 4,
+    53: 5,
+    54: 6,
+    55: 7,
+    56: 8,
+    57: 9,
+    48: 0
+  };
+
+  this.Keyboard = (function() {
+    function Keyboard(player) {
+      this.player = player;
+      this.mode = 'SYNTH';
+      this.is_writing = false;
+      this.is_pressed = false;
+      this.solos = [];
+      this.initEvent();
+    }
+
+    Keyboard.prototype.initEvent = function() {
+      var _this = this;
+      $(window).keydown(function(e) {
+        if (_this.is_writing) {
+          return;
+        }
+        if (_this.is_pressed === false) {
+          _this.is_pressed = true;
+        }
+        return _this.on(e);
+      });
+      return $(window).keyup(function(e) {
+        _this.is_pressed = false;
+        return _this.off(e);
+      });
+    };
+
+    Keyboard.prototype.beginInput = function() {
+      return this.is_writing = true;
+    };
+
+    Keyboard.prototype.endInput = function() {
+      return this.is_writing = false;
+    };
+
+    Keyboard.prototype.setMode = function(mode) {
+      this.mode = mode;
+    };
+
+    Keyboard.prototype.on = function(e) {
+      switch (e.keyCode) {
+        case 37:
+          return this.player.view.moveLeft();
+        case 38:
+          return this.player.view.moveTop();
+        case 39:
+          return this.player.view.moveRight();
+        case 40:
+          return this.player.view.moveBottom();
+        case 32:
+          return this.player.view.viewPlay();
+        case 13:
+          return this.player.view.viewPlay();
+        default:
+          if (this.mode === 'SYNTH') {
+            this.onPlayer(e);
+          }
+          if (this.mode === 'MIXER') {
+            return this.onMixer(e);
+          }
+      }
+    };
+
+    Keyboard.prototype.onPlayer = function(e) {
+      var n;
+      if (this.player.isPlaying()) {
+        this.player.noteOff();
+      }
+      n = KEYCODE_TO_NOTE[e.keyCode];
+      if (n != null) {
+        return this.player.noteOn(n);
+      }
+    };
+
+    Keyboard.prototype.onMixer = function(e) {
+      var num;
+      if (e.keyCode === 8 || e.keyCode === 46) {
+        this.player.session.deleteCell();
+      }
+      num = KEYCODE_TO_NUM[e.keyCode];
+      if ((num != null) && num < 10) {
+        if (__indexOf.call(this.solos, num) < 0) {
+          this.solos.push(num);
+        }
+        return this.player.solo(this.solos);
+      }
+    };
+
+    Keyboard.prototype.off = function(e) {
+      if (this.mode === 'SYNTH') {
+        this.offPlayer(e);
+      }
+      if (this.mode === 'MIXER') {
+        return this.offMixer(e);
+      }
+    };
+
+    Keyboard.prototype.offPlayer = function(e) {
+      return this.player.noteOff();
+    };
+
+    Keyboard.prototype.offMixer = function(e) {
+      var num;
+      num = KEYCODE_TO_NUM[e.keyCode];
+      if ((num != null) && num < 10) {
+        this.solos = this.solos.filter(function(n) {
+          return n !== num;
+        });
+        return this.player.solo(this.solos);
+      }
+    };
+
+    return Keyboard;
+
+  })();
+
+}).call(this);
+;(function() {
   this.Mixer = (function() {
     function Mixer(ctx, player) {
       var s;
@@ -337,6 +513,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
+  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
   this.Player = (function() {
     function Player() {
       this.bpm = 120;
@@ -547,14 +725,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth[next_idx - 1].inactivate();
       this.synth_now = this.synth[next_idx];
       this.synth_now.activate(next_idx);
-      return this.synth_pos++;
+      this.synth_pos++;
+      return window.keyboard.setMode('SYNTH');
     };
 
     Player.prototype.moveLeft = function(next_idx) {
       this.synth[next_idx + 1].inactivate();
       this.synth_now = this.synth[next_idx];
       this.synth_now.activate(next_idx);
-      return this.synth_pos--;
+      this.synth_pos--;
+      return window.keyboard.setMode('SYNTH');
+    };
+
+    Player.prototype.moveTop = function() {
+      return window.keyboard.setMode('MIXER');
+    };
+
+    Player.prototype.moveBottom = function() {
+      return window.keyboard.setMode('SYNTH');
     };
 
     Player.prototype.moveTo = function(synth_num) {
@@ -573,6 +761,29 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
         return _results1;
       }
+    };
+
+    Player.prototype.solo = function(solos) {
+      var s, _i, _j, _len, _len1, _ref, _ref1, _ref2, _results;
+      if (solos.length === 0) {
+        _ref = this.synth;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          s = _ref[_i];
+          s.demute();
+        }
+        return;
+      }
+      _ref1 = this.synth;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        s = _ref1[_j];
+        if (_ref2 = s.id + 1, __indexOf.call(solos, _ref2) >= 0) {
+          _results.push(s.demute());
+        } else {
+          _results.push(s.mute());
+        }
+      }
+      return _results;
     };
 
     Player.prototype.readSong = function(song) {
@@ -687,6 +898,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _this.setKey();
         return _this.setScale();
       });
+      this.bpm.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      }));
+      this.key.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      }));
+      this.scale.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      }));
       this.play.on('mousedown', function() {
         return _this.viewPlay();
       });
@@ -811,7 +1037,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_right.hide();
       this.btn_top.hide();
       this.btn_bottom.show();
-      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
+      this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
+      return this.model.moveTop();
     };
 
     PlayerView.prototype.moveBottom = function() {
@@ -822,7 +1049,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.btn_right.show();
       this.btn_top.show();
       this.btn_bottom.hide();
-      return this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+      this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
+      return this.model.moveBottom();
     };
 
     PlayerView.prototype.setSynthNum = function(total, now) {
@@ -1069,6 +1297,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node = this.ctx.createGain();
       this.node.gain.value = 1.0;
       this.gain = 1.0;
+      this.is_mute = false;
       this.samples = (function() {
         var _i, _results;
         _results = [];
@@ -1085,6 +1314,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SamplerCore.prototype.noteOn = function(notes) {
       var n, time, _i, _len, _results;
+      if (this.is_mute) {
+        return;
+      }
       time = this.ctx.currentTime;
       if (Array.isArray(notes)) {
         _results = [];
@@ -1177,6 +1409,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
       }
       return this.bindSample(0);
+    };
+
+    SamplerCore.prototype.mute = function() {
+      return this.is_mute = true;
+    };
+
+    SamplerCore.prototype.demute = function() {
+      return this.is_mute = false;
     };
 
     return SamplerCore;
@@ -1329,6 +1569,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.view.drawPattern(this.time);
     };
 
+    Sampler.prototype.setSynthName = function(name) {
+      this.name = name;
+      this.session.setSynthName(this.id, this.name);
+      return this.view.setSynthName(this.name);
+    };
+
     Sampler.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.session.setPatternName(this.id, this.pattern_name);
@@ -1348,13 +1594,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Sampler.prototype.getParam = function() {
-      return this.core.getParam();
+      var p;
+      p = this.core.getParam();
+      p.name = this.name;
+      return p;
     };
 
     Sampler.prototype.readParam = function(p) {
       if (p != null) {
         return this.core.readParam(p);
       }
+    };
+
+    Sampler.prototype.mute = function() {
+      return this.core.mute();
+    };
+
+    Sampler.prototype.demute = function() {
+      return this.core.demute();
     };
 
     return Sampler;
@@ -1661,16 +1918,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setSynthName(_this.synth_name.val());
       }));
       this.pattern_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setPatternName(_this.pattern_name.val());
       }));
@@ -2193,6 +2450,30 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth = synth;
     };
 
+    Session.prototype.readTrack = function(song, src, dst) {
+      var name, synth_num;
+      this.song = song;
+      if (this.song.master[dst.y] == null) {
+        this.song.master[dst.y] = {
+          name: 'section-' + dst.y
+        };
+      }
+      if (dst.y + 1 > this.song.length) {
+        this.song.length = dst.y + 1;
+      }
+      name = this.song.tracks[src.x].patterns[src.y].name;
+      synth_num = dst.x;
+      if (this.song.tracks.length <= dst.x) {
+        synth_num = this.song.tracks.length;
+        if (this.song.tracks[src.x].type === 'REZ') {
+          this.player.addSynth(dst.y);
+        } else if (this.song.tracks[src.x].type === 'SAMPLER') {
+          this.player.addSampler(dst.y);
+        }
+      }
+      return this.song.tracks.length - 1;
+    };
+
     Session.prototype.readPattern = function(pat, synth_num, pat_num) {
       this.song.tracks[synth_num].patterns[pat_num] = pat;
       if (this.song.master[pat_num] == null) {
@@ -2200,8 +2481,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           name: 'section-' + pat_num
         };
       }
-      if (pat_num + 2 > this.song.length) {
-        return this.song.length = pat_num + 2;
+      if (pat_num + 1 > this.song.length) {
+        this.song.length = pat_num + 1;
+      }
+      if (this.current_cells[synth_num] = pat_num) {
+        return this.player.synth[synth_num].readPattern(pat);
       }
     };
 
@@ -2412,6 +2696,27 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       };
     };
 
+    Session.prototype.deleteCell = function() {
+      var p;
+      p = this.view.getSelectPos();
+      if (p == null) {
+        return;
+      }
+      if (p.type === 'tracks') {
+        this.song.tracks[p.x].patterns[p.y] = void 0;
+        if (this.current_cells[p.x] === p.y) {
+          this.player.synth[p.x].clearPattern();
+          this.current_cells[p.x] = void 0;
+        }
+        return this.view.readSong(this.song, this.current_cells);
+      } else if (p.type === 'master') {
+        this.song.master[p.y] = {
+          name: this.song.master[p.y].name
+        };
+        return this.view.readSong(this.song, this.current_cells);
+      }
+    };
+
     return Session;
 
   })();
@@ -2448,10 +2753,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx_master_hover = this.canvas_master_hover.getContext('2d');
       this.w = 80;
       this.h = 20;
-      this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.1)'];
+      this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'];
       this.color_schemes = {
-        REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.1)'],
-        SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(255, 160, 216, 0.1)']
+        REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'],
+        SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(255, 160, 216, 0.2)']
       };
       this.track_color = (function() {
         var _i, _results;
@@ -2591,13 +2896,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         var pos;
         pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
         if (_this.is_clicked) {
-          if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
-            return _this.drawDrag(_this.ctx_tracks_hover, pos);
-          }
+          return _this.drawDrag(_this.ctx_tracks_hover, pos);
         } else {
-          if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
-            return _this.drawHover(_this.ctx_tracks_hover, pos);
-          }
+          return _this.drawHover(_this.ctx_tracks_hover, pos);
         }
       }).on('mouseout', function(e) {
         _this.clearHover(_this.ctx_tracks_hover);
@@ -2610,7 +2911,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         var now, pos;
         pos = _this.getPlayPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
         if (pos.y >= 0) {
-          return _this.cueTracks(pos.x, pos.y);
+          _this.cueTracks(pos.x, pos.y);
         } else {
           pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
           now = performance.now();
@@ -2621,8 +2922,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
             _this.last_clicked = now;
           }
           _this.is_clicked = true;
-          return _this.click_pos = pos;
         }
+        return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         var pos;
         pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
@@ -2639,13 +2940,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         var pos;
         pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
         if (_this.is_clicked) {
-          if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
-            return _this.drawDragMaster(_this.ctx_master_hover, pos);
-          }
+          return _this.drawDragMaster(_this.ctx_master_hover, pos);
         } else {
-          if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
-            return _this.drawHover(_this.ctx_master_hover, pos);
-          }
+          return _this.drawHover(_this.ctx_master_hover, pos);
         }
       }).on('mouseout', function(e) {
         _this.clearHover(_this.ctx_master_hover);
@@ -2658,12 +2955,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         var pos;
         pos = _this.getPlayPos(_this.rect_master, _this.wrapper_master, e);
         if (pos.y >= 0) {
-          return _this.cueMaster(pos.x, pos.y);
+          _this.cueMaster(pos.x, pos.y);
         } else {
           pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
           _this.is_clicked = true;
-          return _this.click_pos = pos;
         }
+        return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         var pos;
         pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
@@ -2694,18 +2991,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.closeDialog();
       });
       this.song_title.on('focus', function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       }).on('change', function() {
         return _this.model.setSongTitle(_this.song_title.val());
       }).on('blur', function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       });
       this.song_creator.on('focus', function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       }).on('change', function() {
         return _this.model.setCreatorName(_this.song_creator.val());
       }).on('blur', function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       });
       this.social_twitter.on('click', function() {
         return _this.share('twitter');
@@ -2761,7 +3058,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.track_color[x] = this.color_schemes[this.song.tracks[x].type];
       }
       ctx.strokeStyle = this.track_color[x][1];
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1;
       ctx.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
       ctx.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
       ctx.fillStyle = this.track_color[x][1];
@@ -2830,23 +3127,22 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.drawActive(i, this.current_cells[i]);
       }
       this.drawActiveMaster(pos);
-      return this.scene_pos = pos;
+      this.scene_pos = pos;
+      if (this.select_pos.type === 'tracks') {
+        return this.selectCell(this.select_pos);
+      } else if (this.select_pos.type === 'master') {
+        return this.selectCellMaster(this.select_pos);
+      }
     };
 
     SessionView.prototype.drawActive = function(x, y) {
       this.clearActive(x);
-      this.ctx_tracks_on.strokeStyle = this.track_color[x][1];
-      this.ctx_tracks_on.lineWidth = 1;
-      this.ctx_tracks_on.strokeRect(x * this.w + 4, y * this.h + 3, this.w - 5, this.h - 4);
       this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
       return this.last_active[x] = y;
     };
 
     SessionView.prototype.drawActiveMaster = function(y) {
       this.ctx_master_on.clearRect(0, 0, this.w, 10000);
-      this.ctx_master_on.strokeStyle = this.color[1];
-      this.ctx_master_on.lineWidth = 1;
-      this.ctx_master_on.strokeRect(4, y * this.h + 3, this.w - 5, this.h - 4);
       return this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 3, y * this.h + 3, 16, 15);
     };
 
@@ -2863,19 +3159,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return;
       }
       name = this.song.tracks[this.click_pos.x].patterns[this.click_pos.y].name;
-      if (pos.y >= Math.max(this.song.length, 10)) {
+      if (pos.y >= Math.max(this.song.length, 10) || pos.y < 0) {
         return;
       }
       if (this.track_color[pos.x] == null) {
         this.track_color[pos.x] = this.color_schemes[this.song.tracks[pos.x].type];
       }
+      ctx.fillStyle = 'rgba(255,255,255,1.0)';
+      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w + 2, this.h + 2);
       ctx.strokeStyle = this.track_color[pos.x][1];
       ctx.fillStyle = this.track_color[pos.x][1];
-      ctx.lineWidth = 2;
-      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 4, this.h - 4);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
       ctx.fillText(name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w + 2, this.h + 2);
       return this.hover_pos = pos;
     };
 
@@ -2891,8 +3189,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
       ctx.strokeStyle = this.color[1];
       ctx.fillStyle = this.color[1];
-      ctx.lineWidth = 2;
-      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 4, this.h - 4);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
       ctx.fillText(name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
       ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
@@ -2908,15 +3206,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SessionView.prototype.clearHover = function(ctx) {
       if (ctx === this.ctx_tracks_hover) {
+        ctx.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w + 2, this.h + 2);
         if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y) {
-          return;
+          return this.selectCell(this.select_pos);
         }
-        return ctx.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
       } else {
+        ctx.clearRect(0, this.hover_pos.y * this.h, this.w + 2, this.h + 2);
         if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y) {
-          return;
+          return this.selectCellMaster(this.select_pos);
         }
-        return ctx.clearRect(0, this.hover_pos.y * this.h, this.w, this.h);
       }
     };
 
@@ -3073,7 +3371,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
       this.model.savePattern(src.x, src.y);
       if (this.song.tracks[dst.x] == null) {
-        return;
+        dst.x = this.model.readTrack(this.song, src, dst);
+        this.current_cells.length = dst.x + 1;
+        this.song.tracks[dst.x].type = this.song.tracks[src.x].type;
       }
       if (this.song.tracks[src.x].type !== this.song.tracks[dst.x].type) {
         return;
@@ -3090,8 +3390,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
       this.song.master[dst.y] = $.extend(true, {}, this.song.master[src.y]);
       this.drawCell(this.ctx_master, this.song.master[dst.x], 0, dst.y);
-      this.model.readMaster(this.song.master[dst.y], dst.y);
-      return console.log(this.song.master);
+      return this.model.readMaster(this.song.master[dst.y], dst.y);
     };
 
     SessionView.prototype.selectCell = function(pos) {
@@ -3101,6 +3400,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.song.tracks[pos.x].patterns[pos.y] == null) {
         return;
       }
+      this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.click_pos.x * this.w, this.click_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
@@ -3108,24 +3408,33 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.track_color[pos.x] = this.color_schemes[this.song.tracks[pos.x].type];
       }
       this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][5];
-      this.ctx_tracks_hover.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      this.ctx_tracks_hover.fillRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
       this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][1];
       this.ctx_tracks_hover.fillText(this.song.tracks[pos.x].patterns[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
-      return this.select_pos = pos;
+      this.select_pos = pos;
+      return this.select_pos.type = 'tracks';
     };
 
     SessionView.prototype.selectCellMaster = function(pos) {
       if (this.song.master[pos.y] == null) {
         return;
       }
+      this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.clearRect(this.click_pos.x * this.w, this.click_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.fillStyle = this.color[5];
-      this.ctx_master_hover.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      this.ctx_master_hover.fillRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
       this.ctx_master_hover.fillStyle = this.color[1];
       this.ctx_master_hover.fillText(this.song.master[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
-      return this.select_pos = pos;
+      this.select_pos = pos;
+      return this.select_pos.type = 'master';
+    };
+
+    SessionView.prototype.getSelectPos = function() {
+      if (this.select_pos.x !== -1 && this.select_pos.y !== -1) {
+        return this.select_pos;
+      }
     };
 
     return SessionView;
@@ -3417,6 +3726,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node = this.ctx.createGain();
       this.node.gain.value = 0;
       this.gain = 1.0;
+      this.is_mute = false;
       this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
       this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
       for (i = _i = 0; _i < 3; i = ++_i) {
@@ -3523,6 +3833,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SynthCore.prototype.noteOn = function() {
       var t0;
+      if (this.is_mute) {
+        return;
+      }
       t0 = this.ctx.currentTime;
       this.eg.noteOn(t0);
       return this.feg.noteOn(t0);
@@ -3571,6 +3884,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _results.push(v.setFreq());
       }
       return _results;
+    };
+
+    SynthCore.prototype.mute = function() {
+      return this.is_mute = true;
+    };
+
+    SynthCore.prototype.demute = function() {
+      return this.is_mute = false;
     };
 
     return SynthCore;
@@ -3935,13 +4256,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Synth.prototype.getParam = function() {
-      return this.core.getParam();
+      var p;
+      p = this.core.getParam();
+      p.name = this.name;
+      return p;
     };
 
     Synth.prototype.readParam = function(p) {
       if (p != null) {
         return this.core.readParam(p);
       }
+    };
+
+    Synth.prototype.mute = function() {
+      return this.core.mute();
+    };
+
+    Synth.prototype.demute = function() {
+      return this.core.demute();
     };
 
     return Synth;
@@ -4117,16 +4449,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setSynthName(_this.synth_name.val());
       }));
       this.pattern_name.on('focus', (function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       })).on('blur', (function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       })).on('change', (function() {
         return _this.model.setPatternName(_this.pattern_name.val());
       }));
@@ -4585,49 +4917,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   this.T = new MutekiTimer();
 
-  this.KEYCODE_TO_NOTE = {
-    90: 1,
-    88: 2,
-    67: 3,
-    86: 4,
-    66: 5,
-    78: 6,
-    77: 7,
-    65: 8,
-    83: 9,
-    68: 10,
-    188: 8,
-    190: 9,
-    192: 10,
-    70: 11,
-    71: 12,
-    72: 13,
-    74: 14,
-    75: 15,
-    76: 16,
-    187: 17,
-    81: 15,
-    87: 16,
-    69: 17,
-    82: 18,
-    84: 19,
-    89: 20,
-    85: 21,
-    73: 22,
-    79: 23,
-    80: 24,
-    49: 22,
-    50: 23,
-    51: 24,
-    52: 25,
-    53: 26,
-    54: 27,
-    55: 28,
-    56: 29,
-    57: 30,
-    48: 31
-  };
-
   $(function() {
     var ua;
     console.log('Welcome to evil!');
@@ -4645,9 +4934,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
   this.initEvil = function() {
-    var c1, c2, footer_size, is_key_pressed, p1, p2, p3, p4, song2, t1, t2,
+    var c1, c2, footer_size, p1, p2, p3, p4, song2, t1, t2,
       _this = this;
-    T.setTimeout((function() {
+    setTimeout((function() {
       $('#top').css({
         opacity: '0'
       }).delay(500).css('z-index', '-1');
@@ -4658,43 +4947,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }), 1500);
     window.CONTEXT = new webkitAudioContext();
     window.player = new Player();
-    window.is_input_mode = false;
-    is_key_pressed = false;
-    $(window).keydown(function(e) {
-      var n;
-      if (window.is_input_mode) {
-        return;
-      }
-      if (is_key_pressed === false) {
-        is_key_pressed = true;
-        if (player.isPlaying()) {
-          player.noteOff();
-        }
-        n = KEYCODE_TO_NOTE[e.keyCode];
-        if (n != null) {
-          return player.noteOn(n);
-        } else {
-          switch (e.keyCode) {
-            case 37:
-              return player.view.moveLeft();
-            case 38:
-              return player.view.moveTop();
-            case 39:
-              return player.view.moveRight();
-            case 40:
-              return player.view.moveBottom();
-            case 32:
-              return player.view.viewPlay();
-            case 13:
-              return player.view.viewPlay();
-          }
-        }
-      }
-    });
-    $(window).keyup(function() {
-      is_key_pressed = false;
-      return player.noteOff();
-    });
+    window.keyboard = new Keyboard(window.player);
     footer_size = $(window).height() / 2 - 300;
     $('footer').css('height', footer_size + 'px');
     if (typeof debug !== "undefined" && debug !== null) {

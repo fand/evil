@@ -57,3 +57,23 @@ class @Mixer
 
     changeSynth: (id, synth) ->
         synth.connect(@panners[id])
+
+
+    # You should Mute / Solo by sending messages to Synth / Samplers.
+    # (for better timing)
+
+    # solo: (id) ->
+    #     return if id >= @panners.length
+    #     for i in [0...@panners.length]
+    #         @panners[i].disconnect() if i != id
+
+    # desolo: (id) ->
+    #     return if id >= @panners.length
+    #     for i in [0...@panners.length]
+    #         @panners[i].connect(@node)
+
+    # mute: (id) ->
+    #     @panners[id].disconnect()
+
+    # demute: (id) ->
+    #     @panners[id].connect(@node)

@@ -29,10 +29,10 @@
       this.ctx_master_hover = this.canvas_master_hover.getContext('2d');
       this.w = 80;
       this.h = 20;
-      this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.1)'];
+      this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'];
       this.color_schemes = {
-        REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.1)'],
-        SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(255, 160, 216, 0.1)']
+        REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'],
+        SAMPLER: ['rgba(230, 230, 230, 1.0)', 'rgba(  255, 100, 192, 0.7)', 'rgba(255, 160, 216, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(255, 160, 216, 0.2)']
       };
       this.track_color = (function() {
         var _i, _results;
@@ -172,13 +172,9 @@
         var pos;
         pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
         if (_this.is_clicked) {
-          if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
-            return _this.drawDrag(_this.ctx_tracks_hover, pos);
-          }
+          return _this.drawDrag(_this.ctx_tracks_hover, pos);
         } else {
-          if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
-            return _this.drawHover(_this.ctx_tracks_hover, pos);
-          }
+          return _this.drawHover(_this.ctx_tracks_hover, pos);
         }
       }).on('mouseout', function(e) {
         _this.clearHover(_this.ctx_tracks_hover);
@@ -191,7 +187,7 @@
         var now, pos;
         pos = _this.getPlayPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
         if (pos.y >= 0) {
-          return _this.cueTracks(pos.x, pos.y);
+          _this.cueTracks(pos.x, pos.y);
         } else {
           pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
           now = performance.now();
@@ -202,8 +198,8 @@
             _this.last_clicked = now;
           }
           _this.is_clicked = true;
-          return _this.click_pos = pos;
         }
+        return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         var pos;
         pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
@@ -220,13 +216,9 @@
         var pos;
         pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
         if (_this.is_clicked) {
-          if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
-            return _this.drawDragMaster(_this.ctx_master_hover, pos);
-          }
+          return _this.drawDragMaster(_this.ctx_master_hover, pos);
         } else {
-          if (_this.click_pos.x !== pos.x || _this.click_pos.y !== pos.y) {
-            return _this.drawHover(_this.ctx_master_hover, pos);
-          }
+          return _this.drawHover(_this.ctx_master_hover, pos);
         }
       }).on('mouseout', function(e) {
         _this.clearHover(_this.ctx_master_hover);
@@ -239,12 +231,12 @@
         var pos;
         pos = _this.getPlayPos(_this.rect_master, _this.wrapper_master, e);
         if (pos.y >= 0) {
-          return _this.cueMaster(pos.x, pos.y);
+          _this.cueMaster(pos.x, pos.y);
         } else {
           pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
           _this.is_clicked = true;
-          return _this.click_pos = pos;
         }
+        return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         var pos;
         pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
@@ -275,18 +267,18 @@
         return _this.closeDialog();
       });
       this.song_title.on('focus', function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       }).on('change', function() {
         return _this.model.setSongTitle(_this.song_title.val());
       }).on('blur', function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       });
       this.song_creator.on('focus', function() {
-        return window.is_input_mode = true;
+        return window.keyboard.beginInput();
       }).on('change', function() {
         return _this.model.setCreatorName(_this.song_creator.val());
       }).on('blur', function() {
-        return window.is_input_mode = false;
+        return window.keyboard.endInput();
       });
       this.social_twitter.on('click', function() {
         return _this.share('twitter');
@@ -342,7 +334,7 @@
         this.track_color[x] = this.color_schemes[this.song.tracks[x].type];
       }
       ctx.strokeStyle = this.track_color[x][1];
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1;
       ctx.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
       ctx.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
       ctx.fillStyle = this.track_color[x][1];
@@ -411,23 +403,22 @@
         this.drawActive(i, this.current_cells[i]);
       }
       this.drawActiveMaster(pos);
-      return this.scene_pos = pos;
+      this.scene_pos = pos;
+      if (this.select_pos.type === 'tracks') {
+        return this.selectCell(this.select_pos);
+      } else if (this.select_pos.type === 'master') {
+        return this.selectCellMaster(this.select_pos);
+      }
     };
 
     SessionView.prototype.drawActive = function(x, y) {
       this.clearActive(x);
-      this.ctx_tracks_on.strokeStyle = this.track_color[x][1];
-      this.ctx_tracks_on.lineWidth = 1;
-      this.ctx_tracks_on.strokeRect(x * this.w + 4, y * this.h + 3, this.w - 5, this.h - 4);
       this.ctx_tracks_on.drawImage(this.img_play, 36, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
       return this.last_active[x] = y;
     };
 
     SessionView.prototype.drawActiveMaster = function(y) {
       this.ctx_master_on.clearRect(0, 0, this.w, 10000);
-      this.ctx_master_on.strokeStyle = this.color[1];
-      this.ctx_master_on.lineWidth = 1;
-      this.ctx_master_on.strokeRect(4, y * this.h + 3, this.w - 5, this.h - 4);
       return this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 3, y * this.h + 3, 16, 15);
     };
 
@@ -444,19 +435,21 @@
         return;
       }
       name = this.song.tracks[this.click_pos.x].patterns[this.click_pos.y].name;
-      if (pos.y >= Math.max(this.song.length, 10)) {
+      if (pos.y >= Math.max(this.song.length, 10) || pos.y < 0) {
         return;
       }
       if (this.track_color[pos.x] == null) {
         this.track_color[pos.x] = this.color_schemes[this.song.tracks[pos.x].type];
       }
+      ctx.fillStyle = 'rgba(255,255,255,1.0)';
+      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w + 2, this.h + 2);
       ctx.strokeStyle = this.track_color[pos.x][1];
       ctx.fillStyle = this.track_color[pos.x][1];
-      ctx.lineWidth = 2;
-      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 4, this.h - 4);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
       ctx.fillText(name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w + 2, this.h + 2);
       return this.hover_pos = pos;
     };
 
@@ -472,8 +465,8 @@
       }
       ctx.strokeStyle = this.color[1];
       ctx.fillStyle = this.color[1];
-      ctx.lineWidth = 2;
-      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 4, this.h - 4);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
       ctx.fillText(name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
       ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
@@ -489,15 +482,15 @@
 
     SessionView.prototype.clearHover = function(ctx) {
       if (ctx === this.ctx_tracks_hover) {
+        ctx.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w + 2, this.h + 2);
         if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y) {
-          return;
+          return this.selectCell(this.select_pos);
         }
-        return ctx.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
       } else {
+        ctx.clearRect(0, this.hover_pos.y * this.h, this.w + 2, this.h + 2);
         if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y) {
-          return;
+          return this.selectCellMaster(this.select_pos);
         }
-        return ctx.clearRect(0, this.hover_pos.y * this.h, this.w, this.h);
       }
     };
 
@@ -654,7 +647,9 @@
       }
       this.model.savePattern(src.x, src.y);
       if (this.song.tracks[dst.x] == null) {
-        return;
+        dst.x = this.model.readTrack(this.song, src, dst);
+        this.current_cells.length = dst.x + 1;
+        this.song.tracks[dst.x].type = this.song.tracks[src.x].type;
       }
       if (this.song.tracks[src.x].type !== this.song.tracks[dst.x].type) {
         return;
@@ -671,8 +666,7 @@
       }
       this.song.master[dst.y] = $.extend(true, {}, this.song.master[src.y]);
       this.drawCell(this.ctx_master, this.song.master[dst.x], 0, dst.y);
-      this.model.readMaster(this.song.master[dst.y], dst.y);
-      return console.log(this.song.master);
+      return this.model.readMaster(this.song.master[dst.y], dst.y);
     };
 
     SessionView.prototype.selectCell = function(pos) {
@@ -682,6 +676,7 @@
       if (this.song.tracks[pos.x].patterns[pos.y] == null) {
         return;
       }
+      this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.click_pos.x * this.w, this.click_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
@@ -689,24 +684,33 @@
         this.track_color[pos.x] = this.color_schemes[this.song.tracks[pos.x].type];
       }
       this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][5];
-      this.ctx_tracks_hover.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      this.ctx_tracks_hover.fillRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
       this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][1];
       this.ctx_tracks_hover.fillText(this.song.tracks[pos.x].patterns[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
-      return this.select_pos = pos;
+      this.select_pos = pos;
+      return this.select_pos.type = 'tracks';
     };
 
     SessionView.prototype.selectCellMaster = function(pos) {
       if (this.song.master[pos.y] == null) {
         return;
       }
+      this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.clearRect(this.click_pos.x * this.w, this.click_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.fillStyle = this.color[5];
-      this.ctx_master_hover.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      this.ctx_master_hover.fillRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
       this.ctx_master_hover.fillStyle = this.color[1];
       this.ctx_master_hover.fillText(this.song.master[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
-      return this.select_pos = pos;
+      this.select_pos = pos;
+      return this.select_pos.type = 'master';
+    };
+
+    SessionView.prototype.getSelectPos = function() {
+      if (this.select_pos.x !== -1 && this.select_pos.y !== -1) {
+        return this.select_pos;
+      }
     };
 
     return SessionView;
