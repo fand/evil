@@ -279,7 +279,7 @@
             this.drawTrackName(x, t.name);
           }
         }
-        for (y = _j = 0, _ref1 = Math.max(this.song.length, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
+        for (y = _j = 0, _ref1 = Math.max(this.song.length + 1, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           if ((t != null) && (t.patterns[y] != null)) {
             this.drawCell(this.ctx_tracks, t.patterns[y], x, y);
           } else {
@@ -288,7 +288,7 @@
         }
       }
       this.drawMasterName();
-      for (y = _k = 0, _ref2 = Math.max(this.song.length, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
+      for (y = _k = 0, _ref2 = Math.max(this.song.length + 1, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
         if (this.song.master[y] != null) {
           this.drawCell(this.ctx_master, this.song.master[y], 0, y);
         } else {

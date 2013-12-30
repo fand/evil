@@ -221,7 +221,7 @@ class @SessionView
                 @track_color[x] = @color_schemes[t.type] if t.type?
                 @drawTrackName(x, t.name) if t.name?
 
-            for y in [0...Math.max(@song.length, 10)]
+            for y in [0...Math.max(@song.length + 1, 10)]
                 if t? and t.patterns[y]?
                     @drawCell(@ctx_tracks, t.patterns[y], x, y)
                 else
@@ -229,7 +229,7 @@ class @SessionView
 
         # Draw master
         @drawMasterName()
-        for y in [0...Math.max(@song.length, 10)]
+        for y in [0...Math.max(@song.length + 1, 10)]
             if @song.master[y]?
                 @drawCell(@ctx_master, @song.master[y], 0, y)
             else

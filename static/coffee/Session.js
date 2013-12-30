@@ -97,7 +97,8 @@
         this.player.readScene(this.song.master[this.scene_pos]);
       }
       this.player.setSceneLength(this.scene_length);
-      this.view.drawScene(this.scene_pos);
+      this.view.readSong(this.song, this.current_cells);
+      this.view.drawScene(this.scene_pos, this.current_cells);
       this.next_pattern_pos = [];
       this.next_scene_pos = void 0;
       return this.cue_queue = [];
@@ -170,8 +171,7 @@
           name: 'section-' + pat_num
         };
       }
-      if (pat_num + 2 > this.song_length) {
-        this.song_length = pat_num + 2;
+      if (pat_num + 2 > this.song.length) {
         return this.song.length = pat_num + 2;
       }
     };
@@ -183,9 +183,8 @@
           name: 'section-' + pat_num
         };
       }
-      if (pat_num + 2 > this.song_length) {
-        this.song_length = pat_num + 2;
-        this.song.length = pat_num + 2;
+      if (pat_num + 1 > this.song.length) {
+        this.song.length = pat_num + 1;
       }
       synth_num = _synth_num;
       if (this.song.tracks.length <= _synth_num) {
@@ -266,7 +265,6 @@
       var i, pat, _i, _ref;
       this.song = song;
       this.scene_pos = 0;
-      this.song_length = 0;
       this.scene_length = 0;
       for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         pat = this.song.tracks[i].patterns[0].pattern;
@@ -274,7 +272,6 @@
           this.synth[i].readPattern(this.song.tracks[i].patterns[0]);
           this.current_cells[i] = 0;
         }
-        this.song_length = Math.max(this.song_length, song.tracks[i].patterns.length);
         this.scene_length = Math.max(this.scene_length, song.tracks[i].patterns[0].pattern.length);
       }
       this.player.readScene(this.song.master[0]);
