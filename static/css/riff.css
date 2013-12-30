@@ -1089,12 +1089,12 @@ footer {
 }
 #song-info {
     position: absolute;
-    width: 300px;
+    width: 220px;
     height: 60px;
     top: 50%;
     left: 50%;
     margin-top: -35px;
-    margin-left: 160px;
+    margin-left: 240px;
     text-align: right;
     font-size: 16px;
     color: #0df;

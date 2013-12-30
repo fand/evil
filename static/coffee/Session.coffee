@@ -64,7 +64,7 @@ class @Session
         else
             @scene_pos = pos
 
-        if @scene_pos >= @song_length
+        if @scene_pos >= @song.length
             @player.is_playing = false
             @view.clearAllActive()
             @scene_pos = @next_scene_pos = 0
@@ -80,7 +80,8 @@ class @Session
 
         @player.readScene(@song.master[@scene_pos]) if @song.master[@scene_pos]?
         @player.setSceneLength(@scene_length)
-        @view.drawScene(@scene_pos)
+        @view.readSong(@song, @current_cells)
+        @view.drawScene(@scene_pos, @current_cells)
         @next_pattern_pos = []
         @next_scene_pos = undefined
         @cue_queue = []
@@ -88,7 +89,7 @@ class @Session
     getScene: (i) -> @song.master[i]
 
     play: () ->
-        @view.drawScene(@scene_pos)
+        @view.drawScene(@scene_pos, @current_cells)
 
     beat: () ->
         if @is_waiting_next_scene
@@ -126,21 +127,24 @@ class @Session
 
     setSynth: (@synth) ->
 
-    setPattern: (pat, synth_num, pat_num) ->
+    readPattern: (pat, synth_num, pat_num) ->
         @song.tracks[synth_num].patterns[pat_num] = pat
         if not @song.master[pat_num]?
             @song.master[pat_num] = name: 'section-' + pat_num
-        if pat_num + 2 > @song_length
-            @song_length = pat_num + 2
+        if pat_num + 2 > @song.length
             @song.length = pat_num + 2
+
+    readMaster: (pat, pat_num) ->
+        @song.master[pat_num] = pat
+        if pat_num + 1 > @song.length
+            @song.length = pat_num + 1
 
     editPattern: (_synth_num, pat_num) ->
         # add master
         if not @song.master[pat_num]?
             @song.master[pat_num] = name: 'section-' + pat_num
-        if pat_num + 2 > @song_length
-            @song_length = pat_num + 2
-            @song.length = pat_num + 2
+        if pat_num + 1 > @song.length
+            @song.length = pat_num + 1
 
         # add track pattern
         synth_num = _synth_num
@@ -200,14 +204,12 @@ class @Session
 
     readSong: (@song) ->
         @scene_pos = 0
-        @song_length = 0
         @scene_length = 0
         for i in [0...@song.tracks.length]
             pat = @song.tracks[i].patterns[0].pattern
             if pat?
                 @synth[i].readPattern(@song.tracks[i].patterns[0])
                 @current_cells[i] = 0
-            @song_length = Math.max(@song_length, song.tracks[i].patterns.length)
             @scene_length = Math.max(@scene_length, song.tracks[i].patterns[0].pattern.length)
         @player.readScene(@song.master[0])
         @player.setSceneLength(@scene_length)
