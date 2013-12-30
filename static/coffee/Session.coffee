@@ -64,7 +64,7 @@ class @Session
         else
             @scene_pos = pos
 
-        if @scene_pos >= @song_length
+        if @scene_pos >= @song.length
             @player.is_playing = false
             @view.clearAllActive()
             @scene_pos = @next_scene_pos = 0

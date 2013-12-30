@@ -2105,7 +2105,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       } else {
         this.scene_pos = pos;
       }
-      if (this.scene_pos >= this.song_length) {
+      if (this.scene_pos >= this.song.length) {
         this.player.is_playing = false;
         this.view.clearAllActive();
         this.scene_pos = this.next_scene_pos = 0;
