@@ -77,13 +77,13 @@
         name: 'intro',
         bpm: 80,
         key: 'A',
-        scale: 'IONIAN'
+        scale: 'Major'
       };
       c2 = {
         name: 'outro',
         bpm: 100,
         key: 'G',
-        scale: 'AEOLIAN'
+        scale: 'minor'
       };
       song2 = {
         title: 'hello',

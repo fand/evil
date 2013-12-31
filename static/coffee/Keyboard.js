@@ -63,6 +63,7 @@
       this.mode = 'SYNTH';
       this.is_writing = false;
       this.is_pressed = false;
+      this.last_key = 0;
       this.solos = [];
       this.initEvent();
     }
@@ -97,37 +98,47 @@
     };
 
     Keyboard.prototype.on = function(e) {
+      if (e.keyCode === this.last_key) {
+        return;
+      }
       switch (e.keyCode) {
         case 37:
-          return this.player.view.moveLeft();
+          this.player.view.moveLeft();
+          break;
         case 38:
-          return this.player.view.moveTop();
+          this.player.view.moveTop();
+          break;
         case 39:
-          return this.player.view.moveRight();
+          this.player.view.moveRight();
+          break;
         case 40:
-          return this.player.view.moveBottom();
+          this.player.view.moveBottom();
+          break;
         case 32:
-          return this.player.view.viewPlay();
+          this.player.view.viewPlay();
+          break;
         case 13:
-          return this.player.view.viewPlay();
+          this.player.view.viewPlay();
+          break;
         default:
           if (this.mode === 'SYNTH') {
             this.onPlayer(e);
           }
           if (this.mode === 'MIXER') {
-            return this.onMixer(e);
+            this.onMixer(e);
           }
       }
+      return this.last_key = e.keyCode;
     };
 
     Keyboard.prototype.onPlayer = function(e) {
       var n;
       if (this.player.isPlaying()) {
-        this.player.noteOff();
+        this.player.noteOff(true);
       }
       n = KEYCODE_TO_NOTE[e.keyCode];
       if (n != null) {
-        return this.player.noteOn(n);
+        return this.player.noteOn(n, true);
       }
     };
 
@@ -150,12 +161,13 @@
         this.offPlayer(e);
       }
       if (this.mode === 'MIXER') {
-        return this.offMixer(e);
+        this.offMixer(e);
       }
+      return this.last_key = 0;
     };
 
     Keyboard.prototype.offPlayer = function(e) {
-      return this.player.noteOff();
+      return this.player.noteOff(true);
     };
 
     Keyboard.prototype.offMixer = function(e) {

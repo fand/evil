@@ -112,15 +112,16 @@
           </div>
 
           <div class="clearfix">
-            <label>mode</label>
+            <label>scale</label>
             <select name="mode">
-              <option selected="selected">IONIAN</option>
-              <option>DORIAN</option>
-              <option>PHRYGIAN</option>
-              <option>LYDIAN</option>
-              <option>MIXOLYDIAN</option>
-              <option>AEOLIAN</option>
-              <option>LOCRIAN</option>
+              <option selected="selected">Major</option>
+              <option>minor</option>
+              <option>Pentatonic</option>
+              <option>Harm-minor</option>
+              <option>Dorian</option>
+              <option>Phrygian</option>
+              <option>Lydian</option>
+              <option>Mixolydian</option>
               <option>CHROMATIC</option>
             </select>
           </div>
@@ -166,14 +167,15 @@
       <option>B</option>
       <option>E</option>
     </select>
-    mode: <select name="mode">
-      <option selected="selected">IONIAN</option>
-      <option>DORIAN</option>
-      <option>PHRYGIAN</option>
-      <option>LYDIAN</option>
-      <option>MIXOLYDIAN</option>
-      <option>AEOLIAN</option>
-      <option>LOCRIAN</option>
+    scale: <select name="mode">
+      <option selected="selected">Major</option>
+      <option>minor</option>
+      <option>Pentatonic</option>
+      <option>Harm-minor</option>
+      <option>Dorian</option>
+      <option>Phrygian</option>
+      <option>Lydian</option>
+      <option>Mixolydian</option>
       <option>CHROMATIC</option>
     </select>
     bpm: <input name="bpm" min="60" max="1000" value="120" type="number">

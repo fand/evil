@@ -13,14 +13,15 @@
     Ab: 51.91308719749314
 
 @SCALE_LIST =
-    IONIAN:     [0,2,4,5,7,9,11,12,14,16]
-    DORIAN:     [0,2,3,5,7,9,10,12,14,15]
-    PHRYGIAN:   [0,1,3,5,7,8,10,12,13,15]
-    LYDIAN:     [0,2,4,6,7,9,11,12,14,16]
-    MIXOLYDIAN: [0,2,4,5,7,9,10,12,14,16]
-    AEOLIAN:    [0,2,3,5,7,8,10,12,14,15]
-    LOCRIAN:    [0,1,3,5,6,8,10,12,13,15]
+    Major:      [0,2,4,5,7,9,11]
+    minor:      [0,2,3,5,7,8,10]
+    Pentatonic: [0,3,5,7,10]
+    Dorian:     [0,2,3,5,7,9,10]
+    Phrygian:   [0,1,3,5,7,8,10]
+    Lydian:     [0,2,4,6,7,9,11]
+    Mixolydian: [0,2,4,5,7,9,10]
     CHROMATIC:  [0,1,2,3,4,5,6,7,8,9,10,11]
+    'Harm-minor': [0,2,3,5,7,8,11]
 
 OSC_TYPE =
     RECT:     1
@@ -392,12 +393,13 @@ class @Synth
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @pattern_obj = name: @pattern_name, pattern: @pattern
         @time = 0
-        @scale_name = 'IONIAN'
-        @scale = []
+        @scale_name = 'Major'
+        @scale = SCALE_LIST[@scale_name]
         @view = new SynthView(this, @id)
         @core = new SynthCore(this, @ctx, @id)
 
         @is_sustaining = false
+        @is_performing = false
         @session = @player.session
 
     connect: (dst) -> @core.connect(dst)
@@ -408,27 +410,32 @@ class @Synth
     setNote: (note) -> @core.setNote(note)
 
     setScale: (@scale_name) ->
-        @scale = SCALE_LIST[scale_name]
-        @view.changeKey(@scale_name)
+        @scale = SCALE_LIST[@scale_name]
+        @view.changeScale(@scale)
 
     setGain: (gain) -> @core.setGain(gain)
     getGain: ()     -> @core.gain
 
     noteToSemitone: (ival) ->
-        if @scale_name == 'CHROMATIC'
-            ival - 1
-        else
-            Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]
+        Math.floor((ival-1)/@scale.length) * 12 + @scale[(ival-1) % @scale.length]
 
-    noteOn: (note) ->
-        @core.setNote(@noteToSemitone(note))
-        @core.noteOn()
+    noteOn: (note, force) ->
+        if not @is_performing
+            @core.setNote(@noteToSemitone(note))
+            @core.noteOn()
+        if force
+            @is_performing = true
 
-    noteOff: -> @core.noteOff()
+    noteOff: (force)->
+        @is_performing = false if force
+        if not @is_performing
+            @core.noteOff()
 
     playAt: (@time) ->
         mytime = @time % @pattern.length
         @view.playAt(mytime)
+        return if @is_performing
+
         if @pattern[mytime] == 0
             @core.noteOff()
         else if @pattern[mytime] == 'end'
@@ -521,8 +528,9 @@ class @Synth
         p.name = @name
         return p
 
-    readParam: (p) -> @core.readParam(p) if p?
-
+    readParam: (p) ->
+        return if not p?
+        @core.readParam(p)
 
     mute:   -> @core.mute()
     demute: -> @core.demute()

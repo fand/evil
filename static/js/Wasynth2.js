@@ -83,6 +83,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.mode = 'SYNTH';
       this.is_writing = false;
       this.is_pressed = false;
+      this.last_key = 0;
       this.solos = [];
       this.initEvent();
     }
@@ -117,37 +118,47 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Keyboard.prototype.on = function(e) {
+      if (e.keyCode === this.last_key) {
+        return;
+      }
       switch (e.keyCode) {
         case 37:
-          return this.player.view.moveLeft();
+          this.player.view.moveLeft();
+          break;
         case 38:
-          return this.player.view.moveTop();
+          this.player.view.moveTop();
+          break;
         case 39:
-          return this.player.view.moveRight();
+          this.player.view.moveRight();
+          break;
         case 40:
-          return this.player.view.moveBottom();
+          this.player.view.moveBottom();
+          break;
         case 32:
-          return this.player.view.viewPlay();
+          this.player.view.viewPlay();
+          break;
         case 13:
-          return this.player.view.viewPlay();
+          this.player.view.viewPlay();
+          break;
         default:
           if (this.mode === 'SYNTH') {
             this.onPlayer(e);
           }
           if (this.mode === 'MIXER') {
-            return this.onMixer(e);
+            this.onMixer(e);
           }
       }
+      return this.last_key = e.keyCode;
     };
 
     Keyboard.prototype.onPlayer = function(e) {
       var n;
       if (this.player.isPlaying()) {
-        this.player.noteOff();
+        this.player.noteOff(true);
       }
       n = KEYCODE_TO_NOTE[e.keyCode];
       if (n != null) {
-        return this.player.noteOn(n);
+        return this.player.noteOn(n, true);
       }
     };
 
@@ -170,12 +181,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.offPlayer(e);
       }
       if (this.mode === 'MIXER') {
-        return this.offMixer(e);
+        this.offMixer(e);
       }
+      return this.last_key = 0;
     };
 
     Keyboard.prototype.offPlayer = function(e) {
-      return this.player.noteOff();
+      return this.player.noteOff(true);
     };
 
     Keyboard.prototype.offMixer = function(e) {
@@ -520,10 +532,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.bpm = 120;
       this.duration = 500;
       this.key = 'A';
-      this.scale = 'IONIAN';
+      this.scale = 'Major';
       this.is_playing = false;
       this.time = 0;
-      this.scene = {};
+      this.scene = {
+        bpm: this.bpm,
+        key: this.key,
+        scale: this.scale
+      };
       this.num_id = 0;
       this.context = CONTEXT;
       this.synth = [];
@@ -643,12 +659,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.session.toggleLoop();
     };
 
-    Player.prototype.noteOn = function(note) {
-      return this.synth_now.noteOn(note);
+    Player.prototype.noteOn = function(note, force) {
+      return this.synth_now.noteOn(note, force);
     };
 
-    Player.prototype.noteOff = function() {
-      return this.synth_now.noteOff();
+    Player.prototype.noteOff = function(force) {
+      return this.synth_now.noteOff(force);
     };
 
     Player.prototype.playNext = function() {
@@ -2291,7 +2307,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     name: 'section-0',
     bpm: 120,
     key: 'A',
-    sclae: 'IONIAN'
+    sclae: 'Major'
   };
 
   SONG_DEFAULT = {
@@ -3461,14 +3477,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
   this.SCALE_LIST = {
-    IONIAN: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16],
-    DORIAN: [0, 2, 3, 5, 7, 9, 10, 12, 14, 15],
-    PHRYGIAN: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15],
-    LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
-    MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
-    AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
-    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15],
-    CHROMATIC: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    Major: [0, 2, 4, 5, 7, 9, 11],
+    minor: [0, 2, 3, 5, 7, 8, 10],
+    Pentatonic: [0, 3, 5, 7, 10],
+    Dorian: [0, 2, 3, 5, 7, 9, 10],
+    Phrygian: [0, 1, 3, 5, 7, 8, 10],
+    Lydian: [0, 2, 4, 6, 7, 9, 11],
+    Mixolydian: [0, 2, 4, 5, 7, 9, 10],
+    CHROMATIC: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    'Harm-minor': [0, 2, 3, 5, 7, 8, 11]
   };
 
   OSC_TYPE = {
@@ -4080,11 +4097,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         pattern: this.pattern
       };
       this.time = 0;
-      this.scale_name = 'IONIAN';
-      this.scale = [];
+      this.scale_name = 'Major';
+      this.scale = SCALE_LIST[this.scale_name];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
       this.is_sustaining = false;
+      this.is_performing = false;
       this.session = this.player.session;
     }
 
@@ -4108,8 +4126,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Synth.prototype.setScale = function(scale_name) {
       this.scale_name = scale_name;
-      this.scale = SCALE_LIST[scale_name];
-      return this.view.changeKey(this.scale_name);
+      this.scale = SCALE_LIST[this.scale_name];
+      return this.view.changeScale(this.scale);
     };
 
     Synth.prototype.setGain = function(gain) {
@@ -4121,20 +4139,26 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Synth.prototype.noteToSemitone = function(ival) {
-      if (this.scale_name === 'CHROMATIC') {
-        return ival - 1;
-      } else {
-        return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
+      return Math.floor((ival - 1) / this.scale.length) * 12 + this.scale[(ival - 1) % this.scale.length];
+    };
+
+    Synth.prototype.noteOn = function(note, force) {
+      if (!this.is_performing) {
+        this.core.setNote(this.noteToSemitone(note));
+        this.core.noteOn();
+      }
+      if (force) {
+        return this.is_performing = true;
       }
     };
 
-    Synth.prototype.noteOn = function(note) {
-      this.core.setNote(this.noteToSemitone(note));
-      return this.core.noteOn();
-    };
-
-    Synth.prototype.noteOff = function() {
-      return this.core.noteOff();
+    Synth.prototype.noteOff = function(force) {
+      if (force) {
+        this.is_performing = false;
+      }
+      if (!this.is_performing) {
+        return this.core.noteOff();
+      }
     };
 
     Synth.prototype.playAt = function(time) {
@@ -4143,6 +4167,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.time = time;
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
+      if (this.is_performing) {
+        return;
+      }
       if (this.pattern[mytime] === 0) {
         return this.core.noteOff();
       } else if (this.pattern[mytime] === 'end') {
@@ -4271,9 +4298,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Synth.prototype.readParam = function(p) {
-      if (p != null) {
-        return this.core.readParam(p);
+      if (p == null) {
+        return;
       }
+      return this.core.readParam(p);
     };
 
     Synth.prototype.mute = function() {
@@ -4778,8 +4806,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.pencil.removeClass('btn-true').addClass('btn-false');
     };
 
-    SynthView.prototype.changeKey = function(scale_name) {
-      return this.keyboard.changeKey(scale_name);
+    SynthView.prototype.changeScale = function(scale) {
+      return this.keyboard.changeScale(scale);
     };
 
     return SynthView;
@@ -4805,6 +4833,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         x: -1,
         y: -1
       };
+      this.scale = this.sequencer.model.scale;
       this.initCanvas();
       this.initEvent();
     }
@@ -4844,8 +4873,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         if (_this.is_clicked && _this.click_pos !== pos) {
           _this.clearActive(_this.click_pos);
           _this.drawActive(pos);
-          _this.sequencer.model.noteOff();
-          _this.sequencer.model.noteOn(_this.num - pos);
+          _this.sequencer.model.noteOff(true);
+          _this.sequencer.model.noteOn(_this.num - pos, true);
           return _this.click_pos = pos;
         }
       }).on('mousedown', function(e) {
@@ -4853,19 +4882,19 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _this.is_clicked = true;
         pos = _this.getPos(e);
         _this.drawActive(pos);
-        _this.sequencer.model.noteOn(_this.num - pos);
+        _this.sequencer.model.noteOn(_this.num - pos, true);
         return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         _this.is_clicked = false;
         _this.clearActive(_this.click_pos);
-        _this.sequencer.model.noteOff();
+        _this.sequencer.model.noteOff(true);
         return _this.click_pos = {
           x: -1,
           y: -1
         };
       }).on('mouseout', function(e) {
         _this.clearActive(_this.hover_pos);
-        _this.sequencer.model.noteOff();
+        _this.sequencer.model.noteOff(true);
         _this.hover_pos = {
           x: -1,
           y: -1
@@ -4914,9 +4943,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.drawNormal(i);
     };
 
-    KeyboardView.prototype.changeKey = function(scale_name) {
+    KeyboardView.prototype.changeScale = function(scale) {
       var i, _i, _ref, _results;
-      this.scale_name = scale_name;
+      this.scale = scale;
       _results = [];
       for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         _results.push(this.drawNormal(i));
@@ -4925,19 +4954,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     KeyboardView.prototype.text = function(i) {
-      if (this.scale_name === 'CHROMATIC') {
-        return (this.num - i - 1) % 12 + 1 + 'th';
-      } else {
-        return (this.num - i - 1) % 7 + 1 + 'th';
-      }
+      return (this.num - i - 1) % this.scale.length + 1 + 'th';
     };
 
     KeyboardView.prototype.isKey = function(i) {
-      if (this.scale_name === 'CHROMATIC') {
-        return (this.num - i - 1) % 12 === 0;
-      } else {
-        return (this.num - i - 1) % 7 === 0;
-      }
+      return (this.num - i - 1) % this.scale.length === 0;
     };
 
     return KeyboardView;
@@ -5024,13 +5045,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         name: 'intro',
         bpm: 80,
         key: 'A',
-        scale: 'IONIAN'
+        scale: 'Major'
       };
       c2 = {
         name: 'outro',
         bpm: 100,
         key: 'G',
-        scale: 'AEOLIAN'
+        scale: 'minor'
       };
       song2 = {
         title: 'hello',

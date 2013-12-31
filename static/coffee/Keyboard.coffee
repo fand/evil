@@ -60,6 +60,8 @@ class @Keyboard
         @is_writing = false
         @is_pressed = false
 
+        @last_key = 0
+
         @solos = []
 
         @initEvent()
@@ -83,6 +85,8 @@ class @Keyboard
     setMode: (@mode) ->
 
     on: (e) ->
+        return if e.keyCode == @last_key
+
         switch e.keyCode
             when 37 then @player.view.moveLeft()
             when 38 then @player.view.moveTop()
@@ -94,10 +98,12 @@ class @Keyboard
                 @onPlayer(e) if @mode == 'SYNTH'
                 @onMixer(e)  if @mode == 'MIXER'
 
+        @last_key = e.keyCode
+
     onPlayer: (e) ->
-        @player.noteOff() if @player.isPlaying()
+        @player.noteOff(true) if @player.isPlaying()
         n = KEYCODE_TO_NOTE[e.keyCode]
-        @player.noteOn(n) if n?
+        @player.noteOn(n, true) if n?
 
     onMixer: (e) ->
         # Session
@@ -113,8 +119,9 @@ class @Keyboard
     off: (e) ->
         @offPlayer(e) if @mode == 'SYNTH'
         @offMixer(e)  if @mode == 'MIXER'
+        @last_key = 0
 
-    offPlayer: (e) -> @player.noteOff()
+    offPlayer: (e) -> @player.noteOff(true)
 
     offMixer: (e) ->
         num = KEYCODE_TO_NUM[e.keyCode]

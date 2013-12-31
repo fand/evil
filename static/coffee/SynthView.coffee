@@ -454,8 +454,8 @@ class @SynthView
         @step.removeClass('btn-false').addClass('btn-true')
         @pencil.removeClass('btn-true').addClass('btn-false')
 
-    changeKey: (scale_name) ->
-        @keyboard.changeKey(scale_name)
+    changeScale: (scale) ->
+        @keyboard.changeScale(scale)
 
 
 
@@ -474,6 +474,8 @@ class @KeyboardView
         @is_clicked = false
         @hover_pos = x: -1, y: -1
         @click_pos = x: -1, y: -1
+
+        @scale = @sequencer.model.scale
 
         @initCanvas()
         @initEvent()
@@ -504,24 +506,24 @@ class @KeyboardView
             if @is_clicked and @click_pos != pos
                 @clearActive(@click_pos)
                 @drawActive(pos)
-                @sequencer.model.noteOff()
-                @sequencer.model.noteOn(@num - pos)
+                @sequencer.model.noteOff(true)
+                @sequencer.model.noteOn(@num - pos, true)
                 @click_pos = pos
 
         ).on('mousedown', (e) =>
             @is_clicked = true
             pos = @getPos(e)
             @drawActive(pos)
-            @sequencer.model.noteOn(@num - pos)
+            @sequencer.model.noteOn(@num - pos, true)
             @click_pos = pos
         ).on('mouseup', (e) =>
             @is_clicked = false
             @clearActive(@click_pos)
-            @sequencer.model.noteOff()
+            @sequencer.model.noteOff(true)
             @click_pos = x: -1, y: -1
         ).on('mouseout', (e) =>
             @clearActive(@hover_pos)
-            @sequencer.model.noteOff()
+            @sequencer.model.noteOff(true)
             @hover_pos = x: -1, y: -1
             @click_pos = x: -1, y: -1
         )
@@ -556,18 +558,12 @@ class @KeyboardView
         @clearNormal(i)
         @drawNormal(i)
 
-    changeKey: (@scale_name) ->
+    changeScale: (@scale) ->
         for i in [0...@num]
             @drawNormal(i)
 
     text: (i) ->
-        if @scale_name == 'CHROMATIC'
-            (@num - i - 1) % 12 + 1 + 'th'
-        else
-            (@num - i - 1) % 7 + 1 + 'th'
+        (@num - i - 1) % @scale.length + 1 + 'th'
 
     isKey: (i) ->
-        if @scale_name == 'CHROMATIC'
-            (@num - i - 1) % 12 == 0
-        else
-            (@num - i - 1) % 7 == 0
+        (@num - i - 1) % @scale.length == 0
