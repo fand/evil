@@ -4143,7 +4143,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Synth.prototype.noteOn = function(note, force) {
-      if (!this.is_performing) {
+      if (force || !this.is_performing) {
         this.core.setNote(this.noteToSemitone(note));
         this.core.noteOn();
       }

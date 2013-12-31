@@ -420,7 +420,7 @@ class @Synth
         Math.floor((ival-1)/@scale.length) * 12 + @scale[(ival-1) % @scale.length]
 
     noteOn: (note, force) ->
-        if not @is_performing
+        if force or not @is_performing
             @core.setNote(@noteToSemitone(note))
             @core.noteOn()
         if force
