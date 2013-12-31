@@ -454,6 +454,8 @@ class @SynthView
         @step.removeClass('btn-false').addClass('btn-true')
         @pencil.removeClass('btn-true').addClass('btn-false')
 
+    changeKey: (scale_name) ->
+        @keyboard.changeKey(scale_name)
 
 
 
@@ -485,7 +487,6 @@ class @KeyboardView
         @ctx.fillStyle = @color[0]
         for i in [0...@num]
             @drawNormal(i)
-            @drawText(i)
 
     getPos: (e) ->
         @rect = @canvas.getBoundingClientRect()
@@ -528,21 +529,25 @@ class @KeyboardView
     drawNormal: (i) ->
         @clearNormal(i)
         @ctx.fillStyle = @color[0]
+        if @isKey(i)
+            @ctx.fillRect(0, (i+1) * @h - 5, @w, 2)
         @ctx.fillRect(0, (i+1) * @h - 3, @w, 2)
         @ctx.fillStyle = @color[3]
-        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx.fillText(@text(i), 10, (i+1) * @h - 10)
 
     drawHover: (i) ->
         @ctx.fillStyle = @color[1]
         @ctx.fillRect(0, (i+1) * @h - 3, @w, 2)
-        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        if @isKey(i)
+            @ctx.fillRect(0, (i+1) * @h - 5, @w, 2)
+        @ctx.fillText(@text(i), 10, (i+1) * @h - 10)
 
     drawActive: (i) ->
         @clearNormal(i)
         @ctx.fillStyle = @color[2]
         @ctx.fillRect(0, i * @h, @w, @h)
         @ctx.fillStyle = @color[4]
-        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+        @ctx.fillText(@text(i), 10, (i+1) * @h - 10)
 
     clearNormal: (i) ->
         @ctx.clearRect(0, i * @h, @w, @h)
@@ -550,8 +555,19 @@ class @KeyboardView
     clearActive: (i) ->
         @clearNormal(i)
         @drawNormal(i)
-        @drawText(i)
 
-    drawText: (i) ->
-        @ctx.fillStyle = @color[3]
-        @ctx.fillText((@num - i - 1) % 7 + 1 + 'th', 10, (i+1) * @h - 10)
+    changeKey: (@scale_name) ->
+        for i in [0...@num]
+            @drawNormal(i)
+
+    text: (i) ->
+        if @scale_name == 'CHROMATIC'
+            (@num - i - 1) % 12 + 1 + 'th'
+        else
+            (@num - i - 1) % 7 + 1 + 'th'
+
+    isKey: (i) ->
+        if @scale_name == 'CHROMATIC'
+            (@num - i - 1) % 12 == 0
+        else
+            (@num - i - 1) % 7 == 0
