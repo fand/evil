@@ -17,13 +17,15 @@ class @MixerView
         @canvas_tracks = (d[0] for d in @canvas_tracks_dom)
         @ctx_tracks = (c.getContext('2d') for c in @canvas_tracks)
         for c in @canvas_tracks
-            [c.width, c.height] = [70, 110]
+            [c.width, c.height] = [10, 110]
 
         @canvas_master_dom = @master.find('.vu-meter')
         @canvas_master = @canvas_master_dom[0]
         @ctx_master = @canvas_master.getContext('2d')
-        @canvas_master.width = 70
+        @canvas_master.width  = 60
         @canvas_master.height = 110
+        @ctx_master.fillStyle = '#fff'
+        @ctx_master.fillRect(10, 0, 40, 110)
 
         @track_dom = $('#templates > .console-track')
         @initEvent()
@@ -37,9 +39,9 @@ class @MixerView
         v = Math.max.apply(null, data)
         h = (v - 128) / 128 * 110
 
-        @ctx_tracks[i].clearRect(0, 0, 70, 110)
+        @ctx_tracks[i].clearRect(0, 0, 10, 110)
         @ctx_tracks[i].fillStyle = '#0df'
-        @ctx_tracks[i].fillRect(50,  110 - h, 10, h)
+        @ctx_tracks[i].fillRect(0,  110 - h, 10, h)
 
     drawGainMaster: (data_l, data_r) ->
         v_l = Math.max.apply(null, data_l)
@@ -47,10 +49,11 @@ class @MixerView
         h_l = (v_l - 128) / 128 * 110
         h_r = (v_r - 128) / 128 * 110
 
-        @ctx_master.clearRect(0, 0, 70, 110)
+        @ctx_master.clearRect(0,  0, 10, 110)
+        @ctx_master.clearRect(50, 0, 10, 110)
         @ctx_master.fillStyle = '#0df'
         @ctx_master.fillRect(0,  110 - h_l, 10, h_l)
-        @ctx_master.fillRect(60, 110 - h_r, 10, h_r)
+        @ctx_master.fillRect(50, 110 - h_r, 10, h_r)
 
     addSynth: (synth) ->
         dom = @track_dom.clone()
@@ -62,7 +65,7 @@ class @MixerView
         @canvas_tracks_dom.push(d)
         @canvas_tracks.push(d[0])
         @ctx_tracks.push(d[0].getContext('2d'))
-        [d[0].width, d[0].height] = [70, 110]
+        [d[0].width, d[0].height] = [10, 110]
 
         @console_tracks.css(width: (@gains.length * 80 + 2) + 'px')
         @console_tracks.on('change', () => @setGains())
