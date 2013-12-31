@@ -13,12 +13,29 @@ class @MixerView
         @pans = @tracks.find('.console-track > .pan-slider')
         @pan_master = @master.find('.console-track > .pan-slider')
 
+        @canvas_master_dom = @master.find('.vu-meter')
+        @canvas_master = @canvas_master_dom[0]
+        @ctx_master = @canvas_master.getContext('2d')
+        @canvas_master.width = 70
+        @canvas_master.height = 110
+
         @track_dom = $('#templates > .console-track')
         @initEvent()
 
     initEvent: ->
         @console_tracks.on('change', () => @setParams())
         @console_master.on('change', () => @setParams())
+
+    drawGainMaster: (data_l, data_r) ->
+        v_l = Math.max.apply(null, data_l)
+        v_r = Math.max.apply(null, data_r)
+        h_l = (v_l - 128) / 128 * 110
+        h_r = (v_r - 128) / 128 * 110
+
+        @ctx_master.clearRect(0, 0, 70, 110)
+        @ctx_master.fillStyle = '#0df'
+        @ctx_master.fillRect(0,  110 - h_l, 10, h_l)
+        @ctx_master.fillRect(60, 110 - h_r, 10, h_r)
 
     addSynth: (synth) ->
         dom = @track_dom.clone()

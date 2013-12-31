@@ -667,14 +667,35 @@ canvas:active {
 .pan-slider {
     width: 50px;
     height: 25px;
+    z-index: 2;
 }
 .gain-slider {
     width: 30px;
     height: 100px;
     margin: 10px;
     -webkit-appearance: slider-vertical;
+    z-index: 2;
 }
-
+#console-master .gain-slider {
+    position: absolute;
+    width: 30px;
+    height: 115px;
+    top: 20px;
+    left: 50%;
+    margin: 10px;
+    margin-left: -15px;
+    -webkit-appearance: slider-vertical;
+    z-index: 2;
+}
+.vu-meter {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    width: 70px;
+    height: 120px;
+    margin-left: -35px;
+    z-index: 0;
+}
 
 #sidebar-wrapper {
     position: absolute;
