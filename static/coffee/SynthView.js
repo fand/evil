@@ -487,6 +487,10 @@
       return this.pencil.removeClass('btn-true').addClass('btn-false');
     };
 
+    SynthView.prototype.changeKey = function(scale_name) {
+      return this.keyboard.changeKey(scale_name);
+    };
+
     return SynthView;
 
   })();
@@ -526,8 +530,7 @@
       this.ctx.fillStyle = this.color[0];
       _results = [];
       for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.drawNormal(i);
-        _results.push(this.drawText(i));
+        _results.push(this.drawNormal(i));
       }
       return _results;
     };
@@ -586,15 +589,21 @@
     KeyboardView.prototype.drawNormal = function(i) {
       this.clearNormal(i);
       this.ctx.fillStyle = this.color[0];
+      if (this.isKey(i)) {
+        this.ctx.fillRect(0, (i + 1) * this.h - 5, this.w, 2);
+      }
       this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
       this.ctx.fillStyle = this.color[3];
-      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+      return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
     };
 
     KeyboardView.prototype.drawHover = function(i) {
       this.ctx.fillStyle = this.color[1];
       this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
-      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+      if (this.isKey(i)) {
+        this.ctx.fillRect(0, (i + 1) * this.h - 5, this.w, 2);
+      }
+      return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
     };
 
     KeyboardView.prototype.drawActive = function(i) {
@@ -602,7 +611,7 @@
       this.ctx.fillStyle = this.color[2];
       this.ctx.fillRect(0, i * this.h, this.w, this.h);
       this.ctx.fillStyle = this.color[4];
-      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+      return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
     };
 
     KeyboardView.prototype.clearNormal = function(i) {
@@ -611,13 +620,33 @@
 
     KeyboardView.prototype.clearActive = function(i) {
       this.clearNormal(i);
-      this.drawNormal(i);
-      return this.drawText(i);
+      return this.drawNormal(i);
     };
 
-    KeyboardView.prototype.drawText = function(i) {
-      this.ctx.fillStyle = this.color[3];
-      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    KeyboardView.prototype.changeKey = function(scale_name) {
+      var i, _i, _ref, _results;
+      this.scale_name = scale_name;
+      _results = [];
+      for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.drawNormal(i));
+      }
+      return _results;
+    };
+
+    KeyboardView.prototype.text = function(i) {
+      if (this.scale_name === 'CHROMATIC') {
+        return (this.num - i - 1) % 12 + 1 + 'th';
+      } else {
+        return (this.num - i - 1) % 7 + 1 + 'th';
+      }
+    };
+
+    KeyboardView.prototype.isKey = function(i) {
+      if (this.scale_name === 'CHROMATIC') {
+        return (this.num - i - 1) % 12 === 0;
+      } else {
+        return (this.num - i - 1) % 7 === 0;
+      }
     };
 
     return KeyboardView;

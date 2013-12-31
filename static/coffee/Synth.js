@@ -23,7 +23,8 @@
     LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
     MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
     AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
-    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15]
+    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15],
+    CHROMATIC: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   };
 
   OSC_TYPE = {
@@ -635,6 +636,7 @@
         pattern: this.pattern
       };
       this.time = 0;
+      this.scale_name = 'IONIAN';
       this.scale = [];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
@@ -656,12 +658,14 @@
       return this.core.setKey(key);
     };
 
-    Synth.prototype.setScale = function(scale_name) {
-      return this.scale = SCALE_LIST[scale_name];
-    };
-
     Synth.prototype.setNote = function(note) {
       return this.core.setNote(note);
+    };
+
+    Synth.prototype.setScale = function(scale_name) {
+      this.scale_name = scale_name;
+      this.scale = SCALE_LIST[scale_name];
+      return this.view.changeKey(this.scale_name);
     };
 
     Synth.prototype.setGain = function(gain) {
@@ -673,7 +677,11 @@
     };
 
     Synth.prototype.noteToSemitone = function(ival) {
-      return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
+      if (this.scale_name === 'CHROMATIC') {
+        return ival - 1;
+      } else {
+        return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
+      }
     };
 
     Synth.prototype.noteOn = function(note) {

@@ -3467,7 +3467,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
     MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
     AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
-    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15]
+    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15],
+    CHROMATIC: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   };
 
   OSC_TYPE = {
@@ -4079,6 +4080,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         pattern: this.pattern
       };
       this.time = 0;
+      this.scale_name = 'IONIAN';
       this.scale = [];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
@@ -4100,12 +4102,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.core.setKey(key);
     };
 
-    Synth.prototype.setScale = function(scale_name) {
-      return this.scale = SCALE_LIST[scale_name];
-    };
-
     Synth.prototype.setNote = function(note) {
       return this.core.setNote(note);
+    };
+
+    Synth.prototype.setScale = function(scale_name) {
+      this.scale_name = scale_name;
+      this.scale = SCALE_LIST[scale_name];
+      return this.view.changeKey(this.scale_name);
     };
 
     Synth.prototype.setGain = function(gain) {
@@ -4117,7 +4121,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Synth.prototype.noteToSemitone = function(ival) {
-      return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
+      if (this.scale_name === 'CHROMATIC') {
+        return ival - 1;
+      } else {
+        return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
+      }
     };
 
     Synth.prototype.noteOn = function(note) {
@@ -4770,6 +4778,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.pencil.removeClass('btn-true').addClass('btn-false');
     };
 
+    SynthView.prototype.changeKey = function(scale_name) {
+      return this.keyboard.changeKey(scale_name);
+    };
+
     return SynthView;
 
   })();
@@ -4809,8 +4821,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx.fillStyle = this.color[0];
       _results = [];
       for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.drawNormal(i);
-        _results.push(this.drawText(i));
+        _results.push(this.drawNormal(i));
       }
       return _results;
     };
@@ -4869,15 +4880,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     KeyboardView.prototype.drawNormal = function(i) {
       this.clearNormal(i);
       this.ctx.fillStyle = this.color[0];
+      if (this.isKey(i)) {
+        this.ctx.fillRect(0, (i + 1) * this.h - 5, this.w, 2);
+      }
       this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
       this.ctx.fillStyle = this.color[3];
-      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+      return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
     };
 
     KeyboardView.prototype.drawHover = function(i) {
       this.ctx.fillStyle = this.color[1];
       this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
-      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+      if (this.isKey(i)) {
+        this.ctx.fillRect(0, (i + 1) * this.h - 5, this.w, 2);
+      }
+      return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
     };
 
     KeyboardView.prototype.drawActive = function(i) {
@@ -4885,7 +4902,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx.fillStyle = this.color[2];
       this.ctx.fillRect(0, i * this.h, this.w, this.h);
       this.ctx.fillStyle = this.color[4];
-      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+      return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
     };
 
     KeyboardView.prototype.clearNormal = function(i) {
@@ -4894,13 +4911,33 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     KeyboardView.prototype.clearActive = function(i) {
       this.clearNormal(i);
-      this.drawNormal(i);
-      return this.drawText(i);
+      return this.drawNormal(i);
     };
 
-    KeyboardView.prototype.drawText = function(i) {
-      this.ctx.fillStyle = this.color[3];
-      return this.ctx.fillText((this.num - i - 1) % 7 + 1 + 'th', 10, (i + 1) * this.h - 10);
+    KeyboardView.prototype.changeKey = function(scale_name) {
+      var i, _i, _ref, _results;
+      this.scale_name = scale_name;
+      _results = [];
+      for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.drawNormal(i));
+      }
+      return _results;
+    };
+
+    KeyboardView.prototype.text = function(i) {
+      if (this.scale_name === 'CHROMATIC') {
+        return (this.num - i - 1) % 12 + 1 + 'th';
+      } else {
+        return (this.num - i - 1) % 7 + 1 + 'th';
+      }
+    };
+
+    KeyboardView.prototype.isKey = function(i) {
+      if (this.scale_name === 'CHROMATIC') {
+        return (this.num - i - 1) % 12 === 0;
+      } else {
+        return (this.num - i - 1) % 7 === 0;
+      }
     };
 
     return KeyboardView;

@@ -121,6 +121,7 @@
               <option>MIXOLYDIAN</option>
               <option>AEOLIAN</option>
               <option>LOCRIAN</option>
+              <option>CHROMATIC</option>
             </select>
           </div>
 
@@ -173,6 +174,7 @@
       <option>MIXOLYDIAN</option>
       <option>AEOLIAN</option>
       <option>LOCRIAN</option>
+      <option>CHROMATIC</option>
     </select>
     bpm: <input name="bpm" min="60" max="1000" value="120" type="number">
   </div>
@@ -195,11 +197,5 @@
 <i id="btn-top"    class="btn fa fa-angle-up"    data-line1="mixer"></i>
 <i id="btn-bottom" class="btn fa fa-angle-down"  data-line1="synths"></i>
 
-
-
-<!-- <div id="btn-save" class="fa fa-save"></div> -->
-<!-- <div id="btn-clear" class="fa fa-file-o"></div> -->
-<!-- <form id="ajax-form" method="POST"></form> -->
-<!-- <script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script> -->
 
 : }

@@ -20,6 +20,7 @@
     MIXOLYDIAN: [0,2,4,5,7,9,10,12,14,16]
     AEOLIAN:    [0,2,3,5,7,8,10,12,14,15]
     LOCRIAN:    [0,1,3,5,6,8,10,12,13,15]
+    CHROMATIC:  [0,1,2,3,4,5,6,7,8,9,10,11]
 
 OSC_TYPE =
     RECT:     1
@@ -391,6 +392,7 @@ class @Synth
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @pattern_obj = name: @pattern_name, pattern: @pattern
         @time = 0
+        @scale_name = 'IONIAN'
         @scale = []
         @view = new SynthView(this, @id)
         @core = new SynthCore(this, @ctx, @id)
@@ -403,14 +405,20 @@ class @Synth
 
     setDuration: (@duration) ->
     setKey:  (key) -> @core.setKey(key)
-    setScale: (scale_name) -> @scale = SCALE_LIST[scale_name]
     setNote: (note) -> @core.setNote(note)
+
+    setScale: (@scale_name) ->
+        @scale = SCALE_LIST[scale_name]
+        @view.changeKey(@scale_name)
 
     setGain: (gain) -> @core.setGain(gain)
     getGain: ()     -> @core.gain
 
     noteToSemitone: (ival) ->
-        Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]
+        if @scale_name == 'CHROMATIC'
+            ival - 1
+        else
+            Math.floor((ival-1)/7) * 12 + @scale[(ival-1) % 7]
 
     noteOn: (note) ->
         @core.setNote(@noteToSemitone(note))
