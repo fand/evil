@@ -629,6 +629,7 @@ canvas:active {
 }
 .console-track {
     float: left;
+    position: relative;
     width: 79px;
     height: 153px;
     margin-bottom: -1px;
@@ -670,12 +671,25 @@ canvas:active {
     z-index: 2;
 }
 .gain-slider {
-    width: 30px;
-    height: 100px;
+    position: absolute;
+    width: 40px;
+    height: 110px;
+    top: 25px;
+    left: 0px;
     margin: 10px;
     -webkit-appearance: slider-vertical;
     z-index: 2;
 }
+.vu-meter {
+    position: absolute;
+    top: 35px;
+    left: 50%;
+    width: 70px;
+    height: 110px;
+    margin-left: -35px;
+    z-index: 0;
+}
+
 #console-master .gain-slider {
     position: absolute;
     width: 30px;
@@ -687,7 +701,7 @@ canvas:active {
     -webkit-appearance: slider-vertical;
     z-index: 2;
 }
-.vu-meter {
+#console-master .vu-meter {
     position: absolute;
     top: 25px;
     left: 50%;
@@ -696,6 +710,11 @@ canvas:active {
     margin-left: -35px;
     z-index: 0;
 }
+.gain-slider:focus {
+    outline:none;
+}
+
+
 
 #sidebar-wrapper {
     position: absolute;

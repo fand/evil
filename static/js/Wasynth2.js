@@ -228,7 +228,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node.gain.value = this.gain_master;
       this.node.connect(this.ctx.destination);
       this.panners = [];
-      this.analyzers = [];
+      this.analysers = [];
       this.splitter_master = this.ctx.createChannelSplitter(2);
       this.analyser_master = [this.ctx.createAnalyser(), this.ctx.createAnalyser()];
       this.node.connect(this.splitter_master);
@@ -243,14 +243,23 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
       this.view = new MixerView(this);
       setInterval((function() {
-        var data_l, data_r;
-        data_l = new Uint8Array(_this.analyser_master[0].frequencyBinCount);
-        data_r = new Uint8Array(_this.analyser_master[1].frequencyBinCount);
-        _this.analyser_master[0].getByteTimeDomainData(data_l);
-        _this.analyser_master[1].getByteTimeDomainData(data_r);
-        return _this.view.drawGainMaster(data_l, data_r);
-      }), 10);
+        return _this.drawGains();
+      }), 30);
     }
+
+    Mixer.prototype.drawGains = function() {
+      var data, data_l, data_r, i, _i, _ref;
+      for (i = _i = 0, _ref = this.analysers.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        data = new Uint8Array(this.analysers[i].frequencyBinCount);
+        this.analysers[i].getByteTimeDomainData(data);
+        this.view.drawGainTracks(i, data);
+      }
+      data_l = new Uint8Array(this.analyser_master[0].frequencyBinCount);
+      data_r = new Uint8Array(this.analyser_master[1].frequencyBinCount);
+      this.analyser_master[0].getByteTimeDomainData(data_l);
+      this.analyser_master[1].getByteTimeDomainData(data_r);
+      return this.view.drawGainMaster(data_l, data_r);
+    };
 
     Mixer.prototype.empty = function() {
       this.gain_tracks = [];
@@ -267,6 +276,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.panners.push(p);
       a = this.ctx.createAnalyser();
       synth.connect(a);
+      this.analysers.push(a);
       return this.view.addSynth(synth);
     };
 
@@ -339,6 +349,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 ;(function() {
   this.MixerView = (function() {
     function MixerView(model) {
+      var c, d, _i, _len, _ref, _ref1;
       this.model = model;
       this.dom = $('#mixer');
       this.tracks = $('#mixer-tracks');
@@ -349,6 +360,32 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.gain_master = this.master.find('.console-track > .gain-slider');
       this.pans = this.tracks.find('.console-track > .pan-slider');
       this.pan_master = this.master.find('.console-track > .pan-slider');
+      this.canvas_tracks_dom = this.tracks.find('.vu-meter');
+      this.canvas_tracks = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.canvas_tracks_dom;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          d = _ref[_i];
+          _results.push(d[0]);
+        }
+        return _results;
+      }).call(this);
+      this.ctx_tracks = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.canvas_tracks;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          c = _ref[_i];
+          _results.push(c.getContext('2d'));
+        }
+        return _results;
+      }).call(this);
+      _ref = this.canvas_tracks;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        c = _ref[_i];
+        _ref1 = [70, 110], c.width = _ref1[0], c.height = _ref1[1];
+      }
       this.canvas_master_dom = this.master.find('.vu-meter');
       this.canvas_master = this.canvas_master_dom[0];
       this.ctx_master = this.canvas_master.getContext('2d');
@@ -368,6 +405,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
+    MixerView.prototype.drawGainTracks = function(i, data) {
+      var h, v;
+      v = Math.max.apply(null, data);
+      h = (v - 128) / 128 * 110;
+      this.ctx_tracks[i].clearRect(0, 0, 70, 110);
+      this.ctx_tracks[i].fillStyle = '#0df';
+      return this.ctx_tracks[i].fillRect(50, 110 - h, 10, h);
+    };
+
     MixerView.prototype.drawGainMaster = function(data_l, data_r) {
       var h_l, h_r, v_l, v_r;
       v_l = Math.max.apply(null, data_l);
@@ -381,12 +427,17 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     MixerView.prototype.addSynth = function(synth) {
-      var dom,
+      var d, dom, _ref,
         _this = this;
       dom = this.track_dom.clone();
       this.console_tracks.append(dom);
       this.pans.push(dom.find('.pan-slider'));
       this.gains.push(dom.find('.gain-slider'));
+      d = dom.find('.vu-meter');
+      this.canvas_tracks_dom.push(d);
+      this.canvas_tracks.push(d[0]);
+      this.ctx_tracks.push(d[0].getContext('2d'));
+      _ref = [70, 110], d[0].width = _ref[0], d[0].height = _ref[1];
       this.console_tracks.css({
         width: (this.gains.length * 80 + 2) + 'px'
       });

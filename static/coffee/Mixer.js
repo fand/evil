@@ -20,7 +20,7 @@
       this.node.gain.value = this.gain_master;
       this.node.connect(this.ctx.destination);
       this.panners = [];
-      this.analyzers = [];
+      this.analysers = [];
       this.splitter_master = this.ctx.createChannelSplitter(2);
       this.analyser_master = [this.ctx.createAnalyser(), this.ctx.createAnalyser()];
       this.node.connect(this.splitter_master);
@@ -35,14 +35,23 @@
       }
       this.view = new MixerView(this);
       setInterval((function() {
-        var data_l, data_r;
-        data_l = new Uint8Array(_this.analyser_master[0].frequencyBinCount);
-        data_r = new Uint8Array(_this.analyser_master[1].frequencyBinCount);
-        _this.analyser_master[0].getByteTimeDomainData(data_l);
-        _this.analyser_master[1].getByteTimeDomainData(data_r);
-        return _this.view.drawGainMaster(data_l, data_r);
-      }), 10);
+        return _this.drawGains();
+      }), 30);
     }
+
+    Mixer.prototype.drawGains = function() {
+      var data, data_l, data_r, i, _i, _ref;
+      for (i = _i = 0, _ref = this.analysers.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        data = new Uint8Array(this.analysers[i].frequencyBinCount);
+        this.analysers[i].getByteTimeDomainData(data);
+        this.view.drawGainTracks(i, data);
+      }
+      data_l = new Uint8Array(this.analyser_master[0].frequencyBinCount);
+      data_r = new Uint8Array(this.analyser_master[1].frequencyBinCount);
+      this.analyser_master[0].getByteTimeDomainData(data_l);
+      this.analyser_master[1].getByteTimeDomainData(data_r);
+      return this.view.drawGainMaster(data_l, data_r);
+    };
 
     Mixer.prototype.empty = function() {
       this.gain_tracks = [];
@@ -59,6 +68,7 @@
       this.panners.push(p);
       a = this.ctx.createAnalyser();
       synth.connect(a);
+      this.analysers.push(a);
       return this.view.addSynth(synth);
     };
 

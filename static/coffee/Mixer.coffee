@@ -8,7 +8,7 @@ class @Mixer
         @node.connect(@ctx.destination)
 
         @panners = []
-        @analyzers = []
+        @analysers = []
 
         # master VU meter
         @splitter_master = @ctx.createChannelSplitter(2)
@@ -24,12 +24,23 @@ class @Mixer
         @view = new MixerView(this)
 
         setInterval((() =>
-            data_l = new Uint8Array(@analyser_master[0].frequencyBinCount)
-            data_r = new Uint8Array(@analyser_master[1].frequencyBinCount)
-            @analyser_master[0].getByteTimeDomainData(data_l)
-            @analyser_master[1].getByteTimeDomainData(data_r)
-            @view.drawGainMaster(data_l, data_r)
+            @drawGains()
         ), 30)
+
+    drawGains: ->
+        # Tracks
+        for i in [0...@analysers.length]
+            data = new Uint8Array(@analysers[i].frequencyBinCount)
+            @analysers[i].getByteTimeDomainData(data)
+            @view.drawGainTracks(i, data)
+
+        # Master
+        data_l = new Uint8Array(@analyser_master[0].frequencyBinCount)
+        data_r = new Uint8Array(@analyser_master[1].frequencyBinCount)
+        @analyser_master[0].getByteTimeDomainData(data_l)
+        @analyser_master[1].getByteTimeDomainData(data_r)
+        @view.drawGainMaster(data_l, data_r)
+
 
     empty: ->
         @gain_tracks = []
@@ -46,6 +57,7 @@ class @Mixer
 
         a = @ctx.createAnalyser()
         synth.connect(a)
+        @analysers.push(a)
 
         @view.addSynth(synth)
 
