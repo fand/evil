@@ -3,10 +3,10 @@ class @Player
         @bpm = 120
         @duration = 500  # msec
         @key = 'A'
-        @scale = 'IONIAN'
+        @scale = 'Major'
         @is_playing = false
         @time = 0
-        @scene = {}
+        @scene = bpm: @bpm, key: @key, scale: @scale
 
         @num_id = 0
         @context = CONTEXT
@@ -76,8 +76,8 @@ class @Player
 
     toggleLoop: -> @session.toggleLoop()
 
-    noteOn: (note) -> @synth_now.noteOn(note)
-    noteOff: ()    -> @synth_now.noteOff()
+    noteOn: (note, force) -> @synth_now.noteOn(note, force)
+    noteOff: (force)    -> @synth_now.noteOff(force)
 
     playNext: ->
         if @is_playing

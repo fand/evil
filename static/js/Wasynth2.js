@@ -83,6 +83,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.mode = 'SYNTH';
       this.is_writing = false;
       this.is_pressed = false;
+      this.last_key = 0;
       this.solos = [];
       this.initEvent();
     }
@@ -117,37 +118,47 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Keyboard.prototype.on = function(e) {
+      if (e.keyCode === this.last_key) {
+        return;
+      }
       switch (e.keyCode) {
         case 37:
-          return this.player.view.moveLeft();
+          this.player.view.moveLeft();
+          break;
         case 38:
-          return this.player.view.moveTop();
+          this.player.view.moveTop();
+          break;
         case 39:
-          return this.player.view.moveRight();
+          this.player.view.moveRight();
+          break;
         case 40:
-          return this.player.view.moveBottom();
+          this.player.view.moveBottom();
+          break;
         case 32:
-          return this.player.view.viewPlay();
+          this.player.view.viewPlay();
+          break;
         case 13:
-          return this.player.view.viewPlay();
+          this.player.view.viewPlay();
+          break;
         default:
           if (this.mode === 'SYNTH') {
             this.onPlayer(e);
           }
           if (this.mode === 'MIXER') {
-            return this.onMixer(e);
+            this.onMixer(e);
           }
       }
+      return this.last_key = e.keyCode;
     };
 
     Keyboard.prototype.onPlayer = function(e) {
       var n;
       if (this.player.isPlaying()) {
-        this.player.noteOff();
+        this.player.noteOff(true);
       }
       n = KEYCODE_TO_NOTE[e.keyCode];
       if (n != null) {
-        return this.player.noteOn(n);
+        return this.player.noteOn(n, true);
       }
     };
 
@@ -170,12 +181,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.offPlayer(e);
       }
       if (this.mode === 'MIXER') {
-        return this.offMixer(e);
+        this.offMixer(e);
       }
+      return this.last_key = 0;
     };
 
     Keyboard.prototype.offPlayer = function(e) {
-      return this.player.noteOff();
+      return this.player.noteOff(true);
     };
 
     Keyboard.prototype.offMixer = function(e) {
@@ -197,7 +209,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 ;(function() {
   this.Mixer = (function() {
     function Mixer(ctx, player) {
-      var s;
+      var i, s, _i, _len, _ref,
+        _this = this;
       this.ctx = ctx;
       this.player = player;
       this.gain_master = 1.0;
@@ -215,8 +228,38 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node.gain.value = this.gain_master;
       this.node.connect(this.ctx.destination);
       this.panners = [];
+      this.analysers = [];
+      this.splitter_master = this.ctx.createChannelSplitter(2);
+      this.analyser_master = [this.ctx.createAnalyser(), this.ctx.createAnalyser()];
+      this.node.connect(this.splitter_master);
+      _ref = [0, 1];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        i = _ref[_i];
+        this.splitter_master.connect(this.analyser_master[i], i);
+        this.analyser_master[i].fftSize = 1024;
+        this.analyser_master[i].minDecibels = -100.0;
+        this.analyser_master[i].maxDecibels = 0.0;
+        this.analyser_master[i].smoothingTimeConstant = 0.0;
+      }
       this.view = new MixerView(this);
+      setInterval((function() {
+        return _this.drawGains();
+      }), 30);
     }
+
+    Mixer.prototype.drawGains = function() {
+      var data, data_l, data_r, i, _i, _ref;
+      for (i = _i = 0, _ref = this.analysers.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        data = new Uint8Array(this.analysers[i].frequencyBinCount);
+        this.analysers[i].getByteTimeDomainData(data);
+        this.view.drawGainTracks(i, data);
+      }
+      data_l = new Uint8Array(this.analyser_master[0].frequencyBinCount);
+      data_r = new Uint8Array(this.analyser_master[1].frequencyBinCount);
+      this.analyser_master[0].getByteTimeDomainData(data_l);
+      this.analyser_master[1].getByteTimeDomainData(data_r);
+      return this.view.drawGainMaster(data_l, data_r);
+    };
 
     Mixer.prototype.empty = function() {
       this.gain_tracks = [];
@@ -225,12 +268,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Mixer.prototype.addSynth = function(synth) {
-      var p;
+      var a, p;
       p = this.ctx.createPanner();
       p.panningModel = "equalpower";
       synth.connect(p);
       p.connect(this.node);
       this.panners.push(p);
+      a = this.ctx.createAnalyser();
+      synth.connect(a);
+      this.analysers.push(a);
       return this.view.addSynth(synth);
     };
 
@@ -303,6 +349,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 ;(function() {
   this.MixerView = (function() {
     function MixerView(model) {
+      var c, d, _i, _len, _ref, _ref1;
       this.model = model;
       this.dom = $('#mixer');
       this.tracks = $('#mixer-tracks');
@@ -313,6 +360,39 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.gain_master = this.master.find('.console-track > .gain-slider');
       this.pans = this.tracks.find('.console-track > .pan-slider');
       this.pan_master = this.master.find('.console-track > .pan-slider');
+      this.canvas_tracks_dom = this.tracks.find('.vu-meter');
+      this.canvas_tracks = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.canvas_tracks_dom;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          d = _ref[_i];
+          _results.push(d[0]);
+        }
+        return _results;
+      }).call(this);
+      this.ctx_tracks = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.canvas_tracks;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          c = _ref[_i];
+          _results.push(c.getContext('2d'));
+        }
+        return _results;
+      }).call(this);
+      _ref = this.canvas_tracks;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        c = _ref[_i];
+        _ref1 = [10, 110], c.width = _ref1[0], c.height = _ref1[1];
+      }
+      this.canvas_master_dom = this.master.find('.vu-meter');
+      this.canvas_master = this.canvas_master_dom[0];
+      this.ctx_master = this.canvas_master.getContext('2d');
+      this.canvas_master.width = 60;
+      this.canvas_master.height = 110;
+      this.ctx_master.fillStyle = '#fff';
+      this.ctx_master.fillRect(10, 0, 40, 110);
       this.track_dom = $('#templates > .console-track');
       this.initEvent();
     }
@@ -327,13 +407,40 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
+    MixerView.prototype.drawGainTracks = function(i, data) {
+      var h, v;
+      v = Math.max.apply(null, data);
+      h = (v - 128) / 128 * 110;
+      this.ctx_tracks[i].clearRect(0, 0, 10, 110);
+      this.ctx_tracks[i].fillStyle = '#0df';
+      return this.ctx_tracks[i].fillRect(0, 110 - h, 10, h);
+    };
+
+    MixerView.prototype.drawGainMaster = function(data_l, data_r) {
+      var h_l, h_r, v_l, v_r;
+      v_l = Math.max.apply(null, data_l);
+      v_r = Math.max.apply(null, data_r);
+      h_l = (v_l - 128) / 128 * 110;
+      h_r = (v_r - 128) / 128 * 110;
+      this.ctx_master.clearRect(0, 0, 10, 110);
+      this.ctx_master.clearRect(50, 0, 10, 110);
+      this.ctx_master.fillStyle = '#0df';
+      this.ctx_master.fillRect(0, 110 - h_l, 10, h_l);
+      return this.ctx_master.fillRect(50, 110 - h_r, 10, h_r);
+    };
+
     MixerView.prototype.addSynth = function(synth) {
-      var dom,
+      var d, dom, _ref,
         _this = this;
       dom = this.track_dom.clone();
       this.console_tracks.append(dom);
       this.pans.push(dom.find('.pan-slider'));
       this.gains.push(dom.find('.gain-slider'));
+      d = dom.find('.vu-meter');
+      this.canvas_tracks_dom.push(d);
+      this.canvas_tracks.push(d[0]);
+      this.ctx_tracks.push(d[0].getContext('2d'));
+      _ref = [10, 110], d[0].width = _ref[0], d[0].height = _ref[1];
       this.console_tracks.css({
         width: (this.gains.length * 80 + 2) + 'px'
       });
@@ -520,10 +627,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.bpm = 120;
       this.duration = 500;
       this.key = 'A';
-      this.scale = 'IONIAN';
+      this.scale = 'Major';
       this.is_playing = false;
       this.time = 0;
-      this.scene = {};
+      this.scene = {
+        bpm: this.bpm,
+        key: this.key,
+        scale: this.scale
+      };
       this.num_id = 0;
       this.context = CONTEXT;
       this.synth = [];
@@ -643,12 +754,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.session.toggleLoop();
     };
 
-    Player.prototype.noteOn = function(note) {
-      return this.synth_now.noteOn(note);
+    Player.prototype.noteOn = function(note, force) {
+      return this.synth_now.noteOn(note, force);
     };
 
-    Player.prototype.noteOff = function() {
-      return this.synth_now.noteOff();
+    Player.prototype.noteOff = function(force) {
+      return this.synth_now.noteOff(force);
     };
 
     Player.prototype.playNext = function() {
@@ -2291,7 +2402,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     name: 'section-0',
     bpm: 120,
     key: 'A',
-    sclae: 'IONIAN'
+    sclae: 'Major'
   };
 
   SONG_DEFAULT = {
@@ -3461,14 +3572,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
   this.SCALE_LIST = {
-    IONIAN: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16],
-    DORIAN: [0, 2, 3, 5, 7, 9, 10, 12, 14, 15],
-    PHRYGIAN: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15],
-    LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
-    MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
-    AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
-    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15],
-    CHROMATIC: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    Major: [0, 2, 4, 5, 7, 9, 11],
+    minor: [0, 2, 3, 5, 7, 8, 10],
+    Pentatonic: [0, 3, 5, 7, 10],
+    Dorian: [0, 2, 3, 5, 7, 9, 10],
+    Phrygian: [0, 1, 3, 5, 7, 8, 10],
+    Lydian: [0, 2, 4, 6, 7, 9, 11],
+    Mixolydian: [0, 2, 4, 5, 7, 9, 10],
+    CHROMATIC: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    'Harm-minor': [0, 2, 3, 5, 7, 8, 11]
   };
 
   OSC_TYPE = {
@@ -4080,11 +4192,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         pattern: this.pattern
       };
       this.time = 0;
-      this.scale_name = 'IONIAN';
-      this.scale = [];
+      this.scale_name = 'Major';
+      this.scale = SCALE_LIST[this.scale_name];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
       this.is_sustaining = false;
+      this.is_performing = false;
       this.session = this.player.session;
     }
 
@@ -4108,8 +4221,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Synth.prototype.setScale = function(scale_name) {
       this.scale_name = scale_name;
-      this.scale = SCALE_LIST[scale_name];
-      return this.view.changeKey(this.scale_name);
+      this.scale = SCALE_LIST[this.scale_name];
+      return this.view.changeScale(this.scale);
     };
 
     Synth.prototype.setGain = function(gain) {
@@ -4121,20 +4234,26 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Synth.prototype.noteToSemitone = function(ival) {
-      if (this.scale_name === 'CHROMATIC') {
-        return ival - 1;
-      } else {
-        return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
+      return Math.floor((ival - 1) / this.scale.length) * 12 + this.scale[(ival - 1) % this.scale.length];
+    };
+
+    Synth.prototype.noteOn = function(note, force) {
+      if (force || !this.is_performing) {
+        this.core.setNote(this.noteToSemitone(note));
+        this.core.noteOn();
+      }
+      if (force) {
+        return this.is_performing = true;
       }
     };
 
-    Synth.prototype.noteOn = function(note) {
-      this.core.setNote(this.noteToSemitone(note));
-      return this.core.noteOn();
-    };
-
-    Synth.prototype.noteOff = function() {
-      return this.core.noteOff();
+    Synth.prototype.noteOff = function(force) {
+      if (force) {
+        this.is_performing = false;
+      }
+      if (!this.is_performing) {
+        return this.core.noteOff();
+      }
     };
 
     Synth.prototype.playAt = function(time) {
@@ -4143,6 +4262,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.time = time;
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
+      if (this.is_performing) {
+        return;
+      }
       if (this.pattern[mytime] === 0) {
         return this.core.noteOff();
       } else if (this.pattern[mytime] === 'end') {
@@ -4271,9 +4393,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Synth.prototype.readParam = function(p) {
-      if (p != null) {
-        return this.core.readParam(p);
+      if (p == null) {
+        return;
       }
+      return this.core.readParam(p);
     };
 
     Synth.prototype.mute = function() {
@@ -4778,8 +4901,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.pencil.removeClass('btn-true').addClass('btn-false');
     };
 
-    SynthView.prototype.changeKey = function(scale_name) {
-      return this.keyboard.changeKey(scale_name);
+    SynthView.prototype.changeScale = function(scale) {
+      return this.keyboard.changeScale(scale);
     };
 
     return SynthView;
@@ -4805,6 +4928,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         x: -1,
         y: -1
       };
+      this.scale = this.sequencer.model.scale;
       this.initCanvas();
       this.initEvent();
     }
@@ -4844,8 +4968,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         if (_this.is_clicked && _this.click_pos !== pos) {
           _this.clearActive(_this.click_pos);
           _this.drawActive(pos);
-          _this.sequencer.model.noteOff();
-          _this.sequencer.model.noteOn(_this.num - pos);
+          _this.sequencer.model.noteOff(true);
+          _this.sequencer.model.noteOn(_this.num - pos, true);
           return _this.click_pos = pos;
         }
       }).on('mousedown', function(e) {
@@ -4853,19 +4977,19 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _this.is_clicked = true;
         pos = _this.getPos(e);
         _this.drawActive(pos);
-        _this.sequencer.model.noteOn(_this.num - pos);
+        _this.sequencer.model.noteOn(_this.num - pos, true);
         return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         _this.is_clicked = false;
         _this.clearActive(_this.click_pos);
-        _this.sequencer.model.noteOff();
+        _this.sequencer.model.noteOff(true);
         return _this.click_pos = {
           x: -1,
           y: -1
         };
       }).on('mouseout', function(e) {
         _this.clearActive(_this.hover_pos);
-        _this.sequencer.model.noteOff();
+        _this.sequencer.model.noteOff(true);
         _this.hover_pos = {
           x: -1,
           y: -1
@@ -4914,9 +5038,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.drawNormal(i);
     };
 
-    KeyboardView.prototype.changeKey = function(scale_name) {
+    KeyboardView.prototype.changeScale = function(scale) {
       var i, _i, _ref, _results;
-      this.scale_name = scale_name;
+      this.scale = scale;
       _results = [];
       for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         _results.push(this.drawNormal(i));
@@ -4925,19 +5049,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     KeyboardView.prototype.text = function(i) {
-      if (this.scale_name === 'CHROMATIC') {
-        return (this.num - i - 1) % 12 + 1 + 'th';
-      } else {
-        return (this.num - i - 1) % 7 + 1 + 'th';
-      }
+      return (this.num - i - 1) % this.scale.length + 1 + 'th';
     };
 
     KeyboardView.prototype.isKey = function(i) {
-      if (this.scale_name === 'CHROMATIC') {
-        return (this.num - i - 1) % 12 === 0;
-      } else {
-        return (this.num - i - 1) % 7 === 0;
-      }
+      return (this.num - i - 1) % this.scale.length === 0;
     };
 
     return KeyboardView;
@@ -5024,13 +5140,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         name: 'intro',
         bpm: 80,
         key: 'A',
-        scale: 'IONIAN'
+        scale: 'Major'
       };
       c2 = {
         name: 'outro',
         bpm: 100,
         key: 'G',
-        scale: 'AEOLIAN'
+        scale: 'minor'
       };
       song2 = {
         title: 'hello',

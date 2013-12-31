@@ -8,8 +8,39 @@ class @Mixer
         @node.connect(@ctx.destination)
 
         @panners = []
+        @analysers = []
+
+        # master VU meter
+        @splitter_master = @ctx.createChannelSplitter(2)
+        @analyser_master = [@ctx.createAnalyser(), @ctx.createAnalyser()]
+        @node.connect(@splitter_master)
+        for i in [0,1]
+            @splitter_master.connect(@analyser_master[i], i)
+            @analyser_master[i].fftSize = 1024
+            @analyser_master[i].minDecibels = -100.0
+            @analyser_master[i].maxDecibels = 0.0
+            @analyser_master[i].smoothingTimeConstant = 0.0
 
         @view = new MixerView(this)
+
+        setInterval((() =>
+            @drawGains()
+        ), 30)
+
+    drawGains: ->
+        # Tracks
+        for i in [0...@analysers.length]
+            data = new Uint8Array(@analysers[i].frequencyBinCount)
+            @analysers[i].getByteTimeDomainData(data)
+            @view.drawGainTracks(i, data)
+
+        # Master
+        data_l = new Uint8Array(@analyser_master[0].frequencyBinCount)
+        data_r = new Uint8Array(@analyser_master[1].frequencyBinCount)
+        @analyser_master[0].getByteTimeDomainData(data_l)
+        @analyser_master[1].getByteTimeDomainData(data_r)
+        @view.drawGainMaster(data_l, data_r)
+
 
     empty: ->
         @gain_tracks = []
@@ -23,6 +54,10 @@ class @Mixer
         synth.connect(p)
         p.connect(@node)
         @panners.push(p)
+
+        a = @ctx.createAnalyser()
+        synth.connect(a)
+        @analysers.push(a)
 
         @view.addSynth(synth)
 
@@ -57,6 +92,7 @@ class @Mixer
 
     changeSynth: (id, synth) ->
         synth.connect(@panners[id])
+
 
 
     # You should Mute / Solo by sending messages to Synth / Samplers.

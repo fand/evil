@@ -17,14 +17,15 @@
   };
 
   this.SCALE_LIST = {
-    IONIAN: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16],
-    DORIAN: [0, 2, 3, 5, 7, 9, 10, 12, 14, 15],
-    PHRYGIAN: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15],
-    LYDIAN: [0, 2, 4, 6, 7, 9, 11, 12, 14, 16],
-    MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10, 12, 14, 16],
-    AEOLIAN: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15],
-    LOCRIAN: [0, 1, 3, 5, 6, 8, 10, 12, 13, 15],
-    CHROMATIC: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    Major: [0, 2, 4, 5, 7, 9, 11],
+    minor: [0, 2, 3, 5, 7, 8, 10],
+    Pentatonic: [0, 3, 5, 7, 10],
+    Dorian: [0, 2, 3, 5, 7, 9, 10],
+    Phrygian: [0, 1, 3, 5, 7, 8, 10],
+    Lydian: [0, 2, 4, 6, 7, 9, 11],
+    Mixolydian: [0, 2, 4, 5, 7, 9, 10],
+    CHROMATIC: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    'Harm-minor': [0, 2, 3, 5, 7, 8, 11]
   };
 
   OSC_TYPE = {
@@ -636,11 +637,12 @@
         pattern: this.pattern
       };
       this.time = 0;
-      this.scale_name = 'IONIAN';
-      this.scale = [];
+      this.scale_name = 'Major';
+      this.scale = SCALE_LIST[this.scale_name];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
       this.is_sustaining = false;
+      this.is_performing = false;
       this.session = this.player.session;
     }
 
@@ -664,8 +666,8 @@
 
     Synth.prototype.setScale = function(scale_name) {
       this.scale_name = scale_name;
-      this.scale = SCALE_LIST[scale_name];
-      return this.view.changeKey(this.scale_name);
+      this.scale = SCALE_LIST[this.scale_name];
+      return this.view.changeScale(this.scale);
     };
 
     Synth.prototype.setGain = function(gain) {
@@ -677,20 +679,26 @@
     };
 
     Synth.prototype.noteToSemitone = function(ival) {
-      if (this.scale_name === 'CHROMATIC') {
-        return ival - 1;
-      } else {
-        return Math.floor((ival - 1) / 7) * 12 + this.scale[(ival - 1) % 7];
+      return Math.floor((ival - 1) / this.scale.length) * 12 + this.scale[(ival - 1) % this.scale.length];
+    };
+
+    Synth.prototype.noteOn = function(note, force) {
+      if (force || !this.is_performing) {
+        this.core.setNote(this.noteToSemitone(note));
+        this.core.noteOn();
+      }
+      if (force) {
+        return this.is_performing = true;
       }
     };
 
-    Synth.prototype.noteOn = function(note) {
-      this.core.setNote(this.noteToSemitone(note));
-      return this.core.noteOn();
-    };
-
-    Synth.prototype.noteOff = function() {
-      return this.core.noteOff();
+    Synth.prototype.noteOff = function(force) {
+      if (force) {
+        this.is_performing = false;
+      }
+      if (!this.is_performing) {
+        return this.core.noteOff();
+      }
     };
 
     Synth.prototype.playAt = function(time) {
@@ -699,6 +707,9 @@
       this.time = time;
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
+      if (this.is_performing) {
+        return;
+      }
       if (this.pattern[mytime] === 0) {
         return this.core.noteOff();
       } else if (this.pattern[mytime] === 'end') {
@@ -827,9 +838,10 @@
     };
 
     Synth.prototype.readParam = function(p) {
-      if (p != null) {
-        return this.core.readParam(p);
+      if (p == null) {
+        return;
       }
+      return this.core.readParam(p);
     };
 
     Synth.prototype.mute = function() {

@@ -1,6 +1,7 @@
 (function() {
   this.MixerView = (function() {
     function MixerView(model) {
+      var c, d, _i, _len, _ref, _ref1;
       this.model = model;
       this.dom = $('#mixer');
       this.tracks = $('#mixer-tracks');
@@ -11,6 +12,39 @@
       this.gain_master = this.master.find('.console-track > .gain-slider');
       this.pans = this.tracks.find('.console-track > .pan-slider');
       this.pan_master = this.master.find('.console-track > .pan-slider');
+      this.canvas_tracks_dom = this.tracks.find('.vu-meter');
+      this.canvas_tracks = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.canvas_tracks_dom;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          d = _ref[_i];
+          _results.push(d[0]);
+        }
+        return _results;
+      }).call(this);
+      this.ctx_tracks = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.canvas_tracks;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          c = _ref[_i];
+          _results.push(c.getContext('2d'));
+        }
+        return _results;
+      }).call(this);
+      _ref = this.canvas_tracks;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        c = _ref[_i];
+        _ref1 = [10, 110], c.width = _ref1[0], c.height = _ref1[1];
+      }
+      this.canvas_master_dom = this.master.find('.vu-meter');
+      this.canvas_master = this.canvas_master_dom[0];
+      this.ctx_master = this.canvas_master.getContext('2d');
+      this.canvas_master.width = 60;
+      this.canvas_master.height = 110;
+      this.ctx_master.fillStyle = '#fff';
+      this.ctx_master.fillRect(10, 0, 40, 110);
       this.track_dom = $('#templates > .console-track');
       this.initEvent();
     }
@@ -25,13 +59,40 @@
       });
     };
 
+    MixerView.prototype.drawGainTracks = function(i, data) {
+      var h, v;
+      v = Math.max.apply(null, data);
+      h = (v - 128) / 128 * 110;
+      this.ctx_tracks[i].clearRect(0, 0, 10, 110);
+      this.ctx_tracks[i].fillStyle = '#0df';
+      return this.ctx_tracks[i].fillRect(0, 110 - h, 10, h);
+    };
+
+    MixerView.prototype.drawGainMaster = function(data_l, data_r) {
+      var h_l, h_r, v_l, v_r;
+      v_l = Math.max.apply(null, data_l);
+      v_r = Math.max.apply(null, data_r);
+      h_l = (v_l - 128) / 128 * 110;
+      h_r = (v_r - 128) / 128 * 110;
+      this.ctx_master.clearRect(0, 0, 10, 110);
+      this.ctx_master.clearRect(50, 0, 10, 110);
+      this.ctx_master.fillStyle = '#0df';
+      this.ctx_master.fillRect(0, 110 - h_l, 10, h_l);
+      return this.ctx_master.fillRect(50, 110 - h_r, 10, h_r);
+    };
+
     MixerView.prototype.addSynth = function(synth) {
-      var dom,
+      var d, dom, _ref,
         _this = this;
       dom = this.track_dom.clone();
       this.console_tracks.append(dom);
       this.pans.push(dom.find('.pan-slider'));
       this.gains.push(dom.find('.gain-slider'));
+      d = dom.find('.vu-meter');
+      this.canvas_tracks_dom.push(d);
+      this.canvas_tracks.push(d[0]);
+      this.ctx_tracks.push(d[0].getContext('2d'));
+      _ref = [10, 110], d[0].width = _ref[0], d[0].height = _ref[1];
       this.console_tracks.css({
         width: (this.gains.length * 80 + 2) + 'px'
       });

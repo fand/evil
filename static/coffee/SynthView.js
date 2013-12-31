@@ -487,8 +487,8 @@
       return this.pencil.removeClass('btn-true').addClass('btn-false');
     };
 
-    SynthView.prototype.changeKey = function(scale_name) {
-      return this.keyboard.changeKey(scale_name);
+    SynthView.prototype.changeScale = function(scale) {
+      return this.keyboard.changeScale(scale);
     };
 
     return SynthView;
@@ -514,6 +514,7 @@
         x: -1,
         y: -1
       };
+      this.scale = this.sequencer.model.scale;
       this.initCanvas();
       this.initEvent();
     }
@@ -553,8 +554,8 @@
         if (_this.is_clicked && _this.click_pos !== pos) {
           _this.clearActive(_this.click_pos);
           _this.drawActive(pos);
-          _this.sequencer.model.noteOff();
-          _this.sequencer.model.noteOn(_this.num - pos);
+          _this.sequencer.model.noteOff(true);
+          _this.sequencer.model.noteOn(_this.num - pos, true);
           return _this.click_pos = pos;
         }
       }).on('mousedown', function(e) {
@@ -562,19 +563,19 @@
         _this.is_clicked = true;
         pos = _this.getPos(e);
         _this.drawActive(pos);
-        _this.sequencer.model.noteOn(_this.num - pos);
+        _this.sequencer.model.noteOn(_this.num - pos, true);
         return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         _this.is_clicked = false;
         _this.clearActive(_this.click_pos);
-        _this.sequencer.model.noteOff();
+        _this.sequencer.model.noteOff(true);
         return _this.click_pos = {
           x: -1,
           y: -1
         };
       }).on('mouseout', function(e) {
         _this.clearActive(_this.hover_pos);
-        _this.sequencer.model.noteOff();
+        _this.sequencer.model.noteOff(true);
         _this.hover_pos = {
           x: -1,
           y: -1
@@ -623,9 +624,9 @@
       return this.drawNormal(i);
     };
 
-    KeyboardView.prototype.changeKey = function(scale_name) {
+    KeyboardView.prototype.changeScale = function(scale) {
       var i, _i, _ref, _results;
-      this.scale_name = scale_name;
+      this.scale = scale;
       _results = [];
       for (i = _i = 0, _ref = this.num; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         _results.push(this.drawNormal(i));
@@ -634,19 +635,11 @@
     };
 
     KeyboardView.prototype.text = function(i) {
-      if (this.scale_name === 'CHROMATIC') {
-        return (this.num - i - 1) % 12 + 1 + 'th';
-      } else {
-        return (this.num - i - 1) % 7 + 1 + 'th';
-      }
+      return (this.num - i - 1) % this.scale.length + 1 + 'th';
     };
 
     KeyboardView.prototype.isKey = function(i) {
-      if (this.scale_name === 'CHROMATIC') {
-        return (this.num - i - 1) % 12 === 0;
-      } else {
-        return (this.num - i - 1) % 7 === 0;
-      }
+      return (this.num - i - 1) % this.scale.length === 0;
     };
 
     return KeyboardView;

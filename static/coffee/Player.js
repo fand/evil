@@ -6,10 +6,14 @@
       this.bpm = 120;
       this.duration = 500;
       this.key = 'A';
-      this.scale = 'IONIAN';
+      this.scale = 'Major';
       this.is_playing = false;
       this.time = 0;
-      this.scene = {};
+      this.scene = {
+        bpm: this.bpm,
+        key: this.key,
+        scale: this.scale
+      };
       this.num_id = 0;
       this.context = CONTEXT;
       this.synth = [];
@@ -129,12 +133,12 @@
       return this.session.toggleLoop();
     };
 
-    Player.prototype.noteOn = function(note) {
-      return this.synth_now.noteOn(note);
+    Player.prototype.noteOn = function(note, force) {
+      return this.synth_now.noteOn(note, force);
     };
 
-    Player.prototype.noteOff = function() {
-      return this.synth_now.noteOff();
+    Player.prototype.noteOff = function(force) {
+      return this.synth_now.noteOff(force);
     };
 
     Player.prototype.playNext = function() {

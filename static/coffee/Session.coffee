@@ -2,7 +2,7 @@ _master =
     name: 'section-0'
     bpm: 120
     key: 'A'
-    sclae: 'IONIAN'
+    sclae: 'Major'
 
 SONG_DEFAULT =
     tracks: []

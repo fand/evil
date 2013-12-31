@@ -1,7 +1,8 @@
 (function() {
   this.Mixer = (function() {
     function Mixer(ctx, player) {
-      var s;
+      var i, s, _i, _len, _ref,
+        _this = this;
       this.ctx = ctx;
       this.player = player;
       this.gain_master = 1.0;
@@ -19,8 +20,38 @@
       this.node.gain.value = this.gain_master;
       this.node.connect(this.ctx.destination);
       this.panners = [];
+      this.analysers = [];
+      this.splitter_master = this.ctx.createChannelSplitter(2);
+      this.analyser_master = [this.ctx.createAnalyser(), this.ctx.createAnalyser()];
+      this.node.connect(this.splitter_master);
+      _ref = [0, 1];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        i = _ref[_i];
+        this.splitter_master.connect(this.analyser_master[i], i);
+        this.analyser_master[i].fftSize = 1024;
+        this.analyser_master[i].minDecibels = -100.0;
+        this.analyser_master[i].maxDecibels = 0.0;
+        this.analyser_master[i].smoothingTimeConstant = 0.0;
+      }
       this.view = new MixerView(this);
+      setInterval((function() {
+        return _this.drawGains();
+      }), 30);
     }
+
+    Mixer.prototype.drawGains = function() {
+      var data, data_l, data_r, i, _i, _ref;
+      for (i = _i = 0, _ref = this.analysers.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        data = new Uint8Array(this.analysers[i].frequencyBinCount);
+        this.analysers[i].getByteTimeDomainData(data);
+        this.view.drawGainTracks(i, data);
+      }
+      data_l = new Uint8Array(this.analyser_master[0].frequencyBinCount);
+      data_r = new Uint8Array(this.analyser_master[1].frequencyBinCount);
+      this.analyser_master[0].getByteTimeDomainData(data_l);
+      this.analyser_master[1].getByteTimeDomainData(data_r);
+      return this.view.drawGainMaster(data_l, data_r);
+    };
 
     Mixer.prototype.empty = function() {
       this.gain_tracks = [];
@@ -29,12 +60,15 @@
     };
 
     Mixer.prototype.addSynth = function(synth) {
-      var p;
+      var a, p;
       p = this.ctx.createPanner();
       p.panningModel = "equalpower";
       synth.connect(p);
       p.connect(this.node);
       this.panners.push(p);
+      a = this.ctx.createAnalyser();
+      synth.connect(a);
+      this.analysers.push(a);
       return this.view.addSynth(synth);
     };
 
