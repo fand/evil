@@ -670,7 +670,7 @@ canvas:active {
     height: 25px;
     z-index: 2;
 }
-.gain-slider {
+#console-tracks .gain-slider {
     position: absolute;
     width: 25px;
     height: 110px;
@@ -1498,15 +1498,16 @@ legend {
     margin: 9px 14px;
 }
 .Sampler_EQ > .EQ-sliders {
-    top: 120px;
+    position: absolute;
+    top: 140px;
     width: 270px;
-    height: 150px;
+    height: 120px;
     margin: 0px 15px;
 }
 .Sampler_EQ .EQ-slider {
     float: left;
     width: 90px;
-    height: 100px;
+    height: 120px;
     text-align: center;
 }
 .Sampler_EQ .EQ-slider > label {
@@ -1518,9 +1519,15 @@ legend {
 }
 .Sampler_EQ .EQ-slider > .gain-slider {
     width: 80px;
-    height: 80px;
+    height: 90px;
     margin: 0px;
+    margin-top: 2px;  /* align with output slider */
 }
+
+.gain-slider {
+    -webkit-appearance: slider-vertical;
+}
+
 
 .Sampler_output {
     position: absolute;
@@ -1532,7 +1539,8 @@ legend {
     text-align: center;
 }
 .Sampler_output > .gain-slider {
-    height: 180px;
+    width: 80px;
+    height: 195px;
 }
 
 
