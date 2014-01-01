@@ -24,8 +24,8 @@
     'Harm-minor': [0,2,3,5,7,8,11]
 
 OSC_TYPE =
-    RECT:     1
     SINE:     0
+    RECT:     1
     SAW:      2
     TRIANGLE: 3
 
@@ -70,9 +70,14 @@ class @VCO
         @freq = Math.pow(2, @octave) * @freq_key
 
         @node = @ctx.createOscillator()
-        @node.type = 'sine'
+        @node.type = 0
+
+        @nodes = [@ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator(),
+                  @ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator()]
+
         @setFreq()
         @node.start(0)
+        @nodes[i].start(i*10) for i in [0...7]
 
     setOctave: (@octave) ->
     setFine: (@fine) -> @node.detune.value = @fine
@@ -80,13 +85,33 @@ class @VCO
     setKey: (@freq_key) ->
     setInterval: (@interval) ->
     setShape: (@shape) ->
-        @node.type = OSC_TYPE[shape]
+        if @shape == 'SUPERSAW'
+            for n in @nodes
+                n.type = OSC_TYPE['SAW']
+                n.connect(@dst)
+            @node.disconnect()
+        else if @shape == 'SUPERRECT'
+            for n in @nodes
+                n.type = OSC_TYPE['RECT']
+                n.connect(@dst)
+            @node.disconnect()
+        else
+            n.disconnect(@dst) for n in @nodes
+            @node.type = OSC_TYPE[shape]
+            @node.connect(@dst)
 
     setFreq: ->
         @freq = (Math.pow(2, @octave) * Math.pow(SEMITONE, @interval + @note) * @freq_key) + @fine
-        @node.frequency.setValueAtTime(@freq, 0)
+        if @shape == 'SUPERSAW' or @shape == 'SUPERRECT'
+            for i in [0...7]
+                @nodes[i].frequency.setValueAtTime(@freq + i, 0)
+        else
+            @node.frequency.setValueAtTime(@freq, 0)
 
-    connect: (dst) -> @node.connect(dst)
+    connect: (@dst) ->
+        @node.connect(@dst)
+        n.connect(@dst) for n in @nodes
+
     disconnect:    -> @node.disconnect()
 
     getParam: ->
@@ -125,13 +150,12 @@ class @EG
 
     noteOn: (time) ->
         @target.cancelScheduledValues(time)
-        @target.setValueAtTime(@min, time)
         @target.linearRampToValueAtTime(@max, time + @attack)
         @target.linearRampToValueAtTime(@sustain * (@max - @min) + @min, (time + @attack + @decay))
 
     noteOff: (time) ->
         @target.linearRampToValueAtTime(@min, time + @release)
-        @target.linearRampToValueAtTime(0, time + @release + 1)
+#        @target.linearRampToValueAtTime(0, time + @release + 1)
 
 
 
@@ -245,7 +269,7 @@ class @SynthCore
         @filter.disconnect()
         @node.disconnect()
 
-    setNote: (note) ->
+    setNote: (@note) ->
         for v in @vcos
             v.setNote(note)
             v.setFreq()
@@ -453,9 +477,10 @@ class @Synth
         else
             @core.setNote(@noteToSemitone(@pattern[mytime]))
             @core.noteOn()
-            T.setTimeout(( =>
-                @core.noteOff()
-                ), @duration - 10)
+
+            # T.setTimeout(( =>
+            #     @core.noteOff()
+            #     ), @duration - 10)
 
     play: () ->
         @view.play()

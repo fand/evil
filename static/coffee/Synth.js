@@ -29,8 +29,8 @@
   };
 
   OSC_TYPE = {
-    RECT: 1,
     SINE: 0,
+    RECT: 1,
     SAW: 2,
     TRIANGLE: 3
   };
@@ -100,6 +100,7 @@
 
   this.VCO = (function() {
     function VCO(ctx) {
+      var i, _i;
       this.ctx = ctx;
       this.freq_key = 55;
       this.octave = 4;
@@ -108,9 +109,13 @@
       this.note = 0;
       this.freq = Math.pow(2, this.octave) * this.freq_key;
       this.node = this.ctx.createOscillator();
-      this.node.type = 'sine';
+      this.node.type = 0;
+      this.nodes = [this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator()];
       this.setFreq();
       this.node.start(0);
+      for (i = _i = 0; _i < 7; i = ++_i) {
+        this.nodes[i].start(i * 10);
+      }
     }
 
     VCO.prototype.setOctave = function(octave) {
@@ -135,17 +140,60 @@
     };
 
     VCO.prototype.setShape = function(shape) {
+      var n, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
       this.shape = shape;
-      return this.node.type = OSC_TYPE[shape];
+      if (this.shape === 'SUPERSAW') {
+        _ref = this.nodes;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          n = _ref[_i];
+          n.type = OSC_TYPE['SAW'];
+          n.connect(this.dst);
+        }
+        return this.node.disconnect();
+      } else if (this.shape === 'SUPERRECT') {
+        _ref1 = this.nodes;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          n = _ref1[_j];
+          n.type = OSC_TYPE['RECT'];
+          n.connect(this.dst);
+        }
+        return this.node.disconnect();
+      } else {
+        _ref2 = this.nodes;
+        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+          n = _ref2[_k];
+          n.disconnect(this.dst);
+        }
+        this.node.type = OSC_TYPE[shape];
+        return this.node.connect(this.dst);
+      }
     };
 
     VCO.prototype.setFreq = function() {
+      var i, _i, _results;
       this.freq = (Math.pow(2, this.octave) * Math.pow(SEMITONE, this.interval + this.note) * this.freq_key) + this.fine;
-      return this.node.frequency.setValueAtTime(this.freq, 0);
+      if (this.shape === 'SUPERSAW' || this.shape === 'SUPERRECT') {
+        _results = [];
+        for (i = _i = 0; _i < 7; i = ++_i) {
+          _results.push(this.nodes[i].frequency.setValueAtTime(this.freq + i, 0));
+        }
+        return _results;
+      } else {
+        return this.node.frequency.setValueAtTime(this.freq, 0);
+      }
     };
 
     VCO.prototype.connect = function(dst) {
-      return this.node.connect(dst);
+      var n, _i, _len, _ref, _results;
+      this.dst = dst;
+      this.node.connect(this.dst);
+      _ref = this.nodes;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        n = _ref[_i];
+        _results.push(n.connect(this.dst));
+      }
+      return _results;
     };
 
     VCO.prototype.disconnect = function() {
@@ -229,14 +277,12 @@
 
     EG.prototype.noteOn = function(time) {
       this.target.cancelScheduledValues(time);
-      this.target.setValueAtTime(this.min, time);
       this.target.linearRampToValueAtTime(this.max, time + this.attack);
       return this.target.linearRampToValueAtTime(this.sustain * (this.max - this.min) + this.min, time + this.attack + this.decay);
     };
 
     EG.prototype.noteOff = function(time) {
-      this.target.linearRampToValueAtTime(this.min, time + this.release);
-      return this.target.linearRampToValueAtTime(0, time + this.release + 1);
+      return this.target.linearRampToValueAtTime(this.min, time + this.release);
     };
 
     return EG;
@@ -434,6 +480,7 @@
 
     SynthCore.prototype.setNote = function(note) {
       var v, _i, _len, _ref, _results;
+      this.note = note;
       _ref = this.vcos;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -726,10 +773,7 @@
         return this.core.noteOn();
       } else {
         this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
-        this.core.noteOn();
-        return T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
+        return this.core.noteOn();
       }
     };
 

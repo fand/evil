@@ -58,6 +58,8 @@
           <option>TRIANGLE</option>
           <option>SAW</option>
           <option selected="selected">RECT</option>
+          <option>SUPERSAW</option>
+          <option>SUPERRECT</option>
         </select>
       </div>
 
@@ -76,6 +78,8 @@
           <option>TRIANGLE</option>
           <option selected="selected">SAW</option>
           <option>RECT</option>
+          <option>SUPERSAW</option>
+          <option>SUPERRECT</option>
         </select>
       </div>
 
