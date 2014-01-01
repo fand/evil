@@ -130,7 +130,8 @@
     };
 
     Mixer.prototype.changeSynth = function(id, synth) {
-      return synth.connect(this.panners[id]);
+      synth.connect(this.panners[id]);
+      return synth.connect(this.analysers[id]);
     };
 
     return Mixer;

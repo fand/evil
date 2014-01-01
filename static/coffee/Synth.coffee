@@ -388,6 +388,7 @@ class @SynthCoreView
 
 class @Synth
     constructor: (@ctx, @id, @player, @name) ->
+        @type = 'REZ'
         @name = 'Synth #' + @id if not @name?
         @pattern_name = 'pattern 0'
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]

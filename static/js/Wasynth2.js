@@ -338,7 +338,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Mixer.prototype.changeSynth = function(id, synth) {
-      return synth.connect(this.panners[id]);
+      synth.connect(this.panners[id]);
+      return synth.connect(this.analysers[id]);
     };
 
     return Mixer;
@@ -1540,6 +1541,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.id = id;
       this.player = player;
       this.name = name;
+      this.type = 'SAMPLER';
       if (this.name == null) {
         this.name = 'Sampler #' + this.id;
       }
@@ -2534,20 +2536,20 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Session.prototype.addSynth = function(s, _pos) {
-      var name, pos, pp, s_obj;
+      var name, patterns, pos, s_obj;
       pos = _pos ? _pos : this.scene_pos;
       name = s.id + '-' + pos;
       s.readPatternName(name);
-      pp = [];
-      pp[pos] = {
+      patterns = [];
+      patterns[pos] = {
         name: s.pattern_name,
         pattern: s.pattern
       };
       s_obj = {
         id: s.id,
-        type: 'REZ',
-        name: 'Synth #' + s.id,
-        patterns: pp,
+        type: s.type,
+        name: s.name,
+        patterns: patterns,
         params: [],
         gain: 1.0,
         pan: 0.0
@@ -2763,7 +2765,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Session.prototype.changeSynth = function(id, type) {
-      var pat_name, pp, s, s_obj;
+      var pat_name, pp, s, s_obj, _ref;
       s = this.player.changeSynth(id, type);
       pat_name = s.id + '-' + this.scene_pos;
       s.readPatternName(pat_name);
@@ -2783,7 +2785,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       };
       this.song.tracks[id] = s_obj;
       s.readPattern(pp[this.scene_pos]);
-      return this.view.changeSynth(id, type);
+      _ref = [this.song.tracks[id].patterns[this.current_cells[id]], this.song.tracks[id].patterns[0]], this.song.tracks[id].patterns[0] = _ref[0], this.song.tracks[id].patterns[this.current_cells[id]] = _ref[1];
+      return this.view.addSynth(this.song, [id, this.scene_pos]);
     };
 
     Session.prototype.empty = function() {
@@ -3471,7 +3474,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
-    SessionView.prototype.changeSynth = function(id, type) {};
+    SessionView.prototype.changeSynth = function(song, id, type) {
+      this.song = song;
+      return this.readSong(this.song, this.current_cells);
+    };
 
     SessionView.prototype.copyCell = function(src, dst) {
       if (this.song.tracks[src.x] == null) {
@@ -4182,6 +4188,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.id = id;
       this.player = player;
       this.name = name;
+      this.type = 'REZ';
       if (this.name == null) {
         this.name = 'Synth #' + this.id;
       }

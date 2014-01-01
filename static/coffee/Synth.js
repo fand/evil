@@ -627,6 +627,7 @@
       this.id = id;
       this.player = player;
       this.name = name;
+      this.type = 'REZ';
       if (this.name == null) {
         this.name = 'Synth #' + this.id;
       }
