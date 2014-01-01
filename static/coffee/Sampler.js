@@ -321,6 +321,7 @@
       this.id = id;
       this.player = player;
       this.name = name;
+      this.type = 'SAMPLER';
       if (this.name == null) {
         this.name = 'Sampler #' + this.id;
       }

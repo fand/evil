@@ -189,6 +189,7 @@ class @SamplerCore
 
 class @Sampler
     constructor: (@ctx, @id, @player, @name) ->
+        @type = 'SAMPLER'
         @name = 'Sampler #' + @id if not @name?
 
         @pattern_name = 'pattern 0'

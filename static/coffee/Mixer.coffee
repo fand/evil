@@ -92,7 +92,7 @@ class @Mixer
 
     changeSynth: (id, synth) ->
         synth.connect(@panners[id])
-
+        synth.connect(@analysers[id])
 
 
     # You should Mute / Solo by sending messages to Synth / Samplers.

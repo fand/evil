@@ -137,20 +137,20 @@
     };
 
     Session.prototype.addSynth = function(s, _pos) {
-      var name, pos, pp, s_obj;
+      var name, patterns, pos, s_obj;
       pos = _pos ? _pos : this.scene_pos;
       name = s.id + '-' + pos;
       s.readPatternName(name);
-      pp = [];
-      pp[pos] = {
+      patterns = [];
+      patterns[pos] = {
         name: s.pattern_name,
         pattern: s.pattern
       };
       s_obj = {
         id: s.id,
-        type: 'REZ',
-        name: 'Synth #' + s.id,
-        patterns: pp,
+        type: s.type,
+        name: s.name,
+        patterns: patterns,
         params: [],
         gain: 1.0,
         pan: 0.0
@@ -366,7 +366,7 @@
     };
 
     Session.prototype.changeSynth = function(id, type) {
-      var pat_name, pp, s, s_obj;
+      var pat_name, pp, s, s_obj, _ref;
       s = this.player.changeSynth(id, type);
       pat_name = s.id + '-' + this.scene_pos;
       s.readPatternName(pat_name);
@@ -386,7 +386,8 @@
       };
       this.song.tracks[id] = s_obj;
       s.readPattern(pp[this.scene_pos]);
-      return this.view.changeSynth(id, type);
+      _ref = [this.song.tracks[id].patterns[this.current_cells[id]], this.song.tracks[id].patterns[0]], this.song.tracks[id].patterns[0] = _ref[0], this.song.tracks[id].patterns[this.current_cells[id]] = _ref[1];
+      return this.view.addSynth(this.song, [id, this.scene_pos]);
     };
 
     Session.prototype.empty = function() {

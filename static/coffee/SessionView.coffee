@@ -517,8 +517,8 @@ class @SessionView
             window.open(hb_url)
 
 
-    changeSynth: (id, type) ->
-        #@readSong(@song, @current_cells)
+    changeSynth: (@song, id, type) ->
+        @readSong(@song, @current_cells)
 
 
     copyCell: (src, dst) ->
@@ -527,8 +527,7 @@ class @SessionView
 
         @model.savePattern(src.x, src.y)
 
-        # TODO: addSynth when tracks[dst.x] is empty.
-#        return if not @song.tracks[dst.x]?
+        # addSynth when tracks[dst.x] is empty.
         if not @song.tracks[dst.x]?
             dst.x = @model.readTrack(@song, src, dst)
             @current_cells.length = dst.x + 1

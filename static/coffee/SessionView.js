@@ -636,7 +636,10 @@
       }
     };
 
-    SessionView.prototype.changeSynth = function(id, type) {};
+    SessionView.prototype.changeSynth = function(song, id, type) {
+      this.song = song;
+      return this.readSong(this.song, this.current_cells);
+    };
 
     SessionView.prototype.copyCell = function(src, dst) {
       if (this.song.tracks[src.x] == null) {

@@ -116,9 +116,9 @@ class @Session
         name = s.id + '-' + pos
         s.readPatternName(name)
 
-        pp = []
-        pp[pos] = name: s.pattern_name, pattern: s.pattern
-        s_obj = id: s.id, type: 'REZ', name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
+        patterns = []
+        patterns[pos] = name: s.pattern_name, pattern: s.pattern
+        s_obj = id: s.id, type: s.type, name: s.name, patterns: patterns, params: [], gain: 1.0, pan: 0.0
 
         @song.tracks.push(s_obj)
         @current_cells.push(pos)
@@ -290,7 +290,10 @@ class @Session
         @song.tracks[id] = s_obj
         s.readPattern(pp[@scene_pos])
 
-        @view.changeSynth(id, type)
+        # swap
+        [@song.tracks[id].patterns[0], @song.tracks[id].patterns[@current_cells[id]]] = [@song.tracks[id].patterns[@current_cells[id]], @song.tracks[id].patterns[0]]
+
+        @view.addSynth(@song, [id, @scene_pos])
 
     empty: ->
         @next_pattern_pos = []
