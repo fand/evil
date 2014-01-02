@@ -3751,7 +3751,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.shape === 'SUPERSAW' || this.shape === 'SUPERRECT') {
         _results = [];
         for (i = _i = 0; _i < 7; i = ++_i) {
-          _results.push(this.oscs[i].frequency.setValueAtTime(this.freq + i * 0.2, 0));
+          _results.push(this.oscs[i].frequency.setValueAtTime(this.freq + i * 0.1, 0));
         }
         return _results;
       } else {

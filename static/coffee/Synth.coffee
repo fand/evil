@@ -117,7 +117,7 @@ class @VCO
         @freq = (Math.pow(2, @octave) * Math.pow(SEMITONE, @interval + @note) * @freq_key) + @fine
         if @shape == 'SUPERSAW' or @shape == 'SUPERRECT'
             for i in [0...7]
-                @oscs[i].frequency.setValueAtTime(@freq + i * 0.2, 0)
+                @oscs[i].frequency.setValueAtTime(@freq + i * 0.1, 0)
         else
             @osc.frequency.setValueAtTime(@freq, 0)
 
