@@ -23,6 +23,7 @@
       <: if $debug { :>
         <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
         <script src="<: uri_for('/static/js/lib/jquery-2.0.3.min.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/MutekiTimer.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Player.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Session.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Mixer.js') :>"></script>
