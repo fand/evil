@@ -29,6 +29,9 @@ OSC_TYPE =
     SAW:      2
     TRIANGLE: 3
 
+@T2 = new MutekiTimer()
+
+
 
 
 class @Noise
@@ -69,48 +72,59 @@ class @VCO
         @note = 0
         @freq = Math.pow(2, @octave) * @freq_key
 
-        @node = @ctx.createOscillator()
-        @node.type = 0
+        @node = @ctx.createGain()
+        @node.gain.value = 1.0
+        @osc = @ctx.createOscillator()
+        @osc.type = 0
 
-        @nodes = [@ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator(),
-                  @ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator()]
+        @oscs = [@ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator(),
+                 @ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator()]
 
         @setFreq()
-        @node.start(0)
-        @nodes[i].start(i*10) for i in [0...7]
+        @osc.start(0)
+        @oscs[i].start(i) for i in [0...7]
+
 
     setOctave: (@octave) ->
-    setFine: (@fine) -> @node.detune.value = @fine
     setNote: (@note) ->
     setKey: (@freq_key) ->
     setInterval: (@interval) ->
+
+    setFine: (@fine) ->
+        @osc.detune.value = @fine
+        o.detune.value = @fine for o in @oscs
+
     setShape: (@shape) ->
         if @shape == 'SUPERSAW'
-            for n in @nodes
-                n.type = OSC_TYPE['SAW']
-                n.connect(@dst)
-            @node.disconnect()
+            for o in @oscs
+                o.type = OSC_TYPE['SAW']
+                o.connect(@node)
+            @osc.disconnect()
+            @node.gain.value = 0.9
         else if @shape == 'SUPERRECT'
-            for n in @nodes
-                n.type = OSC_TYPE['RECT']
-                n.connect(@dst)
-            @node.disconnect()
+            for o in @oscs
+                o.type = OSC_TYPE['RECT']
+                o.connect(@node)
+            @osc.disconnect()
+            @node.gain.value = 0.9
         else
-            n.disconnect(@dst) for n in @nodes
-            @node.type = OSC_TYPE[shape]
-            @node.connect(@dst)
+            o.disconnect() for o in @oscs
+            @osc.type = OSC_TYPE[shape]
+            @osc.connect(@node)
+            @node.gain.value = 1.0
 
     setFreq: ->
         @freq = (Math.pow(2, @octave) * Math.pow(SEMITONE, @interval + @note) * @freq_key) + @fine
         if @shape == 'SUPERSAW' or @shape == 'SUPERRECT'
             for i in [0...7]
-                @nodes[i].frequency.setValueAtTime(@freq + i, 0)
+                @oscs[i].frequency.setValueAtTime(@freq + i * 0.2, 0)
         else
-            @node.frequency.setValueAtTime(@freq, 0)
+            @osc.frequency.setValueAtTime(@freq, 0)
 
     connect: (@dst) ->
+        @osc.connect(@node)
+        o.connect(@node) for o in @oscs
         @node.connect(@dst)
-        n.connect(@dst) for n in @nodes
 
     disconnect:    -> @node.disconnect()
 
@@ -118,10 +132,10 @@ class @VCO
         shape: @shape, octave: @octave, interval: @interval, fine: @fine
 
     readParam: (p) ->
-        @shape = p.shape
         @octave = p.octave
         @interval = p.interval
         @fine = p.fine
+        @setShape(p.shape)
 
 
 class @EG
@@ -150,12 +164,18 @@ class @EG
 
     noteOn: (time) ->
         @target.cancelScheduledValues(time)
+
+        #@target.setValueAtTime(0, time)
+        @target.setValueAtTime(@target.value, time)
+
         @target.linearRampToValueAtTime(@max, time + @attack)
         @target.linearRampToValueAtTime(@sustain * (@max - @min) + @min, (time + @attack + @decay))
 
     noteOff: (time) ->
         @target.linearRampToValueAtTime(@min, time + @release)
-#        @target.linearRampToValueAtTime(0, time + @release + 1)
+        @target.linearRampToValueAtTime(0, time + @release + 0.001)
+        @target.cancelScheduledValues(time + @release + 0.002)
+
 
 
 
@@ -181,6 +201,8 @@ class @SynthCore
         @node.gain.value = 0
         @gain = 1.0
         @is_mute = false
+
+        @is_on = false
 
         @vcos  = [new VCO(@ctx), new VCO(@ctx), new Noise(@ctx)]
         @gains = [@ctx.createGain(), @ctx.createGain(), @ctx.createGain()]
@@ -246,14 +268,18 @@ class @SynthCore
 
     noteOn: ->
         return if @is_mute
+        return if @is_on
         t0 = @ctx.currentTime
         @eg.noteOn(t0)
         @feg.noteOn(t0)
+        @is_on = true
 
     noteOff: ->
+        return if not @is_on
         t0 = @ctx.currentTime
         @eg.noteOff(t0)
         @feg.noteOff(t0)
+        @is_on = false
 
     setKey: (key) ->
         freq_key = KEY_LIST[key]
@@ -423,6 +449,7 @@ class @Synth
         @view = new SynthView(this, @id)
         @core = new SynthCore(this, @ctx, @id)
 
+        @is_on = false
         @is_sustaining = false
         @is_performing = false
         @session = @player.session
@@ -461,26 +488,36 @@ class @Synth
         @view.playAt(mytime)
         return if @is_performing
 
+        # off
         if @pattern[mytime] == 0
-            @core.noteOff()
-        else if @pattern[mytime] == 'end'
-            T.setTimeout(( =>
-                @core.noteOff()
-                ), @duration - 10)
-        else if @pattern[mytime] == 'sustain'
+            # @core.noteOff()
             return
+
+        # sustain start
         else if @pattern[mytime] < 0
             @is_sustaining = true
             n = -( @pattern[mytime] )
             @core.setNote(@noteToSemitone(n))
             @core.noteOn()
+
+        # sustain mid
+        else if @pattern[mytime] == 'sustain'
+            return
+
+        # sustain end
+        else if @pattern[mytime] == 'end'
+            # T.setTimeout doesn't work!
+            T2.setTimeout(( =>
+                @core.noteOff()
+                ), @duration - 10)
+
+        # single note
         else
             @core.setNote(@noteToSemitone(@pattern[mytime]))
             @core.noteOn()
-
-            # T.setTimeout(( =>
-            #     @core.noteOff()
-            #     ), @duration - 10)
+            T2.setTimeout(( =>
+                @core.noteOff()
+                ), @duration - 10)
 
     play: () ->
         @view.play()

@@ -35,6 +35,8 @@
     TRIANGLE: 3
   };
 
+  this.T2 = new MutekiTimer();
+
   this.Noise = (function() {
     function Noise(ctx) {
       var _this = this;
@@ -108,23 +110,20 @@
       this.fine = 0;
       this.note = 0;
       this.freq = Math.pow(2, this.octave) * this.freq_key;
-      this.node = this.ctx.createOscillator();
-      this.node.type = 0;
-      this.nodes = [this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator()];
+      this.node = this.ctx.createGain();
+      this.node.gain.value = 1.0;
+      this.osc = this.ctx.createOscillator();
+      this.osc.type = 0;
+      this.oscs = [this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator()];
       this.setFreq();
-      this.node.start(0);
+      this.osc.start(0);
       for (i = _i = 0; _i < 7; i = ++_i) {
-        this.nodes[i].start(i * 10);
+        this.oscs[i].start(i);
       }
     }
 
     VCO.prototype.setOctave = function(octave) {
       this.octave = octave;
-    };
-
-    VCO.prototype.setFine = function(fine) {
-      this.fine = fine;
-      return this.node.detune.value = this.fine;
     };
 
     VCO.prototype.setNote = function(note) {
@@ -139,33 +138,49 @@
       this.interval = interval;
     };
 
+    VCO.prototype.setFine = function(fine) {
+      var o, _i, _len, _ref, _results;
+      this.fine = fine;
+      this.osc.detune.value = this.fine;
+      _ref = this.oscs;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        o = _ref[_i];
+        _results.push(o.detune.value = this.fine);
+      }
+      return _results;
+    };
+
     VCO.prototype.setShape = function(shape) {
-      var n, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+      var o, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
       this.shape = shape;
       if (this.shape === 'SUPERSAW') {
-        _ref = this.nodes;
+        _ref = this.oscs;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          n = _ref[_i];
-          n.type = OSC_TYPE['SAW'];
-          n.connect(this.dst);
+          o = _ref[_i];
+          o.type = OSC_TYPE['SAW'];
+          o.connect(this.node);
         }
-        return this.node.disconnect();
+        this.osc.disconnect();
+        return this.node.gain.value = 0.9;
       } else if (this.shape === 'SUPERRECT') {
-        _ref1 = this.nodes;
+        _ref1 = this.oscs;
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          n = _ref1[_j];
-          n.type = OSC_TYPE['RECT'];
-          n.connect(this.dst);
+          o = _ref1[_j];
+          o.type = OSC_TYPE['RECT'];
+          o.connect(this.node);
         }
-        return this.node.disconnect();
+        this.osc.disconnect();
+        return this.node.gain.value = 0.9;
       } else {
-        _ref2 = this.nodes;
+        _ref2 = this.oscs;
         for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          n = _ref2[_k];
-          n.disconnect(this.dst);
+          o = _ref2[_k];
+          o.disconnect();
         }
-        this.node.type = OSC_TYPE[shape];
-        return this.node.connect(this.dst);
+        this.osc.type = OSC_TYPE[shape];
+        this.osc.connect(this.node);
+        return this.node.gain.value = 1.0;
       }
     };
 
@@ -175,25 +190,24 @@
       if (this.shape === 'SUPERSAW' || this.shape === 'SUPERRECT') {
         _results = [];
         for (i = _i = 0; _i < 7; i = ++_i) {
-          _results.push(this.nodes[i].frequency.setValueAtTime(this.freq + i, 0));
+          _results.push(this.oscs[i].frequency.setValueAtTime(this.freq + i * 0.2, 0));
         }
         return _results;
       } else {
-        return this.node.frequency.setValueAtTime(this.freq, 0);
+        return this.osc.frequency.setValueAtTime(this.freq, 0);
       }
     };
 
     VCO.prototype.connect = function(dst) {
-      var n, _i, _len, _ref, _results;
+      var o, _i, _len, _ref;
       this.dst = dst;
-      this.node.connect(this.dst);
-      _ref = this.nodes;
-      _results = [];
+      this.osc.connect(this.node);
+      _ref = this.oscs;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        n = _ref[_i];
-        _results.push(n.connect(this.dst));
+        o = _ref[_i];
+        o.connect(this.node);
       }
-      return _results;
+      return this.node.connect(this.dst);
     };
 
     VCO.prototype.disconnect = function() {
@@ -210,10 +224,10 @@
     };
 
     VCO.prototype.readParam = function(p) {
-      this.shape = p.shape;
       this.octave = p.octave;
       this.interval = p.interval;
-      return this.fine = p.fine;
+      this.fine = p.fine;
+      return this.setShape(p.shape);
     };
 
     return VCO;
@@ -277,12 +291,15 @@
 
     EG.prototype.noteOn = function(time) {
       this.target.cancelScheduledValues(time);
+      this.target.setValueAtTime(this.target.value, time);
       this.target.linearRampToValueAtTime(this.max, time + this.attack);
       return this.target.linearRampToValueAtTime(this.sustain * (this.max - this.min) + this.min, time + this.attack + this.decay);
     };
 
     EG.prototype.noteOff = function(time) {
-      return this.target.linearRampToValueAtTime(this.min, time + this.release);
+      this.target.linearRampToValueAtTime(this.min, time + this.release);
+      this.target.linearRampToValueAtTime(0, time + this.release + 0.001);
+      return this.target.cancelScheduledValues(time + this.release + 0.002);
     };
 
     return EG;
@@ -331,6 +348,7 @@
       this.node.gain.value = 0;
       this.gain = 1.0;
       this.is_mute = false;
+      this.is_on = false;
       this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
       this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
       for (i = _i = 0; _i < 3; i = ++_i) {
@@ -440,16 +458,24 @@
       if (this.is_mute) {
         return;
       }
+      if (this.is_on) {
+        return;
+      }
       t0 = this.ctx.currentTime;
       this.eg.noteOn(t0);
-      return this.feg.noteOn(t0);
+      this.feg.noteOn(t0);
+      return this.is_on = true;
     };
 
     SynthCore.prototype.noteOff = function() {
       var t0;
+      if (!this.is_on) {
+        return;
+      }
       t0 = this.ctx.currentTime;
       this.eg.noteOff(t0);
-      return this.feg.noteOff(t0);
+      this.feg.noteOff(t0);
+      return this.is_on = false;
     };
 
     SynthCore.prototype.setKey = function(key) {
@@ -689,6 +715,7 @@
       this.scale = SCALE_LIST[this.scale_name];
       this.view = new SynthView(this, this.id);
       this.core = new SynthCore(this, this.ctx, this.id);
+      this.is_on = false;
       this.is_sustaining = false;
       this.is_performing = false;
       this.session = this.player.session;
@@ -759,21 +786,24 @@
         return;
       }
       if (this.pattern[mytime] === 0) {
-        return this.core.noteOff();
-      } else if (this.pattern[mytime] === 'end') {
-        return T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
-      } else if (this.pattern[mytime] === 'sustain') {
 
       } else if (this.pattern[mytime] < 0) {
         this.is_sustaining = true;
         n = -this.pattern[mytime];
         this.core.setNote(this.noteToSemitone(n));
         return this.core.noteOn();
+      } else if (this.pattern[mytime] === 'sustain') {
+
+      } else if (this.pattern[mytime] === 'end') {
+        return T2.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
       } else {
         this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
-        return this.core.noteOn();
+        this.core.noteOn();
+        return T2.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
       }
     };
 
