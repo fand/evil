@@ -2,7 +2,7 @@ _master =
     name: 'section-0'
     bpm: 120
     key: 'A'
-    sclae: 'Major'
+    scale: 'Major'
 
 SONG_DEFAULT =
     tracks: []
@@ -211,12 +211,15 @@ class @Session
                 param.patterns = @song.tracks[i].patterns
             @song.tracks[i] = param
 
-    saveMaster: ->
-        @song.master[@scene_pos] = @player.getScene()
+    saveMaster: (y, obj) ->
+        @song.master[y] = obj
+        @view.readSong(@song, @current_cells)
 
     saveMasters: ->
         if @song.master == []
             @song.master.push(@player.getScene())
+        else
+            return
 
     saveMixer: ->
         @song.mixer = @player.mixer.getParam()
@@ -238,7 +241,7 @@ class @Session
         @player.setSceneLength(@scene_length)
         @readTracks(@song.tracks)
         @player.mixer.readParam(@song.mixer)
-        @view.readSong(song, @current_cells)
+        @view.readSong(@song, @current_cells)
 
     saveSong: () ->
         @savePatterns()

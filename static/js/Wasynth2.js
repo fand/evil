@@ -2404,7 +2404,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     name: 'section-0',
     bpm: 120,
     key: 'A',
-    sclae: 'Major'
+    scale: 'Major'
   };
 
   SONG_DEFAULT = {
@@ -2671,13 +2671,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
-    Session.prototype.saveMaster = function() {
-      return this.song.master[this.scene_pos] = this.player.getScene();
+    Session.prototype.saveMaster = function(y, obj) {
+      this.song.master[y] = obj;
+      return this.view.readSong(this.song, this.current_cells);
     };
 
     Session.prototype.saveMasters = function() {
       if (this.song.master === []) {
         return this.song.master.push(this.player.getScene());
+      } else {
+
       }
     };
 
@@ -2711,7 +2714,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.player.setSceneLength(this.scene_length);
       this.readTracks(this.song.tracks);
       this.player.mixer.readParam(this.song.mixer);
-      return this.view.readSong(song, this.current_cells);
+      return this.view.readSong(this.song, this.current_cells);
     };
 
     Session.prototype.saveSong = function() {
@@ -2896,10 +2899,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         y: -1
       };
       this.select_pos = {
-        x: -1,
-        y: -1
+        x: 0,
+        y: 0,
+        type: 'master'
       };
       this.last_clicked = performance.now();
+      this.sidebar = new Sidebar(this, this.model);
       this.dialog = $('#dialog');
       this.dialog_wrapper = $('#dialog-wrapper');
       this.dialog_close = this.dialog.find('.dialog-close');
@@ -2981,13 +2986,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.ctx_master_hover.translate(0, this.offset_y);
     };
 
-    SessionView.prototype.getPos = function(rect, wrapper, e) {
+    SessionView.prototype.getPos = function(rect, wrapper, e, type) {
       var _x, _y;
       _x = Math.floor((e.clientX - rect.left + this.wrapper_mixer.scrollLeft()) / this.w);
       _y = Math.floor((e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) / this.h);
       return {
         x: _x,
-        y: _y
+        y: _y,
+        type: type
       };
     };
 
@@ -3008,7 +3014,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var _this = this;
       this.canvas_tracks_hover_dom.on('mousemove', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
+        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e, 'tracks');
         if (_this.is_clicked) {
           return _this.drawDrag(_this.ctx_tracks_hover, pos);
         } else {
@@ -3027,7 +3033,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         if (pos.y >= 0) {
           _this.cueTracks(pos.x, pos.y);
         } else {
-          pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
+          pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e, 'tracks');
           now = performance.now();
           if (now - _this.last_clicked < 500 && pos.y !== -1) {
             _this.editPattern(pos);
@@ -3040,7 +3046,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
+        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e, 'tracks');
         if (_this.click_pos.x === pos.x && _this.click_pos.y === pos.y) {
           _this.selectCell(pos);
         } else {
@@ -3052,7 +3058,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
       this.canvas_master_hover_dom.on('mousemove', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
+        pos = _this.getPos(_this.rect_master, _this.wrapper_master, e, 'master');
         if (_this.is_clicked) {
           return _this.drawDragMaster(_this.ctx_master_hover, pos);
         } else {
@@ -3071,13 +3077,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         if (pos.y >= 0) {
           _this.cueMaster(pos.x, pos.y);
         } else {
-          pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
+          pos = _this.getPos(_this.rect_master, _this.wrapper_master, e, 'master');
           _this.is_clicked = true;
         }
         return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
+        pos = _this.getPos(_this.rect_master, _this.wrapper_master, e, 'master');
         if (_this.click_pos.x === pos.x && _this.click_pos.y === pos.y) {
           _this.selectCellMaster(pos);
         } else {
@@ -3147,7 +3153,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
         for (y = _j = 0, _ref1 = Math.max(this.song.length + 1, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           if ((t != null) && (t.patterns[y] != null)) {
-            this.drawCell(this.ctx_tracks, t.patterns[y], x, y);
+            this.drawCellTracks(t.patterns[y], x, y);
           } else {
             this.drawEmpty(this.ctx_tracks, x, y);
           }
@@ -3156,27 +3162,38 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.drawMasterName();
       for (y = _k = 0, _ref2 = Math.max(this.song.length + 1, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
         if (this.song.master[y] != null) {
-          this.drawCell(this.ctx_master, this.song.master[y], 0, y);
+          this.drawCellMaster(this.song.master[y], 0, y);
         } else {
           this.drawEmptyMaster(y);
         }
       }
       this.drawScene(this.scene_pos, this.current_cells);
+      this.selectCellMaster(this.select_pos);
       this.song_title.val(this.song.title);
       return this.song_creator.val(this.song.creator);
     };
 
-    SessionView.prototype.drawCell = function(ctx, p, x, y) {
-      this.clearCell(ctx, x, y);
+    SessionView.prototype.drawCellTracks = function(p, x, y) {
+      this.clearCell(this.ctx_tracks, x, y);
       if (this.track_color[x] == null) {
         this.track_color[x] = this.color_schemes[this.song.tracks[x].type];
       }
-      ctx.strokeStyle = this.track_color[x][1];
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
-      ctx.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
-      ctx.fillStyle = this.track_color[x][1];
-      return ctx.fillText(p.name, x * this.w + 24, (y + 1) * this.h - 6);
+      this.ctx_tracks.strokeStyle = this.track_color[x][1];
+      this.ctx_tracks.lineWidth = 1;
+      this.ctx_tracks.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
+      this.ctx_tracks.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
+      this.ctx_tracks.fillStyle = this.track_color[x][1];
+      return this.ctx_tracks.fillText(p.name, x * this.w + 24, (y + 1) * this.h - 6);
+    };
+
+    SessionView.prototype.drawCellMaster = function(p, x, y) {
+      this.clearCell(this.ctx_master, x, y);
+      this.ctx_master.strokeStyle = this.color[1];
+      this.ctx_master.lineWidth = 1;
+      this.ctx_master.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
+      this.ctx_master.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
+      this.ctx_master.fillStyle = this.color[1];
+      return this.ctx_master.fillText(p.name, x * this.w + 24, (y + 1) * this.h - 6);
     };
 
     SessionView.prototype.drawEmpty = function(ctx, x, y) {
@@ -3225,7 +3242,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SessionView.prototype.drawPatternName = function(x, y, p) {
-      return this.drawCell(this.ctx_tracks, p, x, y);
+      return this.drawCellTracks(p, x, y);
     };
 
     SessionView.prototype.drawSceneName = function(y, name) {};
@@ -3321,12 +3338,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SessionView.prototype.clearHover = function(ctx) {
       if (ctx === this.ctx_tracks_hover) {
         ctx.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w + 2, this.h + 2);
-        if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y) {
+        if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y && this.hover_pos.type === this.select_pos.type) {
           return this.selectCell(this.select_pos);
         }
       } else {
         ctx.clearRect(0, this.hover_pos.y * this.h, this.w + 2, this.h + 2);
-        if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y) {
+        if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y && this.hover_pos.type === this.select_pos.type) {
           return this.selectCellMaster(this.select_pos);
         }
       }
@@ -3388,7 +3405,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SessionView.prototype.editPattern = function(pos) {
       var pat;
       pat = this.model.editPattern(pos.x, pos.y);
-      return this.drawCell(this.ctx_tracks, pat[2], pat[0], pat[1]);
+      return this.drawCellTracks(pat[2], pat[0], pat[1]);
     };
 
     SessionView.prototype.addSynth = function(song) {
@@ -3496,9 +3513,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return;
       }
       this.song.tracks[dst.x].patterns[dst.y] = $.extend(true, {}, this.song.tracks[src.x].patterns[src.y]);
-      this.drawCell(this.ctx_tracks, this.song.tracks[dst.x].patterns[dst.y], dst.x, dst.y);
+      this.drawCellTracks(this.song.tracks[dst.x].patterns[dst.y], dst.x, dst.y);
       this.model.readPattern(this.song.tracks[dst.x].patterns[dst.y], dst.x, dst.y);
-      return this.drawCell(this.ctx_master, this.song.master[dst.y], 0, dst.y);
+      return this.drawCellMaster(this.song.master[dst.y], 0, dst.y);
     };
 
     SessionView.prototype.copyCellMaster = function(src, dst) {
@@ -3506,7 +3523,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return;
       }
       this.song.master[dst.y] = $.extend(true, {}, this.song.master[src.y]);
-      this.drawCell(this.ctx_master, this.song.master[dst.x], 0, dst.y);
+      this.drawCellMaster(this.song.master[dst.x], 0, dst.y);
       return this.model.readMaster(this.song.master[dst.y], dst.y);
     };
 
@@ -3529,7 +3546,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][1];
       this.ctx_tracks_hover.fillText(this.song.tracks[pos.x].patterns[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       this.select_pos = pos;
-      return this.select_pos.type = 'tracks';
+      this.select_pos.type = 'tracks';
+      return this.sidebar.show(this.song, this.select_pos);
     };
 
     SessionView.prototype.selectCellMaster = function(pos) {
@@ -3545,7 +3563,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx_master_hover.fillStyle = this.color[1];
       this.ctx_master_hover.fillText(this.song.master[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       this.select_pos = pos;
-      return this.select_pos.type = 'master';
+      this.select_pos.type = 'master';
+      return this.sidebar.show(this.song, this.select_pos);
     };
 
     SessionView.prototype.getSelectPos = function() {
@@ -3555,6 +3574,137 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     return SessionView;
+
+  })();
+
+}).call(this);
+;(function() {
+  this.Sidebar = (function() {
+    function Sidebar(parent, session) {
+      this.parent = parent;
+      this.session = session;
+      this.sidebar_pos = {
+        x: 0,
+        y: 1,
+        type: 'master'
+      };
+      this.view = new SidebarView(this);
+    }
+
+    Sidebar.prototype.show = function(song, select_pos) {
+      this.song = song;
+      this.select_pos = select_pos;
+      if (this.select_pos.type === 'tracks') {
+        if (this.sidebar_pos.x === this.select_pos.x && this.sidebar_pos.type === this.select_pos.type) {
+          return;
+        }
+        this.sidebar_pos = this.select_pos;
+        return this.view.showTracks(this.song.tracks[this.select_pos.x]);
+      } else {
+        if (this.sidebar_pos.y === this.select_pos.y && this.sidebar_pos.type === this.select_pos.type) {
+          return;
+        }
+        this.sidebar_pos = this.select_pos;
+        return this.view.showMaster(this.song.master[this.select_pos.y]);
+      }
+    };
+
+    Sidebar.prototype.saveMaster = function(obj) {
+      if (this.sidebar_pos.y === -1) {
+        return;
+      }
+      return this.session.saveMaster(this.sidebar_pos.y, obj);
+    };
+
+    return Sidebar;
+
+  })();
+
+}).call(this);
+;(function() {
+  this.SidebarView = (function() {
+    function SidebarView(model) {
+      this.model = model;
+      this.wrapper = $('#sidebar-wrapper');
+      this.tracks = this.wrapper.find('#sidebar-tracks');
+      this.master = this.wrapper.find('#sidebar-master');
+      this.master_name = this.master.find('[name=name]');
+      this.master_bpm = this.master.find('[name=bpm]');
+      this.master_key = this.master.find('[name=key]');
+      this.master_scale = this.master.find('[name=mode]');
+      this.master_save = this.master.find('[name=save]');
+      this.initEvent();
+    }
+
+    SidebarView.prototype.initEvent = function() {
+      var m, _i, _len, _ref,
+        _this = this;
+      this.master_name.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      })).on('change', (function() {
+        return _this.saveMaster();
+      }));
+      _ref = [this.master_bpm, this.master_key, this.master_scale];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        m = _ref[_i];
+        m.on('focus', (function() {
+          return window.keyboard.beginInput();
+        })).on('blur', (function() {
+          return window.keyboard.endInput();
+        }));
+      }
+      return this.master_save.on('click', (function() {
+        return _this.saveMaster();
+      }));
+    };
+
+    SidebarView.prototype.saveMaster = function() {
+      var bpm, key, name, obj, scale;
+      name = this.master_name.val();
+      bpm = this.master_bpm.val();
+      key = this.master_key.val();
+      scale = this.master_scale.val();
+      obj = {
+        name: name != null ? name : void 0,
+        bpm: bpm != null ? bpm : void 0,
+        key: key != null ? key : void 0,
+        scale: scale != null ? scale : void 0
+      };
+      return this.model.saveMaster(obj);
+    };
+
+    SidebarView.prototype.clearMaster = function() {
+      var o;
+      o = {
+        name: this.master_name.val()
+      };
+      this.model.saveMaster(o);
+      return this.showMaster(o);
+    };
+
+    SidebarView.prototype.showTracks = function(o) {
+      return this.wrapper.css('left', '0px');
+    };
+
+    SidebarView.prototype.showMaster = function(o) {
+      if (o.name != null) {
+        this.master_name.val(o.name);
+      }
+      if (o.bpm != null) {
+        this.master_bpm.val(o.bpm);
+      }
+      if (o.key != null) {
+        this.master_key.val(o.key);
+      }
+      if (o.scale != null) {
+        this.master_scale.val(o.scale);
+      }
+      return this.wrapper.css('left', '-141px');
+    };
+
+    return SidebarView;
 
   })();
 

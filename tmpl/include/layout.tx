@@ -27,11 +27,13 @@
         <script src="<: uri_for('/static/coffee/Player.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Session.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Mixer.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/Sidebar.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Synth.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Sampler.js') :>"></script>
         <script src="<: uri_for('/static/coffee/PlayerView.js') :>"></script>
         <script src="<: uri_for('/static/coffee/SessionView.js') :>"></script>
         <script src="<: uri_for('/static/coffee/MixerView.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/SidebarView.js') :>"></script>
         <script src="<: uri_for('/static/coffee/SynthView.js') :>"></script>
         <script src="<: uri_for('/static/coffee/SamplerView.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Keyboard.js') :>"></script>

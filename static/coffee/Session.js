@@ -5,7 +5,7 @@
     name: 'section-0',
     bpm: 120,
     key: 'A',
-    sclae: 'Major'
+    scale: 'Major'
   };
 
   SONG_DEFAULT = {
@@ -272,13 +272,16 @@
       return _results;
     };
 
-    Session.prototype.saveMaster = function() {
-      return this.song.master[this.scene_pos] = this.player.getScene();
+    Session.prototype.saveMaster = function(y, obj) {
+      this.song.master[y] = obj;
+      return this.view.readSong(this.song, this.current_cells);
     };
 
     Session.prototype.saveMasters = function() {
       if (this.song.master === []) {
         return this.song.master.push(this.player.getScene());
+      } else {
+
       }
     };
 
@@ -312,7 +315,7 @@
       this.player.setSceneLength(this.scene_length);
       this.readTracks(this.song.tracks);
       this.player.mixer.readParam(this.song.mixer);
-      return this.view.readSong(song, this.current_cells);
+      return this.view.readSong(this.song, this.current_cells);
     };
 
     Session.prototype.saveSong = function() {

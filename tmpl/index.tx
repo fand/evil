@@ -92,8 +92,14 @@
     <div id="mixer-sidebar">
       <div id="sidebar-wrapper" class="clearfix">
 
+        <fieldset id="sidebar-tracks" class="sidebar">
+          <legend>Track #0</legend>
+
+        </fieldset>
+
+
         <fieldset id="sidebar-master" class="sidebar">
-          <legend>Control Change</legend>
+          <legend><input name="name" type="text" value="section-0" /></legend>
 
           <div class="clearfix">
             <label>key</label>
@@ -132,6 +138,8 @@
             <label>bpm</label>
             <input name="bpm"   type="number" min="0" max="50000" value="120">
           </div>
+
+          <input name="save" type="button" value="save"/>
 
         </fieldset>
 

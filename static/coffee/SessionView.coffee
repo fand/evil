@@ -48,8 +48,11 @@ class @SessionView
 
         @hover_pos = x:-1, y:-1
         @click_pos = x:-1, y:-1
-        @select_pos = x:-1, y:-1
+#        @select_pos = x:-1, y:-1
+        @select_pos = x:0, y:0, type: 'master'
         @last_clicked = performance.now()
+
+        @sidebar = new Sidebar(this, @model)
 
         @dialog = $('#dialog')
         @dialog_wrapper = $('#dialog-wrapper')
@@ -118,11 +121,12 @@ class @SessionView
         @ctx_tracks_hover.translate(0, @offset_y)
         @ctx_master_hover.translate(0, @offset_y)
 
-    getPos: (rect, wrapper, e) ->
+    getPos: (rect, wrapper, e, type) ->
         _x = Math.floor((e.clientX - rect.left + @wrapper_mixer.scrollLeft()) / @w)
         _y = Math.floor((e.clientY - rect.top  + wrapper.scrollTop() - @offset_translate) / @h)
         x: _x
         y: _y
+        type: type
 
     getPlayPos: (rect, wrapper, e) ->
         _x = Math.floor((e.clientX - rect.left + @wrapper_mixer.scrollLeft()) / @w)
@@ -138,7 +142,7 @@ class @SessionView
     initEvent: ->
         # Tracks canvas
         @canvas_tracks_hover_dom.on('mousemove', (e) =>
-            pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
+            pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e, 'tracks')
             if @is_clicked
                 @drawDrag(@ctx_tracks_hover, pos)
             else
@@ -152,7 +156,7 @@ class @SessionView
             if pos.y >= 0
                 @cueTracks(pos.x, pos.y)
             else
-                pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
+                pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e, 'tracks')
                 now = performance.now()  # more accurate than Date.now()
 
                 # Double clicked
@@ -170,7 +174,7 @@ class @SessionView
             @click_pos = pos
 
         ).on('mouseup', (e) =>
-            pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e)
+            pos = @getPos(@rect_tracks, @wrapper_tracks_sub, e, 'tracks')
             if @click_pos.x == pos.x and @click_pos.y == pos.y
                 @selectCell(pos)
             else
@@ -181,7 +185,7 @@ class @SessionView
 
         # Master canvas
         @canvas_master_hover_dom.on('mousemove', (e) =>
-            pos = @getPos(@rect_master, @wrapper_master, e)
+            pos = @getPos(@rect_master, @wrapper_master, e, 'master')
             if @is_clicked
                 @drawDragMaster(@ctx_master_hover, pos)
             else
@@ -195,13 +199,13 @@ class @SessionView
             if pos.y >= 0
                 @cueMaster(pos.x, pos.y)
             else
-                pos = @getPos(@rect_master, @wrapper_master, e)
+                pos = @getPos(@rect_master, @wrapper_master, e, 'master')
                 @is_clicked = true
 
             # for both cases
             @click_pos = pos
         ).on('mouseup', (e) =>
-            pos = @getPos(@rect_master, @wrapper_master, e)
+            pos = @getPos(@rect_master, @wrapper_master, e, 'master')
             if @click_pos.x == pos.x and @click_pos.y == pos.y
                 @selectCellMaster(pos)
             else
@@ -243,7 +247,7 @@ class @SessionView
 
             for y in [0...Math.max(@song.length + 1, 10)]
                 if t? and t.patterns[y]?
-                    @drawCell(@ctx_tracks, t.patterns[y], x, y)
+                    @drawCellTracks(t.patterns[y], x, y)
                 else
                     @drawEmpty(@ctx_tracks, x, y)
 
@@ -251,30 +255,42 @@ class @SessionView
         @drawMasterName()
         for y in [0...Math.max(@song.length + 1, 10)]
             if @song.master[y]?
-                @drawCell(@ctx_master, @song.master[y], 0, y)
+                @drawCellMaster(@song.master[y], 0, y)
             else
                 @drawEmptyMaster(y)
 
         @drawScene(@scene_pos, @current_cells)
 
+        @selectCellMaster(@select_pos)
+
         # set Global info
         @song_title.val(@song.title)
         @song_creator.val(@song.creator)
 
-
-    drawCell: (ctx, p, x, y) ->
-        @clearCell(ctx, x, y)
+    drawCellTracks: (p, x, y) ->
+        @clearCell(@ctx_tracks, x, y)
 
         if not @track_color[x]?
             @track_color[x] = @color_schemes[@song.tracks[x].type]
 
-        ctx.strokeStyle = @track_color[x][1]
-        ctx.lineWidth = 1
-        ctx.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
-        ctx.drawImage(@img_play, 0, 0, 18, 18,  x*@w + 3, y*@h + 3, 16, 15)
+        @ctx_tracks.strokeStyle = @track_color[x][1]
+        @ctx_tracks.lineWidth = 1
+        @ctx_tracks.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
+        @ctx_tracks.drawImage(@img_play, 0, 0, 18, 18,  x*@w + 3, y*@h + 3, 16, 15)
 
-        ctx.fillStyle = @track_color[x][1]
-        ctx.fillText(p.name, x * @w + 24, (y + 1) * @h - 6)
+        @ctx_tracks.fillStyle = @track_color[x][1]
+        @ctx_tracks.fillText(p.name, x * @w + 24, (y + 1) * @h - 6)
+
+    drawCellMaster: (p, x, y) ->
+        @clearCell(@ctx_master, x, y)
+
+        @ctx_master.strokeStyle = @color[1]
+        @ctx_master.lineWidth = 1
+        @ctx_master.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
+        @ctx_master.drawImage(@img_play, 0, 0, 18, 18,  x*@w + 3, y*@h + 3, 16, 15)
+
+        @ctx_master.fillStyle = @color[1]
+        @ctx_master.fillText(p.name, x * @w + 24, (y + 1) * @h - 6)
 
     drawEmpty: (ctx, x, y) ->
         @clearCell(ctx, x, y)
@@ -319,7 +335,7 @@ class @SessionView
         @ctx_tracks.shadowBlur  = 0
 
     drawPatternName: (x, y, p) ->
-        @drawCell(@ctx_tracks, p, x, y)
+        @drawCellTracks(p, x, y)
 
     drawSceneName: (y, name) ->
 
@@ -411,13 +427,13 @@ class @SessionView
         if ctx == @ctx_tracks_hover
             # Don't know why '+2' is needed .... but it's needed!!!
             ctx.clearRect(@hover_pos.x * @w, @hover_pos.y * @h, @w+2, @h+2)
-            if @hover_pos.x == @select_pos.x and @hover_pos.y == @select_pos.y
+            if @hover_pos.x == @select_pos.x and @hover_pos.y == @select_pos.y and @hover_pos.type == @select_pos.type
                 @selectCell(@select_pos)
 
         # for master
         else
             ctx.clearRect(0, @hover_pos.y * @h, @w+2, @h+2)
-            if @hover_pos.x == @select_pos.x and @hover_pos.y == @select_pos.y
+            if @hover_pos.x == @select_pos.x and @hover_pos.y == @select_pos.y and @hover_pos.type == @select_pos.type
                 @selectCellMaster(@select_pos)
 
     clearActive: (x) ->
@@ -451,7 +467,7 @@ class @SessionView
 
     editPattern: (pos) ->
         pat = @model.editPattern(pos.x, pos.y)
-        @drawCell(@ctx_tracks, pat[2], pat[0], pat[1])
+        @drawCellTracks(pat[2], pat[0], pat[1])
 
     addSynth: (@song) ->
         @readSong(@song, @current_cells)
@@ -537,10 +553,10 @@ class @SessionView
 
         # Deep copy the pattern
         @song.tracks[dst.x].patterns[dst.y] = $.extend(true, {}, @song.tracks[src.x].patterns[src.y])
-        @drawCell(@ctx_tracks, @song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
+        @drawCellTracks(@song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
 
         @model.readPattern(@song.tracks[dst.x].patterns[dst.y], dst.x, dst.y)
-        @drawCell(@ctx_master, @song.master[dst.y], 0, dst.y)
+        @drawCellMaster(@song.master[dst.y], 0, dst.y)
 
     copyCellMaster: (src, dst) ->
         return if not @song.master[src.y]?
@@ -550,7 +566,7 @@ class @SessionView
 
         # Deep copy the pattern
         @song.master[dst.y] = $.extend(true, {}, @song.master[src.y])
-        @drawCell(@ctx_master, @song.master[dst.x], 0, dst.y)
+        @drawCellMaster(@song.master[dst.x], 0, dst.y)
 
         # save @song.master to @session.song.master
         @model.readMaster(@song.master[dst.y], dst.y)
@@ -577,6 +593,8 @@ class @SessionView
         @select_pos = pos
         @select_pos.type = 'tracks'
 
+        @sidebar.show(@song, @select_pos)
+
 
     selectCellMaster: (pos) ->
         return if not @song.master[pos.y]?
@@ -595,6 +613,8 @@ class @SessionView
 
         @select_pos = pos
         @select_pos.type = 'master'
+
+        @sidebar.show(@song, @select_pos)
 
 
     getSelectPos: -> @select_pos if @select_pos.x != -1 and @select_pos.y != -1
