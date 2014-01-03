@@ -93,7 +93,23 @@
       <div id="sidebar-wrapper" class="clearfix">
 
         <fieldset id="sidebar-tracks" class="sidebar">
-          <legend>Track #0</legend>
+          <legend><input name="name" type="text" value="Synth #0" /></legend>
+
+          <div class="sidebar-effect">
+            <div class="effect-name">Delay</div>
+
+            <label>input</label>
+            <input name="input" type="range" min="0" max="100" value="10" />
+
+            <label>output</label>
+            <input name="size" type="range" min="0" max="100" value="10" />
+
+            <label>time</label>
+            <input name="delay" type="range" min="0" max="100" value="10" />
+
+            <label>feedback</label>
+            <input name="feedback" type="range" min="0" max="100" value="10" />
+          </div>
 
         </fieldset>
 

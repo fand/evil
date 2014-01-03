@@ -1,3 +1,94 @@
+class @FX
+    constructor: (@ctx) ->
+        @in = @ctx.createGain()
+        @in.gain.value = 0.0
+        @out = @ctx.createGain()
+        @out.gain.value = 1.0
+
+    insert: (src, dst) ->
+        src.connect(@in)
+        @out.connect(dst)
+
+    setInput:  (d) -> @in.gain.value = d
+    setOutput: (d) -> @out.gain.value = d
+
+
+class @Delay extends @FX
+    constructor: (@ctx) ->
+        super(@ctx)
+        @delay = @ctx.createDelay()
+        @delay.delayTime.value = 0.23
+        # @hi = @ctx.createBiquadFilter()
+        # @lo = @ctx.createBiquadFilter()
+        @feedback = @ctx.createGain()
+        @feedback.gain.value = 0.4
+        @in.connect(@delay)
+        @delay.connect(@out)
+        @delay.connect(@feedback)
+        @feedback.connect(@delay)
+
+
+    setDelay: (d) -> @delay.delayTime.value = d
+    setFeedback: (d) -> @feedback.gain.value = d
+
+    setParam: (p) ->
+        @setDelay(p.delay) if p.delay?
+        @setFeedback(p.feedback) if p.feedback?
+        @setInput(p.input) if p.input?
+        @setOutput(p.output) if p.output?
+
+IR_URL =
+    'binaural_1': 'static/IR/binaural/s1_r1_b.wav'
+    'binaural_2': 'static/IR/binaural/s1_r2_b.wav'
+    'binaural_3': 'static/IR/binaural/s1_r3_b.wav'
+    'binaural_4': 'static/IR/binaural/s1_r4_b.wav'
+    'binaural_4': 'static/IR/binaural/s1_r4_b.wav'
+    'BIG_SNARE':  'static/IR/H3000/206_BIG_SNARE.wav'
+
+IR_LOADED = {}
+
+
+
+class @Reverb extends @FX
+    constructor: (@ctx) ->
+        super(@ctx)
+        @reverb = @ctx.createConvolver()
+        @in.connect(@reverb)
+        @reverb.connect(@out)
+        @reverb.connect(@ctx.destination)
+        @setIR('BIG_SNARE')
+        @in.gain.value = 1.0
+        @out.gain.value = 1.0
+
+    setIR: (name) ->
+        if IR_LOADED[name]?
+            @reverb.buffer = IR_LOADED[name]
+            return
+
+        url = IR_URL[name]
+        return if not url?
+
+        req = new XMLHttpRequest()
+        req.open('GET', url, true)
+        req.responseType = "arraybuffer"
+        req.onload = () =>
+            @ctx.decodeAudioData(
+                req.response,
+                ((buffer) =>
+                    @reverb.buffer = buffer
+                    IR_LOADED[name] = buffer
+                ),
+                (err) => console.log('ajax error'); console.log(err)
+            )
+        req.send()
+
+    setParam: (p) ->
+        @setIR(p.name) if p.name?
+        @setInput(p.input) if p.input?
+        @setOutput(p.output) if p.output?
+
+
+
 class @Mixer
     constructor: (@ctx, @player) ->
         @gain_master = 1.0
@@ -7,10 +98,14 @@ class @Mixer
         @node.gain.value = @gain_master
         @node.connect(@ctx.destination)
 
+        @node_send = @ctx.createGain()
+        @node_send.gain.value = 1.0
+        @node_send.connect(@node)
+
         @panners = []
         @analysers = []
 
-        # master VU meter
+        # Master VU meter
         @splitter_master = @ctx.createChannelSplitter(2)
         @analyser_master = [@ctx.createAnalyser(), @ctx.createAnalyser()]
         @node.connect(@splitter_master)
@@ -21,9 +116,16 @@ class @Mixer
             @analyser_master[i].maxDecibels = 0.0
             @analyser_master[i].smoothingTimeConstant = 0.0
 
+        # Master Effects
+        @delay = new Delay(@ctx)
+        @delay.insert(@node_send, @node)
+        @reverb = new Reverb(@ctx)
+        @reverb.insert(@node_send, @node)
+
+
         @view = new MixerView(this)
 
-        setInterval((() =>
+        setInterval(( =>
             @drawGains()
         ), 30)
 
@@ -52,7 +154,7 @@ class @Mixer
         p = @ctx.createPanner()
         p.panningModel = "equalpower"
         synth.connect(p)
-        p.connect(@node)
+        p.connect(@node_send)
         @panners.push(p)
 
         a = @ctx.createAnalyser()

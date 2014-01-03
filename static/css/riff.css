@@ -758,10 +758,10 @@ canvas:active {
     text-align: center;
     height: 26px;
 }
-#sidebar-master > legend {
+.sidebar > legend {
     width: 80px;
 }
-#sidebar-master > legend > input {
+.sidebar > legend > input {
     color: #0df;
     font-size: 12px;
     width: 80px;
@@ -771,21 +771,48 @@ canvas:active {
     outline: none;
     border: none;
 }
-#sidebar-master > legend > input:hover {
+.sidebar > legend > input:hover {
     text-shadow: 0px 0px 10px #9ef;
 }
 
-.sidebar > div {
-    margin: 10px 0px;
+.sidebar-effect {
+    width: 125px;
+    height: 150px;
+    border: none;
+    margin: 0px 7px;
 }
-.sidebar label {
+.sidebar-effect > .effect-name {
+    width: 100%;
+    height: 20px;
+    font-size: 12px;
+    text-align: left;
+}
+.sidebar-effect > label{
+    display: block;
+    width: 100%;
+    height: 20px;
+    font-size: 12px;
+    text-align: left;
+    border: none;
+}
+.sidebar-effect > input {
+    display: block;
+    max-width: 110px;
+    text-align: right;
+    margin-left: 15px;
+}
+
+#sidebar-master > div {
+    margin: 5px 0px;
+}
+#sidebar-master label {
     font-size: 12px;
     float: left;
     width: 40px;
     padding-right: 5px;
     text-align: right;
 }
-.sidebar select {
+#sidebar-master select {
     float: right;
     width: 70px;
     font-size: 10px;
@@ -794,13 +821,26 @@ canvas:active {
     margin-right: 12px;
 }
 .sidebar input {
+    font-size: 10px;
+    text-align: center;
+    margin-top: 4px;
+}
+.sidebar-effect input {
+    width: 130px;
+    right: 0px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 4px;
+}
+#sidebar-master input {
     float: right;
     width: 65px;
-    font-size: 10px;
+    font-size: 12px;
     text-align: center;
     margin-top: 4px;
     margin-right: 12px;
 }
+
 
 
 
