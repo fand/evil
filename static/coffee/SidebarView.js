@@ -11,12 +11,8 @@
       this.master_scale = this.master.find('[name=mode]');
       this.master_save = this.master.find('[name=save]');
       this.initEvent();
-      this.reverb = $('#tmpl_fx_reverb').clone();
-      this.reverb.attr('id', 'master_reverb');
-      this.master.append(this.reverb);
-      this.pump = $('#tmpl_fx_pump').clone();
-      this.pump.attr('id', 'master_pump');
-      this.master.append(this.pump);
+      this.model.mixer.reverb.appendTo(this.master);
+      this.model.mixer.pump.appendTo(this.master);
     }
 
     SidebarView.prototype.initEvent = function() {
@@ -38,9 +34,18 @@
           return window.keyboard.endInput();
         }));
       }
-      return this.master_save.on('click', (function() {
+      this.master_save.on('click', (function() {
         return _this.saveMaster();
       }));
+      return this.tracks.find('.sidebar-effect').each(function(i) {
+        return $(_this).on('change', function() {
+          return _this.model.readTracksEffect(i);
+        });
+      });
+    };
+
+    SidebarView.prototype.saveMasterPump = function(i) {
+      return this.mixer.pump(i);
     };
 
     SidebarView.prototype.saveMaster = function() {

@@ -14,6 +14,7 @@ class @Player
 
         @mixer = new Mixer(@context, this)
         @session = new Session(@context, this)
+        @sidebar = new Sidebar(@context, this, @session, @mixer)
 
         @addSynth(0)
         @synth_now = @synth[0]

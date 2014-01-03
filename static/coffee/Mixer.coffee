@@ -19,8 +19,8 @@ class @Mixer
         @bus_reverb.gain.value = 1.0
         @bus_reverb.connect(@node_send)
 
-        @delay_tracks = []
-        @reverb_tracks = []
+        @gain_delay = []
+        @gain_reverb = []
 
         @panners = []
         @analysers = []
@@ -84,12 +84,16 @@ class @Mixer
         p.connect(@node_send)
         @panners.push(p)
 
-        g_delay = @ctx.createPanner()
-        g_reverb = @ctx.createPanner()
+        g_delay = @ctx.createGain()
+        g_reverb = @ctx.createGain()
         p.connect(g_delay)
         p.connect(g_reverb)
-        @delay_tracks.push(g_delay)
-        @reverb_tracks.push(g_reverb)
+        g_delay.connect(@bus_delay)
+        g_reverb.connect(@bus_reverb)
+        g_delay.gain.value = 0.0
+        g_reverb.gain.value = 1.0
+        @gain_delay.push(g_delay)
+        @gain_reverb.push(g_reverb)
 
         a = @ctx.createAnalyser()
         synth.connect(a)

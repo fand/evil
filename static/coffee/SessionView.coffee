@@ -52,7 +52,7 @@ class @SessionView
         @select_pos = x:0, y:0, type: 'master'
         @last_clicked = performance.now()
 
-        @sidebar = new Sidebar(this, @model)
+
 
         @dialog = $('#dialog')
         @dialog_wrapper = $('#dialog-wrapper')
@@ -593,7 +593,7 @@ class @SessionView
         @select_pos = pos
         @select_pos.type = 'tracks'
 
-        @sidebar.show(@song, @select_pos)
+        @model.player.sidebar.show(@song, @select_pos)
 
 
     selectCellMaster: (pos) ->
@@ -614,7 +614,7 @@ class @SessionView
         @select_pos = pos
         @select_pos.type = 'master'
 
-        @sidebar.show(@song, @select_pos)
+        @model.player.sidebar.show(@song, @select_pos)
 
 
     getSelectPos: -> @select_pos if @select_pos.x != -1 and @select_pos.y != -1

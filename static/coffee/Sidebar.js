@@ -1,8 +1,10 @@
 (function() {
   this.Sidebar = (function() {
-    function Sidebar(parent, session) {
-      this.parent = parent;
+    function Sidebar(ctx, player, session, mixer) {
+      this.ctx = ctx;
+      this.player = player;
       this.session = session;
+      this.mixer = mixer;
       this.sidebar_pos = {
         x: 0,
         y: 1,
@@ -34,6 +36,13 @@
         return;
       }
       return this.session.saveMaster(this.sidebar_pos.y, obj);
+    };
+
+    Sidebar.prototype.saveTracksEffect = function(i, param) {
+      if (this.sidebar_pos.type === 'master') {
+        return;
+      }
+      return this.player.synth[this.sidebar_pos.x].effects[i].saveParam();
     };
 
     return Sidebar;

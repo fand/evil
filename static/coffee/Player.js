@@ -19,6 +19,7 @@
       this.synth = [];
       this.mixer = new Mixer(this.context, this);
       this.session = new Session(this.context, this);
+      this.sidebar = new Sidebar(this.context, this, this.session, this.mixer);
       this.addSynth(0);
       this.synth_now = this.synth[0];
       this.synth_pos = 0;

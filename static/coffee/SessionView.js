@@ -63,7 +63,6 @@
         type: 'master'
       };
       this.last_clicked = performance.now();
-      this.sidebar = new Sidebar(this, this.model);
       this.dialog = $('#dialog');
       this.dialog_wrapper = $('#dialog-wrapper');
       this.dialog_close = this.dialog.find('.dialog-close');
@@ -706,7 +705,7 @@
       this.ctx_tracks_hover.fillText(this.song.tracks[pos.x].patterns[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       this.select_pos = pos;
       this.select_pos.type = 'tracks';
-      return this.sidebar.show(this.song, this.select_pos);
+      return this.model.player.sidebar.show(this.song, this.select_pos);
     };
 
     SessionView.prototype.selectCellMaster = function(pos) {
@@ -723,7 +722,7 @@
       this.ctx_master_hover.fillText(this.song.master[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       this.select_pos = pos;
       this.select_pos.type = 'master';
-      return this.sidebar.show(this.song, this.select_pos);
+      return this.model.player.sidebar.show(this.song, this.select_pos);
     };
 
     SessionView.prototype.getSelectPos = function() {

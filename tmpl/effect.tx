@@ -2,7 +2,7 @@
   <div class="effect-name">Reverb</div>
 
   <label>type</label>
-  <select name="key">
+  <select name="name">
     <option selected="selected">BIG_SNARE</option>
     <option>Sweep_Reverb</option>
     <option>Reverb_Factory</option>
@@ -132,6 +132,6 @@
   <div class="effect-name">Pump</div>
 
   <label>gain</label>
-  <input name="input" type="range" min="0" max="100" value="10" />
+  <input name="gain" type="range" min="0" max="100" value="10" />
 
 </div>

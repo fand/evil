@@ -1,5 +1,5 @@
 class @Sidebar
-    constructor: (@parent, @session)->
+    constructor: (@ctx, @player, @session, @mixer)->
         @sidebar_pos = x:0, y:1, type: 'master'
         @view = new SidebarView(this)
 
@@ -16,3 +16,8 @@ class @Sidebar
     saveMaster: (obj) ->
         return if @sidebar_pos.y == -1
         @session.saveMaster(@sidebar_pos.y, obj)
+
+
+    saveTracksEffect: (i, param) ->
+        return if @sidebar_pos.type == 'master'  # TODO: make sure this is impossible / delete this line
+        @player.synth[@sidebar_pos.x].effects[i].saveParam()

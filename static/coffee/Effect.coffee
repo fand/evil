@@ -4,11 +4,15 @@ class @FX
         @in.gain.value = 1.0
         @out = @ctx.createGain()
         @out.gain.value = 1.0
+        @view = new FXView(this)
 
     connect: (dst) -> @out.connect(dst)
 
     setInput:  (d) -> @in.gain.value = d
     setOutput: (d) -> @out.gain.value = d
+
+    appendTo: (dst) ->
+        $(dst).append(@view.dom)
 
 
 class @Delay extends @FX
@@ -46,6 +50,7 @@ class @Reverb extends @FX
         @setIR('BIG_SNARE')
         @in.gain.value = 1.0
         @out.gain.value = 1.0
+        @view = new ReverbView(this)
 
     setIR: (name) ->
         if IR_LOADED[name]?
@@ -104,34 +109,29 @@ class @Compressor extends @FX
 class @Pump extends @FX
     constructor: (@ctx) ->
         super(@ctx)
-        @comp1 = @ctx.createDynamicsCompressor()
-        @comp2 = @ctx.createDynamicsCompressor()
+        @comp = @ctx.createDynamicsCompressor()
         @limiter = @ctx.createDynamicsCompressor()
-        @in.connect(@comp1)
-        @comp1.connect(@comp2)
-        @comp2.connect(@limiter)
+        @in.connect(@comp)
+        @comp.connect(@limiter)
         @limiter.connect(@out)
 
-        @comp1.attack.value = 0.08
-        @comp1.release.value = 0.08
-        @comp1.ratio.value = 4
-        @comp2.attack.value = 0.003
-        @comp2.release.value = 0.03
-        @comp2.ratio.value = 12
-        @limiter.attack.value = 0
-        @limiter.release.value = 0
+        @comp.attack.value = 0.03
+        @comp.release.value = 0.001
+        @comp.ratio.value = 14
+        @comp.knee.value = 0
+
         @limiter.ratio.value = 20
 
-        @setPump(10)
+        @view = new PumpView(this)
 
-    setPump: (@pump) ->
-        @comp1.threshold.value   = @pump * -1.0
-        @comp2.threshold.value   = @pump * -0.5
-        @limiter.threshold.value = @pump * -0.1
+        @setGain(10)
+
+    setGain: (@gain) ->
+        @comp.threshold.value    = @gain * -1.0
+        @limiter.threshold.value = @gain * -0.1 - 6
 
     setParam: (p) ->
-        @setPump(p.pump) if p.pump?
-
+        @setGain(p.gain) if p.gain?
 
 
 IR_URL =

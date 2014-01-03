@@ -14,14 +14,9 @@ class @SidebarView
 
 
         # init Master Effect
-        @reverb = $('#tmpl_fx_reverb').clone()
-        @reverb.attr('id', 'master_reverb')
-        @master.append(@reverb)
-
-        @pump = $('#tmpl_fx_pump').clone()
-        @pump.attr('id', 'master_pump')
-        @master.append(@pump)
-
+#        @model.mixer.delay.appendTo(@master)
+        @model.mixer.reverb.appendTo(@master)
+        @model.mixer.pump.appendTo(@master)
 
 
     initEvent: ->
@@ -31,6 +26,21 @@ class @SidebarView
         for m in [@master_bpm, @master_key, @master_scale]
             m.on('focus', ( => window.keyboard.beginInput())).on('blur', ( => window.keyboard.endInput()))
         @master_save.on('click', ( => @saveMaster()))
+
+        @tracks.find('.sidebar-effect').each((i)=>
+            $(this).on('change', =>
+                # change i-th effect
+                @model.readTracksEffect(i)
+            )
+        )
+
+    saveMasterPump: (i) ->
+        @mixer.pump(i)
+
+    # saveTracksEffect: (i) ->
+    #     @mixer.saveParam(i)
+
+
 
 
     saveMaster: ->

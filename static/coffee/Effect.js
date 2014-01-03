@@ -10,6 +10,7 @@
       this["in"].gain.value = 1.0;
       this.out = this.ctx.createGain();
       this.out.gain.value = 1.0;
+      this.view = new FXView(this);
     }
 
     FX.prototype.connect = function(dst) {
@@ -22,6 +23,10 @@
 
     FX.prototype.setOutput = function(d) {
       return this.out.gain.value = d;
+    };
+
+    FX.prototype.appendTo = function(dst) {
+      return $(dst).append(this.view.dom);
     };
 
     return FX;
@@ -84,6 +89,7 @@
       this.setIR('BIG_SNARE');
       this["in"].gain.value = 1.0;
       this.out.gain.value = 1.0;
+      this.view = new ReverbView(this);
     }
 
     Reverb.prototype.setIR = function(name) {
@@ -195,35 +201,29 @@
     function Pump(ctx) {
       this.ctx = ctx;
       Pump.__super__.constructor.call(this, this.ctx);
-      this.comp1 = this.ctx.createDynamicsCompressor();
-      this.comp2 = this.ctx.createDynamicsCompressor();
+      this.comp = this.ctx.createDynamicsCompressor();
       this.limiter = this.ctx.createDynamicsCompressor();
-      this["in"].connect(this.comp1);
-      this.comp1.connect(this.comp2);
-      this.comp2.connect(this.limiter);
+      this["in"].connect(this.comp);
+      this.comp.connect(this.limiter);
       this.limiter.connect(this.out);
-      this.comp1.attack.value = 0.08;
-      this.comp1.release.value = 0.08;
-      this.comp1.ratio.value = 4;
-      this.comp2.attack.value = 0.003;
-      this.comp2.release.value = 0.03;
-      this.comp2.ratio.value = 12;
-      this.limiter.attack.value = 0;
-      this.limiter.release.value = 0;
+      this.comp.attack.value = 0.03;
+      this.comp.release.value = 0.001;
+      this.comp.ratio.value = 14;
+      this.comp.knee.value = 0;
       this.limiter.ratio.value = 20;
-      this.setPump(10);
+      this.view = new PumpView(this);
+      this.setGain(10);
     }
 
-    Pump.prototype.setPump = function(pump) {
-      this.pump = pump;
-      this.comp1.threshold.value = this.pump * -1.0;
-      this.comp2.threshold.value = this.pump * -0.5;
-      return this.limiter.threshold.value = this.pump * -0.1;
+    Pump.prototype.setGain = function(gain) {
+      this.gain = gain;
+      this.comp.threshold.value = this.gain * -1.0;
+      return this.limiter.threshold.value = this.gain * -0.1 - 6;
     };
 
     Pump.prototype.setParam = function(p) {
-      if (p.pump != null) {
-        return this.setPump(p.pump);
+      if (p.gain != null) {
+        return this.setGain(p.gain);
       }
     };
 
