@@ -11,8 +11,8 @@
       this.master_scale = this.master.find('[name=mode]');
       this.master_save = this.master.find('[name=save]');
       this.initEvent();
+      this.model.mixer.delay.appendTo(this.master);
       this.model.mixer.reverb.appendTo(this.master);
-      this.model.mixer.pump.appendTo(this.master);
     }
 
     SidebarView.prototype.initEvent = function() {

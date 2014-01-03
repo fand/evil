@@ -795,7 +795,7 @@ canvas:active {
 
 .sidebar-effect {
     width: 125px;
-    height: 150px;
+    min-height: 150px;
     border: none;
     margin: 10px 7px;
 }

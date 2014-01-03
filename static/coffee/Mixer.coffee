@@ -39,13 +39,16 @@ class @Mixer
         # Master Effects
         @delay = new Delay(@ctx)
         @reverb = new Reverb(@ctx)
-        @pump = new Pump(@ctx)
+        @limiter = new Limiter(@ctx)
+
         @bus_delay.connect(@delay.in)
         @bus_reverb.connect(@reverb.in)
-        @node_send.connect(@pump.in)
-        @delay.connect(@pump.in)
-        @reverb.connect(@pump.in)
-        @pump.connect(@node)
+
+        @node_send.connect(@limiter.in)
+        @delay.connect(@limiter.in)
+        @reverb.connect(@limiter.in)
+
+        @limiter.connect(@node)
 
         @view = new MixerView(this)
 
@@ -90,7 +93,7 @@ class @Mixer
         p.connect(g_reverb)
         g_delay.connect(@bus_delay)
         g_reverb.connect(@bus_reverb)
-        g_delay.gain.value = 0.0
+        g_delay.gain.value = 1.0
         g_reverb.gain.value = 1.0
         @gain_delay.push(g_delay)
         @gain_reverb.push(g_reverb)

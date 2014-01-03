@@ -46,13 +46,13 @@
       }
       this.delay = new Delay(this.ctx);
       this.reverb = new Reverb(this.ctx);
-      this.pump = new Pump(this.ctx);
+      this.limiter = new Limiter(this.ctx);
       this.bus_delay.connect(this.delay["in"]);
       this.bus_reverb.connect(this.reverb["in"]);
-      this.node_send.connect(this.pump["in"]);
-      this.delay.connect(this.pump["in"]);
-      this.reverb.connect(this.pump["in"]);
-      this.pump.connect(this.node);
+      this.node_send.connect(this.limiter["in"]);
+      this.delay.connect(this.limiter["in"]);
+      this.reverb.connect(this.limiter["in"]);
+      this.limiter.connect(this.node);
       this.view = new MixerView(this);
       setInterval((function() {
         return _this.drawGains();
@@ -94,7 +94,7 @@
       p.connect(g_reverb);
       g_delay.connect(this.bus_delay);
       g_reverb.connect(this.bus_reverb);
-      g_delay.gain.value = 0.0;
+      g_delay.gain.value = 1.0;
       g_reverb.gain.value = 1.0;
       this.gain_delay.push(g_delay);
       this.gain_reverb.push(g_reverb);

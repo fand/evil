@@ -124,14 +124,26 @@
   <input name="input" type="range" min="0" max="100" value="10" />
 
   <label>output</label>
-  <input name="output" type="range" min="0" max="100" value="100" />
+  <input name="output" type="range" min="0" max="100" value="10" />
 
 </div>
 
-<div id="tmpl_fx_pump" class="sidebar-effect">
-  <div class="effect-name">Pump</div>
+<div id="tmpl_fx_delay" class="sidebar-effect">
+  <div class="effect-name">DELAY</div>
 
-  <label>gain</label>
-  <input name="gain" type="range" min="0" max="100" value="10" />
+  <label>input</label>
+  <input name="input" type="range" min="0" max="100" value="100" />
+
+  <label>delay</label>
+  <input name="delay" type="range" min="50" max="1000" value="230" />
+
+  <label>feedback</label>
+  <input name="feedback" type="range" min="0" max="100" value="10" />
+
+  <label>lofi</label>
+  <input name="lofi" type="range" min="0" max="100" value="0" />
+
+  <label>output</label>
+  <input name="output" type="range" min="0" max="100" value="8" />
 
 </div>

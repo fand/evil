@@ -61,13 +61,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       Delay.__super__.constructor.call(this, this.ctx);
       this.delay = this.ctx.createDelay();
       this.delay.delayTime.value = 0.23;
+      this.lofi = this.ctx.createBiquadFilter();
+      this.lofi.frequency.value = 1200;
+      this.lofi.Q.value = 0.0;
+      this.lofi.gain.value = 1.0;
       this.feedback = this.ctx.createGain();
       this.feedback.gain.value = 0.4;
-      this["in"].connect(this.out);
-      this["in"].connect(this.delay);
+      this["in"].connect(this.lofi);
+      this.lofi.connect(this.delay);
       this.delay.connect(this.out);
       this.delay.connect(this.feedback);
-      this.feedback.connect(this.delay);
+      this.feedback.connect(this.lofi);
+      this.view = new DelayView(this);
     }
 
     Delay.prototype.setDelay = function(d) {
@@ -75,7 +80,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Delay.prototype.setFeedback = function(d) {
-      return this.feedback.gain.value = d;
+      this.feedback.gain.value = d;
+      return console.log(d);
+    };
+
+    Delay.prototype.setLofi = function(d) {
+      return this.lofi.Q.value = d * 5.0;
     };
 
     Delay.prototype.setParam = function(p) {
@@ -84,6 +94,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
       if (p.feedback != null) {
         this.setFeedback(p.feedback);
+      }
+      if (p.lofi != null) {
+        this.setLofi(p.lofi);
       }
       if (p.input != null) {
         this.setInput(p.input);
@@ -215,41 +228,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   })(this.FX);
 
-  this.Pump = (function(_super) {
-    __extends(Pump, _super);
-
-    function Pump(ctx) {
+  this.Limiter = (function() {
+    function Limiter(ctx) {
       this.ctx = ctx;
-      Pump.__super__.constructor.call(this, this.ctx);
-      this.comp = this.ctx.createDynamicsCompressor();
-      this.limiter = this.ctx.createDynamicsCompressor();
-      this["in"].connect(this.comp);
-      this.comp.connect(this.limiter);
-      this.limiter.connect(this.out);
-      this.comp.attack.value = 0.03;
-      this.comp.release.value = 0.001;
-      this.comp.ratio.value = 14;
-      this.comp.knee.value = 0;
-      this.limiter.ratio.value = 20;
-      this.view = new PumpView(this);
-      this.setGain(10);
+      this["in"] = this.ctx.createDynamicsCompressor();
+      this.out = this.ctx.createDynamicsCompressor();
+      this["in"].connect(this.out);
+      this["in"].threshold.value = -6;
+      this.out.threshold.value = -10;
+      this.out.ratio.value = 20;
     }
 
-    Pump.prototype.setGain = function(gain) {
-      this.gain = gain;
-      this.comp.threshold.value = this.gain * -1.0;
-      return this.limiter.threshold.value = this.gain * -0.1 - 6;
+    Limiter.prototype.connect = function(dst) {
+      return this.out.connect(dst);
     };
 
-    Pump.prototype.setParam = function(p) {
-      if (p.gain != null) {
-        return this.setGain(p.gain);
-      }
-    };
+    return Limiter;
 
-    return Pump;
-
-  })(this.FX);
+  })();
 
   IR_URL = {
     'BIG_SNARE': 'static/IR/H3000/206_BIG_SNARE.wav',
@@ -382,31 +378,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   })();
 
-  this.PumpView = (function() {
-    function PumpView(model) {
-      this.model = model;
-      this.dom = $('#tmpl_fx_pump').clone();
-      this.dom.removeAttr('id');
-      this.initEvent();
-    }
-
-    PumpView.prototype.initEvent = function() {
-      var _this = this;
-      return this.dom.on('change', function() {
-        return _this.setParam();
-      });
-    };
-
-    PumpView.prototype.setParam = function() {
-      return this.model.setParam({
-        gain: parseFloat(this.dom.find('[name=gain]').val())
-      });
-    };
-
-    return PumpView;
-
-  })();
-
   this.ReverbView = (function() {
     function ReverbView(model) {
       this.model = model;
@@ -444,7 +415,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.model = model;
       this.dom = $('#tmpl_fx_delay').clone();
       this.dom.removeAttr('id');
-      this.name = this.dom.find('[name=name]');
+      this.delay = this.dom.find('[name=delay]');
+      this.feedback = this.dom.find('[name=feedback]');
+      this.lofi = this.dom.find('[name=lofi]');
       this.input = this.dom.find('[name=input]');
       this.output = this.dom.find('[name=output]');
       this.initEvent();
@@ -452,17 +425,29 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     DelayView.prototype.initEvent = function() {
       var _this = this;
-      this.name.on('change', function() {
-        return _this.model.setIR(_this.name.val());
-      });
       this.input.on('change', function() {
         return _this.model.setParam({
           input: parseFloat(_this.input.val()) / 100.0
         });
       });
-      return this.output.on('change', function() {
+      this.output.on('change', function() {
         return _this.model.setParam({
           output: parseFloat(_this.output.val()) / 100.0
+        });
+      });
+      this.delay.on('change', function() {
+        return _this.model.setParam({
+          delay: parseFloat(_this.delay.val()) / 1000.0
+        });
+      });
+      this.feedback.on('change', function() {
+        return _this.model.setParam({
+          feedback: parseFloat(_this.feedback.val()) / 100.0
+        });
+      });
+      return this.lofi.on('change', function() {
+        return _this.model.setParam({
+          lofi: parseFloat(_this.lofi.val()) / 100.0
         });
       });
     };
@@ -708,13 +693,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
       this.delay = new Delay(this.ctx);
       this.reverb = new Reverb(this.ctx);
-      this.pump = new Pump(this.ctx);
+      this.limiter = new Limiter(this.ctx);
       this.bus_delay.connect(this.delay["in"]);
       this.bus_reverb.connect(this.reverb["in"]);
-      this.node_send.connect(this.pump["in"]);
-      this.delay.connect(this.pump["in"]);
-      this.reverb.connect(this.pump["in"]);
-      this.pump.connect(this.node);
+      this.node_send.connect(this.limiter["in"]);
+      this.delay.connect(this.limiter["in"]);
+      this.reverb.connect(this.limiter["in"]);
+      this.limiter.connect(this.node);
       this.view = new MixerView(this);
       setInterval((function() {
         return _this.drawGains();
@@ -756,7 +741,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       p.connect(g_reverb);
       g_delay.connect(this.bus_delay);
       g_reverb.connect(this.bus_reverb);
-      g_delay.gain.value = 0.0;
+      g_delay.gain.value = 1.0;
       g_reverb.gain.value = 1.0;
       this.gain_delay.push(g_delay);
       this.gain_reverb.push(g_reverb);
@@ -4129,8 +4114,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.master_scale = this.master.find('[name=mode]');
       this.master_save = this.master.find('[name=save]');
       this.initEvent();
+      this.model.mixer.delay.appendTo(this.master);
       this.model.mixer.reverb.appendTo(this.master);
-      this.model.mixer.pump.appendTo(this.master);
     }
 
     SidebarView.prototype.initEvent = function() {

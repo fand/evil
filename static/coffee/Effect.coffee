@@ -18,24 +18,34 @@ class @FX
 class @Delay extends @FX
     constructor: (@ctx) ->
         super(@ctx)
+
         @delay = @ctx.createDelay()
         @delay.delayTime.value = 0.23
-        # @hi = @ctx.createBiquadFilter()
-        # @lo = @ctx.createBiquadFilter()
+
+        @lofi = @ctx.createBiquadFilter()
+        @lofi.frequency.value = 1200
+        @lofi.Q.value = 0.0  # range is [0.0, 5.0]
+        @lofi.gain.value = 1.0
+
         @feedback = @ctx.createGain()
         @feedback.gain.value = 0.4
-        @in.connect(@out)
-        @in.connect(@delay)
+
+        @in.connect(@lofi)
+        @lofi.connect(@delay)
         @delay.connect(@out)
         @delay.connect(@feedback)
-        @feedback.connect(@delay)
+        @feedback.connect(@lofi)
+
+        @view = new DelayView(this)
 
     setDelay: (d) -> @delay.delayTime.value = d
-    setFeedback: (d) -> @feedback.gain.value = d
+    setFeedback: (d) -> @feedback.gain.value = d; console.log(d)
+    setLofi: (d) -> @lofi.Q.value = d * 5.0
 
     setParam: (p) ->
         @setDelay(p.delay) if p.delay?
         @setFeedback(p.feedback) if p.feedback?
+        @setLofi(p.lofi) if p.lofi?
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
 
@@ -106,32 +116,18 @@ class @Compressor extends @FX
         @setOutput(p.output) if p.output?
 
 
-class @Pump extends @FX
+class @Limiter
     constructor: (@ctx) ->
-        super(@ctx)
-        @comp = @ctx.createDynamicsCompressor()
-        @limiter = @ctx.createDynamicsCompressor()
-        @in.connect(@comp)
-        @comp.connect(@limiter)
-        @limiter.connect(@out)
+        @in = @ctx.createDynamicsCompressor()
+        @out = @ctx.createDynamicsCompressor()
 
-        @comp.attack.value = 0.03
-        @comp.release.value = 0.001
-        @comp.ratio.value = 14
-        @comp.knee.value = 0
+        @in.connect(@out)
 
-        @limiter.ratio.value = 20
+        @in.threshold.value  = -6
+        @out.threshold.value = -10
+        @out.ratio.value     = 20
 
-        @view = new PumpView(this)
-
-        @setGain(10)
-
-    setGain: (@gain) ->
-        @comp.threshold.value    = @gain * -1.0
-        @limiter.threshold.value = @gain * -0.1 - 6
-
-    setParam: (p) ->
-        @setGain(p.gain) if p.gain?
+    connect: (dst) -> @out.connect(dst)
 
 
 IR_URL =

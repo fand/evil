@@ -41,13 +41,18 @@
       Delay.__super__.constructor.call(this, this.ctx);
       this.delay = this.ctx.createDelay();
       this.delay.delayTime.value = 0.23;
+      this.lofi = this.ctx.createBiquadFilter();
+      this.lofi.frequency.value = 1200;
+      this.lofi.Q.value = 0.0;
+      this.lofi.gain.value = 1.0;
       this.feedback = this.ctx.createGain();
       this.feedback.gain.value = 0.4;
-      this["in"].connect(this.out);
-      this["in"].connect(this.delay);
+      this["in"].connect(this.lofi);
+      this.lofi.connect(this.delay);
       this.delay.connect(this.out);
       this.delay.connect(this.feedback);
-      this.feedback.connect(this.delay);
+      this.feedback.connect(this.lofi);
+      this.view = new DelayView(this);
     }
 
     Delay.prototype.setDelay = function(d) {
@@ -55,7 +60,12 @@
     };
 
     Delay.prototype.setFeedback = function(d) {
-      return this.feedback.gain.value = d;
+      this.feedback.gain.value = d;
+      return console.log(d);
+    };
+
+    Delay.prototype.setLofi = function(d) {
+      return this.lofi.Q.value = d * 5.0;
     };
 
     Delay.prototype.setParam = function(p) {
@@ -64,6 +74,9 @@
       }
       if (p.feedback != null) {
         this.setFeedback(p.feedback);
+      }
+      if (p.lofi != null) {
+        this.setLofi(p.lofi);
       }
       if (p.input != null) {
         this.setInput(p.input);
@@ -195,41 +208,24 @@
 
   })(this.FX);
 
-  this.Pump = (function(_super) {
-    __extends(Pump, _super);
-
-    function Pump(ctx) {
+  this.Limiter = (function() {
+    function Limiter(ctx) {
       this.ctx = ctx;
-      Pump.__super__.constructor.call(this, this.ctx);
-      this.comp = this.ctx.createDynamicsCompressor();
-      this.limiter = this.ctx.createDynamicsCompressor();
-      this["in"].connect(this.comp);
-      this.comp.connect(this.limiter);
-      this.limiter.connect(this.out);
-      this.comp.attack.value = 0.03;
-      this.comp.release.value = 0.001;
-      this.comp.ratio.value = 14;
-      this.comp.knee.value = 0;
-      this.limiter.ratio.value = 20;
-      this.view = new PumpView(this);
-      this.setGain(10);
+      this["in"] = this.ctx.createDynamicsCompressor();
+      this.out = this.ctx.createDynamicsCompressor();
+      this["in"].connect(this.out);
+      this["in"].threshold.value = -6;
+      this.out.threshold.value = -10;
+      this.out.ratio.value = 20;
     }
 
-    Pump.prototype.setGain = function(gain) {
-      this.gain = gain;
-      this.comp.threshold.value = this.gain * -1.0;
-      return this.limiter.threshold.value = this.gain * -0.1 - 6;
+    Limiter.prototype.connect = function(dst) {
+      return this.out.connect(dst);
     };
 
-    Pump.prototype.setParam = function(p) {
-      if (p.gain != null) {
-        return this.setGain(p.gain);
-      }
-    };
+    return Limiter;
 
-    return Pump;
-
-  })(this.FX);
+  })();
 
   IR_URL = {
     'BIG_SNARE': 'static/IR/H3000/206_BIG_SNARE.wav',

@@ -14,9 +14,8 @@ class @SidebarView
 
 
         # init Master Effect
-#        @model.mixer.delay.appendTo(@master)
+        @model.mixer.delay.appendTo(@master)
         @model.mixer.reverb.appendTo(@master)
-        @model.mixer.pump.appendTo(@master)
 
 
     initEvent: ->
