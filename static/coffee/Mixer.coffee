@@ -5,19 +5,15 @@ class @Mixer
 
         @node = @ctx.createGain()
         @node.gain.value = @gain_master
-        @node.connect(@ctx.destination)
 
         @node_send = @ctx.createGain()
         @node_send.gain.value = 1.0
-        @node_send.connect(@node)
 
         @bus_delay = @ctx.createGain()
         @bus_delay.gain.value = 1.0
-        @bus_delay.connect(@node_send)
 
         @bus_reverb = @ctx.createGain()
         @bus_reverb.gain.value = 1.0
-        @bus_reverb.connect(@node_send)
 
         @gain_delay = []
         @gain_reverb = []
@@ -47,8 +43,9 @@ class @Mixer
         @node_send.connect(@limiter.in)
         @delay.connect(@limiter.in)
         @reverb.connect(@limiter.in)
-
         @limiter.connect(@node)
+
+        @node.connect(@ctx.destination)
 
         @view = new MixerView(this)
 

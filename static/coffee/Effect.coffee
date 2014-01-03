@@ -39,7 +39,7 @@ class @Delay extends @FX
         @view = new DelayView(this)
 
     setDelay: (d) -> @delay.delayTime.value = d
-    setFeedback: (d) -> @feedback.gain.value = d; console.log(d)
+    setFeedback: (d) -> @feedback.gain.value = d
     setLofi: (d) -> @lofi.Q.value = d * 5.0
 
     setParam: (p) ->
@@ -116,7 +116,8 @@ class @Compressor extends @FX
         @setOutput(p.output) if p.output?
 
 
-class @Limiter
+
+class @Limiter  # DON'T NEED to extend FX
     constructor: (@ctx) ->
         @in = @ctx.createDynamicsCompressor()
         @out = @ctx.createDynamicsCompressor()
@@ -128,6 +129,7 @@ class @Limiter
         @out.ratio.value     = 20
 
     connect: (dst) -> @out.connect(dst)
+
 
 
 IR_URL =

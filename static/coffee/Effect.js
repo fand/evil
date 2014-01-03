@@ -60,8 +60,7 @@
     };
 
     Delay.prototype.setFeedback = function(d) {
-      this.feedback.gain.value = d;
-      return console.log(d);
+      return this.feedback.gain.value = d;
     };
 
     Delay.prototype.setLofi = function(d) {

@@ -80,8 +80,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Delay.prototype.setFeedback = function(d) {
-      this.feedback.gain.value = d;
-      return console.log(d);
+      return this.feedback.gain.value = d;
     };
 
     Delay.prototype.setLofi = function(d) {
@@ -665,16 +664,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }).call(this);
       this.node = this.ctx.createGain();
       this.node.gain.value = this.gain_master;
-      this.node.connect(this.ctx.destination);
       this.node_send = this.ctx.createGain();
       this.node_send.gain.value = 1.0;
-      this.node_send.connect(this.node);
       this.bus_delay = this.ctx.createGain();
       this.bus_delay.gain.value = 1.0;
-      this.bus_delay.connect(this.node_send);
       this.bus_reverb = this.ctx.createGain();
       this.bus_reverb.gain.value = 1.0;
-      this.bus_reverb.connect(this.node_send);
       this.gain_delay = [];
       this.gain_reverb = [];
       this.panners = [];
@@ -700,6 +695,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.delay.connect(this.limiter["in"]);
       this.reverb.connect(this.limiter["in"]);
       this.limiter.connect(this.node);
+      this.node.connect(this.ctx.destination);
       this.view = new MixerView(this);
       setInterval((function() {
         return _this.drawGains();
@@ -4201,7 +4197,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
-  var OSC_TYPE;
+  var FREQ_OFFSET, OSC_TYPE, TIME_OFFSET;
 
   this.KEY_LIST = {
     A: 55,
@@ -4238,6 +4234,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
   this.T2 = new MutekiTimer();
+
+  TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17];
+
+  FREQ_OFFSET = [0.1, 0.15, 0.25, 0.35, 0.55, 0.65, 0.85];
 
   this.Noise = (function() {
     function Noise(ctx) {
@@ -4320,7 +4320,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.setFreq();
       this.osc.start(0);
       for (i = _i = 0; _i < 7; i = ++_i) {
-        this.oscs[i].start(i);
+        this.oscs[i].start(TIME_OFFSET[i]);
       }
     }
 
@@ -4392,7 +4392,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.shape === 'SUPERSAW' || this.shape === 'SUPERRECT') {
         _results = [];
         for (i = _i = 0; _i < 7; i = ++_i) {
-          _results.push(this.oscs[i].frequency.setValueAtTime(this.freq + i * 0.1, 0));
+          _results.push(this.oscs[i].frequency.setValueAtTime(this.freq + FREQ_OFFSET[i], 0));
         }
         return _results;
       } else {

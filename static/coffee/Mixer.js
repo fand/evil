@@ -18,16 +18,12 @@
       }).call(this);
       this.node = this.ctx.createGain();
       this.node.gain.value = this.gain_master;
-      this.node.connect(this.ctx.destination);
       this.node_send = this.ctx.createGain();
       this.node_send.gain.value = 1.0;
-      this.node_send.connect(this.node);
       this.bus_delay = this.ctx.createGain();
       this.bus_delay.gain.value = 1.0;
-      this.bus_delay.connect(this.node_send);
       this.bus_reverb = this.ctx.createGain();
       this.bus_reverb.gain.value = 1.0;
-      this.bus_reverb.connect(this.node_send);
       this.gain_delay = [];
       this.gain_reverb = [];
       this.panners = [];
@@ -53,6 +49,7 @@
       this.delay.connect(this.limiter["in"]);
       this.reverb.connect(this.limiter["in"]);
       this.limiter.connect(this.node);
+      this.node.connect(this.ctx.destination);
       this.view = new MixerView(this);
       setInterval((function() {
         return _this.drawGains();
