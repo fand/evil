@@ -26,6 +26,7 @@
         <script src="<: uri_for('/static/coffee/MutekiTimer.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Player.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Session.js') :>"></script>
+        <script src="<: uri_for('/static/coffee/Effect.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Mixer.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Sidebar.js') :>"></script>
         <script src="<: uri_for('/static/coffee/Synth.js') :>"></script>

@@ -11,6 +11,12 @@
       this.master_scale = this.master.find('[name=mode]');
       this.master_save = this.master.find('[name=save]');
       this.initEvent();
+      this.reverb = $('#tmpl_fx_reverb').clone();
+      this.reverb.attr('id', 'master_reverb');
+      this.master.append(this.reverb);
+      this.pump = $('#tmpl_fx_pump').clone();
+      this.pump.attr('id', 'master_pump');
+      this.master.append(this.pump);
     }
 
     SidebarView.prototype.initEvent = function() {

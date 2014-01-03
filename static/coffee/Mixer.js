@@ -1,145 +1,4 @@
 (function() {
-  var IR_LOADED, IR_URL,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  this.FX = (function() {
-    function FX(ctx) {
-      this.ctx = ctx;
-      this["in"] = this.ctx.createGain();
-      this["in"].gain.value = 0.0;
-      this.out = this.ctx.createGain();
-      this.out.gain.value = 1.0;
-    }
-
-    FX.prototype.insert = function(src, dst) {
-      src.connect(this["in"]);
-      return this.out.connect(dst);
-    };
-
-    FX.prototype.setInput = function(d) {
-      return this["in"].gain.value = d;
-    };
-
-    FX.prototype.setOutput = function(d) {
-      return this.out.gain.value = d;
-    };
-
-    return FX;
-
-  })();
-
-  this.Delay = (function(_super) {
-    __extends(Delay, _super);
-
-    function Delay(ctx) {
-      this.ctx = ctx;
-      Delay.__super__.constructor.call(this, this.ctx);
-      this.delay = this.ctx.createDelay();
-      this.delay.delayTime.value = 0.23;
-      this.feedback = this.ctx.createGain();
-      this.feedback.gain.value = 0.4;
-      this["in"].connect(this.delay);
-      this.delay.connect(this.out);
-      this.delay.connect(this.feedback);
-      this.feedback.connect(this.delay);
-    }
-
-    Delay.prototype.setDelay = function(d) {
-      return this.delay.delayTime.value = d;
-    };
-
-    Delay.prototype.setFeedback = function(d) {
-      return this.feedback.gain.value = d;
-    };
-
-    Delay.prototype.setParam = function(p) {
-      if (p.delay != null) {
-        this.setDelay(p.delay);
-      }
-      if (p.feedback != null) {
-        this.setFeedback(p.feedback);
-      }
-      if (p.input != null) {
-        this.setInput(p.input);
-      }
-      if (p.output != null) {
-        return this.setOutput(p.output);
-      }
-    };
-
-    return Delay;
-
-  })(this.FX);
-
-  IR_URL = {
-    'binaural_1': 'static/IR/binaural/s1_r1_b.wav',
-    'binaural_2': 'static/IR/binaural/s1_r2_b.wav',
-    'binaural_3': 'static/IR/binaural/s1_r3_b.wav',
-    'binaural_4': 'static/IR/binaural/s1_r4_b.wav',
-    'binaural_4': 'static/IR/binaural/s1_r4_b.wav',
-    'BIG_SNARE': 'static/IR/H3000/206_BIG_SNARE.wav'
-  };
-
-  IR_LOADED = {};
-
-  this.Reverb = (function(_super) {
-    __extends(Reverb, _super);
-
-    function Reverb(ctx) {
-      this.ctx = ctx;
-      Reverb.__super__.constructor.call(this, this.ctx);
-      this.reverb = this.ctx.createConvolver();
-      this["in"].connect(this.reverb);
-      this.reverb.connect(this.out);
-      this.reverb.connect(this.ctx.destination);
-      this.setIR('BIG_SNARE');
-      this["in"].gain.value = 1.0;
-      this.out.gain.value = 1.0;
-    }
-
-    Reverb.prototype.setIR = function(name) {
-      var req, url,
-        _this = this;
-      if (IR_LOADED[name] != null) {
-        this.reverb.buffer = IR_LOADED[name];
-        return;
-      }
-      url = IR_URL[name];
-      if (url == null) {
-        return;
-      }
-      req = new XMLHttpRequest();
-      req.open('GET', url, true);
-      req.responseType = "arraybuffer";
-      req.onload = function() {
-        return _this.ctx.decodeAudioData(req.response, (function(buffer) {
-          _this.reverb.buffer = buffer;
-          return IR_LOADED[name] = buffer;
-        }), function(err) {
-          console.log('ajax error');
-          return console.log(err);
-        });
-      };
-      return req.send();
-    };
-
-    Reverb.prototype.setParam = function(p) {
-      if (p.name != null) {
-        this.setIR(p.name);
-      }
-      if (p.input != null) {
-        this.setInput(p.input);
-      }
-      if (p.output != null) {
-        return this.setOutput(p.output);
-      }
-    };
-
-    return Reverb;
-
-  })(this.FX);
-
   this.Mixer = (function() {
     function Mixer(ctx, player) {
       var i, s, _i, _len, _ref,
@@ -163,6 +22,14 @@
       this.node_send = this.ctx.createGain();
       this.node_send.gain.value = 1.0;
       this.node_send.connect(this.node);
+      this.bus_delay = this.ctx.createGain();
+      this.bus_delay.gain.value = 1.0;
+      this.bus_delay.connect(this.node_send);
+      this.bus_reverb = this.ctx.createGain();
+      this.bus_reverb.gain.value = 1.0;
+      this.bus_reverb.connect(this.node_send);
+      this.delay_tracks = [];
+      this.reverb_tracks = [];
       this.panners = [];
       this.analysers = [];
       this.splitter_master = this.ctx.createChannelSplitter(2);
@@ -178,9 +45,14 @@
         this.analyser_master[i].smoothingTimeConstant = 0.0;
       }
       this.delay = new Delay(this.ctx);
-      this.delay.insert(this.node_send, this.node);
       this.reverb = new Reverb(this.ctx);
-      this.reverb.insert(this.node_send, this.node);
+      this.pump = new Pump(this.ctx);
+      this.bus_delay.connect(this.delay["in"]);
+      this.bus_reverb.connect(this.reverb["in"]);
+      this.node_send.connect(this.pump["in"]);
+      this.delay.connect(this.pump["in"]);
+      this.reverb.connect(this.pump["in"]);
+      this.pump.connect(this.node);
       this.view = new MixerView(this);
       setInterval((function() {
         return _this.drawGains();
@@ -204,16 +76,24 @@
     Mixer.prototype.empty = function() {
       this.gain_tracks = [];
       this.panners = [];
-      return this.view.empty();
+      this.view.empty();
+      this.delay_tracks = [];
+      return this.reverb_tracks = [];
     };
 
     Mixer.prototype.addSynth = function(synth) {
-      var a, p;
+      var a, g_delay, g_reverb, p;
       p = this.ctx.createPanner();
       p.panningModel = "equalpower";
       synth.connect(p);
       p.connect(this.node_send);
       this.panners.push(p);
+      g_delay = this.ctx.createPanner();
+      g_reverb = this.ctx.createPanner();
+      p.connect(g_delay);
+      p.connect(g_reverb);
+      this.delay_tracks.push(g_delay);
+      this.reverb_tracks.push(g_reverb);
       a = this.ctx.createAnalyser();
       synth.connect(a);
       this.analysers.push(a);

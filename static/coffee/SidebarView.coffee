@@ -12,6 +12,18 @@ class @SidebarView
 
         @initEvent()
 
+
+        # init Master Effect
+        @reverb = $('#tmpl_fx_reverb').clone()
+        @reverb.attr('id', 'master_reverb')
+        @master.append(@reverb)
+
+        @pump = $('#tmpl_fx_pump').clone()
+        @pump.attr('id', 'master_pump')
+        @master.append(@pump)
+
+
+
     initEvent: ->
         @master_name.on('focus', ( => window.keyboard.beginInput())
         ).on('blur', ( => window.keyboard.endInput())

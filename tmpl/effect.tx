@@ -1,0 +1,137 @@
+<div id="tmpl_fx_reverb" class="sidebar-effect">
+  <div class="effect-name">Reverb</div>
+
+  <label>type</label>
+  <select name="key">
+    <option selected="selected">BIG_SNARE</option>
+    <option>Sweep_Reverb</option>
+    <option>Reverb_Factory</option>
+    <option>Dense_Room</option>
+    <option>8_SEC_REVERB</option>
+    <option>GUITAR_ROOM</option>
+    <option>HUNTER_DELAY</option>
+    <option>JERRY_RACE_CAR</option>
+    <option>ResoVibroEee</option>
+    <option>ROOM_OF_DOOM</option>
+    <option>RHYTHM_&_REVERB</option>
+    <option>BIG_SNARE</option>
+    <option>BIG_SWEEP</option>
+    <option>BRIGHT_ROOM</option>
+    <option>CANYON</option>
+    <option>DARK_ROOM</option>
+    <option>DISCRETE-VERB</option>
+    <option>EXPLODING_'VERB</option>
+    <option>GATED_REVERB</option>
+    <option>LOCKER_ROOM</option>
+    <option>RANDOM_GATE</option>
+    <option>REVERSE_GATE</option>
+    <option>RICH_PLATE</option>
+    <option>SHIMMERISH</option>
+    <option>SMALL_ROOM</option>
+    <option>TONAL_ROOM</option>
+    <option>WARM_HALL</option>
+    <option>THRAX-VERB</option>
+    <option>TWIRLING_ROOM</option>
+    <option>USEFUL_VERB</option>
+    <option>FLUTTEROUS_ROOM</option>
+    <option>MARKS_MED_DARK</option>
+    <option>LG_GUITAR_ROOM</option>
+    <option>ACCURATE_ROOM</option>
+    <option>BASS_SPACE</option>
+    <option>BriteBrassPlate</option>
+    <option>CLOSE_MIKED</option>
+    <option>COMB_SPACE_1</option>
+    <option>COMPRESSED_AIR</option>
+    <option>DOUBLE_SPACE_DENSE_ROOM</option>
+    <option>DENSE_HALL_2</option>
+    <option>DELAY_W__ROOM</option>
+    <option>DRAGON_BREATH</option>
+    <option>DRUM_AMBIENCE</option>
+    <option>GATED_FENCE</option>
+    <option>GATED_ROOM_2</option>
+    <option>GENERIC_HALL</option>
+    <option>GREAT_DRUMSPACE</option>
+    <option>5SEC_HANG_VERB</option>
+    <option>HUGE_DENSE_HALL</option>
+    <option>HUGE_SYNTHSPACE</option>
+    <option>MANY_REFLECTIONS</option>
+    <option>AMBIENCE</option>
+    <option>AMBIENT_BOOTH</option>
+    <option>BATHROOM</option>
+    <option>CRASS_ROOM</option>
+    <option>DREW'S_CHAMBER</option>
+    <option>DRUM_AMBIENCE</option>
+    <option>EMPTY_CLOSET</option>
+    <option>EMPTY_ROOM</option>
+    <option>MEDIUM_SPACE</option>
+    <option>NEW_HOUSE</option>
+    <option>PRCSVHORN_PLATE</option>
+    <option>REAL_ROOM</option>
+    <option>SMALL_ROOM</option>
+    <option>SMLSTEREOSPACE</option>
+    <option>SMALLVOCAL_ROOM</option>
+    <option>TIGHT_ROOM</option>
+    <option>TIGHT_&_BRIGHT</option>
+    <option>VOCAL_BOOTH</option>
+    <option>ALIVE_CHAMBER</option>
+    <option>BIG_SWEEP</option>
+    <option>BOB'S_ROOM</option>
+    <option>BREATHING_CANYON</option>
+    <option>BRIGHT_ROOM</option>
+    <option>CANYON</option>
+    <option>CONCERT_HALL</option>
+    <option>DARK_ROOM</option>
+    <option>DISCRETE-VERB</option>
+    <option>NORTHWEST_HALL</option>
+    <option>RICH_PLATE</option>
+    <option>SLAPVERB</option>
+    <option>SMOOTH_PLATE</option>
+    <option>WARM_HALL</option>
+    <option>ECHO-VERB</option>
+    <option>EXPLODING_'vERB</option>
+    <option>GATED_REVERB</option>
+    <option>GATED_ROOM</option>
+    <option>GATE_ROOM</option>
+    <option>HUMP-VERB</option>
+    <option>METALVERB</option>
+    <option>RANDOM_GATE</option>
+    <option>REVERSE_GATE</option>
+    <option>REVERB_RAMP</option>
+    <option>SHIMMERISH</option>
+    <option>TONAL_ROOM</option>
+    <option>DRUM_PROCESSOR</option>
+    <option>LIQUID_REVERB</option>
+    <option>REVERSERB</option>
+    <option>BOUNCE_VERB</option>
+    <option>DEATHLESS_ROOM</option>
+    <option>ENDLESS_CAVE</option>
+    <option>REVERB-a-BOUND</option>
+    <option>SMALL_DARK_ROOM</option>
+    <option>CLONEVERB</option>
+    <option>LONG_&_SMOOTH</option>
+    <option>MEAT_LOCKER</option>
+    <option>ethereal</option>
+    <option>rewzNooRoom</option>
+    <option>swell_reverb</option>
+    <option>PAPER_PLATE</option>
+    <option>USEFUL_VERB_2</option>
+    <option>ROBO_DRUM</option>
+    <option>AIR_SHAMIR</option>
+    <option>SMALL_&_LIVE_VERB</option>
+  </select>
+
+  <label>input</label>
+  <input name="input" type="range" min="0" max="100" value="10" />
+
+  <label>output</label>
+  <input name="output" type="range" min="0" max="100" value="100" />
+
+</div>
+
+<div id="tmpl_fx_pump" class="sidebar-effect">
+  <div class="effect-name">Pump</div>
+
+  <label>gain</label>
+  <input name="input" type="range" min="0" max="100" value="10" />
+
+</div>

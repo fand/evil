@@ -566,7 +566,8 @@ canvas:active {
 #session-tracks-wrapper {
     position: absolute;
     width: 100%;
-    height: 312px;
+    /* height: 312px; */
+    height: 242px;
     top: 0px;
     left: 0px;
     margin-bottom: 160px;
@@ -576,7 +577,8 @@ canvas:active {
 #session-tracks-wrapper-sub {
     position: absolute;
     width: 100%;
-    height: 312px;
+    /* height: 312px; */
+    height: 242px;
     top: 0px;
     left: 0px;
     overflow-x: hidden;
@@ -591,7 +593,8 @@ canvas:active {
 #session-master-wrapper {
     position: absolute;
     width: 94px;
-    height: 312px;
+    /* height: 312px; */
+    height: 242px;
     top: 0px;
     right: 0px;
     margin: 0px 7px 0px 9px;
@@ -690,6 +693,23 @@ canvas:active {
     background-color: #f6f6f6;
 }
 
+.bus {
+    float: left;
+    width: 39px;
+    height: 70px;
+    margin: 0px;
+}
+.bus-label {
+    width: 39px;
+    text-align: center;
+    font-size: 9px;
+}
+.bus-slider {
+    width: 30px;
+    height: 50px;
+    -webkit-appearance: slider-vertical;
+}
+
 #console-master .gain-slider {
     position: absolute;
     width: 30px;
@@ -756,10 +776,8 @@ canvas:active {
 .sidebar > legend {
     font-size: 12px;
     text-align: center;
-    height: 26px;
-}
-.sidebar > legend {
     width: 80px;
+    height: 26px;
 }
 .sidebar > legend > input {
     color: #0df;
@@ -779,7 +797,7 @@ canvas:active {
     width: 125px;
     height: 150px;
     border: none;
-    margin: 0px 7px;
+    margin: 10px 7px;
 }
 .sidebar-effect > .effect-name {
     width: 100%;
@@ -801,25 +819,6 @@ canvas:active {
     text-align: right;
     margin-left: 15px;
 }
-
-#sidebar-master > div {
-    margin: 5px 0px;
-}
-#sidebar-master label {
-    font-size: 12px;
-    float: left;
-    width: 40px;
-    padding-right: 5px;
-    text-align: right;
-}
-#sidebar-master select {
-    float: right;
-    width: 70px;
-    font-size: 10px;
-    text-align: left;
-    margin-top: 4px;
-    margin-right: 12px;
-}
 .sidebar input {
     font-size: 10px;
     text-align: center;
@@ -832,7 +831,38 @@ canvas:active {
     text-align: center;
     margin-top: 4px;
 }
-#sidebar-master input {
+.sidebar-effect select {
+    width: 100px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 4px;
+    margin-left: 25px;
+}
+
+#sidebar-master-control {
+    display: block;
+    margin-bottom: 10px;
+}
+#sidebar-master-control > div {
+    margin: 5px 0px;
+    height: 26px;
+}
+#sidebar-master-control label {
+    font-size: 12px;
+    float: left;
+    width: 40px;
+    padding-right: 5px;
+    text-align: right;
+}
+#sidebar-master-control select {
+    float: right;
+    width: 70px;
+    font-size: 10px;
+    text-align: left;
+    margin-top: 4px;
+    margin-right: 12px;
+}
+#sidebar-master-control input {
     float: right;
     width: 65px;
     font-size: 12px;
