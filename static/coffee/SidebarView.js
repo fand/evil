@@ -89,7 +89,7 @@
       if (o.scale != null) {
         this.master_scale.val(o.scale);
       }
-      return this.wrapper.css('left', '-221px');
+      return this.wrapper.css('left', '-223px');
     };
 
     return SidebarView;

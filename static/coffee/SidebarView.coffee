@@ -72,4 +72,4 @@ class @SidebarView
         @master_bpm.val(o.bpm)     if o.bpm?
         @master_key.val(o.key)     if o.key?
         @master_scale.val(o.scale) if o.scale?
-        @wrapper.css('left', '-221px')
+        @wrapper.css('left', '-223px')

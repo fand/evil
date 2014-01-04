@@ -10,6 +10,7 @@ class @MixerView
         @gains = @tracks.find('.console-track > .gain-slider')
         @gain_master = @master.find('.console-track > .gain-slider')
 
+        @pans_label = @tracks.find('.console-track > .pan-label')
         @pans = @tracks.find('.console-track > .pan-slider')
         @pan_master = @master.find('.console-track > .pan-slider')
 
@@ -60,6 +61,7 @@ class @MixerView
         @console_tracks.append(dom)
         @pans.push(dom.find('.pan-slider'))
         @gains.push(dom.find('.gain-slider'))
+        @pans_label.push(dom.find('.pan-label'))
 
         d = dom.find('.vu-meter')
         @canvas_tracks_dom.push(d)
@@ -78,9 +80,15 @@ class @MixerView
         @model.setGains(g, g_master)
 
     setPans: ->
-        p = (@pan2pos(1.0 - (parseFloat(_p.val())) / 100.0) for _p in @pans)
-        p_master = @pan2pos(1.0 - parseFloat(@pan_master.val() / 100.0))
+        p = (@pan2pos(1.0 - (parseFloat(_p.val())) / 200.0) for _p in @pans)
+        p_master = @pan2pos(1.0 - parseFloat(@pan_master.val() / 200.0))
         @model.setPans(p, p_master)
+
+        for i in [0...@pans.length]
+            l = parseInt(@pans[i].val()) - 100
+            t = if l == 0 then 'C' else (if l < 0 then (-l) + '% L' else l + '% R')
+            @pans_label[i].text(t)
+
 
     readGains: (g, g_master) ->
         for i in [0...g.length]

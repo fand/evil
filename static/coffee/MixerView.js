@@ -10,6 +10,7 @@
       this.console_master = this.master.find('#console-master');
       this.gains = this.tracks.find('.console-track > .gain-slider');
       this.gain_master = this.master.find('.console-track > .gain-slider');
+      this.pans_label = this.tracks.find('.console-track > .pan-label');
       this.pans = this.tracks.find('.console-track > .pan-slider');
       this.pan_master = this.master.find('.console-track > .pan-slider');
       this.canvas_tracks_dom = this.tracks.find('.vu-meter');
@@ -88,6 +89,7 @@
       this.console_tracks.append(dom);
       this.pans.push(dom.find('.pan-slider'));
       this.gains.push(dom.find('.gain-slider'));
+      this.pans_label.push(dom.find('.pan-label'));
       d = dom.find('.vu-meter');
       this.canvas_tracks_dom.push(d);
       this.canvas_tracks.push(d[0]);
@@ -119,19 +121,26 @@
     };
 
     MixerView.prototype.setPans = function() {
-      var p, p_master, _p;
+      var i, l, p, p_master, t, _i, _p, _ref, _results;
       p = (function() {
         var _i, _len, _ref, _results;
         _ref = this.pans;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           _p = _ref[_i];
-          _results.push(this.pan2pos(1.0 - (parseFloat(_p.val())) / 100.0));
+          _results.push(this.pan2pos(1.0 - (parseFloat(_p.val())) / 200.0));
         }
         return _results;
       }).call(this);
-      p_master = this.pan2pos(1.0 - parseFloat(this.pan_master.val() / 100.0));
-      return this.model.setPans(p, p_master);
+      p_master = this.pan2pos(1.0 - parseFloat(this.pan_master.val() / 200.0));
+      this.model.setPans(p, p_master);
+      _results = [];
+      for (i = _i = 0, _ref = this.pans.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        l = parseInt(this.pans[i].val()) - 100;
+        t = l === 0 ? 'C' : (l < 0 ? (-l) + '% L' : l + '% R');
+        _results.push(this.pans_label[i].text(t));
+      }
+      return _results;
     };
 
     MixerView.prototype.readGains = function(g, g_master) {
