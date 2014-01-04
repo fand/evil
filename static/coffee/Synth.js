@@ -780,8 +780,7 @@
     };
 
     Synth.prototype.playAt = function(time) {
-      var mytime, n,
-        _this = this;
+      var mytime, n;
       this.time = time;
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
@@ -789,7 +788,7 @@
         return;
       }
       if (this.pattern[mytime] === 0) {
-
+        return this.core.noteOff();
       } else if (this.pattern[mytime] < 0) {
         this.is_sustaining = true;
         n = -this.pattern[mytime];
@@ -798,15 +797,10 @@
       } else if (this.pattern[mytime] === 'sustain') {
 
       } else if (this.pattern[mytime] === 'end') {
-        return this.T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
+
       } else {
         this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
-        this.core.noteOn();
-        return this.T.setTimeout((function() {
-          return _this.core.noteOff();
-        }), this.duration - 10);
+        return this.core.noteOn();
       }
     };
 

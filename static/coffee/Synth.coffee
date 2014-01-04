@@ -494,8 +494,7 @@ class @Synth
 
         # off
         if @pattern[mytime] == 0
-            # @core.noteOff()
-            return
+            @core.noteOff()
 
         # sustain start
         else if @pattern[mytime] < 0
@@ -510,18 +509,13 @@ class @Synth
 
         # sustain end
         else if @pattern[mytime] == 'end'
-            # T.setTimeout doesn't work!
-            @T.setTimeout(( =>
-                @core.noteOff()
-                ), @duration - 10)
+            # note will be off on next '0'.
+            return
 
         # single note
         else
             @core.setNote(@noteToSemitone(@pattern[mytime]))
             @core.noteOn()
-            @T.setTimeout(( =>
-                @core.noteOff()
-                ), @duration - 10)
 
     play: () ->
         @view.play()
