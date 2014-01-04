@@ -29,7 +29,7 @@ OSC_TYPE =
     SAW:      2
     TRIANGLE: 3
 
-@T2 = new MutekiTimer()
+T2 = new MutekiTimer()
 
 
 TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17]
@@ -168,7 +168,6 @@ class @EG
     noteOn: (time) ->
         @target.cancelScheduledValues(time)
 
-        #@target.setValueAtTime(0, time)
         @target.setValueAtTime(@target.value, time)
 
         @target.linearRampToValueAtTime(@max, time + @attack)
@@ -457,6 +456,8 @@ class @Synth
         @is_performing = false
         @session = @player.session
 
+        @T = new MutekiTimer()
+
     connect: (dst) -> @core.connect(dst)
     disconnect: () -> #@core.disconnect()
 
@@ -493,8 +494,7 @@ class @Synth
 
         # off
         if @pattern[mytime] == 0
-            # @core.noteOff()
-            return
+            @core.noteOff()
 
         # sustain start
         else if @pattern[mytime] < 0
@@ -509,18 +509,14 @@ class @Synth
 
         # sustain end
         else if @pattern[mytime] == 'end'
-            # T.setTimeout doesn't work!
-            T2.setTimeout(( =>
-                @core.noteOff()
-                ), @duration - 10)
+            T2.setTimeout((() => @core.noteOff()), @duration - 10)
 
         # single note
         else
             @core.setNote(@noteToSemitone(@pattern[mytime]))
             @core.noteOn()
-            T2.setTimeout(( =>
-                @core.noteOff()
-                ), @duration - 10)
+            T2.setTimeout((() => @core.noteOff()), @duration - 10)
+
 
     play: () ->
         @view.play()

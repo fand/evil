@@ -87,7 +87,7 @@ class @Player
 
             s.playAt(@time) for s in @synth
 
-            if @time % 32 == 31 and @time + 32 > @scene_length
+            if @time % 32 == 31
                 @session.nextMeasure(@synth)
 
             if @time % 8 == 0

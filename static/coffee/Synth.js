@@ -1,5 +1,5 @@
 (function() {
-  var FREQ_OFFSET, OSC_TYPE, TIME_OFFSET;
+  var FREQ_OFFSET, OSC_TYPE, T2, TIME_OFFSET;
 
   this.KEY_LIST = {
     A: 55,
@@ -35,7 +35,7 @@
     TRIANGLE: 3
   };
 
-  this.T2 = new MutekiTimer();
+  T2 = new MutekiTimer();
 
   TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17];
 
@@ -723,6 +723,7 @@
       this.is_sustaining = false;
       this.is_performing = false;
       this.session = this.player.session;
+      this.T = new MutekiTimer();
     }
 
     Synth.prototype.connect = function(dst) {
@@ -790,7 +791,7 @@
         return;
       }
       if (this.pattern[mytime] === 0) {
-
+        return this.core.noteOff();
       } else if (this.pattern[mytime] < 0) {
         this.is_sustaining = true;
         n = -this.pattern[mytime];
