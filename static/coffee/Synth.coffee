@@ -29,7 +29,7 @@ OSC_TYPE =
     SAW:      2
     TRIANGLE: 3
 
-#@T2 = new MutekiTimer()
+T2 = new MutekiTimer()
 
 
 TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17]
@@ -509,13 +509,14 @@ class @Synth
 
         # sustain end
         else if @pattern[mytime] == 'end'
-            # note will be off on next '0'.
-            return
+            T2.setTimeout((() => @core.noteOff()), @duration - 10)
 
         # single note
         else
             @core.setNote(@noteToSemitone(@pattern[mytime]))
             @core.noteOn()
+            T2.setTimeout((() => @core.noteOff()), @duration - 10)
+
 
     play: () ->
         @view.play()

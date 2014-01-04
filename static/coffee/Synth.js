@@ -1,5 +1,5 @@
 (function() {
-  var FREQ_OFFSET, OSC_TYPE, TIME_OFFSET;
+  var FREQ_OFFSET, OSC_TYPE, T2, TIME_OFFSET;
 
   this.KEY_LIST = {
     A: 55,
@@ -34,6 +34,8 @@
     SAW: 2,
     TRIANGLE: 3
   };
+
+  T2 = new MutekiTimer();
 
   TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17];
 
@@ -780,7 +782,8 @@
     };
 
     Synth.prototype.playAt = function(time) {
-      var mytime, n;
+      var mytime, n,
+        _this = this;
       this.time = time;
       mytime = this.time % this.pattern.length;
       this.view.playAt(mytime);
@@ -797,10 +800,15 @@
       } else if (this.pattern[mytime] === 'sustain') {
 
       } else if (this.pattern[mytime] === 'end') {
-
+        return T2.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
       } else {
         this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
-        return this.core.noteOn();
+        this.core.noteOn();
+        return T2.setTimeout((function() {
+          return _this.core.noteOff();
+        }), this.duration - 10);
       }
     };
 

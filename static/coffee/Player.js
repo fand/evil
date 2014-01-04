@@ -154,7 +154,7 @@
           s = _ref[_i];
           s.playAt(this.time);
         }
-        if (this.time % 32 === 31) {
+        if (this.time % 32 === 31 && this.time + 32 > this.scene_length) {
           this.session.nextMeasure(this.synth);
         }
         if (this.time % 8 === 0) {

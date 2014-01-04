@@ -37,7 +37,7 @@
       return this.is_loop = !this.is_loop;
     };
 
-    Session.prototype.nextMeasure = function(synth) {
+    Session.prototype.nextMeasure = function(synth, time) {
       this.synth = synth;
       if (this.is_loop) {
         if (this.is_waiting_next_scene) {
@@ -67,7 +67,7 @@
     };
 
     Session.prototype.nextScene = function(pos) {
-      var i, pat, _i, _ref;
+      var i, pat, s, _i, _ref;
       this.savePatterns();
       this.is_waiting_next_scene = false;
       if (pos == null) {
@@ -80,13 +80,23 @@
         this.player.is_playing = false;
         this.view.clearAllActive();
         this.scene_pos = this.next_scene_pos = 0;
+        this.current_cells = (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.song.tracks;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            s = _ref[_i];
+            _results.push(0);
+          }
+          return _results;
+        }).call(this);
         return;
       }
       for (i = _i = 0, _ref = this.synth.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        if (this.song.tracks[i].patterns[pos] == null) {
+        if (this.song.tracks[i].patterns[this.scene_pos] == null) {
           continue;
         }
-        pat = this.song.tracks[i].patterns[pos];
+        pat = this.song.tracks[i].patterns[this.scene_pos];
         if (pat != null) {
           this.synth[i].readPattern(pat);
           this.scene_length = Math.max(this.scene_length, pat.pattern.length);
@@ -198,8 +208,6 @@
       if (pat_num + 1 > this.song.length) {
         this.song.length = pat_num + 1;
       }
-      console.log(synth_num);
-      console.log(this.current_cells);
       if (this.current_cells[synth_num] === pat_num) {
         return this.player.synth[synth_num].readPattern(pat);
       }
@@ -253,11 +261,9 @@
 
     Session.prototype.savePattern = function(x, y) {
       if (this.song.tracks[x].patterns[y] != null) {
-        return this.song.tracks[x].patterns[y].pattern = this.player.synth[x].pattern;
+        return this.song.tracks[x].patterns[y] = this.player.synth[x].getPattern();
       } else {
-        return this.song.tracks[x].patterns[y] = {
-          pattern: this.player.synth[x].pattern
-        };
+        return this.song.tracks[x].patterns[y] = this.player.synth[x].getPattern();
       }
     };
 

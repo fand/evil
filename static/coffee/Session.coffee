@@ -33,7 +33,7 @@ class @Session
 
     toggleLoop: -> @is_loop = !@is_loop
 
-    nextMeasure: (@synth) ->
+    nextMeasure: (@synth, time) ->
         if @is_loop
             if @is_waiting_next_scene
                 @nextScene(@next_scene_pos)
@@ -68,11 +68,12 @@ class @Session
             @player.is_playing = false
             @view.clearAllActive()
             @scene_pos = @next_scene_pos = 0
+            @current_cells = (0 for s in @song.tracks)
             return
 
         for i in [0...@synth.length]
-            continue if not @song.tracks[i].patterns[pos]?
-            pat = @song.tracks[i].patterns[pos]
+            continue if not @song.tracks[i].patterns[@scene_pos]?
+            pat = @song.tracks[i].patterns[@scene_pos]
             if pat?
                 @synth[i].readPattern(pat)
                 @scene_length = Math.max(@scene_length, pat.pattern.length)
@@ -154,8 +155,6 @@ class @Session
             @song.master[pat_num] = name: 'section-' + pat_num
         if pat_num + 1 > @song.length
             @song.length = pat_num + 1
-        console.log(synth_num)
-        console.log(@current_cells)
         if @current_cells[synth_num] == pat_num
             @player.synth[synth_num].readPattern(pat)
 
@@ -202,9 +201,9 @@ class @Session
 
     savePattern: (x, y) ->
         if @song.tracks[x].patterns[y]?
-            @song.tracks[x].patterns[y].pattern = @player.synth[x].pattern
+            @song.tracks[x].patterns[y] = @player.synth[x].getPattern()
         else
-            @song.tracks[x].patterns[y] = pattern: @player.synth[x].pattern
+            @song.tracks[x].patterns[y] = @player.synth[x].getPattern()
 
     saveTracks: ->
         for i in [0...@player.synth.length]
