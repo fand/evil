@@ -17,3 +17,6 @@ MYMETA.yml
 /local/
 /.carton/
 node_modules/
+
+static/IR/
+static/wav/

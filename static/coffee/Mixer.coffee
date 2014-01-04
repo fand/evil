@@ -5,12 +5,23 @@ class @Mixer
 
         @node = @ctx.createGain()
         @node.gain.value = @gain_master
-        @node.connect(@ctx.destination)
+
+        @node_send = @ctx.createGain()
+        @node_send.gain.value = 1.0
+
+        @bus_delay = @ctx.createGain()
+        @bus_delay.gain.value = 1.0
+
+        @bus_reverb = @ctx.createGain()
+        @bus_reverb.gain.value = 1.0
+
+        @gain_delay = []
+        @gain_reverb = []
 
         @panners = []
         @analysers = []
 
-        # master VU meter
+        # Master VU meter
         @splitter_master = @ctx.createChannelSplitter(2)
         @analyser_master = [@ctx.createAnalyser(), @ctx.createAnalyser()]
         @node.connect(@splitter_master)
@@ -21,9 +32,24 @@ class @Mixer
             @analyser_master[i].maxDecibels = 0.0
             @analyser_master[i].smoothingTimeConstant = 0.0
 
+        # Master Effects
+        @delay = new Delay(@ctx)
+        @reverb = new Reverb(@ctx)
+        @limiter = new Limiter(@ctx)
+
+        @bus_delay.connect(@delay.in)
+        @bus_reverb.connect(@reverb.in)
+
+        @node_send.connect(@limiter.in)
+        @delay.connect(@limiter.in)
+        @reverb.connect(@limiter.in)
+        @limiter.connect(@node)
+
+        @node.connect(@ctx.destination)
+
         @view = new MixerView(this)
 
-        setInterval((() =>
+        setInterval(( =>
             @drawGains()
         ), 30)
 
@@ -47,13 +73,27 @@ class @Mixer
         @panners = []
         @view.empty()
 
+        @delay_tracks = []
+        @reverb_tracks = []
+
     addSynth: (synth) ->
         # Create new panner
         p = @ctx.createPanner()
         p.panningModel = "equalpower"
         synth.connect(p)
-        p.connect(@node)
+        p.connect(@node_send)
         @panners.push(p)
+
+        g_delay = @ctx.createGain()
+        g_reverb = @ctx.createGain()
+        p.connect(g_delay)
+        p.connect(g_reverb)
+        g_delay.connect(@bus_delay)
+        g_reverb.connect(@bus_reverb)
+        g_delay.gain.value = 1.0
+        g_reverb.gain.value = 1.0
+        @gain_delay.push(g_delay)
+        @gain_reverb.push(g_reverb)
 
         a = @ctx.createAnalyser()
         synth.connect(a)

@@ -32,6 +32,9 @@ OSC_TYPE =
 @T2 = new MutekiTimer()
 
 
+TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17]
+FREQ_OFFSET = [0.1, 0.15, 0.25, 0.35, 0.55, 0.65, 0.85]
+
 
 
 class @Noise
@@ -82,7 +85,7 @@ class @VCO
 
         @setFreq()
         @osc.start(0)
-        @oscs[i].start(i) for i in [0...7]
+        @oscs[i].start(TIME_OFFSET[i]) for i in [0...7]
 
 
     setOctave: (@octave) ->
@@ -117,7 +120,7 @@ class @VCO
         @freq = (Math.pow(2, @octave) * Math.pow(SEMITONE, @interval + @note) * @freq_key) + @fine
         if @shape == 'SUPERSAW' or @shape == 'SUPERRECT'
             for i in [0...7]
-                @oscs[i].frequency.setValueAtTime(@freq + i * 0.1, 0)
+                @oscs[i].frequency.setValueAtTime(@freq + FREQ_OFFSET[i], 0)
         else
             @osc.frequency.setValueAtTime(@freq, 0)
 

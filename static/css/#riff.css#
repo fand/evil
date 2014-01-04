@@ -524,7 +524,7 @@ canvas:active {
 }
 #mixer-body {
     position: absolute;
-    width: 671px;
+    width: 751px;
     height: 491px;
     top: 0px;
     left: 0px;
@@ -534,16 +534,16 @@ canvas:active {
 }
 #mixer-sidebar {
     position: absolute;
-    width: 223px;
-    height: 483px;
+    width: 141px;
+    height: 491px;
     top: 0px;
     right: 0px;
-    margin: 9px 7px 9px 0px;
+    margin: 0px 9px 10px 0px;
     overflow: hidden;
 }
 #mixer-tracks {
     position: absolute;
-    width: 561px;
+    width: 641px;
     height: 484px;
     top: 0px;
     left: 0px;
@@ -566,6 +566,7 @@ canvas:active {
 #session-tracks-wrapper {
     position: absolute;
     width: 100%;
+    /* height: 312px; */
     height: 242px;
     top: 0px;
     left: 0px;
@@ -576,6 +577,7 @@ canvas:active {
 #session-tracks-wrapper-sub {
     position: absolute;
     width: 100%;
+    /* height: 312px; */
     height: 242px;
     top: 0px;
     left: 0px;
@@ -591,6 +593,7 @@ canvas:active {
 #session-master-wrapper {
     position: absolute;
     width: 94px;
+    /* height: 312px; */
     height: 242px;
     top: 0px;
     right: 0px;
@@ -603,19 +606,19 @@ canvas:active {
     top: 0px;
     left: 0px;
     width: 80px;
-    height: 240px;
+    height: 310px;
 }
 #session-tracks, #session-tracks-on, #session-tracks-hover {
     position: absolute;
     top: 0px;
     left: 0px;
-    width: 560px;
-    height: 240px;
+    width: 640px;
+    height: 310px;
 }
 #console-tracks {
     position: absolute;
     width: 100%;
-    height: 163px;
+    height: 153px;
     bottom: 0px;
     left: 0px;
     border-bottom: 0px;
@@ -624,15 +627,14 @@ canvas:active {
 #console-master {
     position: absolute;
     width: 100%;
-    height: 171px;
+    height: 161px;
     bottom: 0px;
 }
-
 .console-track {
     float: left;
     position: relative;
-    width: 69px;
-    height: 163px;
+    width: 79px;
+    height: 153px;
     margin-bottom: -1px;
     margin-left: -1px;
     border: 1px solid #0df;
@@ -649,71 +651,47 @@ canvas:active {
     bottom: 0px;
     right: 0px;
     width: 90px;
-    height: 169px;
+    height: 159px;
     margin: 0px 9px;
     border: 1px solid #0df;
     text-align: center;
     background-color: #fff;
     border-radius: 0px 0px 3px 3px / 0px 0px 3px 3px;
 }
-.console-track div {
+#console-master div {
     float: none;
-    width: 100%;
+    width: 80px;
     height: 12px;
     margin: 4px auto;
     text-align: center;
 }
+#console-master .gain-slider {
+    height: 110px;
+}
 .pan-slider {
-    width: 60px;
-    height: 20px;
-    margin-left:5px;
+    width: 50px;
+    height: 25px;
     z-index: 2;
 }
-
 #console-tracks .gain-slider {
     position: absolute;
     width: 25px;
-    height: 100px;
-    top: 45px;
+    height: 110px;
+    top: 25px;
     right: 0px;
     margin: 10px;
     -webkit-appearance: slider-vertical;
     z-index: 2;
 }
-#console-master .gain-slider {
-    position: absolute;
-    width: 30px;
-    height: 130px;
-    top: 15px;
-    left: 50%;
-    margin: 10px;
-    margin-left: -15px;
-    -webkit-appearance: slider-vertical;
-    z-index: 2;
-}
-
 .vu-meter {
     position: absolute;
-    top: 55px;
+    top: 35px;
     left: 15px;
     width: 10px;
-    height: 100px;
+    height: 110px;
     z-index: 0;
     background-color: #f6f6f6;
 }
-#console-master .vu-meter {
-    position: absolute;
-    top: 25px;
-    left: 50%;
-    width: 60px;
-    height: 130px;
-    margin-left: -30px;
-    z-index: 0;
-}
-.gain-slider:focus {
-    outline:none;
-}
-
 
 .bus {
     float: left;
@@ -732,6 +710,29 @@ canvas:active {
     -webkit-appearance: slider-vertical;
 }
 
+#console-master .gain-slider {
+    position: absolute;
+    width: 30px;
+    height: 115px;
+    top: 20px;
+    left: 50%;
+    margin: 10px;
+    margin-left: -15px;
+    -webkit-appearance: slider-vertical;
+    z-index: 2;
+}
+#console-master .vu-meter {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    width: 60px;
+    height: 120px;
+    margin-left: -30px;
+    z-index: 0;
+}
+.gain-slider:focus {
+    outline:none;
+}
 
 
 
@@ -746,13 +747,13 @@ canvas:active {
 }
 .sidebar {
     position: absolute;
-    width: 223px;
-    height: 482px;
+    width: 139px;
+    height: 489px;
     top: 0px;
     margin: 0px;
     padding: 0px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 
     color: #0df;
     background-color: #fff;
@@ -760,16 +761,9 @@ canvas:active {
     text-align: center;
     vertical-align: top;
     line-height: 26px;
-}
-#sidebar-tracks-wrapper {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-}
-#sidebar-master-wrapper {
-    position: absolute;
-    top: 0px;
-    right: 0px;
+
+    border-radius: 3px;
+    border: 1px solid #0df;
 }
 #sidebar-tracks {
     top: 0px;
@@ -777,34 +771,15 @@ canvas:active {
 }
 #sidebar-master {
     top: 0px;
-    left: 0px;
-    width: 209px;
+    right: 0px;
 }
-
-.sidebar-effect {
-    width: 207px;   /* (223 - 10 - 4 - 2). total size including scrollbar is 223.*/
-    border: none;
-    margin: 0px;
-    /* margin-top: 4px; */
-    padding: 0px;
-
-    border: 1px solid #0df;
-    border-radius: 3px;
-}
-#sidebar-tracks > .sidebar-effect:first-child {
-    margin-top: -9px;
-}
-#sidebar-master > .sidebar-effect:first-child {
-    margin-top: -9px;
-}
-
-.sidebar-name > legend {
+.sidebar > legend {
     font-size: 12px;
     text-align: center;
     width: 80px;
     height: 26px;
 }
-.sidebar-name > legend > input {
+.sidebar > legend > input {
     color: #0df;
     font-size: 12px;
     width: 80px;
@@ -814,52 +789,60 @@ canvas:active {
     outline: none;
     border: none;
 }
-.sidebar-name > legend > input:hover {
+.sidebar > legend > input:hover {
     text-shadow: 0px 0px 10px #9ef;
 }
-/* .sidebar-effect > input { */
-/*     display: block; */
-/*     width: 150px; */
-/*     text-align: right; */
-/*     margin-left: 15px; */
-/* } */
-/* .sidebar input { */
-/*     font-size: 10px; */
-/*     text-align: center; */
-/*     margin-top: 4px; */
-/* } */
-.sidebar-effect > div {
-    width: 100%;
-    height: 40px;
+
+.sidebar-effect {
+    width: 125px;
+    min-height: 150px;
+    border: none;
+    margin: 10p 7px;
 }
-.sidebar-effect label{
-    float: left;
-    width: 50px;
+.sidebar-effect > .effect-name {
+    width: 100%;
     height: 20px;
     font-size: 12px;
-    text-align: right;
-    margin: 0px 10px;
+    text-align: left;
+}
+.sidebar-effect > label{
+    display: block;
+    width: 100%;
+    height: 20px;
+    font-size: 12px;
+    text-align: left;
     border: none;
 }
+.sidebar-effect > input {
+    display: block;
+    max-width: 110px;
+    text-align: right;
+    margin-left: 15px;
+}
+.sidebar input {
+    font-size: 10px;
+    text-align: center;
+    margin-top: 4px;
+}
 .sidebar-effect input {
-    float: left;
-    width: 120px;
+    width: 130px;
     right: 0px;
     font-size: 10px;
     text-align: center;
-    margin: 0px 5px;
     margin-top: 4px;
 }
 .sidebar-effect select {
-    float: left;
     width: 100px;
     font-size: 10px;
     text-align: center;
-    margin: 0px 10px;
     margin-top: 4px;
     margin-left: 25px;
 }
 
+#sidebar-master-control {
+    display: block;
+    margin-bottom: 10px;
+}
 #sidebar-master-control > div {
     margin: 5px 0px;
     height: 26px;
@@ -871,7 +854,7 @@ canvas:active {
     padding-right: 5px;
     text-align: right;
 }
-#sidebar-master-control > div > select {
+#sidebar-master-control select {
     float: right;
     width: 70px;
     font-size: 10px;
@@ -879,7 +862,7 @@ canvas:active {
     margin-top: 4px;
     margin-right: 12px;
 }
-#sidebar-master-control > div > input {
+#sidebar-master-control input {
     float: right;
     width: 65px;
     font-size: 12px;
@@ -1271,6 +1254,7 @@ footer {
 
 .synth-core {
     position: absolute;
+    /* top: 300px; */
     bottom: 0px;
     width: 100%;
     height: 280px;
@@ -1636,7 +1620,6 @@ legend {
 
 .gain-slider {
     -webkit-appearance: slider-vertical;
-    -webkit-transform: translateX(2px);
 }
 
 

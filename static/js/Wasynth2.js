@@ -19,6 +19,444 @@ e(this).html(d);break;case "hatena_oldstyle":d=a.button||"http://d.hatena.ne.jp/
 b+'" style="border: none; vertical-align: text-bottom" /></a></span>');break;case "google_plusone":j=a;if(!(e.browser.msie&&8>parseInt(e.browser.version,10))){c=j.size||j.button||"";f=j.href||j.url||"";b=j.lang||"";h=j.parsetags||"";l=j.callback||"";j=void 0!=j.count?j.count:!0;switch(c){case "small":case "standard":case "medium":break;case "tall":j=!0;break;default:c="standard",j=!0}c=e("<div>").attr({"data-callback":l,"data-count":j?"true":"false","data-href":f,"data-size":c}).addClass("g-plusone");
 e(this).append(c);d==m&&(d="",""!=b&&(d+='lang: "'+k(b)+'"'),""!=h&&(d=d+(""!=d?",":"")+('parsetags: "'+k(h)+"'")),""!=d&&(d="{"+d+"}"),"undefined"===typeof gapi||"undefined"===typeof gapi.plusone?e("body").append('<script type="text/javascript" src="https://apis.google.com/js/plusone.js">'+d+"<\/script>"):gapi.plusone.go())}break;case "pinterest":b=a.url||t,h=a.button||"horizontal",c=void 0!=a.media?a.media:"",f=void 0!=a.description?a.description:"",b=o(decodeURIComponent(b)),c=o(decodeURIComponent(c)),
 f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p({url:b,media:c,description:f})+'" class="pin-it-button" count-layout="'+h+'"><img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" /></a>',e(this).html(b),d==m&&e("body").append('<script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"><\/script>')}return!0})}})(jQuery);;(function() {
+  var IR_LOADED, IR_URL,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.FX = (function() {
+    function FX(ctx) {
+      this.ctx = ctx;
+      this["in"] = this.ctx.createGain();
+      this["in"].gain.value = 1.0;
+      this.out = this.ctx.createGain();
+      this.out.gain.value = 1.0;
+      this.view = new FXView(this);
+    }
+
+    FX.prototype.connect = function(dst) {
+      return this.out.connect(dst);
+    };
+
+    FX.prototype.setInput = function(d) {
+      return this["in"].gain.value = d;
+    };
+
+    FX.prototype.setOutput = function(d) {
+      return this.out.gain.value = d;
+    };
+
+    FX.prototype.appendTo = function(dst) {
+      return $(dst).append(this.view.dom);
+    };
+
+    return FX;
+
+  })();
+
+  this.Delay = (function(_super) {
+    __extends(Delay, _super);
+
+    function Delay(ctx) {
+      this.ctx = ctx;
+      Delay.__super__.constructor.call(this, this.ctx);
+      this.delay = this.ctx.createDelay();
+      this.delay.delayTime.value = 0.23;
+      this.lofi = this.ctx.createBiquadFilter();
+      this.lofi.frequency.value = 1200;
+      this.lofi.Q.value = 0.0;
+      this.lofi.gain.value = 1.0;
+      this.feedback = this.ctx.createGain();
+      this.feedback.gain.value = 0.4;
+      this["in"].connect(this.lofi);
+      this.lofi.connect(this.delay);
+      this.delay.connect(this.out);
+      this.delay.connect(this.feedback);
+      this.feedback.connect(this.lofi);
+      this.view = new DelayView(this);
+    }
+
+    Delay.prototype.setDelay = function(d) {
+      return this.delay.delayTime.value = d;
+    };
+
+    Delay.prototype.setFeedback = function(d) {
+      return this.feedback.gain.value = d;
+    };
+
+    Delay.prototype.setLofi = function(d) {
+      return this.lofi.Q.value = d * 5.0;
+    };
+
+    Delay.prototype.setParam = function(p) {
+      if (p.delay != null) {
+        this.setDelay(p.delay);
+      }
+      if (p.feedback != null) {
+        this.setFeedback(p.feedback);
+      }
+      if (p.lofi != null) {
+        this.setLofi(p.lofi);
+      }
+      if (p.input != null) {
+        this.setInput(p.input);
+      }
+      if (p.output != null) {
+        return this.setOutput(p.output);
+      }
+    };
+
+    return Delay;
+
+  })(this.FX);
+
+  this.Reverb = (function(_super) {
+    __extends(Reverb, _super);
+
+    function Reverb(ctx) {
+      this.ctx = ctx;
+      Reverb.__super__.constructor.call(this, this.ctx);
+      this.reverb = this.ctx.createConvolver();
+      this["in"].connect(this.reverb);
+      this.reverb.connect(this.out);
+      this.setIR('BIG_SNARE');
+      this["in"].gain.value = 1.0;
+      this.out.gain.value = 1.0;
+      this.view = new ReverbView(this);
+    }
+
+    Reverb.prototype.setIR = function(name) {
+      var req, url,
+        _this = this;
+      if (IR_LOADED[name] != null) {
+        this.reverb.buffer = IR_LOADED[name];
+        return;
+      }
+      url = IR_URL[name];
+      if (url == null) {
+        return;
+      }
+      req = new XMLHttpRequest();
+      req.open('GET', url, true);
+      req.responseType = "arraybuffer";
+      req.onload = function() {
+        return _this.ctx.decodeAudioData(req.response, (function(buffer) {
+          _this.reverb.buffer = buffer;
+          return IR_LOADED[name] = buffer;
+        }), function(err) {
+          console.log('ajax error');
+          return console.log(err);
+        });
+      };
+      return req.send();
+    };
+
+    Reverb.prototype.setParam = function(p) {
+      if (p.name != null) {
+        this.setIR(p.name);
+      }
+      if (p.input != null) {
+        this.setInput(p.input);
+      }
+      if (p.output != null) {
+        return this.setOutput(p.output);
+      }
+    };
+
+    return Reverb;
+
+  })(this.FX);
+
+  this.Compressor = (function(_super) {
+    __extends(Compressor, _super);
+
+    function Compressor(ctx) {
+      this.ctx = ctx;
+      Compressor.__super__.constructor.call(this, this.ctx);
+      this.comp = this.ctx.createDynamicsCompressor();
+      this["in"].connect(this.comp);
+      this.comp.connect(this.out);
+      this["in"].gain.value = 1.0;
+      this.out.gain.value = 1.0;
+    }
+
+    Compressor.prototype.setAttack = function(d) {
+      return this.comp.attack.value = d;
+    };
+
+    Compressor.prototype.setRelease = function(d) {
+      return this.comp.release.value = d;
+    };
+
+    Compressor.prototype.setThreshold = function(d) {
+      return this.comp.threshold.value = d;
+    };
+
+    Compressor.prototype.setRatio = function(d) {
+      return this.comp.ratio.value = d;
+    };
+
+    Compressor.prototype.setKnee = function(d) {
+      return this.comp.knee.value = d;
+    };
+
+    Compressor.prototype.setParam = function(p) {
+      if (p.attack != null) {
+        this.setAttack(p.attack);
+      }
+      if (p.release != null) {
+        this.setRelease(p.release);
+      }
+      if (p.threshold != null) {
+        this.setThreshold(p.threshold);
+      }
+      if (p.ratio != null) {
+        this.setRatio(p.ratio);
+      }
+      if (p.knee != null) {
+        this.setKnee(p.knee);
+      }
+      if (p.input != null) {
+        this.setInput(p.input);
+      }
+      if (p.output != null) {
+        return this.setOutput(p.output);
+      }
+    };
+
+    return Compressor;
+
+  })(this.FX);
+
+  this.Limiter = (function() {
+    function Limiter(ctx) {
+      this.ctx = ctx;
+      this["in"] = this.ctx.createDynamicsCompressor();
+      this.out = this.ctx.createDynamicsCompressor();
+      this["in"].connect(this.out);
+      this["in"].threshold.value = -6;
+      this.out.threshold.value = -10;
+      this.out.ratio.value = 20;
+    }
+
+    Limiter.prototype.connect = function(dst) {
+      return this.out.connect(dst);
+    };
+
+    return Limiter;
+
+  })();
+
+  IR_URL = {
+    'BIG_SNARE': 'static/IR/H3000/206_BIG_SNARE.wav',
+    'Sweep_Reverb': 'static/IR/H3000/106_Sweep_Reverb.wav',
+    'Reverb_Factory': 'static/IR/H3000/107_Reverb_Factory.wav',
+    'Dense_Room': 'static/IR/H3000/114_Dense_Room.wav',
+    '8_SEC_REVERB': 'static/IR/H3000/154_8_SEC_REVERB.wav',
+    'GUITAR_ROOM': 'static/IR/H3000/178_GUITAR_ROOM.wav',
+    'HUNTER_DELAY': 'static/IR/H3000/181_HUNTER_DELAY.wav',
+    'JERRY_RACE_CAR': 'static/IR/H3000/182_JERRY_RACE_CAR.wav',
+    'ResoVibroEee': 'static/IR/H3000/192_ResoVibroEee.wav',
+    'ROOM_OF_DOOM': 'static/IR/H3000/193_ROOM_OF_DOOM.wav',
+    'RHYTHM_&_REVERB': 'static/IR/H3000/194_RHYTHM_&_REVERB.wav',
+    'BIG_SNARE': 'static/IR/H3000/206_BIG_SNARE.wav',
+    'BIG_SWEEP': 'static/IR/H3000/207_BIG_SWEEP.wav',
+    'BRIGHT_ROOM': 'static/IR/H3000/209_BRIGHT_ROOM.wav',
+    'CANYON': 'static/IR/H3000/211_CANYON.wav',
+    'DARK_ROOM': 'static/IR/H3000/213_DARK_ROOM.wav',
+    'DISCRETE-VERB': 'static/IR/H3000/215_DISCRETE-VERB.wav',
+    "EXPLODING_'VERB": "static/IR/H3000/219_EXPLODING_'VERB.wav",
+    'GATED_REVERB': 'static/IR/H3000/223_GATED_REVERB.wav',
+    'LOCKER_ROOM': 'static/IR/H3000/230_LOCKER_ROOM.wav',
+    'RANDOM_GATE': 'static/IR/H3000/240_RANDOM_GATE.wav',
+    'REVERSE_GATE': 'static/IR/H3000/241_REVERSE_GATE.wav',
+    'RICH_PLATE': 'static/IR/H3000/243_RICH_PLATE.wav',
+    'SHIMMERISH': 'static/IR/H3000/246_SHIMMERISH.wav',
+    'SMALL_ROOM': 'static/IR/H3000/248_SMALL_ROOM.wav',
+    'TONAL_ROOM': 'static/IR/H3000/254_TONAL_ROOM.wav',
+    'WARM_HALL': 'static/IR/H3000/257_WARM_HALL.wav',
+    'THRAX-VERB': 'static/IR/H3000/261_THRAX-VERB.wav',
+    'TWIRLING_ROOM': 'static/IR/H3000/262_TWIRLING_ROOM.wav',
+    'USEFUL_VERB': 'static/IR/H3000/265_USEFUL_VERB.wav',
+    'FLUTTEROUS_ROOM': 'static/IR/H3000/278_FLUTTEROUS_ROOM.wav',
+    'MARKS_MED_DARK': 'static/IR/H3000/282_MARKS_MED_DARK.wav',
+    'LG_GUITAR_ROOM': 'static/IR/H3000/283_LG_GUITAR_ROOM.wav',
+    'ACCURATE_ROOM': 'static/IR/H3000/368_ACCURATE_ROOM.wav',
+    'BASS_SPACE': 'static/IR/H3000/371_BASS_SPACE.wav',
+    'BriteBrassPlate': 'static/IR/H3000/372_BriteBrassPlate.wav',
+    'CLOSE_MIKED': 'static/IR/H3000/377_CLOSE_MIKED.wav',
+    'COMB_SPACE_1': 'static/IR/H3000/378_COMB_SPACE_1.wav',
+    'COMPRESSED_AIR': 'static/IR/H3000/379_COMPRESSED_AIR.wav',
+    'DOUBLE_SPACE_DENSE_ROOM': 'static/IR/H3000/381_DOUBLE_SPACE_DENSE_ROOM.wav',
+    'DENSE_HALL_2': 'static/IR/H3000/382_DENSE_HALL_2.wav',
+    'DELAY_W__ROOM': 'static/IR/H3000/383_DELAY_W__ROOM.wav',
+    'DRAGON_BREATH': 'static/IR/H3000/385_DRAGON_BREATH.wav',
+    'DRUM_AMBIENCE': 'static/IR/H3000/387_DRUM_AMBIENCE.wav',
+    'GATED_FENCE': 'static/IR/H3000/390_GATED_FENCE.wav',
+    'GATED_ROOM_2': 'static/IR/H3000/391_GATED_ROOM_2.wav',
+    'GENERIC_HALL': 'static/IR/H3000/392_GENERIC_HALL.wav',
+    'GREAT_DRUMSPACE': 'static/IR/H3000/393_GREAT_DRUMSPACE.wav',
+    '5SEC_HANG_VERB': 'static/IR/H3000/394_5SEC_HANG_VERB.wav',
+    'HUGE_DENSE_HALL': 'static/IR/H3000/395_HUGE_DENSE_HALL.wav',
+    'HUGE_SYNTHSPACE': 'static/IR/H3000/396_HUGE_SYNTHSPACE.wav',
+    'MANY_REFLECTIONS': 'static/IR/H3000/516_MANY_REFLECTIONS.wav',
+    'AMBIENCE': 'static/IR/H3000/555_AMBIENCE.wav',
+    'AMBIENT_BOOTH': 'static/IR/H3000/556_AMBIENT_BOOTH.wav',
+    'BATHROOM': 'static/IR/H3000/557_BATHROOM.wav',
+    'CRASS_ROOM': 'static/IR/H3000/559_CRASS_ROOM.wav',
+    "DREW'S_CHAMBER": "static/IR/H3000/561_DREW'S_CHAMBER.wav",
+    'DRUM_AMBIENCE': 'static/IR/H3000/562_DRUM_AMBIENCE.wav',
+    'EMPTY_CLOSET': 'static/IR/H3000/563_EMPTY_CLOSET.wav',
+    'EMPTY_ROOM': 'static/IR/H3000/564_EMPTY_ROOM.wav',
+    'MEDIUM_SPACE': 'static/IR/H3000/565_MEDIUM_SPACE.wav',
+    'NEW_HOUSE': 'static/IR/H3000/566_NEW_HOUSE.wav',
+    'PRCSVHORN_PLATE': 'static/IR/H3000/567_PRCSVHORN_PLATE.wav',
+    'REAL_ROOM': 'static/IR/H3000/568_REAL_ROOM.wav',
+    'SMALL_ROOM': 'static/IR/H3000/569_SMALL_ROOM.wav',
+    'SMLSTEREOSPACE': 'static/IR/H3000/570_SMLSTEREOSPACE.wav',
+    'SMALLVOCAL_ROOM': 'static/IR/H3000/571_SMALLVOCAL_ROOM.wav',
+    'TIGHT_ROOM': 'static/IR/H3000/572_TIGHT_ROOM.wav',
+    'TIGHT_&_BRIGHT': 'static/IR/H3000/573_TIGHT_&_BRIGHT.wav',
+    'VOCAL_BOOTH': 'static/IR/H3000/574_VOCAL_BOOTH.wav',
+    'ALIVE_CHAMBER': 'static/IR/H3000/575_ALIVE_CHAMBER.wav',
+    'BIG_SWEEP': 'static/IR/H3000/577_BIG_SWEEP.wav',
+    "BOB'S_ROOM": "static/IR/H3000/578_BOB'S_ROOM.wav",
+    'BREATHING_CANYON': 'static/IR/H3000/579_BREATHING_CANYON.wav',
+    'BRIGHT_ROOM': 'static/IR/H3000/580_BRIGHT_ROOM.wav',
+    'CANYON': 'static/IR/H3000/581_CANYON.wav',
+    'CONCERT_HALL': 'static/IR/H3000/582_CONCERT_HALL.wav',
+    'DARK_ROOM': 'static/IR/H3000/583_DARK_ROOM.wav',
+    'DISCRETE-VERB': 'static/IR/H3000/584_DISCRETE-VERB.wav',
+    'NORTHWEST_HALL': 'static/IR/H3000/585_NORTHWEST_HALL.wav',
+    'RICH_PLATE': 'static/IR/H3000/586_RICH_PLATE.wav',
+    'SLAPVERB': 'static/IR/H3000/587_SLAPVERB.wav',
+    'SMOOTH_PLATE': 'static/IR/H3000/588_SMOOTH_PLATE.wav',
+    'WARM_HALL': 'static/IR/H3000/589_WARM_HALL.wav',
+    'ECHO-VERB': 'static/IR/H3000/591_ECHO-VERB.wav',
+    "EXPLODING_'vERB": "static/IR/H3000/592_EXPLODING_'vERB.wav",
+    'GATED_REVERB': 'static/IR/H3000/593_GATED_REVERB.wav',
+    'GATED_ROOM': 'static/IR/H3000/594_GATED_ROOM.wav',
+    'GATE_ROOM': 'static/IR/H3000/595_GATE_ROOM.wav',
+    'HUMP-VERB': 'static/IR/H3000/596_HUMP-VERB.wav',
+    'METALVERB': 'static/IR/H3000/597_METALVERB.wav',
+    'RANDOM_GATE': 'static/IR/H3000/598_RANDOM_GATE.wav',
+    'REVERSE_GATE': 'static/IR/H3000/600_REVERSE_GATE.wav',
+    'REVERB_RAMP': 'static/IR/H3000/601_REVERB_RAMP.wav',
+    'SHIMMERISH': 'static/IR/H3000/602_SHIMMERISH.wav',
+    'TONAL_ROOM': 'static/IR/H3000/603_TONAL_ROOM.wav',
+    'DRUM_PROCESSOR': 'static/IR/H3000/643_DRUM_PROCESSOR.wav',
+    'LIQUID_REVERB': 'static/IR/H3000/646_LIQUID_REVERB.wav',
+    'REVERSERB': 'static/IR/H3000/655_REVERSERB.wav',
+    'BOUNCE_VERB': 'static/IR/H3000/712_BOUNCE_VERB.wav',
+    'DEATHLESS_ROOM': 'static/IR/H3000/716_DEATHLESS_ROOM.wav',
+    'ENDLESS_CAVE': 'static/IR/H3000/719_ENDLESS_CAVE.wav',
+    'REVERB-a-BOUND': 'static/IR/H3000/736_REVERB-a-BOUND.wav',
+    'SMALL_DARK_ROOM': 'static/IR/H3000/739_SMALL_DARK_ROOM.wav',
+    'CLONEVERB': 'static/IR/H3000/793_CLONEVERB.wav',
+    'LONG_&_SMOOTH': 'static/IR/H3000/795_LONG_&_SMOOTH.wav',
+    'MEAT_LOCKER': 'static/IR/H3000/796_MEAT_LOCKER.wav',
+    'ethereal': 'static/IR/H3000/833_ethereal.wav',
+    'rewzNooRoom': 'static/IR/H3000/86_DrewzNooRoom.wav',
+    'swell_reverb': 'static/IR/H3000/884_swell_reverb.wav',
+    'PAPER_PLATE': 'static/IR/H3000/980_PAPER_PLATE.wav',
+    'USEFUL_VERB_2': 'static/IR/H3000/985_USEFUL_VERB_2.wav',
+    'ROBO_DRUM': 'static/IR/H3000/990_ROBO_DRUM.wav',
+    'AIR_SHAMIR': 'static/IR/H3000/991_AIR_SHAMIR.wav',
+    'SMALL_&_LIVE_VERB': 'static/IR/H3000/995_SMALL_&_LIVE_VERB.wav'
+  };
+
+  IR_LOADED = {};
+
+}).call(this);
+;(function() {
+  this.FXView = (function() {
+    function FXView(model) {
+      this.model = model;
+    }
+
+    return FXView;
+
+  })();
+
+  this.ReverbView = (function() {
+    function ReverbView(model) {
+      this.model = model;
+      this.dom = $('#tmpl_fx_reverb').clone();
+      this.dom.removeAttr('id');
+      this.name = this.dom.find('[name=name]');
+      this.input = this.dom.find('[name=input]');
+      this.output = this.dom.find('[name=output]');
+      this.initEvent();
+    }
+
+    ReverbView.prototype.initEvent = function() {
+      var _this = this;
+      this.name.on('change', function() {
+        return _this.model.setIR(_this.name.val());
+      });
+      this.input.on('change', function() {
+        return _this.model.setParam({
+          input: parseFloat(_this.input.val()) / 100.0
+        });
+      });
+      return this.output.on('change', function() {
+        return _this.model.setParam({
+          output: parseFloat(_this.output.val()) / 100.0
+        });
+      });
+    };
+
+    return ReverbView;
+
+  })();
+
+  this.DelayView = (function() {
+    function DelayView(model) {
+      this.model = model;
+      this.dom = $('#tmpl_fx_delay').clone();
+      this.dom.removeAttr('id');
+      this.delay = this.dom.find('[name=delay]');
+      this.feedback = this.dom.find('[name=feedback]');
+      this.lofi = this.dom.find('[name=lofi]');
+      this.input = this.dom.find('[name=input]');
+      this.output = this.dom.find('[name=output]');
+      this.initEvent();
+    }
+
+    DelayView.prototype.initEvent = function() {
+      var _this = this;
+      this.input.on('change', function() {
+        return _this.model.setParam({
+          input: parseFloat(_this.input.val()) / 100.0
+        });
+      });
+      this.output.on('change', function() {
+        return _this.model.setParam({
+          output: parseFloat(_this.output.val()) / 100.0
+        });
+      });
+      this.delay.on('change', function() {
+        return _this.model.setParam({
+          delay: parseFloat(_this.delay.val()) / 1000.0
+        });
+      });
+      this.feedback.on('change', function() {
+        return _this.model.setParam({
+          feedback: parseFloat(_this.feedback.val()) / 100.0
+        });
+      });
+      return this.lofi.on('change', function() {
+        return _this.model.setParam({
+          lofi: parseFloat(_this.lofi.val()) / 100.0
+        });
+      });
+    };
+
+    return DelayView;
+
+  })();
+
+}).call(this);
+;(function() {
   var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   this.KEYCODE_TO_NOTE = {
@@ -226,7 +664,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }).call(this);
       this.node = this.ctx.createGain();
       this.node.gain.value = this.gain_master;
-      this.node.connect(this.ctx.destination);
+      this.node_send = this.ctx.createGain();
+      this.node_send.gain.value = 1.0;
+      this.bus_delay = this.ctx.createGain();
+      this.bus_delay.gain.value = 1.0;
+      this.bus_reverb = this.ctx.createGain();
+      this.bus_reverb.gain.value = 1.0;
+      this.gain_delay = [];
+      this.gain_reverb = [];
       this.panners = [];
       this.analysers = [];
       this.splitter_master = this.ctx.createChannelSplitter(2);
@@ -241,6 +686,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.analyser_master[i].maxDecibels = 0.0;
         this.analyser_master[i].smoothingTimeConstant = 0.0;
       }
+      this.delay = new Delay(this.ctx);
+      this.reverb = new Reverb(this.ctx);
+      this.limiter = new Limiter(this.ctx);
+      this.bus_delay.connect(this.delay["in"]);
+      this.bus_reverb.connect(this.reverb["in"]);
+      this.node_send.connect(this.limiter["in"]);
+      this.delay.connect(this.limiter["in"]);
+      this.reverb.connect(this.limiter["in"]);
+      this.limiter.connect(this.node);
+      this.node.connect(this.ctx.destination);
       this.view = new MixerView(this);
       setInterval((function() {
         return _this.drawGains();
@@ -264,16 +719,28 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Mixer.prototype.empty = function() {
       this.gain_tracks = [];
       this.panners = [];
-      return this.view.empty();
+      this.view.empty();
+      this.delay_tracks = [];
+      return this.reverb_tracks = [];
     };
 
     Mixer.prototype.addSynth = function(synth) {
-      var a, p;
+      var a, g_delay, g_reverb, p;
       p = this.ctx.createPanner();
       p.panningModel = "equalpower";
       synth.connect(p);
-      p.connect(this.node);
+      p.connect(this.node_send);
       this.panners.push(p);
+      g_delay = this.ctx.createGain();
+      g_reverb = this.ctx.createGain();
+      p.connect(g_delay);
+      p.connect(g_reverb);
+      g_delay.connect(this.bus_delay);
+      g_reverb.connect(this.bus_reverb);
+      g_delay.gain.value = 1.0;
+      g_reverb.gain.value = 1.0;
+      this.gain_delay.push(g_delay);
+      this.gain_reverb.push(g_reverb);
       a = this.ctx.createAnalyser();
       synth.connect(a);
       this.analysers.push(a);
@@ -359,6 +826,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.console_master = this.master.find('#console-master');
       this.gains = this.tracks.find('.console-track > .gain-slider');
       this.gain_master = this.master.find('.console-track > .gain-slider');
+      this.pans_label = this.tracks.find('.console-track > .pan-label');
       this.pans = this.tracks.find('.console-track > .pan-slider');
       this.pan_master = this.master.find('.console-track > .pan-slider');
       this.canvas_tracks_dom = this.tracks.find('.vu-meter');
@@ -385,15 +853,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       _ref = this.canvas_tracks;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         c = _ref[_i];
-        _ref1 = [10, 110], c.width = _ref1[0], c.height = _ref1[1];
+        _ref1 = [10, 100], c.width = _ref1[0], c.height = _ref1[1];
       }
       this.canvas_master_dom = this.master.find('.vu-meter');
       this.canvas_master = this.canvas_master_dom[0];
       this.ctx_master = this.canvas_master.getContext('2d');
-      this.canvas_master.width = 60;
-      this.canvas_master.height = 110;
+      this.canvas_master.width = 70;
+      this.canvas_master.height = 130;
       this.ctx_master.fillStyle = '#fff';
-      this.ctx_master.fillRect(10, 0, 40, 110);
+      this.ctx_master.fillRect(10, 0, 50, 130);
       this.track_dom = $('#templates > .console-track');
       this.initEvent();
     }
@@ -411,23 +879,23 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     MixerView.prototype.drawGainTracks = function(i, data) {
       var h, v;
       v = Math.max.apply(null, data);
-      h = (v - 128) / 128 * 110;
-      this.ctx_tracks[i].clearRect(0, 0, 10, 110);
+      h = (v - 128) / 128 * 100;
+      this.ctx_tracks[i].clearRect(0, 0, 10, 100);
       this.ctx_tracks[i].fillStyle = '#0df';
-      return this.ctx_tracks[i].fillRect(0, 110 - h, 10, h);
+      return this.ctx_tracks[i].fillRect(0, 100 - h, 10, h);
     };
 
     MixerView.prototype.drawGainMaster = function(data_l, data_r) {
       var h_l, h_r, v_l, v_r;
       v_l = Math.max.apply(null, data_l);
       v_r = Math.max.apply(null, data_r);
-      h_l = (v_l - 128) / 128 * 110;
-      h_r = (v_r - 128) / 128 * 110;
-      this.ctx_master.clearRect(0, 0, 10, 110);
-      this.ctx_master.clearRect(50, 0, 10, 110);
+      h_l = (v_l - 128) / 128 * 130;
+      h_r = (v_r - 128) / 128 * 130;
+      this.ctx_master.clearRect(0, 0, 10, 130);
+      this.ctx_master.clearRect(60, 0, 10, 130);
       this.ctx_master.fillStyle = '#0df';
-      this.ctx_master.fillRect(0, 110 - h_l, 10, h_l);
-      return this.ctx_master.fillRect(50, 110 - h_r, 10, h_r);
+      this.ctx_master.fillRect(0, 130 - h_l, 10, h_l);
+      return this.ctx_master.fillRect(60, 130 - h_r, 10, h_r);
     };
 
     MixerView.prototype.addSynth = function(synth) {
@@ -437,11 +905,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.console_tracks.append(dom);
       this.pans.push(dom.find('.pan-slider'));
       this.gains.push(dom.find('.gain-slider'));
+      this.pans_label.push(dom.find('.pan-label'));
       d = dom.find('.vu-meter');
       this.canvas_tracks_dom.push(d);
       this.canvas_tracks.push(d[0]);
       this.ctx_tracks.push(d[0].getContext('2d'));
-      _ref = [10, 110], d[0].width = _ref[0], d[0].height = _ref[1];
+      _ref = [10, 100], d[0].width = _ref[0], d[0].height = _ref[1];
       this.console_tracks.css({
         width: (this.gains.length * 80 + 2) + 'px'
       });
@@ -468,19 +937,26 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     MixerView.prototype.setPans = function() {
-      var p, p_master, _p;
+      var i, l, p, p_master, t, _i, _p, _ref, _results;
       p = (function() {
         var _i, _len, _ref, _results;
         _ref = this.pans;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           _p = _ref[_i];
-          _results.push(this.pan2pos(1.0 - (parseFloat(_p.val())) / 100.0));
+          _results.push(this.pan2pos(1.0 - (parseFloat(_p.val())) / 200.0));
         }
         return _results;
       }).call(this);
-      p_master = this.pan2pos(1.0 - parseFloat(this.pan_master.val() / 100.0));
-      return this.model.setPans(p, p_master);
+      p_master = this.pan2pos(1.0 - parseFloat(this.pan_master.val() / 200.0));
+      this.model.setPans(p, p_master);
+      _results = [];
+      for (i = _i = 0, _ref = this.pans.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        l = parseInt(this.pans[i].val()) - 100;
+        t = l === 0 ? 'C' : (l < 0 ? (-l) + '% L' : l + '% R');
+        _results.push(this.pans_label[i].text(t));
+      }
+      return _results;
     };
 
     MixerView.prototype.readGains = function(g, g_master) {
@@ -641,6 +1117,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.synth = [];
       this.mixer = new Mixer(this.context, this);
       this.session = new Session(this.context, this);
+      this.sidebar = new Sidebar(this.context, this, this.session, this.mixer);
       this.addSynth(0);
       this.synth_now = this.synth[0];
       this.synth_pos = 0;
@@ -2404,7 +2881,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     name: 'section-0',
     bpm: 120,
     key: 'A',
-    sclae: 'Major'
+    scale: 'Major'
   };
 
   SONG_DEFAULT = {
@@ -2671,13 +3148,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
-    Session.prototype.saveMaster = function() {
-      return this.song.master[this.scene_pos] = this.player.getScene();
+    Session.prototype.saveMaster = function(y, obj) {
+      this.song.master[y] = obj;
+      return this.view.readSong(this.song, this.current_cells);
     };
 
     Session.prototype.saveMasters = function() {
       if (this.song.master === []) {
         return this.song.master.push(this.player.getScene());
+      } else {
+
       }
     };
 
@@ -2711,7 +3191,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.player.setSceneLength(this.scene_length);
       this.readTracks(this.song.tracks);
       this.player.mixer.readParam(this.song.mixer);
-      return this.view.readSong(song, this.current_cells);
+      return this.view.readSong(this.song, this.current_cells);
     };
 
     Session.prototype.saveSong = function() {
@@ -2865,8 +3345,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx_master_on = this.canvas_master_on.getContext('2d');
       this.ctx_tracks_hover = this.canvas_tracks_hover.getContext('2d');
       this.ctx_master_hover = this.canvas_master_hover.getContext('2d');
-      this.w = 80;
+      this.w = 70;
       this.h = 20;
+      this.w_master = 80;
       this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'];
       this.color_schemes = {
         REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'],
@@ -2896,8 +3377,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         y: -1
       };
       this.select_pos = {
-        x: -1,
-        y: -1
+        x: 0,
+        y: 0,
+        type: 'master'
       };
       this.last_clicked = performance.now();
       this.dialog = $('#dialog');
@@ -2915,9 +3397,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SessionView.prototype.initCanvas = function() {
       this.canvas_tracks.width = this.canvas_tracks_on.width = this.canvas_tracks_hover.width = this.w * 8 + 1;
-      this.canvas_master.width = this.canvas_master_on.width = this.canvas_master_hover.width = this.w + 1;
-      this.canvas_tracks.height = this.canvas_tracks_on.height = this.canvas_tracks_hover.height = this.h * 15 + 10;
-      this.canvas_master.height = this.canvas_master_on.height = this.canvas_master_hover.height = this.h * 15 + 10;
+      this.canvas_master.width = this.canvas_master_on.width = this.canvas_master_hover.width = this.w + 11;
+      this.canvas_tracks.height = this.canvas_tracks_on.height = this.canvas_tracks_hover.height = this.h * 11 + 10;
+      this.canvas_master.height = this.canvas_master_on.height = this.canvas_master_hover.height = this.h * 11 + 10;
       this.offset_y = 20;
       this.ctx_tracks.translate(0, this.offset_y);
       this.ctx_master.translate(0, this.offset_y);
@@ -2942,7 +3424,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx_tracks_hover.translate(0, -this.offset_y);
       this.ctx_master_hover.translate(0, -this.offset_y);
       w_new = Math.max(this.song.tracks.length, 8) * this.w + 1;
-      h_new = Math.max(this.song.length + 1, 15) * this.h + 10;
+      h_new = Math.max(this.song.length + 2, 11) * this.h + 10;
       this.canvas_tracks.width = this.canvas_tracks_on.width = this.canvas_tracks_hover.width = w_new;
       this.canvas_tracks.height = this.canvas_tracks_on.height = this.canvas_tracks_hover.height = h_new;
       this.canvas_master.height = this.canvas_master_on.height = this.canvas_master_hover.height = h_new;
@@ -2981,13 +3463,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.ctx_master_hover.translate(0, this.offset_y);
     };
 
-    SessionView.prototype.getPos = function(rect, wrapper, e) {
+    SessionView.prototype.getPos = function(rect, wrapper, e, type) {
       var _x, _y;
       _x = Math.floor((e.clientX - rect.left + this.wrapper_mixer.scrollLeft()) / this.w);
       _y = Math.floor((e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) / this.h);
       return {
         x: _x,
-        y: _y
+        y: _y,
+        type: type
       };
     };
 
@@ -3008,7 +3491,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var _this = this;
       this.canvas_tracks_hover_dom.on('mousemove', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
+        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e, 'tracks');
         if (_this.is_clicked) {
           return _this.drawDrag(_this.ctx_tracks_hover, pos);
         } else {
@@ -3027,7 +3510,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         if (pos.y >= 0) {
           _this.cueTracks(pos.x, pos.y);
         } else {
-          pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
+          pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e, 'tracks');
           now = performance.now();
           if (now - _this.last_clicked < 500 && pos.y !== -1) {
             _this.editPattern(pos);
@@ -3040,7 +3523,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e);
+        pos = _this.getPos(_this.rect_tracks, _this.wrapper_tracks_sub, e, 'tracks');
         if (_this.click_pos.x === pos.x && _this.click_pos.y === pos.y) {
           _this.selectCell(pos);
         } else {
@@ -3052,7 +3535,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
       this.canvas_master_hover_dom.on('mousemove', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
+        pos = _this.getPos(_this.rect_master, _this.wrapper_master, e, 'master');
         if (_this.is_clicked) {
           return _this.drawDragMaster(_this.ctx_master_hover, pos);
         } else {
@@ -3071,13 +3554,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         if (pos.y >= 0) {
           _this.cueMaster(pos.x, pos.y);
         } else {
-          pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
+          pos = _this.getPos(_this.rect_master, _this.wrapper_master, e, 'master');
           _this.is_clicked = true;
         }
         return _this.click_pos = pos;
       }).on('mouseup', function(e) {
         var pos;
-        pos = _this.getPos(_this.rect_master, _this.wrapper_master, e);
+        pos = _this.getPos(_this.rect_master, _this.wrapper_master, e, 'master');
         if (_this.click_pos.x === pos.x && _this.click_pos.y === pos.y) {
           _this.selectCellMaster(pos);
         } else {
@@ -3147,7 +3630,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
         for (y = _j = 0, _ref1 = Math.max(this.song.length + 1, 10); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           if ((t != null) && (t.patterns[y] != null)) {
-            this.drawCell(this.ctx_tracks, t.patterns[y], x, y);
+            this.drawCellTracks(t.patterns[y], x, y);
           } else {
             this.drawEmpty(this.ctx_tracks, x, y);
           }
@@ -3156,27 +3639,38 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.drawMasterName();
       for (y = _k = 0, _ref2 = Math.max(this.song.length + 1, 10); 0 <= _ref2 ? _k < _ref2 : _k > _ref2; y = 0 <= _ref2 ? ++_k : --_k) {
         if (this.song.master[y] != null) {
-          this.drawCell(this.ctx_master, this.song.master[y], 0, y);
+          this.drawCellMaster(this.song.master[y], 0, y);
         } else {
           this.drawEmptyMaster(y);
         }
       }
       this.drawScene(this.scene_pos, this.current_cells);
+      this.selectCellMaster(this.select_pos);
       this.song_title.val(this.song.title);
       return this.song_creator.val(this.song.creator);
     };
 
-    SessionView.prototype.drawCell = function(ctx, p, x, y) {
-      this.clearCell(ctx, x, y);
+    SessionView.prototype.drawCellTracks = function(p, x, y) {
+      this.clearCell(this.ctx_tracks, x, y);
       if (this.track_color[x] == null) {
         this.track_color[x] = this.color_schemes[this.song.tracks[x].type];
       }
-      ctx.strokeStyle = this.track_color[x][1];
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
-      ctx.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
-      ctx.fillStyle = this.track_color[x][1];
-      return ctx.fillText(p.name, x * this.w + 24, (y + 1) * this.h - 6);
+      this.ctx_tracks.strokeStyle = this.track_color[x][1];
+      this.ctx_tracks.lineWidth = 1;
+      this.ctx_tracks.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
+      this.ctx_tracks.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
+      this.ctx_tracks.fillStyle = this.track_color[x][1];
+      return this.ctx_tracks.fillText(p.name, x * this.w + 24, (y + 1) * this.h - 6);
+    };
+
+    SessionView.prototype.drawCellMaster = function(p, x, y) {
+      this.clearCell(this.ctx_master, x, y);
+      this.ctx_master.strokeStyle = this.color[1];
+      this.ctx_master.lineWidth = 1;
+      this.ctx_master.strokeRect(2, y * this.h + 2, this.w_master - 2, this.h - 2);
+      this.ctx_master.drawImage(this.img_play, 0, 0, 18, 18, 3, y * this.h + 3, 16, 15);
+      this.ctx_master.fillStyle = this.color[1];
+      return this.ctx_master.fillText(p.name, 24, (y + 1) * this.h - 6);
     };
 
     SessionView.prototype.drawEmpty = function(ctx, x, y) {
@@ -3190,12 +3684,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.clearCell(this.ctx_master, 0, y);
       this.ctx_master.strokeStyle = this.color[0];
       this.ctx_master.lineWidth = 1;
-      this.ctx_master.strokeRect(2, y * this.h + 2, this.w - 2, this.h - 2);
+      this.ctx_master.strokeRect(2, y * this.h + 2, this.w_master - 2, this.h - 2);
       return this.ctx_master.drawImage(this.img_play, 0, 0, 18, 18, 3, y * this.h + 3, 16, 15);
     };
 
     SessionView.prototype.clearCell = function(ctx, x, y) {
-      return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
+      if (ctx === this.ctx_master) {
+        return ctx.clearRect(0, y * this.h, this.w_master, this.h);
+      } else {
+        return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
+      }
     };
 
     SessionView.prototype.drawMasterName = function() {
@@ -3225,7 +3723,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SessionView.prototype.drawPatternName = function(x, y, p) {
-      return this.drawCell(this.ctx_tracks, p, x, y);
+      return this.drawCellTracks(p, x, y);
     };
 
     SessionView.prototype.drawSceneName = function(y, name) {};
@@ -3256,7 +3754,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SessionView.prototype.drawActiveMaster = function(y) {
-      this.ctx_master_on.clearRect(0, 0, this.w, 10000);
+      this.ctx_master_on.clearRect(0, 0, this.w_master, 10000);
       return this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 3, y * this.h + 3, 16, 15);
     };
 
@@ -3304,29 +3802,33 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       ctx.strokeStyle = this.color[1];
       ctx.fillStyle = this.color[1];
       ctx.lineWidth = 1;
-      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
-      ctx.fillText(name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
+      ctx.strokeRect(2, pos.y * this.h + 2, this.w_master - 2, this.h - 2);
+      ctx.fillText(name, 24, (pos.y + 1) * this.h - 6);
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      ctx.fillRect(0, pos.y * this.h, this.w_master, this.h);
       return this.hover_pos = pos;
     };
 
     SessionView.prototype.drawHover = function(ctx, pos) {
       this.clearHover(ctx);
       ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      if (ctx === this.ctx_master_hover) {
+        ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w_master, this.h);
+      } else {
+        ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      }
       return this.hover_pos = pos;
     };
 
     SessionView.prototype.clearHover = function(ctx) {
       if (ctx === this.ctx_tracks_hover) {
         ctx.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w + 2, this.h + 2);
-        if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y) {
+        if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y && this.hover_pos.type === this.select_pos.type) {
           return this.selectCell(this.select_pos);
         }
       } else {
-        ctx.clearRect(0, this.hover_pos.y * this.h, this.w + 2, this.h + 2);
-        if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y) {
+        ctx.clearRect(0, this.hover_pos.y * this.h, this.w_master + 2, this.h + 2);
+        if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y && this.hover_pos.type === this.select_pos.type) {
           return this.selectCellMaster(this.select_pos);
         }
       }
@@ -3388,7 +3890,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SessionView.prototype.editPattern = function(pos) {
       var pat;
       pat = this.model.editPattern(pos.x, pos.y);
-      return this.drawCell(this.ctx_tracks, pat[2], pat[0], pat[1]);
+      return this.drawCellTracks(pat[2], pat[0], pat[1]);
     };
 
     SessionView.prototype.addSynth = function(song) {
@@ -3496,9 +3998,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return;
       }
       this.song.tracks[dst.x].patterns[dst.y] = $.extend(true, {}, this.song.tracks[src.x].patterns[src.y]);
-      this.drawCell(this.ctx_tracks, this.song.tracks[dst.x].patterns[dst.y], dst.x, dst.y);
+      this.drawCellTracks(this.song.tracks[dst.x].patterns[dst.y], dst.x, dst.y);
       this.model.readPattern(this.song.tracks[dst.x].patterns[dst.y], dst.x, dst.y);
-      return this.drawCell(this.ctx_master, this.song.master[dst.y], 0, dst.y);
+      return this.drawCellMaster(this.song.master[dst.y], 0, dst.y);
     };
 
     SessionView.prototype.copyCellMaster = function(src, dst) {
@@ -3506,7 +4008,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return;
       }
       this.song.master[dst.y] = $.extend(true, {}, this.song.master[src.y]);
-      this.drawCell(this.ctx_master, this.song.master[dst.x], 0, dst.y);
+      this.drawCellMaster(this.song.master[dst.x], 0, dst.y);
       return this.model.readMaster(this.song.master[dst.y], dst.y);
     };
 
@@ -3517,7 +4019,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.song.tracks[pos.x].patterns[pos.y] == null) {
         return;
       }
-      this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
+      this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w_master, this.h);
       this.ctx_tracks_hover.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.click_pos.x * this.w, this.click_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
@@ -3529,23 +4031,25 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][1];
       this.ctx_tracks_hover.fillText(this.song.tracks[pos.x].patterns[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
       this.select_pos = pos;
-      return this.select_pos.type = 'tracks';
+      this.select_pos.type = 'tracks';
+      return this.model.player.sidebar.show(this.song, this.select_pos);
     };
 
     SessionView.prototype.selectCellMaster = function(pos) {
       if (this.song.master[pos.y] == null) {
         return;
       }
-      this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
-      this.ctx_master_hover.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
-      this.ctx_master_hover.clearRect(this.click_pos.x * this.w, this.click_pos.y * this.h, this.w, this.h);
-      this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
+      this.ctx_tracks_hover.clearRect(0, this.select_pos.y * this.h, this.w, this.h);
+      this.ctx_master_hover.clearRect(0, this.hover_pos.y * this.h, this.w_master, this.h);
+      this.ctx_master_hover.clearRect(0, this.click_pos.y * this.h, this.w_master, this.h);
+      this.ctx_master_hover.clearRect(0, this.select_pos.y * this.h, this.w_master, this.h);
       this.ctx_master_hover.fillStyle = this.color[5];
-      this.ctx_master_hover.fillRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
+      this.ctx_master_hover.fillRect(2, pos.y * this.h + 2, this.w_master - 2, this.h - 2);
       this.ctx_master_hover.fillStyle = this.color[1];
-      this.ctx_master_hover.fillText(this.song.master[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
+      this.ctx_master_hover.fillText(this.song.master[pos.y].name, pos.x * this.w_master + 24, (pos.y + 1) * this.h - 6);
       this.select_pos = pos;
-      return this.select_pos.type = 'master';
+      this.select_pos.type = 'master';
+      return this.model.player.sidebar.show(this.song, this.select_pos);
     };
 
     SessionView.prototype.getSelectPos = function() {
@@ -3560,7 +4064,158 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
-  var OSC_TYPE;
+  this.Sidebar = (function() {
+    function Sidebar(ctx, player, session, mixer) {
+      this.ctx = ctx;
+      this.player = player;
+      this.session = session;
+      this.mixer = mixer;
+      this.sidebar_pos = {
+        x: 0,
+        y: 1,
+        type: 'master'
+      };
+      this.view = new SidebarView(this);
+    }
+
+    Sidebar.prototype.show = function(song, select_pos) {
+      this.song = song;
+      this.select_pos = select_pos;
+      if (this.select_pos.type === 'tracks') {
+        if (this.sidebar_pos.x === this.select_pos.x && this.sidebar_pos.type === this.select_pos.type) {
+          return;
+        }
+        this.sidebar_pos = this.select_pos;
+        return this.view.showTracks(this.song.tracks[this.select_pos.x]);
+      } else {
+        if (this.sidebar_pos.y === this.select_pos.y && this.sidebar_pos.type === this.select_pos.type) {
+          return;
+        }
+        this.sidebar_pos = this.select_pos;
+        return this.view.showMaster(this.song.master[this.select_pos.y]);
+      }
+    };
+
+    Sidebar.prototype.saveMaster = function(obj) {
+      if (this.sidebar_pos.y === -1) {
+        return;
+      }
+      return this.session.saveMaster(this.sidebar_pos.y, obj);
+    };
+
+    Sidebar.prototype.saveTracksEffect = function(i, param) {
+      if (this.sidebar_pos.type === 'master') {
+        return;
+      }
+      return this.player.synth[this.sidebar_pos.x].effects[i].saveParam();
+    };
+
+    return Sidebar;
+
+  })();
+
+}).call(this);
+;(function() {
+  this.SidebarView = (function() {
+    function SidebarView(model) {
+      this.model = model;
+      this.wrapper = $('#sidebar-wrapper');
+      this.tracks = this.wrapper.find('#sidebar-tracks');
+      this.master = this.wrapper.find('#sidebar-master');
+      this.master_name = this.master.find('[name=name]');
+      this.master_bpm = this.master.find('[name=bpm]');
+      this.master_key = this.master.find('[name=key]');
+      this.master_scale = this.master.find('[name=mode]');
+      this.master_save = this.master.find('[name=save]');
+      this.initEvent();
+      this.model.mixer.delay.appendTo(this.master);
+      this.model.mixer.reverb.appendTo(this.master);
+    }
+
+    SidebarView.prototype.initEvent = function() {
+      var m, _i, _len, _ref,
+        _this = this;
+      this.master_name.on('focus', (function() {
+        return window.keyboard.beginInput();
+      })).on('blur', (function() {
+        return window.keyboard.endInput();
+      })).on('change', (function() {
+        return _this.saveMaster();
+      }));
+      _ref = [this.master_bpm, this.master_key, this.master_scale];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        m = _ref[_i];
+        m.on('focus', (function() {
+          return window.keyboard.beginInput();
+        })).on('blur', (function() {
+          return window.keyboard.endInput();
+        }));
+      }
+      this.master_save.on('click', (function() {
+        return _this.saveMaster();
+      }));
+      return this.tracks.find('.sidebar-effect').each(function(i) {
+        return $(_this).on('change', function() {
+          return _this.model.readTracksEffect(i);
+        });
+      });
+    };
+
+    SidebarView.prototype.saveMasterPump = function(i) {
+      return this.mixer.pump(i);
+    };
+
+    SidebarView.prototype.saveMaster = function() {
+      var bpm, key, name, obj, scale;
+      name = this.master_name.val();
+      bpm = this.master_bpm.val();
+      key = this.master_key.val();
+      scale = this.master_scale.val();
+      obj = {
+        name: name != null ? name : void 0,
+        bpm: bpm != null ? bpm : void 0,
+        key: key != null ? key : void 0,
+        scale: scale != null ? scale : void 0
+      };
+      return this.model.saveMaster(obj);
+    };
+
+    SidebarView.prototype.clearMaster = function() {
+      var o;
+      o = {
+        name: this.master_name.val()
+      };
+      this.model.saveMaster(o);
+      return this.showMaster(o);
+    };
+
+    SidebarView.prototype.showTracks = function(o) {
+      return this.wrapper.css('left', '0px');
+    };
+
+    SidebarView.prototype.showMaster = function(o) {
+      if (o.name != null) {
+        this.master_name.val(o.name);
+      }
+      if (o.bpm != null) {
+        this.master_bpm.val(o.bpm);
+      }
+      if (o.key != null) {
+        this.master_key.val(o.key);
+      }
+      if (o.scale != null) {
+        this.master_scale.val(o.scale);
+      }
+      return this.wrapper.css('left', '-223px');
+    };
+
+    return SidebarView;
+
+  })();
+
+}).call(this);
+;(function() {
+  var FREQ_OFFSET, OSC_TYPE, TIME_OFFSET;
 
   this.KEY_LIST = {
     A: 55,
@@ -3597,6 +4252,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
   this.T2 = new MutekiTimer();
+
+  TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17];
+
+  FREQ_OFFSET = [0.1, 0.15, 0.25, 0.35, 0.55, 0.65, 0.85];
 
   this.Noise = (function() {
     function Noise(ctx) {
@@ -3679,7 +4338,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.setFreq();
       this.osc.start(0);
       for (i = _i = 0; _i < 7; i = ++_i) {
-        this.oscs[i].start(i);
+        this.oscs[i].start(TIME_OFFSET[i]);
       }
     }
 
@@ -3751,7 +4410,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.shape === 'SUPERSAW' || this.shape === 'SUPERRECT') {
         _results = [];
         for (i = _i = 0; _i < 7; i = ++_i) {
-          _results.push(this.oscs[i].frequency.setValueAtTime(this.freq + i * 0.1, 0));
+          _results.push(this.oscs[i].frequency.setValueAtTime(this.freq + FREQ_OFFSET[i], 0));
         }
         return _results;
       } else {

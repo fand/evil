@@ -68,6 +68,7 @@
           <canvas id="session-tracks-hover"></canvas>
          </div>
         </div>
+        <div id="effects-tracks" class="clearfix"></div>
         <div id="console-tracks" class="clearfix"></div>
       </div>
 
@@ -79,10 +80,8 @@
         </div>
         <div id="console-master" class="clearfix">
           <div class="console-track">
-            <!-- L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R -->
             <div>MASTER</div>
             <input class="gain-slider" type="range" min="0" max="100" value="100" />
-
             <canvas class="vu-meter"></canvas>
           </div>
         </div>
@@ -90,50 +89,80 @@
     </div>
 
     <div id="mixer-sidebar">
-      <div id="sidebar-wrapper" class="clearfix">
+      <div id="sidebar-wrapper">
+        <div id="sidebar-tracks-wrapper" class="sidebar">
+          <div id="sidebar-tracks">
 
-        <fieldset id="sidebar-master" class="sidebar">
-          <legend>Control Change</legend>
+            <fieldset class="sidebar-effect sidebar-name">
+              <legend><input name="name" type="text" value="Synth #0" /></legend>
+            </fieldset>
 
-          <div class="clearfix">
-            <label>key</label>
-            <select name="key">
-              <option selected="selected">A</option>
-              <option>D</option>
-              <option>G</option>
-              <option>C</option>
-              <option>F</option>
-              <option>Bb</option>
-              <option>Eb</option>
-              <option>Ab</option>
-              <option>Db</option>
-              <option>Gb</option>
-              <option>B</option>
-              <option>E</option>
-            </select>
+            <div>
+              <select>
+                <option>Fuzz</option>
+                <option>Double</option>
+                <option>Comp</option>
+                <option>Delay</option>
+                <option>Reverb</option>
+              </select>
+              <input type="button" value="add"/>
+            </div>
+
           </div>
 
-          <div class="clearfix">
-            <label>scale</label>
-            <select name="mode">
-              <option selected="selected">Major</option>
-              <option>minor</option>
-              <option>Pentatonic</option>
-              <option>Harm-minor</option>
-              <option>Dorian</option>
-              <option>Phrygian</option>
-              <option>Lydian</option>
-              <option>Mixolydian</option>
-              <option>CHROMATIC</option>
-            </select>
-          </div>
+        </div>
 
-          <div class="clearfix">
-            <label>bpm</label>
-            <input name="bpm"   type="number" min="0" max="50000" value="120">
-          </div>
 
-        </fieldset>
+        <div id="sidebar-master-wrapper" class="sidebar">
+          <div id="sidebar-master">
+
+            <fieldset id="sidebar-master-control" class="sidebar-effect sidebar-name">
+              <legend><input name="name" type="text" value="section-0" /></legend>
+
+              <div class="clearfix">
+                <label>key</label>
+                <select name="key">
+                  <option selected="selected">A</option>
+                  <option>D</option>
+                  <option>G</option>
+                  <option>C</option>
+                  <option>F</option>
+                  <option>Bb</option>
+                  <option>Eb</option>
+                  <option>Ab</option>
+                  <option>Db</option>
+                  <option>Gb</option>
+                  <option>B</option>
+                  <option>E</option>
+                </select>
+              </div>
+
+              <div class="clearfix">
+                <label>scale</label>
+                <select name="mode">
+                  <option selected="selected">Major</option>
+                  <option>minor</option>
+                  <option>Pentatonic</option>
+                  <option>Harm-minor</option>
+                  <option>Dorian</option>
+                  <option>Phrygian</option>
+                  <option>Lydian</option>
+                  <option>Mixolydian</option>
+                  <option>CHROMATIC</option>
+                </select>
+              </div>
+
+              <div class="clearfix">
+                <label>bpm</label>
+                <input name="bpm"   type="number" min="0" max="50000" value="120">
+              </div>
+
+              <div class="clearfix">
+                <input name="save" type="button" value="save"/>
+              </div>
+            </fieldset>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -143,8 +172,11 @@
     <: include 'synth/synth.tx' :>
     <: include 'synth/sampler.tx' :>
 
+    <: include 'effect.tx' :>
+
     <div class="console-track">
-      L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
+      <div class="pan-label">C</div>
+      <input class="pan-slider" type="range" min="0" max="200" value="100" />
       <input class="gain-slider" type="range" min="0" max="100" value="100" />
 
       <canvas class="vu-meter"></canvas>

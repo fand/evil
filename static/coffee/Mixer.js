@@ -18,7 +18,14 @@
       }).call(this);
       this.node = this.ctx.createGain();
       this.node.gain.value = this.gain_master;
-      this.node.connect(this.ctx.destination);
+      this.node_send = this.ctx.createGain();
+      this.node_send.gain.value = 1.0;
+      this.bus_delay = this.ctx.createGain();
+      this.bus_delay.gain.value = 1.0;
+      this.bus_reverb = this.ctx.createGain();
+      this.bus_reverb.gain.value = 1.0;
+      this.gain_delay = [];
+      this.gain_reverb = [];
       this.panners = [];
       this.analysers = [];
       this.splitter_master = this.ctx.createChannelSplitter(2);
@@ -33,6 +40,16 @@
         this.analyser_master[i].maxDecibels = 0.0;
         this.analyser_master[i].smoothingTimeConstant = 0.0;
       }
+      this.delay = new Delay(this.ctx);
+      this.reverb = new Reverb(this.ctx);
+      this.limiter = new Limiter(this.ctx);
+      this.bus_delay.connect(this.delay["in"]);
+      this.bus_reverb.connect(this.reverb["in"]);
+      this.node_send.connect(this.limiter["in"]);
+      this.delay.connect(this.limiter["in"]);
+      this.reverb.connect(this.limiter["in"]);
+      this.limiter.connect(this.node);
+      this.node.connect(this.ctx.destination);
       this.view = new MixerView(this);
       setInterval((function() {
         return _this.drawGains();
@@ -56,16 +73,28 @@
     Mixer.prototype.empty = function() {
       this.gain_tracks = [];
       this.panners = [];
-      return this.view.empty();
+      this.view.empty();
+      this.delay_tracks = [];
+      return this.reverb_tracks = [];
     };
 
     Mixer.prototype.addSynth = function(synth) {
-      var a, p;
+      var a, g_delay, g_reverb, p;
       p = this.ctx.createPanner();
       p.panningModel = "equalpower";
       synth.connect(p);
-      p.connect(this.node);
+      p.connect(this.node_send);
       this.panners.push(p);
+      g_delay = this.ctx.createGain();
+      g_reverb = this.ctx.createGain();
+      p.connect(g_delay);
+      p.connect(g_reverb);
+      g_delay.connect(this.bus_delay);
+      g_reverb.connect(this.bus_reverb);
+      g_delay.gain.value = 1.0;
+      g_reverb.gain.value = 1.0;
+      this.gain_delay.push(g_delay);
+      this.gain_reverb.push(g_reverb);
       a = this.ctx.createAnalyser();
       synth.connect(a);
       this.analysers.push(a);
