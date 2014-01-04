@@ -189,8 +189,10 @@
     };
 
     VCO.prototype.setFreq = function() {
-      var i, _i, _results;
-      this.freq = (Math.pow(2, this.octave) * Math.pow(SEMITONE, this.interval + this.note) * this.freq_key) + this.fine;
+      var i, note_oct, note_shift, _i, _results;
+      note_oct = Math.floor(this.note / 12);
+      note_shift = this.note % 12;
+      this.freq = (Math.pow(2, this.octave + note_oct) * Math.pow(SEMITONE, note_shift) * this.freq_key) + this.fine;
       if (this.shape === 'SUPERSAW' || this.shape === 'SUPERRECT') {
         _results = [];
         for (i = _i = 0; _i < 7; i = ++_i) {
@@ -353,6 +355,8 @@
       this.gain = 1.0;
       this.is_mute = false;
       this.is_on = false;
+      this.is_harmony = true;
+      this.scale = this.parent.scale;
       this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
       this.gains = [this.ctx.createGain(), this.ctx.createGain(), this.ctx.createGain()];
       for (i = _i = 0; _i < 3; i = ++_i) {
@@ -396,7 +400,8 @@
         }).call(this),
         eg: this.eg.getParam(),
         feg: this.feg.getParam(),
-        filter: [this.feg.getRange()[1], this.filter.getParam()]
+        filter: [this.feg.getRange()[1], this.filter.getParam()],
+        harmony: this.harmony
       };
     };
 
@@ -424,12 +429,15 @@
       return this.view.readParam(p);
     };
 
-    SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine) {
+    SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine, harmony) {
       this.vcos[i].setShape(shape);
       this.vcos[i].setOctave(oct);
       this.vcos[i].setInterval(interval);
       this.vcos[i].setFine(fine);
-      return this.vcos[i].setFreq();
+      this.vcos[i].setFreq();
+      if (harmony != null) {
+        return this.is_harmony = harmony === 'harmony';
+      }
     };
 
     SynthCore.prototype.setEGParam = function(a, d, s, r) {
@@ -508,6 +516,22 @@
       return this.node.disconnect();
     };
 
+    SynthCore.prototype.noteToSemitone = function(note, shift) {
+      var semitone;
+      if (this.is_harmony) {
+        note = note + shift;
+        if (shift > 0) {
+          note--;
+        }
+        if (shift < 0) {
+          note++;
+        }
+        return semitone = Math.floor((note - 1) / this.scale.length) * 12 + this.scale[(note - 1) % this.scale.length];
+      } else {
+        return semitone = Math.floor((note - 1) / this.scale.length) * 12 + this.scale[(note - 1) % this.scale.length] + shift;
+      }
+    };
+
     SynthCore.prototype.setNote = function(note) {
       var v, _i, _len, _ref, _results;
       this.note = note;
@@ -515,7 +539,7 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         v = _ref[_i];
-        v.setNote(note);
+        v.setNote(this.noteToSemitone(this.note, v.interval));
         _results.push(v.setFreq());
       }
       return _results;
@@ -530,171 +554,6 @@
     };
 
     return SynthCore;
-
-  })();
-
-  this.SynthCoreView = (function() {
-    function SynthCoreView(model, id, dom) {
-      this.model = model;
-      this.id = id;
-      this.dom = dom;
-      this.vcos = $(this.dom.find('.RS_VCO'));
-      this.EG_inputs = this.dom.find('.RS_EG input');
-      this.FEG_inputs = this.dom.find('.RS_FEG input');
-      this.filter_inputs = this.dom.find(".RS_filter input");
-      this.gain_inputs = this.dom.find('.RS_mixer input');
-      this.canvasEG = this.dom.find(".RS_EG .canvasEG").get()[0];
-      this.canvasFEG = this.dom.find(".RS_FEG .canvasFEG").get()[0];
-      this.contextEG = this.canvasEG.getContext('2d');
-      this.contextFEG = this.canvasFEG.getContext('2d');
-      this.initEvent();
-    }
-
-    SynthCoreView.prototype.initEvent = function() {
-      var _this = this;
-      this.vcos.on("change", function() {
-        return _this.setVCOParam();
-      });
-      this.gain_inputs.on("change", function() {
-        return _this.setGains();
-      });
-      this.filter_inputs.on("change", function() {
-        return _this.setFilterParam();
-      });
-      this.EG_inputs.on("change", function() {
-        return _this.setEGParam();
-      });
-      this.FEG_inputs.on("change", function() {
-        return _this.setFEGParam();
-      });
-      return this.setParam();
-    };
-
-    SynthCoreView.prototype.updateCanvas = function(name) {
-      var adsr, canvas, context, h, w, w4;
-      canvas = null;
-      context = null;
-      adsr = null;
-      if (name === "EG") {
-        canvas = this.canvasEG;
-        context = this.contextEG;
-        adsr = this.model.eg.getADSR();
-      } else {
-        canvas = this.canvasFEG;
-        context = this.contextFEG;
-        adsr = this.model.feg.getADSR();
-      }
-      w = canvas.width = 180;
-      h = canvas.height = 50;
-      w4 = w / 4;
-      context.clearRect(0, 0, w, h);
-      context.beginPath();
-      context.moveTo(w4 * (1.0 - adsr[0]), h);
-      context.lineTo(w / 4, 0);
-      context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));
-      context.lineTo(w4 * 3, h * (1.0 - adsr[2]));
-      context.lineTo(w4 * (adsr[3] + 3), h);
-      context.strokeStyle = 'rgb(0, 220, 255)';
-      return context.stroke();
-    };
-
-    SynthCoreView.prototype.setParam = function() {
-      this.setVCOParam();
-      this.setEGParam();
-      this.setFEGParam();
-      this.setFilterParam();
-      return this.setGains();
-    };
-
-    SynthCoreView.prototype.setVCOParam = function() {
-      var i, vco, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        vco = this.vcos.eq(i);
-        _results.push(this.model.setVCOParam(i, vco.find('.shape').val(), parseInt(vco.find('.octave').val()), parseInt(vco.find('.interval').val()), parseInt(vco.find('.fine').val())));
-      }
-      return _results;
-    };
-
-    SynthCoreView.prototype.readVCOParam = function(p) {
-      var i, vco, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        vco = this.vcos.eq(i);
-        vco.find('.shape').val(p[i].shape);
-        vco.find('.octave').val(p[i].octave);
-        vco.find('.interval').val(p[i].interval);
-        _results.push(vco.find('.fine').val(p[i].fine));
-      }
-      return _results;
-    };
-
-    SynthCoreView.prototype.setEGParam = function() {
-      this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
-      return this.updateCanvas("EG");
-    };
-
-    SynthCoreView.prototype.readEGParam = function(p) {
-      this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
-      this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
-      this.EG_inputs.eq(2).val(p.adsr[2] * 100);
-      return this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
-    };
-
-    SynthCoreView.prototype.setFEGParam = function() {
-      this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
-      return this.updateCanvas("FEG");
-    };
-
-    SynthCoreView.prototype.readFEGParam = function(p) {
-      var i, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.FEG_inputs.eq(i).val(p.adsr[i]));
-      }
-      return _results;
-    };
-
-    SynthCoreView.prototype.setFilterParam = function() {
-      return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
-    };
-
-    SynthCoreView.prototype.readFilterParam = function(p) {
-      this.filter_inputs.eq(0).val(p[0]);
-      return this.filter_inputs.eq(1).val(p[1]);
-    };
-
-    SynthCoreView.prototype.setGains = function() {
-      var i, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
-      }
-      return _results;
-    };
-
-    SynthCoreView.prototype.readParam = function(p) {
-      var i, _i, _ref;
-      if (p.vcos != null) {
-        this.readVCOParam(p.vcos);
-      }
-      if (p.gains != null) {
-        for (i = _i = 0, _ref = p.gains.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          this.gain_inputs.eq(i).val(p.gains[i] / 0.3 * 100);
-        }
-      }
-      if (p.eg != null) {
-        this.readEGParam(p.eg);
-      }
-      if (p.feg != null) {
-        this.readFEGParam(p.feg);
-      }
-      if (p.filter != null) {
-        return this.readFilterParam(p.filter);
-      }
-    };
-
-    return SynthCoreView;
 
   })();
 
@@ -747,6 +606,7 @@
     Synth.prototype.setScale = function(scale_name) {
       this.scale_name = scale_name;
       this.scale = SCALE_LIST[this.scale_name];
+      this.core.scale = this.scale;
       return this.view.changeScale(this.scale);
     };
 
@@ -758,13 +618,9 @@
       return this.core.gain;
     };
 
-    Synth.prototype.noteToSemitone = function(ival) {
-      return Math.floor((ival - 1) / this.scale.length) * 12 + this.scale[(ival - 1) % this.scale.length];
-    };
-
     Synth.prototype.noteOn = function(note, force) {
       if (force || !this.is_performing) {
-        this.core.setNote(this.noteToSemitone(note));
+        this.core.setNote(note);
         this.core.noteOn();
       }
       if (force) {
@@ -795,7 +651,7 @@
       } else if (this.pattern[mytime] < 0) {
         this.is_sustaining = true;
         n = -this.pattern[mytime];
-        this.core.setNote(this.noteToSemitone(n));
+        this.core.setNote(n);
         return this.core.noteOn();
       } else if (this.pattern[mytime] === 'sustain') {
 
@@ -804,7 +660,7 @@
           return _this.core.noteOff();
         }), this.duration - 10);
       } else {
-        this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
+        this.core.setNote(this.pattern[mytime]);
         this.core.noteOn();
         return T2.setTimeout((function() {
           return _this.core.noteOff();

@@ -64,8 +64,16 @@
       </div>
 
       <div class="clearfix"><label>OCT</label>   <input class="octave"   type="number" min="0" max="5" value="0"></div>
-      <div class="clearfix"><label>SHIFT</label> <input class="interval" type="number" min="-12" max="12" value="0"></div>
       <div class="clearfix"><label>TUNE</label>  <input class="fine"     type="number" min="-50" max="50" value="0"></div>
+      <input class="interval" type="hidden" value="0">
+      <div class="clearfix">
+        <label>SHIFT</label>
+        <select class="harmony" type="number" min="-12" max="12" value="0">
+          <option selected="selected">harmony</option>
+          <option>chromatic</option>
+        </select>
+      </div>
+
     </fieldset>
 
     <fieldset class="RS_module RS_vco1 RS_VCO">
@@ -84,8 +92,9 @@
       </div>
 
       <div class="clearfix"><label>OCT</label>   <input class="octave"   type="number" min="0" max="5" value="0"></div>
-      <div class="clearfix"><label>SHIFT</label> <input class="interval" type="number" min="-12" max="12" value="7"></div>
       <div class="clearfix"><label>TUNE</label>  <input class="fine"     type="number" min="-50" max="50" value="1"></div>
+      <div class="clearfix"><label>SHIFT</label> <input class="interval" type="number" min="-12" max="12" value="3"></div>
+
     </fieldset>
 
     <fieldset class="RS_module RS_vco2 RS_VCO">
