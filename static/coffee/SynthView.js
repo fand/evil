@@ -495,6 +495,172 @@
 
   })();
 
+  this.SynthCoreView = (function() {
+    function SynthCoreView(model, id, dom) {
+      this.model = model;
+      this.id = id;
+      this.dom = dom;
+      this.vcos = $(this.dom.find('.RS_VCO'));
+      this.EG_inputs = this.dom.find('.RS_EG input');
+      this.FEG_inputs = this.dom.find('.RS_FEG input');
+      this.filter_inputs = this.dom.find(".RS_filter input");
+      this.gain_inputs = this.dom.find('.RS_mixer input');
+      this.canvasEG = this.dom.find(".RS_EG .canvasEG").get()[0];
+      this.canvasFEG = this.dom.find(".RS_FEG .canvasFEG").get()[0];
+      this.contextEG = this.canvasEG.getContext('2d');
+      this.contextFEG = this.canvasFEG.getContext('2d');
+      this.initEvent();
+    }
+
+    SynthCoreView.prototype.initEvent = function() {
+      var _this = this;
+      this.vcos.on("change", function() {
+        return _this.setVCOParam();
+      });
+      this.gain_inputs.on("change", function() {
+        return _this.setGains();
+      });
+      this.filter_inputs.on("change", function() {
+        return _this.setFilterParam();
+      });
+      this.EG_inputs.on("change", function() {
+        return _this.setEGParam();
+      });
+      this.FEG_inputs.on("change", function() {
+        return _this.setFEGParam();
+      });
+      return this.setParam();
+    };
+
+    SynthCoreView.prototype.updateCanvas = function(name) {
+      var adsr, canvas, context, h, w, w4;
+      canvas = null;
+      context = null;
+      adsr = null;
+      if (name === "EG") {
+        canvas = this.canvasEG;
+        context = this.contextEG;
+        adsr = this.model.eg.getADSR();
+      } else {
+        canvas = this.canvasFEG;
+        context = this.contextFEG;
+        adsr = this.model.feg.getADSR();
+      }
+      w = canvas.width = 180;
+      h = canvas.height = 50;
+      w4 = w / 4;
+      context.clearRect(0, 0, w, h);
+      context.beginPath();
+      context.moveTo(w4 * (1.0 - adsr[0]), h);
+      context.lineTo(w / 4, 0);
+      context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));
+      context.lineTo(w4 * 3, h * (1.0 - adsr[2]));
+      context.lineTo(w4 * (adsr[3] + 3), h);
+      context.strokeStyle = 'rgb(0, 220, 255)';
+      return context.stroke();
+    };
+
+    SynthCoreView.prototype.setParam = function() {
+      this.setVCOParam();
+      this.setEGParam();
+      this.setFEGParam();
+      this.setFilterParam();
+      return this.setGains();
+    };
+
+    SynthCoreView.prototype.setVCOParam = function() {
+      var harmony, i, vco, _i, _ref, _results;
+      harmony = this.vcos.eq(0).find('.harmony').val();
+      _results = [];
+      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        vco = this.vcos.eq(i);
+        _results.push(this.model.setVCOParam(i, vco.find('.shape').val(), parseInt(vco.find('.octave').val()), parseInt(vco.find('.interval').val()), parseInt(vco.find('.fine').val()), harmony));
+      }
+      return _results;
+    };
+
+    SynthCoreView.prototype.readVCOParam = function(p) {
+      var i, vco, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        vco = this.vcos.eq(i);
+        vco.find('.shape').val(p[i].shape);
+        vco.find('.octave').val(p[i].octave);
+        vco.find('.interval').val(p[i].interval);
+        _results.push(vco.find('.fine').val(p[i].fine));
+      }
+      return _results;
+    };
+
+    SynthCoreView.prototype.setEGParam = function() {
+      this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
+      return this.updateCanvas("EG");
+    };
+
+    SynthCoreView.prototype.readEGParam = function(p) {
+      this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
+      this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
+      this.EG_inputs.eq(2).val(p.adsr[2] * 100);
+      return this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
+    };
+
+    SynthCoreView.prototype.setFEGParam = function() {
+      this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
+      return this.updateCanvas("FEG");
+    };
+
+    SynthCoreView.prototype.readFEGParam = function(p) {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.FEG_inputs.eq(i).val(p.adsr[i]));
+      }
+      return _results;
+    };
+
+    SynthCoreView.prototype.setFilterParam = function() {
+      return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
+    };
+
+    SynthCoreView.prototype.readFilterParam = function(p) {
+      this.filter_inputs.eq(0).val(p[0]);
+      return this.filter_inputs.eq(1).val(p[1]);
+    };
+
+    SynthCoreView.prototype.setGains = function() {
+      var i, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
+      }
+      return _results;
+    };
+
+    SynthCoreView.prototype.readParam = function(p) {
+      var i, _i, _ref;
+      if (p.vcos != null) {
+        this.readVCOParam(p.vcos);
+      }
+      if (p.gains != null) {
+        for (i = _i = 0, _ref = p.gains.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          this.gain_inputs.eq(i).val(p.gains[i] / 0.3 * 100);
+        }
+      }
+      if (p.eg != null) {
+        this.readEGParam(p.eg);
+      }
+      if (p.feg != null) {
+        this.readFEGParam(p.feg);
+      }
+      if (p.filter != null) {
+        return this.readFilterParam(p.filter);
+      }
+    };
+
+    return SynthCoreView;
+
+  })();
+
   this.KeyboardView = (function() {
     function KeyboardView(sequencer) {
       this.sequencer = sequencer;

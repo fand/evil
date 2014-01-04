@@ -117,7 +117,10 @@ class @VCO
             @node.gain.value = 1.0
 
     setFreq: ->
-        @freq = (Math.pow(2, @octave) * Math.pow(SEMITONE, @interval + @note) * @freq_key) + @fine
+        note_oct = Math.floor(@note / 12)
+        note_shift = @note % 12
+        @freq = (Math.pow(2, @octave + note_oct) * Math.pow(SEMITONE, note_shift) * @freq_key) + @fine
+
         if @shape == 'SUPERSAW' or @shape == 'SUPERRECT'
             for i in [0...7]
                 @oscs[i].frequency.setValueAtTime(@freq + FREQ_OFFSET[i], 0)
@@ -139,6 +142,7 @@ class @VCO
         @interval = p.interval
         @fine = p.fine
         @setShape(p.shape)
+
 
 
 class @EG
@@ -203,9 +207,10 @@ class @SynthCore
         @node.gain.value = 0
         @gain = 1.0
         @is_mute = false
-
         @is_on = false
+        @is_harmony = true
 
+        @scale = @parent.scale
         @vcos  = [new VCO(@ctx), new VCO(@ctx), new Noise(@ctx)]
         @gains = [@ctx.createGain(), @ctx.createGain(), @ctx.createGain()]
         for i in [0...3]
@@ -233,6 +238,7 @@ class @SynthCore
         eg:  @eg.getParam()
         feg: @feg.getParam()
         filter: [@feg.getRange()[1], @filter.getParam()]
+        harmony: @harmony
 
     readParam: (p) ->
         if p.vcos?
@@ -246,12 +252,14 @@ class @SynthCore
         @filter.readParam(p.filter) if p.filter?
         @view.readParam(p)
 
-    setVCOParam: (i, shape, oct, interval, fine) ->
+    setVCOParam: (i, shape, oct, interval, fine, harmony) ->
         @vcos[i].setShape(shape)
         @vcos[i].setOctave(oct)
         @vcos[i].setInterval(interval)
         @vcos[i].setFine(fine)
         @vcos[i].setFreq()
+        if harmony?
+            @is_harmony = (harmony == 'harmony')
 
     setEGParam:  (a, d, s, r) -> @eg.setADSR(a, d, s, r)
     setFEGParam: (a, d, s, r) -> @feg.setADSR(a, d, s, r)
@@ -297,144 +305,23 @@ class @SynthCore
         @filter.disconnect()
         @node.disconnect()
 
+    noteToSemitone: (note, shift) ->
+        if @is_harmony
+            note = note + shift
+            note-- if shift > 0
+            note++ if shift < 0
+            semitone = Math.floor((note-1)/@scale.length) * 12 + @scale[(note-1) % @scale.length]
+        else
+            semitone = Math.floor((note-1)/@scale.length) * 12 + @scale[(note-1) % @scale.length] + shift
+
+
     setNote: (@note) ->
         for v in @vcos
-            v.setNote(note)
+            v.setNote(@noteToSemitone(@note, v.interval))
             v.setFreq()
 
     mute:   -> @is_mute = true
     demute: -> @is_mute = false
-
-
-class @SynthCoreView
-    constructor: (@model, @id, @dom) ->
-
-        @vcos = $(@dom.find('.RS_VCO'))
-
-        @EG_inputs     = @dom.find('.RS_EG input')
-        @FEG_inputs    = @dom.find('.RS_FEG input')
-        @filter_inputs = @dom.find(".RS_filter input")
-        @gain_inputs   = @dom.find('.RS_mixer input')
-
-        @canvasEG   = @dom.find(".RS_EG .canvasEG").get()[0]
-        @canvasFEG  = @dom.find(".RS_FEG .canvasFEG").get()[0]
-        @contextEG  = @canvasEG.getContext('2d')
-        @contextFEG = @canvasFEG.getContext('2d')
-
-        @initEvent()
-
-    initEvent: ->
-        @vcos.on("change",          () => @setVCOParam())
-        @gain_inputs.on("change",   () => @setGains())
-        @filter_inputs.on("change", () => @setFilterParam())
-        @EG_inputs.on("change",     () => @setEGParam())
-        @FEG_inputs.on("change",    () => @setFEGParam())
-        @setParam()
-
-    updateCanvas: (name) ->
-        canvas  = null
-        context = null
-        adsr    = null
-        if name == "EG"
-            canvas  = @canvasEG
-            context = @contextEG
-            adsr    = @model.eg.getADSR()
-        else
-            canvas  = @canvasFEG
-            context = @contextFEG
-            adsr    = @model.feg.getADSR()
-
-        w = canvas.width = 180
-        h = canvas.height = 50
-        w4 = w/4
-        context.clearRect(0,0,w,h)
-        context.beginPath()
-        context.moveTo(w4 * (1.0 - adsr[0]), h)
-        context.lineTo(w / 4,0)                                  # attack
-        context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]))  # decay
-        context.lineTo(w4 * 3, h * (1.0 - adsr[2]))              # sustain
-        context.lineTo(w4 * (adsr[3] + 3), h)                    # release
-        context.strokeStyle = 'rgb(0, 220, 255)'
-        context.stroke()
-
-    setParam: ->
-        @setVCOParam()
-        @setEGParam()
-        @setFEGParam()
-        @setFilterParam()
-        @setGains()
-
-    setVCOParam: ->
-        for i in [0...@vcos.length]
-            vco = @vcos.eq(i)
-            @model.setVCOParam(
-                i,
-                vco.find('.shape').val(),
-                parseInt(vco.find('.octave').val()),
-                parseInt(vco.find('.interval').val()),
-                parseInt(vco.find('.fine').val())
-            )
-
-    readVCOParam: (p) ->
-        for i in [0...@vcos.length]
-            vco = @vcos.eq(i)
-            vco.find('.shape').val(p[i].shape)
-            vco.find('.octave').val(p[i].octave)
-            vco.find('.interval').val(p[i].interval)
-            vco.find('.fine').val(p[i].fine)
-
-    setEGParam: ->
-        @model.setEGParam(
-            parseFloat(@EG_inputs.eq(0).val()),
-            parseFloat(@EG_inputs.eq(1).val()),
-            parseFloat(@EG_inputs.eq(2).val()),
-            parseFloat(@EG_inputs.eq(3).val())
-        )
-        @updateCanvas("EG");
-
-    readEGParam: (p) ->
-        @EG_inputs.eq(0).val(p.adsr[0] * 50000)
-        @EG_inputs.eq(1).val(p.adsr[1] * 50000)
-        @EG_inputs.eq(2).val(p.adsr[2] * 100)
-        @EG_inputs.eq(3).val(p.adsr[3] * 50000)
-
-    setFEGParam: ->
-        @model.setFEGParam(
-            parseFloat(@FEG_inputs.eq(0).val()),
-            parseFloat(@FEG_inputs.eq(1).val()),
-            parseFloat(@FEG_inputs.eq(2).val()),
-            parseFloat(@FEG_inputs.eq(3).val())
-        );
-        @updateCanvas("FEG");
-
-    readFEGParam: (p) ->
-        for i in [0...p.length]
-            @FEG_inputs.eq(i).val(p.adsr[i])
-
-    setFilterParam: ->
-        @model.setFilterParam(
-            parseFloat(@filter_inputs.eq(0).val()),
-            parseFloat(@filter_inputs.eq(1).val())
-        )
-
-    readFilterParam: (p) ->
-        @filter_inputs.eq(0).val(p[0])
-        @filter_inputs.eq(1).val(p[1])
-
-    setGains: ->
-        for i in [0... @gain_inputs.length]
-            @model.setVCOGain(i, parseInt(@gain_inputs.eq(i).val()))
-
-    readParam: (p) ->
-        if p.vcos?
-            @readVCOParam(p.vcos)
-        if p.gains?
-            for i in [0...p.gains.length]
-                @gain_inputs.eq(i).val(p.gains[i] / 0.3 * 100)
-        @readEGParam(p.eg) if p.eg?
-        @readFEGParam(p.feg) if p.feg?
-        @readFilterParam(p.filter) if p.filter?
-
 
 
 
@@ -467,17 +354,18 @@ class @Synth
 
     setScale: (@scale_name) ->
         @scale = SCALE_LIST[@scale_name]
+        @core.scale = @scale
         @view.changeScale(@scale)
 
     setGain: (gain) -> @core.setGain(gain)
     getGain: ()     -> @core.gain
 
-    noteToSemitone: (ival) ->
-        Math.floor((ival-1)/@scale.length) * 12 + @scale[(ival-1) % @scale.length]
+    # noteToSemitone: (ival) ->
+    #     Math.floor((ival-1)/@scale.length) * 12 + @scale[(ival-1) % @scale.length]
 
     noteOn: (note, force) ->
         if force or not @is_performing
-            @core.setNote(@noteToSemitone(note))
+            @core.setNote(note)
             @core.noteOn()
         if force
             @is_performing = true
@@ -500,7 +388,7 @@ class @Synth
         else if @pattern[mytime] < 0
             @is_sustaining = true
             n = -( @pattern[mytime] )
-            @core.setNote(@noteToSemitone(n))
+            @core.setNote(n)
             @core.noteOn()
 
         # sustain mid
@@ -513,7 +401,7 @@ class @Synth
 
         # single note
         else
-            @core.setNote(@noteToSemitone(@pattern[mytime]))
+            @core.setNote(@pattern[mytime])
             @core.noteOn()
             T2.setTimeout((() => @core.noteOff()), @duration - 10)
 
