@@ -26,8 +26,9 @@ class @SessionView
         @ctx_tracks_hover = @canvas_tracks_hover.getContext('2d')
         @ctx_master_hover = @canvas_master_hover.getContext('2d')
 
-        @w = 80
+        @w = 70
         @h = 20
+        @w_master = 80
         @color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)',]
 
@@ -70,7 +71,7 @@ class @SessionView
 
     initCanvas: ->
         @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = @w*8 + 1
-        @canvas_master.width  = @canvas_master_on.width  = @canvas_master_hover.width  = @w + 1
+        @canvas_master.width  = @canvas_master_on.width  = @canvas_master_hover.width  = @w + 11
         @canvas_tracks.height = @canvas_tracks_on.height = @canvas_tracks_hover.height = @h*15 + 10
         @canvas_master.height = @canvas_master_on.height = @canvas_master_hover.height = @h*15 + 10
 
@@ -286,11 +287,11 @@ class @SessionView
 
         @ctx_master.strokeStyle = @color[1]
         @ctx_master.lineWidth = 1
-        @ctx_master.strokeRect(x * @w + 2, y * @h + 2, @w-2, @h-2)
-        @ctx_master.drawImage(@img_play, 0, 0, 18, 18,  x*@w + 3, y*@h + 3, 16, 15)
+        @ctx_master.strokeRect(2, y * @h + 2, @w_master-2, @h-2)
+        @ctx_master.drawImage(@img_play, 0, 0, 18, 18, 3, y*@h + 3, 16, 15)
 
         @ctx_master.fillStyle = @color[1]
-        @ctx_master.fillText(p.name, x * @w + 24, (y + 1) * @h - 6)
+        @ctx_master.fillText(p.name, 24, (y + 1) * @h - 6)
 
     drawEmpty: (ctx, x, y) ->
         @clearCell(ctx, x, y)
@@ -302,11 +303,14 @@ class @SessionView
         @clearCell(@ctx_master, 0, y)
         @ctx_master.strokeStyle = @color[0]
         @ctx_master.lineWidth = 1
-        @ctx_master.strokeRect(2, y * @h + 2, @w-2, @h-2)
+        @ctx_master.strokeRect(2, y * @h + 2, @w_master-2, @h-2)
         @ctx_master.drawImage(@img_play, 0, 0, 18, 18, 3, y*@h + 3, 16, 15)
 
     clearCell: (ctx, x, y) ->
-        ctx.clearRect(x * @w, y * @h, @w, @h)
+        if ctx == @ctx_master
+            ctx.clearRect(0, y * @h, @w_master, @h)
+        else
+            ctx.clearRect(x * @w, y * @h, @w, @h)
 
     drawMasterName: ->
         m = @ctx_master.measureText('MASTER')
@@ -363,7 +367,7 @@ class @SessionView
         @last_active[x] = y
 
     drawActiveMaster: (y) ->
-        @ctx_master_on.clearRect(0, 0, @w, 10000)
+        @ctx_master_on.clearRect(0, 0, @w_master, 10000)
         @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  3, y*@h + 3, 16, 15)
 
     drawDrag: (ctx, pos) ->
@@ -408,18 +412,21 @@ class @SessionView
         ctx.fillStyle = @color[1]
 
         ctx.lineWidth = 1
-        ctx.strokeRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
-        ctx.fillText(name, pos.x * @w + 24, (pos.y + 1) * @h - 6)
+        ctx.strokeRect(2, pos.y * @h + 2, @w_master-2, @h-2)
+        ctx.fillText(name, 24, (pos.y + 1) * @h - 6)
 
         ctx.fillStyle = 'rgba(255,255,255,0.7)'
-        ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
+        ctx.fillRect(0, pos.y * @h, @w_master, @h)
 
         @hover_pos = pos
 
     drawHover: (ctx, pos) ->
         @clearHover(ctx)
         ctx.fillStyle = 'rgba(255,255,255,0.6)'
-        ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
+        if ctx == @ctx_master_hover
+            ctx.fillRect(pos.x * @w, pos.y * @h, @w_master, @h)
+        else
+            ctx.fillRect(pos.x * @w, pos.y * @h, @w, @h)
         @hover_pos = pos
 
     clearHover: (ctx) ->
@@ -432,7 +439,7 @@ class @SessionView
 
         # for master
         else
-            ctx.clearRect(0, @hover_pos.y * @h, @w+2, @h+2)
+            ctx.clearRect(0, @hover_pos.y * @h, @w_master+2, @h+2)
             if @hover_pos.x == @select_pos.x and @hover_pos.y == @select_pos.y and @hover_pos.type == @select_pos.type
                 @selectCellMaster(@select_pos)
 
@@ -575,7 +582,7 @@ class @SessionView
         return if not @song.tracks[pos.x]?
         return if not @song.tracks[pos.x].patterns[pos.y]?
 
-        @ctx_master_hover.clearRect(@select_pos.x * @w, @select_pos.y * @h, @w, @h)
+        @ctx_master_hover.clearRect(@select_pos.x * @w, @select_pos.y * @h, @w_master, @h)
 
         @ctx_tracks_hover.clearRect(@hover_pos.x * @w, @hover_pos.y * @h, @w, @h)
         @ctx_tracks_hover.clearRect(@click_pos.x * @w, @click_pos.y * @h, @w, @h)
@@ -599,17 +606,17 @@ class @SessionView
     selectCellMaster: (pos) ->
         return if not @song.master[pos.y]?
 
-        @ctx_tracks_hover.clearRect(@select_pos.x * @w, @select_pos.y * @h, @w, @h)
+        @ctx_tracks_hover.clearRect(0, @select_pos.y * @h, @w, @h)
 
-        @ctx_master_hover.clearRect(@hover_pos.x * @w, @hover_pos.y * @h, @w, @h)
-        @ctx_master_hover.clearRect(@click_pos.x * @w, @click_pos.y * @h, @w, @h)
-        @ctx_master_hover.clearRect(@select_pos.x * @w, @select_pos.y * @h, @w, @h)
+        @ctx_master_hover.clearRect(0, @hover_pos.y * @h, @w_master, @h)
+        @ctx_master_hover.clearRect(0, @click_pos.y * @h, @w_master, @h)
+        @ctx_master_hover.clearRect(0, @select_pos.y * @h, @w_master, @h)
 
         @ctx_master_hover.fillStyle = @color[5]
-        @ctx_master_hover.fillRect(pos.x * @w + 2, pos.y * @h + 2, @w-2, @h-2)
+        @ctx_master_hover.fillRect(2, pos.y * @h + 2, @w_master-2, @h-2)
 
         @ctx_master_hover.fillStyle = @color[1]
-        @ctx_master_hover.fillText(@song.master[pos.y].name, pos.x * @w + 24, (pos.y + 1) * @h - 6)
+        @ctx_master_hover.fillText(@song.master[pos.y].name, pos.x * @w_master + 24, (pos.y + 1) * @h - 6)
 
         @select_pos = pos
         @select_pos.type = 'master'

@@ -3336,8 +3336,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx_master_on = this.canvas_master_on.getContext('2d');
       this.ctx_tracks_hover = this.canvas_tracks_hover.getContext('2d');
       this.ctx_master_hover = this.canvas_master_hover.getContext('2d');
-      this.w = 80;
+      this.w = 70;
       this.h = 20;
+      this.w_master = 80;
       this.color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'];
       this.color_schemes = {
         REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)', 'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)'],
@@ -3387,7 +3388,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SessionView.prototype.initCanvas = function() {
       this.canvas_tracks.width = this.canvas_tracks_on.width = this.canvas_tracks_hover.width = this.w * 8 + 1;
-      this.canvas_master.width = this.canvas_master_on.width = this.canvas_master_hover.width = this.w + 1;
+      this.canvas_master.width = this.canvas_master_on.width = this.canvas_master_hover.width = this.w + 11;
       this.canvas_tracks.height = this.canvas_tracks_on.height = this.canvas_tracks_hover.height = this.h * 15 + 10;
       this.canvas_master.height = this.canvas_master_on.height = this.canvas_master_hover.height = this.h * 15 + 10;
       this.offset_y = 20;
@@ -3657,10 +3658,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.clearCell(this.ctx_master, x, y);
       this.ctx_master.strokeStyle = this.color[1];
       this.ctx_master.lineWidth = 1;
-      this.ctx_master.strokeRect(x * this.w + 2, y * this.h + 2, this.w - 2, this.h - 2);
-      this.ctx_master.drawImage(this.img_play, 0, 0, 18, 18, x * this.w + 3, y * this.h + 3, 16, 15);
+      this.ctx_master.strokeRect(2, y * this.h + 2, this.w_master - 2, this.h - 2);
+      this.ctx_master.drawImage(this.img_play, 0, 0, 18, 18, 3, y * this.h + 3, 16, 15);
       this.ctx_master.fillStyle = this.color[1];
-      return this.ctx_master.fillText(p.name, x * this.w + 24, (y + 1) * this.h - 6);
+      return this.ctx_master.fillText(p.name, 24, (y + 1) * this.h - 6);
     };
 
     SessionView.prototype.drawEmpty = function(ctx, x, y) {
@@ -3674,12 +3675,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.clearCell(this.ctx_master, 0, y);
       this.ctx_master.strokeStyle = this.color[0];
       this.ctx_master.lineWidth = 1;
-      this.ctx_master.strokeRect(2, y * this.h + 2, this.w - 2, this.h - 2);
+      this.ctx_master.strokeRect(2, y * this.h + 2, this.w_master - 2, this.h - 2);
       return this.ctx_master.drawImage(this.img_play, 0, 0, 18, 18, 3, y * this.h + 3, 16, 15);
     };
 
     SessionView.prototype.clearCell = function(ctx, x, y) {
-      return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
+      if (ctx === this.ctx_master) {
+        return ctx.clearRect(0, y * this.h, this.w_master, this.h);
+      } else {
+        return ctx.clearRect(x * this.w, y * this.h, this.w, this.h);
+      }
     };
 
     SessionView.prototype.drawMasterName = function() {
@@ -3740,7 +3745,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SessionView.prototype.drawActiveMaster = function(y) {
-      this.ctx_master_on.clearRect(0, 0, this.w, 10000);
+      this.ctx_master_on.clearRect(0, 0, this.w_master, 10000);
       return this.ctx_master_on.drawImage(this.img_play, 36, 0, 18, 18, 3, y * this.h + 3, 16, 15);
     };
 
@@ -3788,17 +3793,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       ctx.strokeStyle = this.color[1];
       ctx.fillStyle = this.color[1];
       ctx.lineWidth = 1;
-      ctx.strokeRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
-      ctx.fillText(name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
+      ctx.strokeRect(2, pos.y * this.h + 2, this.w_master - 2, this.h - 2);
+      ctx.fillText(name, 24, (pos.y + 1) * this.h - 6);
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      ctx.fillRect(0, pos.y * this.h, this.w_master, this.h);
       return this.hover_pos = pos;
     };
 
     SessionView.prototype.drawHover = function(ctx, pos) {
       this.clearHover(ctx);
       ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      if (ctx === this.ctx_master_hover) {
+        ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w_master, this.h);
+      } else {
+        ctx.fillRect(pos.x * this.w, pos.y * this.h, this.w, this.h);
+      }
       return this.hover_pos = pos;
     };
 
@@ -3809,7 +3818,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           return this.selectCell(this.select_pos);
         }
       } else {
-        ctx.clearRect(0, this.hover_pos.y * this.h, this.w + 2, this.h + 2);
+        ctx.clearRect(0, this.hover_pos.y * this.h, this.w_master + 2, this.h + 2);
         if (this.hover_pos.x === this.select_pos.x && this.hover_pos.y === this.select_pos.y && this.hover_pos.type === this.select_pos.type) {
           return this.selectCellMaster(this.select_pos);
         }
@@ -4001,7 +4010,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.song.tracks[pos.x].patterns[pos.y] == null) {
         return;
       }
-      this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
+      this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w_master, this.h);
       this.ctx_tracks_hover.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.click_pos.x * this.w, this.click_pos.y * this.h, this.w, this.h);
       this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
@@ -4021,14 +4030,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.song.master[pos.y] == null) {
         return;
       }
-      this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
-      this.ctx_master_hover.clearRect(this.hover_pos.x * this.w, this.hover_pos.y * this.h, this.w, this.h);
-      this.ctx_master_hover.clearRect(this.click_pos.x * this.w, this.click_pos.y * this.h, this.w, this.h);
-      this.ctx_master_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
+      this.ctx_tracks_hover.clearRect(0, this.select_pos.y * this.h, this.w, this.h);
+      this.ctx_master_hover.clearRect(0, this.hover_pos.y * this.h, this.w_master, this.h);
+      this.ctx_master_hover.clearRect(0, this.click_pos.y * this.h, this.w_master, this.h);
+      this.ctx_master_hover.clearRect(0, this.select_pos.y * this.h, this.w_master, this.h);
       this.ctx_master_hover.fillStyle = this.color[5];
-      this.ctx_master_hover.fillRect(pos.x * this.w + 2, pos.y * this.h + 2, this.w - 2, this.h - 2);
+      this.ctx_master_hover.fillRect(2, pos.y * this.h + 2, this.w_master - 2, this.h - 2);
       this.ctx_master_hover.fillStyle = this.color[1];
-      this.ctx_master_hover.fillText(this.song.master[pos.y].name, pos.x * this.w + 24, (pos.y + 1) * this.h - 6);
+      this.ctx_master_hover.fillText(this.song.master[pos.y].name, pos.x * this.w_master + 24, (pos.y + 1) * this.h - 6);
       this.select_pos = pos;
       this.select_pos.type = 'master';
       return this.model.player.sidebar.show(this.song, this.select_pos);
@@ -4188,7 +4197,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (o.scale != null) {
         this.master_scale.val(o.scale);
       }
-      return this.wrapper.css('left', '-141px');
+      return this.wrapper.css('left', '-221px');
     };
 
     return SidebarView;

@@ -159,7 +159,8 @@
     <: include 'effect.tx' :>
 
     <div class="console-track">
-      L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
+      <div class="pan-label">C</div>
+      <input class="pan-slider" type="range" min="0" max="100" value="50" />
       <input class="gain-slider" type="range" min="0" max="100" value="100" />
 
       <canvas class="vu-meter"></canvas>

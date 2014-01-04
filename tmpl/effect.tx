@@ -120,8 +120,8 @@
     <option>SMALL_&_LIVE_VERB</option>
   </select>
 
-  <label>input</label>
-  <input name="input" type="range" min="0" max="100" value="10" />
+  <!-- <label>input</label> -->
+  <input name="input" type="hidden" min="0" max="100" value="100" />
 
   <label>output</label>
   <input name="output" type="range" min="0" max="100" value="10" />
@@ -131,8 +131,8 @@
 <div id="tmpl_fx_delay" class="sidebar-effect">
   <div class="effect-name">DELAY</div>
 
-  <label>input</label>
-  <input name="input" type="range" min="0" max="100" value="100" />
+  <!-- <label>input</label> -->
+  <input name="input" type="hidden" min="0" max="100" value="100" />
 
   <label>delay</label>
   <input name="delay" type="range" min="50" max="1000" value="230" />
