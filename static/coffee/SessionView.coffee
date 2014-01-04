@@ -72,8 +72,8 @@ class @SessionView
     initCanvas: ->
         @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = @w*8 + 1
         @canvas_master.width  = @canvas_master_on.width  = @canvas_master_hover.width  = @w + 11
-        @canvas_tracks.height = @canvas_tracks_on.height = @canvas_tracks_hover.height = @h*15 + 10
-        @canvas_master.height = @canvas_master_on.height = @canvas_master_hover.height = @h*15 + 10
+        @canvas_tracks.height = @canvas_tracks_on.height = @canvas_tracks_hover.height = @h*11 + 10
+        @canvas_master.height = @canvas_master_on.height = @canvas_master_hover.height = @h*11 + 10
 
         @offset_y = 20
         @ctx_tracks.translate(0, @offset_y)
@@ -100,7 +100,7 @@ class @SessionView
         @ctx_master_hover.translate(0, -@offset_y)
 
         w_new = Math.max(@song.tracks.length, 8) * @w + 1
-        h_new = Math.max(@song.length + 1, 15) * @h + 10    # 0th cell is for track name!
+        h_new = Math.max(@song.length + 2, 11) * @h + 10    # 0th cell is for track name!
 
         @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = w_new
         @canvas_tracks.height = @canvas_tracks_on.height = @canvas_tracks_hover.height = h_new

@@ -80,8 +80,8 @@
     SessionView.prototype.initCanvas = function() {
       this.canvas_tracks.width = this.canvas_tracks_on.width = this.canvas_tracks_hover.width = this.w * 8 + 1;
       this.canvas_master.width = this.canvas_master_on.width = this.canvas_master_hover.width = this.w + 11;
-      this.canvas_tracks.height = this.canvas_tracks_on.height = this.canvas_tracks_hover.height = this.h * 15 + 10;
-      this.canvas_master.height = this.canvas_master_on.height = this.canvas_master_hover.height = this.h * 15 + 10;
+      this.canvas_tracks.height = this.canvas_tracks_on.height = this.canvas_tracks_hover.height = this.h * 11 + 10;
+      this.canvas_master.height = this.canvas_master_on.height = this.canvas_master_hover.height = this.h * 11 + 10;
       this.offset_y = 20;
       this.ctx_tracks.translate(0, this.offset_y);
       this.ctx_master.translate(0, this.offset_y);
@@ -106,7 +106,7 @@
       this.ctx_tracks_hover.translate(0, -this.offset_y);
       this.ctx_master_hover.translate(0, -this.offset_y);
       w_new = Math.max(this.song.tracks.length, 8) * this.w + 1;
-      h_new = Math.max(this.song.length + 1, 15) * this.h + 10;
+      h_new = Math.max(this.song.length + 2, 11) * this.h + 10;
       this.canvas_tracks.width = this.canvas_tracks_on.width = this.canvas_tracks_hover.width = w_new;
       this.canvas_tracks.height = this.canvas_tracks_on.height = this.canvas_tracks_hover.height = h_new;
       this.canvas_master.height = this.canvas_master_on.height = this.canvas_master_hover.height = h_new;
