@@ -198,7 +198,9 @@
       if (pat_num + 1 > this.song.length) {
         this.song.length = pat_num + 1;
       }
-      if (this.current_cells[synth_num] = pat_num) {
+      console.log(synth_num);
+      console.log(this.current_cells);
+      if (this.current_cells[synth_num] === pat_num) {
         return this.player.synth[synth_num].readPattern(pat);
       }
     };

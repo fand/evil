@@ -154,7 +154,9 @@ class @Session
             @song.master[pat_num] = name: 'section-' + pat_num
         if pat_num + 1 > @song.length
             @song.length = pat_num + 1
-        if @current_cells[synth_num] = pat_num
+        console.log(synth_num)
+        console.log(@current_cells)
+        if @current_cells[synth_num] == pat_num
             @player.synth[synth_num].readPattern(pat)
 
     readMaster: (pat, pat_num) ->

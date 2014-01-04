@@ -35,8 +35,6 @@
     TRIANGLE: 3
   };
 
-  this.T2 = new MutekiTimer();
-
   TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17];
 
   FREQ_OFFSET = [0.1, 0.15, 0.25, 0.35, 0.55, 0.65, 0.85];
@@ -723,6 +721,7 @@
       this.is_sustaining = false;
       this.is_performing = false;
       this.session = this.player.session;
+      this.T = new MutekiTimer();
     }
 
     Synth.prototype.connect = function(dst) {
@@ -799,13 +798,13 @@
       } else if (this.pattern[mytime] === 'sustain') {
 
       } else if (this.pattern[mytime] === 'end') {
-        return T2.setTimeout((function() {
+        return this.T.setTimeout((function() {
           return _this.core.noteOff();
         }), this.duration - 10);
       } else {
         this.core.setNote(this.noteToSemitone(this.pattern[mytime]));
         this.core.noteOn();
-        return T2.setTimeout((function() {
+        return this.T.setTimeout((function() {
           return _this.core.noteOff();
         }), this.duration - 10);
       }
