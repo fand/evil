@@ -1,10 +1,13 @@
 (function() {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
   this.Sidebar = (function() {
     function Sidebar(ctx, player, session, mixer) {
       this.ctx = ctx;
       this.player = player;
       this.session = session;
       this.mixer = mixer;
+      this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.sidebar_pos = {
         x: 0,
         y: 1,
@@ -43,6 +46,10 @@
         return;
       }
       return this.player.synth[this.sidebar_pos.x].effects[i].saveParam();
+    };
+
+    Sidebar.prototype.addMasterEffect = function(name) {
+      return this.mixer.addMasterEffect(name);
     };
 
     return Sidebar;

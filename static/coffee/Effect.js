@@ -17,6 +17,10 @@
       return this.out.connect(dst);
     };
 
+    FX.prototype.disconnect = function() {
+      return this.out.disconnect();
+    };
+
     FX.prototype.setInput = function(d) {
       return this["in"].gain.value = d;
     };

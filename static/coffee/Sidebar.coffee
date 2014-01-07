@@ -21,3 +21,6 @@ class @Sidebar
     saveTracksEffect: (i, param) ->
         return if @sidebar_pos.type == 'master'  # TODO: make sure this is impossible / delete this line
         @player.synth[@sidebar_pos.x].effects[i].saveParam()
+
+    addMasterEffect: (name) =>
+        @mixer.addMasterEffect(name)

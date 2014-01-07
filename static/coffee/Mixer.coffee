@@ -9,6 +9,9 @@ class @Mixer
         @node_send = @ctx.createGain()
         @node_send.gain.value = 1.0
 
+        @node_return = @ctx.createGain()
+        @node_return.gain.value = 1.0
+
         @bus_delay = @ctx.createGain()
         @bus_delay.gain.value = 1.0
 
@@ -40,10 +43,16 @@ class @Mixer
         @bus_delay.connect(@delay.in)
         @bus_reverb.connect(@reverb.in)
 
-        @node_send.connect(@limiter.in)
-        @delay.connect(@limiter.in)
-        @reverb.connect(@limiter.in)
+        # @node_send.connect(@limiter.in)
+        # @delay.connect(@limiter.in)
+        # @reverb.connect(@limiter.in)
+        @delay.connect(@node_send)
+        @reverb.connect(@node_send)
+        @node_send.connect(@node_return)
+        @node_return.connect(@limiter.in)
         @limiter.connect(@node)
+
+        @effects_master = [@node_send]
 
         @node.connect(@ctx.destination)
 
@@ -153,3 +162,16 @@ class @Mixer
 
     # demute: (id) ->
     #     @panners[id].connect(@node)
+
+
+    addMasterEffect: (name) =>
+        if name == 'Delay'
+            fx = new Delay(@ctx)
+
+        pos = @effects_master.length
+        @effects_master[pos - 1].disconnect()
+        @effects_master[pos - 1].connect(fx.in)
+        fx.connect(@node_return)
+        @effects_master.push(fx)
+
+        return fx

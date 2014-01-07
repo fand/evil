@@ -10,9 +10,14 @@
       this.master_key = this.master.find('[name=key]');
       this.master_scale = this.master.find('[name=mode]');
       this.master_save = this.master.find('[name=save]');
+      this.master_effects = this.master.find('.sidebar-effects');
+      this.add_master = this.master.find('.add-type');
+      this.add_master_btn = this.master.find('.add-btn');
+      this.add_tracks = this.tracks.find('.add-type');
+      this.add_tracks_btn = this.tracks.find('.add-btn');
       this.initEvent();
-      this.model.mixer.delay.appendTo(this.master);
-      this.model.mixer.reverb.appendTo(this.master);
+      this.model.mixer.delay.appendTo(this.master_effects);
+      this.model.mixer.reverb.appendTo(this.master_effects);
     }
 
     SidebarView.prototype.initEvent = function() {
@@ -37,10 +42,13 @@
       this.master_save.on('click', (function() {
         return _this.saveMaster();
       }));
-      return this.tracks.find('.sidebar-effect').each(function(i) {
+      this.tracks.find('.sidebar-effect').each(function(i) {
         return $(_this).on('change', function() {
           return _this.model.readTracksEffect(i);
         });
+      });
+      return this.add_master_btn.on('click', function() {
+        return _this.addMasterEffect(_this.add_master.val());
       });
     };
 
@@ -90,6 +98,12 @@
         this.master_scale.val(o.scale);
       }
       return this.wrapper.css('left', '-223px');
+    };
+
+    SidebarView.prototype.addMasterEffect = function(name) {
+      var fx;
+      fx = this.model.addMasterEffect(name);
+      return fx.appendTo(this.master_effects);
     };
 
     return SidebarView;

@@ -7,6 +7,7 @@ class @FX
         @view = new FXView(this)
 
     connect: (dst) -> @out.connect(dst)
+    disconnect: () -> @out.disconnect()
 
     setInput:  (d) -> @in.gain.value = d
     setOutput: (d) -> @out.gain.value = d

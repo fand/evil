@@ -1,10 +1,13 @@
 (function() {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
   this.Mixer = (function() {
     function Mixer(ctx, player) {
       var i, s, _i, _len, _ref,
         _this = this;
       this.ctx = ctx;
       this.player = player;
+      this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.gain_master = 1.0;
       this.gain_tracks = (function() {
         var _i, _len, _ref, _results;
@@ -20,6 +23,8 @@
       this.node.gain.value = this.gain_master;
       this.node_send = this.ctx.createGain();
       this.node_send.gain.value = 1.0;
+      this.node_return = this.ctx.createGain();
+      this.node_return.gain.value = 1.0;
       this.bus_delay = this.ctx.createGain();
       this.bus_delay.gain.value = 1.0;
       this.bus_reverb = this.ctx.createGain();
@@ -45,10 +50,12 @@
       this.limiter = new Limiter(this.ctx);
       this.bus_delay.connect(this.delay["in"]);
       this.bus_reverb.connect(this.reverb["in"]);
-      this.node_send.connect(this.limiter["in"]);
-      this.delay.connect(this.limiter["in"]);
-      this.reverb.connect(this.limiter["in"]);
+      this.delay.connect(this.node_send);
+      this.reverb.connect(this.node_send);
+      this.node_send.connect(this.node_return);
+      this.node_return.connect(this.limiter["in"]);
       this.limiter.connect(this.node);
+      this.effects_master = [this.node_send];
       this.node.connect(this.ctx.destination);
       this.view = new MixerView(this);
       setInterval((function() {
@@ -161,6 +168,19 @@
     Mixer.prototype.changeSynth = function(id, synth) {
       synth.connect(this.panners[id]);
       return synth.connect(this.analysers[id]);
+    };
+
+    Mixer.prototype.addMasterEffect = function(name) {
+      var fx, pos;
+      if (name === 'Delay') {
+        fx = new Delay(this.ctx);
+      }
+      pos = this.effects_master.length;
+      this.effects_master[pos - 1].disconnect();
+      this.effects_master[pos - 1].connect(fx["in"]);
+      fx.connect(this.node_return);
+      this.effects_master.push(fx);
+      return fx;
     };
 
     return Mixer;

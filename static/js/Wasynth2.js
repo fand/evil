@@ -37,6 +37,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.out.connect(dst);
     };
 
+    FX.prototype.disconnect = function() {
+      return this.out.disconnect();
+    };
+
     FX.prototype.setInput = function(d) {
       return this["in"].gain.value = d;
     };
@@ -645,12 +649,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
   this.Mixer = (function() {
     function Mixer(ctx, player) {
       var i, s, _i, _len, _ref,
         _this = this;
       this.ctx = ctx;
       this.player = player;
+      this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.gain_master = 1.0;
       this.gain_tracks = (function() {
         var _i, _len, _ref, _results;
@@ -666,6 +673,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.node.gain.value = this.gain_master;
       this.node_send = this.ctx.createGain();
       this.node_send.gain.value = 1.0;
+      this.node_return = this.ctx.createGain();
+      this.node_return.gain.value = 1.0;
       this.bus_delay = this.ctx.createGain();
       this.bus_delay.gain.value = 1.0;
       this.bus_reverb = this.ctx.createGain();
@@ -691,10 +700,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.limiter = new Limiter(this.ctx);
       this.bus_delay.connect(this.delay["in"]);
       this.bus_reverb.connect(this.reverb["in"]);
-      this.node_send.connect(this.limiter["in"]);
-      this.delay.connect(this.limiter["in"]);
-      this.reverb.connect(this.limiter["in"]);
+      this.delay.connect(this.node_send);
+      this.reverb.connect(this.node_send);
+      this.node_send.connect(this.node_return);
+      this.node_return.connect(this.limiter["in"]);
       this.limiter.connect(this.node);
+      this.effects_master = [this.node_send];
       this.node.connect(this.ctx.destination);
       this.view = new MixerView(this);
       setInterval((function() {
@@ -807,6 +818,19 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Mixer.prototype.changeSynth = function(id, synth) {
       synth.connect(this.panners[id]);
       return synth.connect(this.analysers[id]);
+    };
+
+    Mixer.prototype.addMasterEffect = function(name) {
+      var fx, pos;
+      if (name === 'Delay') {
+        fx = new Delay(this.ctx);
+      }
+      pos = this.effects_master.length;
+      this.effects_master[pos - 1].disconnect();
+      this.effects_master[pos - 1].connect(fx["in"]);
+      fx.connect(this.node_return);
+      this.effects_master.push(fx);
+      return fx;
     };
 
     return Mixer;
@@ -4072,12 +4096,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
   this.Sidebar = (function() {
     function Sidebar(ctx, player, session, mixer) {
       this.ctx = ctx;
       this.player = player;
       this.session = session;
       this.mixer = mixer;
+      this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.sidebar_pos = {
         x: 0,
         y: 1,
@@ -4118,6 +4145,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.player.synth[this.sidebar_pos.x].effects[i].saveParam();
     };
 
+    Sidebar.prototype.addMasterEffect = function(name) {
+      return this.mixer.addMasterEffect(name);
+    };
+
     return Sidebar;
 
   })();
@@ -4135,9 +4166,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.master_key = this.master.find('[name=key]');
       this.master_scale = this.master.find('[name=mode]');
       this.master_save = this.master.find('[name=save]');
+      this.master_effects = this.master.find('.sidebar-effects');
+      this.add_master = this.master.find('.add-type');
+      this.add_master_btn = this.master.find('.add-btn');
+      this.add_tracks = this.tracks.find('.add-type');
+      this.add_tracks_btn = this.tracks.find('.add-btn');
       this.initEvent();
-      this.model.mixer.delay.appendTo(this.master);
-      this.model.mixer.reverb.appendTo(this.master);
+      this.model.mixer.delay.appendTo(this.master_effects);
+      this.model.mixer.reverb.appendTo(this.master_effects);
     }
 
     SidebarView.prototype.initEvent = function() {
@@ -4162,10 +4198,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.master_save.on('click', (function() {
         return _this.saveMaster();
       }));
-      return this.tracks.find('.sidebar-effect').each(function(i) {
+      this.tracks.find('.sidebar-effect').each(function(i) {
         return $(_this).on('change', function() {
           return _this.model.readTracksEffect(i);
         });
+      });
+      return this.add_master_btn.on('click', function() {
+        return _this.addMasterEffect(_this.add_master.val());
       });
     };
 
@@ -4215,6 +4254,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.master_scale.val(o.scale);
       }
       return this.wrapper.css('left', '-223px');
+    };
+
+    SidebarView.prototype.addMasterEffect = function(name) {
+      var fx;
+      fx = this.model.addMasterEffect(name);
+      return fx.appendTo(this.master_effects);
     };
 
     return SidebarView;
