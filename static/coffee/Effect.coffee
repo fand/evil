@@ -101,6 +101,8 @@ class @Compressor extends @FX
         @in.gain.value = 1.0
         @out.gain.value = 1.0
 
+        @view = new CompressorView(this)
+
     setAttack:    (d) -> @comp.attack.value = d
     setRelease:   (d) -> @comp.release.value = d
     setThreshold: (d) -> @comp.threshold.value = d

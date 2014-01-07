@@ -161,6 +161,7 @@
       this.comp.connect(this.out);
       this["in"].gain.value = 1.0;
       this.out.gain.value = 1.0;
+      this.view = new CompressorView(this);
     }
 
     Compressor.prototype.setAttack = function(d) {

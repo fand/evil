@@ -181,6 +181,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.comp.connect(this.out);
       this["in"].gain.value = 1.0;
       this.out.gain.value = 1.0;
+      this.view = new CompressorView(this);
     }
 
     Compressor.prototype.setAttack = function(d) {
@@ -456,6 +457,104 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     return DelayView;
+
+  })();
+
+  this.CompressorView = (function() {
+    function CompressorView(model) {
+      this.model = model;
+      this.dom = $('#tmpl_fx_compressor').clone();
+      this.dom.removeAttr('id');
+      this.attack = this.dom.find('[name=attack]');
+      this.release = this.dom.find('[name=release]');
+      this.threshold = this.dom.find('[name=threshold]');
+      this.ratio = this.dom.find('[name=ratio]');
+      this.knee = this.dom.find('[name=knee]');
+      this.input = this.dom.find('[name=input]');
+      this.output = this.dom.find('[name=output]');
+      this.initEvent();
+    }
+
+    CompressorView.prototype.initEvent = function() {
+      var _this = this;
+      this.input.on('change', function() {
+        return _this.model.setParam({
+          input: parseFloat(_this.input.val()) / 100.0
+        });
+      });
+      this.output.on('change', function() {
+        return _this.model.setParam({
+          output: parseFloat(_this.output.val()) / 100.0
+        });
+      });
+      this.attack.on('change', function() {
+        return _this.model.setParam({
+          attack: parseFloat(_this.attack.val()) / 1000.0
+        });
+      });
+      this.release.on('change', function() {
+        return _this.model.setParam({
+          release: parseFloat(_this.release.val()) / 1000.0
+        });
+      });
+      this.threshold.on('change', function() {
+        return _this.model.setParam({
+          threshold: parseFloat(_this.threshold.val()) / -10.0
+        });
+      });
+      this.ratio.on('change', function() {
+        return _this.model.setParam({
+          ratio: parseInt(_this.ratio.val())
+        });
+      });
+      return this.knee.on('change', function() {
+        return _this.model.setParam({
+          knee: parseFloat(_this.knee.val()) / 1000.0
+        });
+      });
+    };
+
+    return CompressorView;
+
+  })();
+
+  this.FuzzView = (function() {
+    function FuzzView(model) {
+      this.model = model;
+      this.dom = $('#tmpl_fx_fuzz').clone();
+      this.dom.removeAttr('id');
+      this.type = this.dom.find('[name=type]');
+      this.gain = this.dom.find('[name=gain]');
+      this.input = this.dom.find('[name=input]');
+      this.output = this.dom.find('[name=output]');
+      this.initEvent();
+    }
+
+    FuzzView.prototype.initEvent = function() {
+      var _this = this;
+      this.input.on('change', function() {
+        return _this.model.setParam({
+          input: parseFloat(_this.input.val()) / 100.0
+        });
+      });
+      this.output.on('change', function() {
+        return _this.model.setParam({
+          output: parseFloat(_this.output.val()) / 100.0
+        });
+      });
+      this.type.on('change', function() {
+        return _this.model.setParam({
+          type: _this.type.val()
+        });
+      });
+      return this.gain.on('change', function() {
+        return _this.model.setParam({
+          gain: parseFloat(_this.gain.val()) / 1000.0
+        });
+      });
+    };
+
+    return FuzzView;
 
   })();
 
@@ -824,6 +923,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var fx, pos;
       if (name === 'Delay') {
         fx = new Delay(this.ctx);
+      } else if (name === 'Reverb') {
+        fx = new Reverb(this.ctx);
+      } else if (name === 'Comp') {
+        fx = new Compressor(this.ctx);
       }
       pos = this.effects_master.length;
       this.effects_master[pos - 1].disconnect();

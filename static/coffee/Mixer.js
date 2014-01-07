@@ -174,6 +174,10 @@
       var fx, pos;
       if (name === 'Delay') {
         fx = new Delay(this.ctx);
+      } else if (name === 'Reverb') {
+        fx = new Reverb(this.ctx);
+      } else if (name === 'Comp') {
+        fx = new Compressor(this.ctx);
       }
       pos = this.effects_master.length;
       this.effects_master[pos - 1].disconnect();

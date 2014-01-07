@@ -167,6 +167,10 @@ class @Mixer
     addMasterEffect: (name) =>
         if name == 'Delay'
             fx = new Delay(@ctx)
+        else if name == 'Reverb'
+            fx = new Reverb(@ctx)
+        else if name == 'Comp'
+            fx = new Compressor(@ctx)
 
         pos = @effects_master.length
         @effects_master[pos - 1].disconnect()
