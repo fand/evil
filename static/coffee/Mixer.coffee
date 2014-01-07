@@ -165,7 +165,9 @@ class @Mixer
 
 
     addMasterEffect: (name) =>
-        if name == 'Delay'
+        if name == 'Fuzz'
+            fx = new Fuzz(@ctx)
+        else if name == 'Delay'
             fx = new Delay(@ctx)
         else if name == 'Reverb'
             fx = new Reverb(@ctx)

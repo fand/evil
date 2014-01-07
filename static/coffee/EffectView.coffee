@@ -117,5 +117,5 @@ class @FuzzView
             @model.setParam(type: @type.val())
         )
         @gain.on('change', () =>
-            @model.setParam(gain: parseFloat(@gain.val()) / 1000.0)
+            @model.setParam(gain: parseFloat(@gain.val())/ 100.0)
         )

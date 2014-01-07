@@ -172,7 +172,9 @@
 
     Mixer.prototype.addMasterEffect = function(name) {
       var fx, pos;
-      if (name === 'Delay') {
+      if (name === 'Fuzz') {
+        fx = new Fuzz(this.ctx);
+      } else if (name === 'Delay') {
         fx = new Delay(this.ctx);
       } else if (name === 'Reverb') {
         fx = new Reverb(this.ctx);

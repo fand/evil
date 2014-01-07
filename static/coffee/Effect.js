@@ -231,6 +231,67 @@
 
   })();
 
+  this.Fuzz = (function(_super) {
+    __extends(Fuzz, _super);
+
+    function Fuzz(ctx) {
+      this.ctx = ctx;
+      Fuzz.__super__.constructor.call(this, this.ctx);
+      this.fuzz = this.ctx.createWaveShaper();
+      this["in"].connect(this.fuzz);
+      this.fuzz.connect(this.out);
+      this["in"].gain.value = 1.0;
+      this.out.gain.value = 1.0;
+      this.type = 'Sigmoid';
+      this.samples = 2048;
+      this.fuzz.curve = new Float32Array(this.samples);
+      this.setGain(1.0);
+      this.view = new FuzzView(this);
+    }
+
+    Fuzz.prototype.setType = function(d) {};
+
+    Fuzz.prototype.setGain = function(d) {
+      var i, ratio, sigmax, sigmoid, x, _i, _j, _ref, _ref1, _results, _results1;
+      sigmax = 2.0 / (1 + Math.exp(-d * 1.0)) - 1.0;
+      ratio = 1.0 / sigmax;
+      if (this.type === 'Sigmoid') {
+        _results = [];
+        for (i = _i = 0, _ref = this.samples; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          x = i * 2.0 / this.samples - 1.0;
+          sigmoid = 2.0 / (1 + Math.exp(-d * 100 * x)) - 1.0;
+          _results.push(this.fuzz.curve[i] = sigmoid * ratio);
+        }
+        return _results;
+      } else if (this.type === 'Octavia') {
+        _results1 = [];
+        for (i = _j = 0, _ref1 = this.samples; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+          x = i * 2.0 / this.samples - 1.0;
+          _results1.push(this.fuzz.curve[i] = Math.abs(x) * 2.0 - 1.0);
+        }
+        return _results1;
+      }
+    };
+
+    Fuzz.prototype.setParam = function(p) {
+      if (p.type != null) {
+        this.setType(p.type);
+      }
+      if (p.gain != null) {
+        this.setGain(p.gain);
+      }
+      if (p.input != null) {
+        this.setInput(p.input);
+      }
+      if (p.output != null) {
+        return this.setOutput(p.output);
+      }
+    };
+
+    return Fuzz;
+
+  })(this.FX);
+
   IR_URL = {
     'BIG_SNARE': 'static/IR/H3000/206_BIG_SNARE.wav',
     'Sweep_Reverb': 'static/IR/H3000/106_Sweep_Reverb.wav',

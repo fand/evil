@@ -214,14 +214,15 @@
 
   <div class="clearfix">
     <label>type</label>
-    <select name="ratio">
-      <option selected="selected">Octavia</option>
+    <select name="type">
+      <option selected="selected">Sigmoid</option>
+      <option>Octavia</option>
     </select>
   </div>
 
   <div class="clearfix">
     <label>gain</label>
-    <input name="gain" type="range" min="0" max="100" value="40" />
+    <input name="gain" type="range" min="1" max="99" value="40" />
   </div>
 
   <div class="clearfix">

@@ -175,7 +175,7 @@
       });
       return this.gain.on('change', function() {
         return _this.model.setParam({
-          gain: parseFloat(_this.gain.val()) / 1000.0
+          gain: parseFloat(_this.gain.val()) / 100.0
         });
       });
     };
