@@ -222,7 +222,7 @@
 
   <div class="clearfix">
     <label>gain</label>
-    <input name="gain" type="range" min="1" max="99" value="40" />
+    <input name="gain" type="range" min="8" max="99" value="10" />
   </div>
 
   <div class="clearfix">

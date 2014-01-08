@@ -245,11 +245,13 @@
       this.type = 'Sigmoid';
       this.samples = 2048;
       this.fuzz.curve = new Float32Array(this.samples);
-      this.setGain(1.0);
+      this.setGain(0.08);
       this.view = new FuzzView(this);
     }
 
-    Fuzz.prototype.setType = function(d) {};
+    Fuzz.prototype.setType = function(type) {
+      this.type = type;
+    };
 
     Fuzz.prototype.setGain = function(d) {
       var i, ratio, sigmax, sigmoid, x, _i, _j, _ref, _ref1, _results, _results1;
@@ -259,7 +261,7 @@
         _results = [];
         for (i = _i = 0, _ref = this.samples; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           x = i * 2.0 / this.samples - 1.0;
-          sigmoid = 2.0 / (1 + Math.exp(-d * 100 * x)) - 1.0;
+          sigmoid = 2.0 / (1 + Math.exp(-d * d * d * 1000 * x)) - 1.0;
           _results.push(this.fuzz.curve[i] = sigmoid * ratio);
         }
         return _results;
@@ -267,7 +269,8 @@
         _results1 = [];
         for (i = _j = 0, _ref1 = this.samples; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           x = i * 2.0 / this.samples - 1.0;
-          _results1.push(this.fuzz.curve[i] = Math.abs(x) * 2.0 - 1.0);
+          sigmoid = 2.0 / (1 + Math.exp(-d * d * 10 * x)) - 1.0;
+          _results1.push(this.fuzz.curve[i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0);
         }
         return _results1;
       }
