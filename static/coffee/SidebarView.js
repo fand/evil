@@ -13,6 +13,7 @@
       this.master_effects = this.master.find('.sidebar-effects');
       this.add_master = this.master.find('.add-type');
       this.add_master_btn = this.master.find('.add-btn');
+      this.tracks_effects = this.tracks.find('.sidebar-effects');
       this.add_tracks = this.tracks.find('.add-type');
       this.add_tracks_btn = this.tracks.find('.add-btn');
       this.initEvent();
@@ -47,8 +48,11 @@
           return _this.model.readTracksEffect(i);
         });
       });
-      return this.add_master_btn.on('click', function() {
+      this.add_master_btn.on('click', function() {
         return _this.addMasterEffect(_this.add_master.val());
+      });
+      return this.add_tracks_btn.on('click', function() {
+        return _this.addTracksEffect(_this.add_tracks.val());
       });
     };
 
@@ -104,6 +108,12 @@
       var fx;
       fx = this.model.addMasterEffect(name);
       return fx.appendTo(this.master_effects);
+    };
+
+    SidebarView.prototype.addTracksEffect = function(name) {
+      var fx;
+      fx = this.model.addTracksEffect(name);
+      return fx.appendTo(this.tracks_effects);
     };
 
     return SidebarView;

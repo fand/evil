@@ -43,9 +43,6 @@ class @Mixer
         @bus_delay.connect(@delay.in)
         @bus_reverb.connect(@reverb.in)
 
-        # @node_send.connect(@limiter.in)
-        # @delay.connect(@limiter.in)
-        # @reverb.connect(@limiter.in)
         @delay.connect(@node_send)
         @reverb.connect(@node_send)
         @node_send.connect(@node_return)
@@ -179,5 +176,25 @@ class @Mixer
         @effects_master[pos - 1].connect(fx.in)
         fx.connect(@node_return)
         @effects_master.push(fx)
+
+        return fx
+
+
+    addTracksEffect: (x, name) =>
+        if name == 'Fuzz'
+            fx = new Fuzz(@ctx)
+        else if name == 'Delay'
+            fx = new Delay(@ctx)
+        else if name == 'Reverb'
+            fx = new Reverb(@ctx)
+        else if name == 'Comp'
+            fx = new Compressor(@ctx)
+
+        effects = @player.synth[x].effects
+        pos = effects.length
+        effects[pos - 1].disconnect()
+        effects[pos - 1].connect(fx.in)
+        fx.connect(@player.synth[x].out)
+        effects.push(fx)
 
         return fx

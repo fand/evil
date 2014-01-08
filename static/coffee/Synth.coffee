@@ -192,6 +192,7 @@ class @ResFilter
         @lpf.gain.value = 1.0
 
     connect:    (dst)  -> @lpf.connect(dst)
+    disconnect:    ()  -> @lpf.disconnect()
     getResonance:      -> @lpf.Q.value
     setQ: (Q) -> @lpf.Q.value = Q
 
@@ -343,9 +344,15 @@ class @Synth
         @is_performing = false
         @session = @player.session
 
+        @out = @ctx.createGain()
+        @out.gain.value = 1.0
+        @core.connect(@out)
+
+        @effects = [@core.filter]
+
         @T = new MutekiTimer()
 
-    connect: (dst) -> @core.connect(dst)
+    connect: (dst) -> @out.connect(dst)
     disconnect: () -> #@core.disconnect()
 
     setDuration: (@duration) ->

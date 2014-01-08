@@ -7,6 +7,7 @@
       this.player = player;
       this.session = session;
       this.mixer = mixer;
+      this.addTracksEffect = __bind(this.addTracksEffect, this);
       this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.sidebar_pos = {
         x: 0,
@@ -50,6 +51,10 @@
 
     Sidebar.prototype.addMasterEffect = function(name) {
       return this.mixer.addMasterEffect(name);
+    };
+
+    Sidebar.prototype.addTracksEffect = function(name) {
+      return this.mixer.addTracksEffect(this.sidebar_pos.x, name);
     };
 
     return Sidebar;

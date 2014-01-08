@@ -820,6 +820,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _this = this;
       this.ctx = ctx;
       this.player = player;
+      this.addTracksEffect = __bind(this.addTracksEffect, this);
       this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.gain_master = 1.0;
       this.gain_tracks = (function() {
@@ -999,6 +1000,26 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.effects_master[pos - 1].connect(fx["in"]);
       fx.connect(this.node_return);
       this.effects_master.push(fx);
+      return fx;
+    };
+
+    Mixer.prototype.addTracksEffect = function(x, name) {
+      var effects, fx, pos;
+      if (name === 'Fuzz') {
+        fx = new Fuzz(this.ctx);
+      } else if (name === 'Delay') {
+        fx = new Delay(this.ctx);
+      } else if (name === 'Reverb') {
+        fx = new Reverb(this.ctx);
+      } else if (name === 'Comp') {
+        fx = new Compressor(this.ctx);
+      }
+      effects = this.player.synth[x].effects;
+      pos = effects.length;
+      effects[pos - 1].disconnect();
+      effects[pos - 1].connect(fx["in"]);
+      fx.connect(this.player.synth[x].out);
+      effects.push(fx);
       return fx;
     };
 
@@ -4273,6 +4294,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.player = player;
       this.session = session;
       this.mixer = mixer;
+      this.addTracksEffect = __bind(this.addTracksEffect, this);
       this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.sidebar_pos = {
         x: 0,
@@ -4318,6 +4340,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.mixer.addMasterEffect(name);
     };
 
+    Sidebar.prototype.addTracksEffect = function(name) {
+      return this.mixer.addTracksEffect(this.sidebar_pos.x, name);
+    };
+
     return Sidebar;
 
   })();
@@ -4338,6 +4364,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.master_effects = this.master.find('.sidebar-effects');
       this.add_master = this.master.find('.add-type');
       this.add_master_btn = this.master.find('.add-btn');
+      this.tracks_effects = this.tracks.find('.sidebar-effects');
       this.add_tracks = this.tracks.find('.add-type');
       this.add_tracks_btn = this.tracks.find('.add-btn');
       this.initEvent();
@@ -4372,8 +4399,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           return _this.model.readTracksEffect(i);
         });
       });
-      return this.add_master_btn.on('click', function() {
+      this.add_master_btn.on('click', function() {
         return _this.addMasterEffect(_this.add_master.val());
+      });
+      return this.add_tracks_btn.on('click', function() {
+        return _this.addTracksEffect(_this.add_tracks.val());
       });
     };
 
@@ -4429,6 +4459,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var fx;
       fx = this.model.addMasterEffect(name);
       return fx.appendTo(this.master_effects);
+    };
+
+    SidebarView.prototype.addTracksEffect = function(name) {
+      var fx;
+      fx = this.model.addTracksEffect(name);
+      return fx.appendTo(this.tracks_effects);
     };
 
     return SidebarView;
@@ -4762,6 +4798,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.lpf.connect(dst);
     };
 
+    ResFilter.prototype.disconnect = function() {
+      return this.lpf.disconnect();
+    };
+
     ResFilter.prototype.getResonance = function() {
       return this.lpf.Q.value;
     };
@@ -5020,11 +5060,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.is_sustaining = false;
       this.is_performing = false;
       this.session = this.player.session;
+      this.out = this.ctx.createGain();
+      this.out.gain.value = 1.0;
+      this.core.connect(this.out);
+      this.effects = [this.core.filter];
       this.T = new MutekiTimer();
     }
 
     Synth.prototype.connect = function(dst) {
-      return this.core.connect(dst);
+      return this.out.connect(dst);
     };
 
     Synth.prototype.disconnect = function() {};

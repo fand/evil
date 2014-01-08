@@ -7,6 +7,7 @@
         _this = this;
       this.ctx = ctx;
       this.player = player;
+      this.addTracksEffect = __bind(this.addTracksEffect, this);
       this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.gain_master = 1.0;
       this.gain_tracks = (function() {
@@ -186,6 +187,26 @@
       this.effects_master[pos - 1].connect(fx["in"]);
       fx.connect(this.node_return);
       this.effects_master.push(fx);
+      return fx;
+    };
+
+    Mixer.prototype.addTracksEffect = function(x, name) {
+      var effects, fx, pos;
+      if (name === 'Fuzz') {
+        fx = new Fuzz(this.ctx);
+      } else if (name === 'Delay') {
+        fx = new Delay(this.ctx);
+      } else if (name === 'Reverb') {
+        fx = new Reverb(this.ctx);
+      } else if (name === 'Comp') {
+        fx = new Compressor(this.ctx);
+      }
+      effects = this.player.synth[x].effects;
+      pos = effects.length;
+      effects[pos - 1].disconnect();
+      effects[pos - 1].connect(fx["in"]);
+      fx.connect(this.player.synth[x].out);
+      effects.push(fx);
       return fx;
     };
 

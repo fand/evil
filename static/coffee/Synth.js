@@ -324,6 +324,10 @@
       return this.lpf.connect(dst);
     };
 
+    ResFilter.prototype.disconnect = function() {
+      return this.lpf.disconnect();
+    };
+
     ResFilter.prototype.getResonance = function() {
       return this.lpf.Q.value;
     };
@@ -582,11 +586,15 @@
       this.is_sustaining = false;
       this.is_performing = false;
       this.session = this.player.session;
+      this.out = this.ctx.createGain();
+      this.out.gain.value = 1.0;
+      this.core.connect(this.out);
+      this.effects = [this.core.filter];
       this.T = new MutekiTimer();
     }
 
     Synth.prototype.connect = function(dst) {
-      return this.core.connect(dst);
+      return this.out.connect(dst);
     };
 
     Synth.prototype.disconnect = function() {};

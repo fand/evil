@@ -13,6 +13,7 @@ class @SidebarView
         @master_effects = @master.find('.sidebar-effects')
         @add_master     = @master.find('.add-type')
         @add_master_btn = @master.find('.add-btn')
+        @tracks_effects = @tracks.find('.sidebar-effects')
         @add_tracks     = @tracks.find('.add-type')
         @add_tracks_btn = @tracks.find('.add-btn')
 
@@ -42,13 +43,15 @@ class @SidebarView
             @addMasterEffect(@add_master.val())
         )
 
+        @add_tracks_btn.on('click', () =>
+            @addTracksEffect(@add_tracks.val())
+        )
 
     saveMasterPump: (i) ->
         @mixer.pump(i)
 
     # saveTracksEffect: (i) ->
     #     @mixer.saveParam(i)
-
 
 
 
@@ -70,10 +73,6 @@ class @SidebarView
         @showMaster(o)
 
     showTracks: (o) ->
-        # @master_name.val(o.name)   if o.name?
-        # @master_bpm.val(o.bpm)     if o.bpm?
-        # @master_key.val(o.key)     if o.key?
-        # @master_scale.val(o.scale) if o.scale?
         @wrapper.css('left', '0px')
 
 
@@ -87,3 +86,7 @@ class @SidebarView
     addMasterEffect: (name) ->
         fx = @model.addMasterEffect(name)
         fx.appendTo(@master_effects)
+
+    addTracksEffect: (name) ->
+        fx = @model.addTracksEffect(name)
+        fx.appendTo(@tracks_effects)

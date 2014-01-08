@@ -24,3 +24,6 @@ class @Sidebar
 
     addMasterEffect: (name) =>
         @mixer.addMasterEffect(name)
+
+    addTracksEffect: (name) =>
+        @mixer.addTracksEffect(@sidebar_pos.x, name)
