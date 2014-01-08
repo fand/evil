@@ -94,12 +94,12 @@
           <div id="sidebar-tracks">
 
             <div class="sidebar-effects">
-              <fieldset class="sidebar-effect sidebar-name">
+              <fieldset class="sidebar-module sidebar-name">
                 <legend><input name="name" type="text" value="Synth #0" /></legend>
               </fieldset>
             </div>
 
-            <fieldset class="sidebar-effect sidebar-add-effect clearfix">
+            <fieldset class="sidebar-module sidebar-add-effect clearfix">
               <select class="add-type">
                 <option>Fuzz</option>
                 <option>Double</option>
@@ -121,7 +121,7 @@
 
             <div class="sidebar-effects">
 
-              <fieldset id="sidebar-master-control" class="sidebar-effect sidebar-name">
+              <fieldset id="sidebar-master-control" class="sidebar-module sidebar-name">
                 <legend><input name="name" type="text" value="section-0" /></legend>
 
                 <div class="clearfix">
@@ -169,7 +169,7 @@
 
             </div>
 
-            <fieldset class="sidebar-effect sidebar-add-effect clearfix">
+            <fieldset class="sidebar-module sidebar-add-effect clearfix">
               <select class="add-type">
                 <option>Fuzz</option>
                 <option>Double</option>

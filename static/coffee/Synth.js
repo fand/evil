@@ -586,15 +586,18 @@
       this.is_sustaining = false;
       this.is_performing = false;
       this.session = this.player.session;
-      this.out = this.ctx.createGain();
-      this.out.gain.value = 1.0;
-      this.core.connect(this.out);
-      this.effects = [this.core.filter];
+      this.send = this.ctx.createGain();
+      this.send.gain.value = 1.0;
+      this["return"] = this.ctx.createGain();
+      this["return"].gain.value = 1.0;
+      this.core.connect(this.send);
+      this.send.connect(this["return"]);
+      this.effects = [];
       this.T = new MutekiTimer();
     }
 
     Synth.prototype.connect = function(dst) {
-      return this.out.connect(dst);
+      return this["return"].connect(dst);
     };
 
     Synth.prototype.disconnect = function() {};
@@ -794,6 +797,29 @@
 
     Synth.prototype.demute = function() {
       return this.core.demute();
+    };
+
+    Synth.prototype.getEffectParam = function() {
+      var f, _i, _len, _ref, _results;
+      _ref = this.effects;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        _results.push(f.getParam());
+      }
+      return _results;
+    };
+
+    Synth.prototype.insertEffect = function(fx) {
+      if (this.effects.length === 0) {
+        this.send.disconnect();
+        this.send.connect(fx["in"]);
+      } else {
+        this.effects[this.effects.length - 1].disconnect();
+        this.effects[this.effects.length - 1].connect(fx["in"]);
+      }
+      fx.connect(this["return"]);
+      return this.effects.push(fx);
     };
 
     return Synth;

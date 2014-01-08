@@ -56,10 +56,6 @@
       });
     };
 
-    SidebarView.prototype.saveMasterPump = function(i) {
-      return this.mixer.pump(i);
-    };
-
     SidebarView.prototype.saveMaster = function() {
       var bpm, key, name, obj, scale;
       name = this.master_name.val();
@@ -84,7 +80,25 @@
       return this.showMaster(o);
     };
 
-    SidebarView.prototype.showTracks = function(o) {
+    SidebarView.prototype.saveTracksEffect = function() {
+      var f, _i, _len, _ref, _results;
+      _ref = this.tracks_effects;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        _results.push(f.getParam());
+      }
+      return _results;
+    };
+
+    SidebarView.prototype.showTracks = function(track) {
+      var f, _i, _len, _ref;
+      this.tracks_effects.find('.sidebar-effect').remove();
+      _ref = track.effects;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        f.appendTo(this.tracks_effects);
+      }
       return this.wrapper.css('left', '0px');
     };
 

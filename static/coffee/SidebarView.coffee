@@ -47,14 +47,6 @@ class @SidebarView
             @addTracksEffect(@add_tracks.val())
         )
 
-    saveMasterPump: (i) ->
-        @mixer.pump(i)
-
-    # saveTracksEffect: (i) ->
-    #     @mixer.saveParam(i)
-
-
-
     saveMaster: ->
         name  = @master_name.val()
         bpm   = @master_bpm.val()
@@ -72,7 +64,12 @@ class @SidebarView
         @model.saveMaster(o)
         @showMaster(o)
 
-    showTracks: (o) ->
+    saveTracksEffect: ->
+        (f.getParam() for f in @tracks_effects)
+
+    showTracks: (track) ->
+        @tracks_effects.find('.sidebar-effect').remove()
+        f.appendTo(@tracks_effects) for f in track.effects
         @wrapper.css('left', '0px')
 
 

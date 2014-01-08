@@ -1,4 +1,4 @@
-<fieldset id="tmpl_fx_reverb" class="sidebar-effect">
+<fieldset id="tmpl_fx_reverb" class="sidebar-effect sidebar-module">
   <legend>Reverb</legend>
 
   <div class="clearfix">
@@ -132,7 +132,7 @@
 
 </fieldset>
 
-<fieldset id="tmpl_fx_delay" class="sidebar-effect">
+<fieldset id="tmpl_fx_delay" class="sidebar-effect sidebar-module">
   <legend>Delay</legend>
 
   <!-- <label>input</label> -->
@@ -162,7 +162,7 @@
 
 
 
-<fieldset id="tmpl_fx_compressor" class="sidebar-effect">
+<fieldset id="tmpl_fx_compressor" class="sidebar-effect sidebar-module">
   <legend>Comp</legend>
 
   <div class="clearfix">
@@ -204,7 +204,7 @@
 
 
 
-<fieldset id="tmpl_fx_fuzz" class="sidebar-effect">
+<fieldset id="tmpl_fx_fuzz" class="sidebar-effect sidebar-module">
   <legend>Fuzz</legend>
 
   <div class="clearfix">

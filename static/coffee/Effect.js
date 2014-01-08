@@ -89,6 +89,17 @@
       }
     };
 
+    Delay.prototype.getParam = function(p) {
+      return {
+        effect: 'Delay',
+        delay: this.delay.delayTime.value,
+        feedback: this.feedback.gain.value,
+        lofi: this.lofi.Q.value,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
+    };
+
     return Delay;
 
   })(this.FX);
@@ -111,6 +122,7 @@
     Reverb.prototype.setIR = function(name) {
       var req, url,
         _this = this;
+      this.name = name;
       if (IR_LOADED[name] != null) {
         this.reverb.buffer = IR_LOADED[name];
         return;
@@ -144,6 +156,15 @@
       if (p.output != null) {
         return this.setOutput(p.output);
       }
+    };
+
+    Reverb.prototype.getParam = function(p) {
+      return {
+        effect: 'Reverb',
+        name: this.name,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
     };
 
     return Reverb;
@@ -208,6 +229,19 @@
       }
     };
 
+    Compressor.prototype.getParam = function(p) {
+      return {
+        effect: 'Compressor',
+        attack: this.comp.attack.value,
+        release: this.comp.release.value,
+        threshold: this.comp.threshold.value,
+        ratio: this.comp.ratio.value,
+        knee: this.comp.knee.value,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
+    };
+
     return Compressor;
 
   })(this.FX);
@@ -253,15 +287,16 @@
       this.type = type;
     };
 
-    Fuzz.prototype.setGain = function(d) {
+    Fuzz.prototype.setGain = function(gain) {
       var i, ratio, sigmax, sigmoid, x, _i, _j, _ref, _ref1, _results, _results1;
-      sigmax = 2.0 / (1 + Math.exp(-d * 1.0)) - 1.0;
+      this.gain = gain;
+      sigmax = 2.0 / (1 + Math.exp(-this.gain * 1.0)) - 1.0;
       ratio = 1.0 / sigmax;
       if (this.type === 'Sigmoid') {
         _results = [];
         for (i = _i = 0, _ref = this.samples; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           x = i * 2.0 / this.samples - 1.0;
-          sigmoid = 2.0 / (1 + Math.exp(-d * d * d * 1000 * x)) - 1.0;
+          sigmoid = 2.0 / (1 + Math.exp(-Math.pow(this.gain, 3) * 1000 * x)) - 1.0;
           _results.push(this.fuzz.curve[i] = sigmoid * ratio);
         }
         return _results;
@@ -269,7 +304,7 @@
         _results1 = [];
         for (i = _j = 0, _ref1 = this.samples; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           x = i * 2.0 / this.samples - 1.0;
-          sigmoid = 2.0 / (1 + Math.exp(-d * d * 10 * x)) - 1.0;
+          sigmoid = 2.0 / (1 + Math.exp(-Math.pow(this.gain, 2) * 10 * x)) - 1.0;
           _results1.push(this.fuzz.curve[i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0);
         }
         return _results1;
@@ -289,6 +324,16 @@
       if (p.output != null) {
         return this.setOutput(p.output);
       }
+    };
+
+    Fuzz.prototype.getParam = function(p) {
+      return {
+        effect: 'Fuzz',
+        type: this.type,
+        gain: this.gain,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
     };
 
     return Fuzz;

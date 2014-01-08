@@ -190,11 +190,5 @@ class @Mixer
         else if name == 'Comp'
             fx = new Compressor(@ctx)
 
-        effects = @player.synth[x].effects
-        pos = effects.length
-        effects[pos - 1].disconnect()
-        effects[pos - 1].connect(fx.in)
-        fx.connect(@player.synth[x].out)
-        effects.push(fx)
-
+        @player.synth[x].insertEffect(fx)
         return fx

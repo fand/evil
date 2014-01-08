@@ -344,15 +344,18 @@ class @Synth
         @is_performing = false
         @session = @player.session
 
-        @out = @ctx.createGain()
-        @out.gain.value = 1.0
-        @core.connect(@out)
+        @send = @ctx.createGain()
+        @send.gain.value = 1.0
+        @return = @ctx.createGain()
+        @return.gain.value = 1.0
+        @core.connect(@send)
+        @send.connect(@return)
 
-        @effects = [@core.filter]
+        @effects = []
 
         @T = new MutekiTimer()
 
-    connect: (dst) -> @out.connect(dst)
+    connect: (dst) -> @return.connect(dst)
     disconnect: () -> #@core.disconnect()
 
     setDuration: (@duration) ->
@@ -491,3 +494,17 @@ class @Synth
 
     mute:   -> @core.mute()
     demute: -> @core.demute()
+
+    getEffectParam: ->
+        f.getParam() for f in @effects
+
+    insertEffect: (fx) ->
+        if @effects.length == 0
+            @send.disconnect()
+            @send.connect(fx.in)
+        else
+            @effects[@effects.length - 1].disconnect()
+            @effects[@effects.length - 1].connect(fx.in)
+
+        fx.connect(@return)
+        @effects.push(fx)

@@ -191,7 +191,7 @@
     };
 
     Mixer.prototype.addTracksEffect = function(x, name) {
-      var effects, fx, pos;
+      var fx;
       if (name === 'Fuzz') {
         fx = new Fuzz(this.ctx);
       } else if (name === 'Delay') {
@@ -201,12 +201,7 @@
       } else if (name === 'Comp') {
         fx = new Compressor(this.ctx);
       }
-      effects = this.player.synth[x].effects;
-      pos = effects.length;
-      effects[pos - 1].disconnect();
-      effects[pos - 1].connect(fx["in"]);
-      fx.connect(this.player.synth[x].out);
-      effects.push(fx);
+      this.player.synth[x].insertEffect(fx);
       return fx;
     };
 

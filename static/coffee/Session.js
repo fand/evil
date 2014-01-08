@@ -280,6 +280,10 @@
       return _results;
     };
 
+    Session.prototype.saveTracksEffect = function(pos) {
+      return this.song.tracks[pos.x].effects = this.player.synth[pos.x].getEffectParam();
+    };
+
     Session.prototype.saveMaster = function(y, obj) {
       this.song.master[y] = obj;
       return this.view.readSong(this.song, this.current_cells);

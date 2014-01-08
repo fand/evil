@@ -212,6 +212,9 @@ class @Session
                 param.patterns = @song.tracks[i].patterns
             @song.tracks[i] = param
 
+    saveTracksEffect: (pos) ->
+        @song.tracks[pos.x].effects = @player.synth[pos.x].getEffectParam()
+
     saveMaster: (y, obj) ->
         @song.master[y] = obj
         @view.readSong(@song, @current_cells)

@@ -109,6 +109,17 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
+    Delay.prototype.getParam = function(p) {
+      return {
+        effect: 'Delay',
+        delay: this.delay.delayTime.value,
+        feedback: this.feedback.gain.value,
+        lofi: this.lofi.Q.value,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
+    };
+
     return Delay;
 
   })(this.FX);
@@ -131,6 +142,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Reverb.prototype.setIR = function(name) {
       var req, url,
         _this = this;
+      this.name = name;
       if (IR_LOADED[name] != null) {
         this.reverb.buffer = IR_LOADED[name];
         return;
@@ -164,6 +176,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (p.output != null) {
         return this.setOutput(p.output);
       }
+    };
+
+    Reverb.prototype.getParam = function(p) {
+      return {
+        effect: 'Reverb',
+        name: this.name,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
     };
 
     return Reverb;
@@ -228,6 +249,19 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
+    Compressor.prototype.getParam = function(p) {
+      return {
+        effect: 'Compressor',
+        attack: this.comp.attack.value,
+        release: this.comp.release.value,
+        threshold: this.comp.threshold.value,
+        ratio: this.comp.ratio.value,
+        knee: this.comp.knee.value,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
+    };
+
     return Compressor;
 
   })(this.FX);
@@ -273,15 +307,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.type = type;
     };
 
-    Fuzz.prototype.setGain = function(d) {
+    Fuzz.prototype.setGain = function(gain) {
       var i, ratio, sigmax, sigmoid, x, _i, _j, _ref, _ref1, _results, _results1;
-      sigmax = 2.0 / (1 + Math.exp(-d * 1.0)) - 1.0;
+      this.gain = gain;
+      sigmax = 2.0 / (1 + Math.exp(-this.gain * 1.0)) - 1.0;
       ratio = 1.0 / sigmax;
       if (this.type === 'Sigmoid') {
         _results = [];
         for (i = _i = 0, _ref = this.samples; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           x = i * 2.0 / this.samples - 1.0;
-          sigmoid = 2.0 / (1 + Math.exp(-d * d * d * 1000 * x)) - 1.0;
+          sigmoid = 2.0 / (1 + Math.exp(-Math.pow(this.gain, 3) * 1000 * x)) - 1.0;
           _results.push(this.fuzz.curve[i] = sigmoid * ratio);
         }
         return _results;
@@ -289,7 +324,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _results1 = [];
         for (i = _j = 0, _ref1 = this.samples; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           x = i * 2.0 / this.samples - 1.0;
-          sigmoid = 2.0 / (1 + Math.exp(-d * d * 10 * x)) - 1.0;
+          sigmoid = 2.0 / (1 + Math.exp(-Math.pow(this.gain, 2) * 10 * x)) - 1.0;
           _results1.push(this.fuzz.curve[i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0);
         }
         return _results1;
@@ -309,6 +344,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (p.output != null) {
         return this.setOutput(p.output);
       }
+    };
+
+    Fuzz.prototype.getParam = function(p) {
+      return {
+        effect: 'Fuzz',
+        type: this.type,
+        gain: this.gain,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
     };
 
     return Fuzz;
@@ -1004,7 +1049,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Mixer.prototype.addTracksEffect = function(x, name) {
-      var effects, fx, pos;
+      var fx;
       if (name === 'Fuzz') {
         fx = new Fuzz(this.ctx);
       } else if (name === 'Delay') {
@@ -1014,12 +1059,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       } else if (name === 'Comp') {
         fx = new Compressor(this.ctx);
       }
-      effects = this.player.synth[x].effects;
-      pos = effects.length;
-      effects[pos - 1].disconnect();
-      effects[pos - 1].connect(fx["in"]);
-      fx.connect(this.player.synth[x].out);
-      effects.push(fx);
+      this.player.synth[x].insertEffect(fx);
       return fx;
     };
 
@@ -3370,6 +3410,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
+    Session.prototype.saveTracksEffect = function(pos) {
+      return this.song.tracks[pos.x].effects = this.player.synth[pos.x].getEffectParam();
+    };
+
     Session.prototype.saveMaster = function(y, obj) {
       this.song.master[y] = obj;
       return this.view.readSong(this.song, this.current_cells);
@@ -4311,8 +4355,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         if (this.sidebar_pos.x === this.select_pos.x && this.sidebar_pos.type === this.select_pos.type) {
           return;
         }
+        this.saveTracksEffect(this.sidebar_pos.x);
         this.sidebar_pos = this.select_pos;
-        return this.view.showTracks(this.song.tracks[this.select_pos.x]);
+        return this.view.showTracks(this.player.synth[this.select_pos.x]);
       } else {
         if (this.sidebar_pos.y === this.select_pos.y && this.sidebar_pos.type === this.select_pos.type) {
           return;
@@ -4329,11 +4374,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.session.saveMaster(this.sidebar_pos.y, obj);
     };
 
-    Sidebar.prototype.saveTracksEffect = function(i, param) {
+    Sidebar.prototype.saveTracksEffect = function() {
       if (this.sidebar_pos.type === 'master') {
         return;
       }
-      return this.player.synth[this.sidebar_pos.x].effects[i].saveParam();
+      return this.session.saveTracksEffect(this.sidebar_pos);
     };
 
     Sidebar.prototype.addMasterEffect = function(name) {
@@ -4407,10 +4452,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
-    SidebarView.prototype.saveMasterPump = function(i) {
-      return this.mixer.pump(i);
-    };
-
     SidebarView.prototype.saveMaster = function() {
       var bpm, key, name, obj, scale;
       name = this.master_name.val();
@@ -4435,7 +4476,25 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.showMaster(o);
     };
 
-    SidebarView.prototype.showTracks = function(o) {
+    SidebarView.prototype.saveTracksEffect = function() {
+      var f, _i, _len, _ref, _results;
+      _ref = this.tracks_effects;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        _results.push(f.getParam());
+      }
+      return _results;
+    };
+
+    SidebarView.prototype.showTracks = function(track) {
+      var f, _i, _len, _ref;
+      this.tracks_effects.find('.sidebar-effect').remove();
+      _ref = track.effects;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        f.appendTo(this.tracks_effects);
+      }
       return this.wrapper.css('left', '0px');
     };
 
@@ -5060,15 +5119,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.is_sustaining = false;
       this.is_performing = false;
       this.session = this.player.session;
-      this.out = this.ctx.createGain();
-      this.out.gain.value = 1.0;
-      this.core.connect(this.out);
-      this.effects = [this.core.filter];
+      this.send = this.ctx.createGain();
+      this.send.gain.value = 1.0;
+      this["return"] = this.ctx.createGain();
+      this["return"].gain.value = 1.0;
+      this.core.connect(this.send);
+      this.send.connect(this["return"]);
+      this.effects = [];
       this.T = new MutekiTimer();
     }
 
     Synth.prototype.connect = function(dst) {
-      return this.out.connect(dst);
+      return this["return"].connect(dst);
     };
 
     Synth.prototype.disconnect = function() {};
@@ -5268,6 +5330,29 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Synth.prototype.demute = function() {
       return this.core.demute();
+    };
+
+    Synth.prototype.getEffectParam = function() {
+      var f, _i, _len, _ref, _results;
+      _ref = this.effects;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        _results.push(f.getParam());
+      }
+      return _results;
+    };
+
+    Synth.prototype.insertEffect = function(fx) {
+      if (this.effects.length === 0) {
+        this.send.disconnect();
+        this.send.connect(fx["in"]);
+      } else {
+        this.effects[this.effects.length - 1].disconnect();
+        this.effects[this.effects.length - 1].connect(fx["in"]);
+      }
+      fx.connect(this["return"]);
+      return this.effects.push(fx);
     };
 
     return Synth;

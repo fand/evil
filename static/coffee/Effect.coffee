@@ -50,6 +50,14 @@ class @Delay extends @FX
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
 
+    getParam: (p) ->
+        effect: 'Delay'
+        delay: @delay.delayTime.value
+        feedback: @feedback.gain.value
+        lofi: @lofi.Q.value
+        input: @in.gain.value
+        output: @out.gain.value
+
 
 
 class @Reverb extends @FX
@@ -63,7 +71,7 @@ class @Reverb extends @FX
         @out.gain.value = 1.0
         @view = new ReverbView(this)
 
-    setIR: (name) ->
+    setIR: (@name) ->
         if IR_LOADED[name]?
             @reverb.buffer = IR_LOADED[name]
             return
@@ -89,6 +97,12 @@ class @Reverb extends @FX
         @setIR(p.name) if p.name?
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
+
+    getParam: (p) ->
+        effect: 'Reverb'
+        name: @name
+        input: @in.gain.value
+        output: @out.gain.value
 
 
 
@@ -117,6 +131,16 @@ class @Compressor extends @FX
         @setKnee(p.knee) if p.knee?
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
+
+    getParam: (p) ->
+        effect: 'Compressor'
+        attack:  @comp.attack.value
+        release: @comp.release.value
+        threshold: @comp.threshold.value
+        ratio: @comp.ratio.value
+        knee: @comp.knee.value
+        input: @in.gain.value
+        output: @out.gain.value
 
 
 
@@ -151,18 +175,18 @@ class @Fuzz extends @FX
         @view = new FuzzView(this)
 
     setType: (@type) ->
-    setGain: (d) ->
-        sigmax = 2.0 / (1 + Math.exp(-d * 1.0)) - 1.0
+    setGain: (@gain) ->
+        sigmax = 2.0 / (1 + Math.exp(-@gain * 1.0)) - 1.0
         ratio = 1.0 / sigmax
         if @type == 'Sigmoid'
             for i in [0...@samples]
                 x = i * 2.0 / @samples - 1.0
-                sigmoid = 2.0 / (1 + Math.exp(-d*d*d*1000 * x)) - 1.0
+                sigmoid = 2.0 / (1 + Math.exp(-Math.pow(@gain, 3) * 1000 * x)) - 1.0
                 @fuzz.curve[i] = sigmoid * ratio
         else if @type == 'Octavia'
             for i in [0...@samples]
                 x = i * 2.0 / @samples - 1.0
-                sigmoid = 2.0 / (1 + Math.exp(-d*d*10 * x)) - 1.0
+                sigmoid = 2.0 / (1 + Math.exp(-Math.pow(@gain, 2) * 10 * x)) - 1.0
                 @fuzz.curve[i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0
 
     setParam: (p) ->
@@ -170,6 +194,13 @@ class @Fuzz extends @FX
         @setGain(p.gain) if p.gain?
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
+
+    getParam: (p) ->
+        effect: 'Fuzz'
+        type: @type
+        gain: @gain
+        input: @in.gain.value
+        output: @out.gain.value
 
 
 
