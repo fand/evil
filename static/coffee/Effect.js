@@ -350,12 +350,12 @@
       Double.__super__.constructor.call(this, this.ctx);
       this.delay = this.ctx.createDelay();
       this.delay.delayTime.value = 0.03;
-      this.pan_l = this.ctx.createPanner();
-      this.pan_r = this.ctx.createPanner();
+      this.pan_l = new Panner(this.ctx);
+      this.pan_r = new Panner(this.ctx);
       this.setWidth([0, 0, -1]);
-      this["in"].connect(this.pan_l);
+      this["in"].connect(this.pan_l["in"]);
       this["in"].connect(this.delay);
-      this.delay.connect(this.pan_r);
+      this.delay.connect(this.pan_r["in"]);
       this.pan_l.connect(this.out);
       this.pan_r.connect(this.out);
       this.view = new DoubleView(this);
@@ -367,8 +367,8 @@
 
     Double.prototype.setWidth = function(pos) {
       this.pos = pos;
-      this.pan_l.setPosition(this.pos[0], this.pos[1], this.pos[2]);
-      return this.pan_r.setPosition(-this.pos[0], this.pos[1], this.pos[2]);
+      this.pan_l.setPosition(this.pos);
+      return this.pan_r.setPosition(-this.pos);
     };
 
     Double.prototype.setParam = function(p) {

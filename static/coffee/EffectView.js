@@ -215,15 +215,9 @@
       });
       return this.width.on('change', function() {
         return _this.model.setParam({
-          width: _this.pan2pos(parseFloat(_this.width.val()) / 200.0 + 0.5)
+          width: parseFloat(_this.width.val()) / 200.0 + 0.5
         });
       });
-    };
-
-    DoubleView.prototype.pan2pos = function(v) {
-      var theta;
-      theta = v * Math.PI;
-      return [Math.cos(theta), 0, -Math.sin(theta)];
     };
 
     return DoubleView;

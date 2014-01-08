@@ -17,6 +17,8 @@
       this.add_tracks = this.tracks.find('.add-type');
       this.add_tracks_btn = this.tracks.find('.add-btn');
       this.initEvent();
+      this.model.mixer.delay.appendTo(this.master_effects);
+      this.model.mixer.reverb.appendTo(this.master_effects);
     }
 
     SidebarView.prototype.initEvent = function() {

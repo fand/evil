@@ -81,7 +81,7 @@
 
     <fieldset class="Sampler_module Sampler_output">
       <legend>output</legend>
-      L <input class="pan-slider" type="range" min="0" max="100" value="50" /> R
+      L <input class="pan-slider" type="range" min="0" max="200" value="100" /> R
       <input class="gain-slider" type="range" min="0" max="100" value="100" />
     </fieldset>
 

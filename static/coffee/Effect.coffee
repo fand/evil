@@ -213,13 +213,13 @@ class @Double extends @FX
         @delay = @ctx.createDelay()
         @delay.delayTime.value = 0.03
 
-        @pan_l = @ctx.createPanner()
-        @pan_r = @ctx.createPanner()
+        @pan_l = new Panner(@ctx)
+        @pan_r = new Panner(@ctx)
         @setWidth([0, 0, -1])
 
-        @in.connect(@pan_l)
+        @in.connect(@pan_l.in)
         @in.connect(@delay)
-        @delay.connect(@pan_r)
+        @delay.connect(@pan_r.in)
         @pan_l.connect(@out)
         @pan_r.connect(@out)
 
@@ -227,8 +227,8 @@ class @Double extends @FX
 
     setDelay: (d) -> @delay.delayTime.value = d
     setWidth: (@pos) ->
-        @pan_l.setPosition( @pos[0], @pos[1], @pos[2])
-        @pan_r.setPosition(-@pos[0], @pos[1], @pos[2])
+        @pan_l.setPosition( @pos)
+        @pan_r.setPosition(-@pos)
 
     setParam: (p) ->
         @setDelay(p.delay) if p.delay?

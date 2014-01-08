@@ -597,7 +597,11 @@
     }
 
     Synth.prototype.connect = function(dst) {
-      return this["return"].connect(dst);
+      if (dst instanceof Panner) {
+        return this["return"].connect(dst["in"]);
+      } else {
+        return this["return"].connect(dst);
+      }
     };
 
     Synth.prototype.disconnect = function() {};

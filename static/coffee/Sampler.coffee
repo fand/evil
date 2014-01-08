@@ -34,14 +34,16 @@ class @SampleNode
         [eq1.gain.value, eq2.gain.value, eq3.gain.value] = @eq_gains
         @eq_nodes = [eq1, eq2, eq3]
 
-        @panner = @ctx.createPanner()
-        @panner.panningModel = "equalpower"
-        @pan_value = [0, 0, -1]
+        @panner = new Panner(@ctx)
+        @pan_value = 0.5
 
         eq1.connect(eq2)
         eq2.connect(eq3)
-        eq3.connect(@panner)
+        eq3.connect(@panner.in)
         @panner.connect(@node)
+
+        # for mono source
+        @merger = @ctx.createChannelMerger(2)
 
     setSample: (sample) ->
         if sample.data?
@@ -69,7 +71,10 @@ class @SampleNode
         source = @ctx.createBufferSource()
         source.buffer = @buffer
         node = @ctx.createGain()
-        source.connect(node)
+#        source.connect(node)
+        source.connect(@merger, 0, 0)
+        source.connect(@merger, 0, 1)
+        @merger.connect(node)
         node.connect(@eq_nodes[0])
 
         head_time = time + @buffer_duration * @head
@@ -89,7 +94,7 @@ class @SampleNode
     getEQParam: -> @eq_gains
 
     setOutputParam: (@pan_value, gain) ->
-        @panner.setPosition(@pan_value[0], @pan_value[1], @pan_value[2])
+        @panner.setPosition(@pan_value)
         @node.gain.value = gain
 
     getOutputParam: ->
@@ -203,8 +208,22 @@ class @Sampler
         @is_sustaining = false
         @session = @player.session
 
+        @send = @ctx.createGain()
+        @send.gain.value = 1.0
+        @return = @ctx.createGain()
+        @return.gain.value = 1.0
+        @core.connect(@send)
+        @send.connect(@return)
+
+        @effects = []
+
+
     connect: (dst) ->
-        @core.connect(dst)
+        if dst instanceof Panner
+            @return.connect(dst.in)
+        else
+            @return.connect(dst)
+
 
     setDuration: ->
     setKey:  ->
@@ -300,9 +319,25 @@ class @Sampler
     getParam: ->
         p = @core.getParam()
         p.name = @name
+        p.effects = @getEffectsParam()
         return p
 
     readParam: (p) -> @core.readParam(p) if p?
 
     mute:   -> @core.mute()
     demute: -> @core.demute()
+
+    getEffectsParam: ->
+        f.getParam() for f in @effects
+
+    insertEffect: (fx) ->
+
+        if @effects.length == 0
+            @send.disconnect()
+            @send.connect(fx.in)
+        else
+            @effects[@effects.length - 1].disconnect()
+            @effects[@effects.length - 1].connect(fx.in)
+
+        fx.connect(@return)
+        @effects.push(fx)

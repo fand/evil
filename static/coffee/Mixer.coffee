@@ -84,9 +84,8 @@ class @Mixer
 
     addSynth: (synth) ->
         # Create new panner
-        p = @ctx.createPanner()
-        p.panningModel = "equalpower"
-        synth.connect(p)
+        p = new Panner(@ctx)
+        synth.connect(p.in)
         p.connect(@node_send)
         @panners.push(p)
 
@@ -117,8 +116,7 @@ class @Mixer
 
     setPans: (@pan_tracks, @pan_master) ->
         for i in [0...@pan_tracks.length]
-            p = @pan_tracks[i]
-            @panners[i].setPosition(p[0], p[1], p[2])
+            @panners[i].setPosition(@pan_tracks[i])
 
     readGains: (@gain_tracks, @gain_master) ->
         @setGains(@gain_tracks, @gain_master)

@@ -370,12 +370,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       Double.__super__.constructor.call(this, this.ctx);
       this.delay = this.ctx.createDelay();
       this.delay.delayTime.value = 0.03;
-      this.pan_l = this.ctx.createPanner();
-      this.pan_r = this.ctx.createPanner();
+      this.pan_l = new Panner(this.ctx);
+      this.pan_r = new Panner(this.ctx);
       this.setWidth([0, 0, -1]);
-      this["in"].connect(this.pan_l);
+      this["in"].connect(this.pan_l["in"]);
       this["in"].connect(this.delay);
-      this.delay.connect(this.pan_r);
+      this.delay.connect(this.pan_r["in"]);
       this.pan_l.connect(this.out);
       this.pan_r.connect(this.out);
       this.view = new DoubleView(this);
@@ -387,8 +387,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Double.prototype.setWidth = function(pos) {
       this.pos = pos;
-      this.pan_l.setPosition(this.pos[0], this.pos[1], this.pos[2]);
-      return this.pan_r.setPosition(-this.pos[0], this.pos[1], this.pos[2]);
+      this.pan_l.setPosition(this.pos);
+      return this.pan_r.setPosition(-this.pos);
     };
 
     Double.prototype.setParam = function(p) {
@@ -758,15 +758,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
       return this.width.on('change', function() {
         return _this.model.setParam({
-          width: _this.pan2pos(parseFloat(_this.width.val()) / 200.0 + 0.5)
+          width: parseFloat(_this.width.val()) / 200.0 + 0.5
         });
       });
-    };
-
-    DoubleView.prototype.pan2pos = function(v) {
-      var theta;
-      theta = v * Math.PI;
-      return [Math.cos(theta), 0, -Math.sin(theta)];
     };
 
     return DoubleView;
@@ -1052,9 +1046,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Mixer.prototype.addSynth = function(synth) {
       var a, g_delay, g_reverb, p;
-      p = this.ctx.createPanner();
-      p.panningModel = "equalpower";
-      synth.connect(p);
+      p = new Panner(this.ctx);
+      synth.connect(p["in"]);
       p.connect(this.node_send);
       this.panners.push(p);
       g_delay = this.ctx.createGain();
@@ -1088,13 +1081,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Mixer.prototype.setPans = function(pan_tracks, pan_master) {
-      var i, p, _i, _ref, _results;
+      var i, _i, _ref, _results;
       this.pan_tracks = pan_tracks;
       this.pan_master = pan_master;
       _results = [];
       for (i = _i = 0, _ref = this.pan_tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        p = this.pan_tracks[i];
-        _results.push(this.panners[i].setPosition(p[0], p[1], p[2]));
+        _results.push(this.panners[i].setPosition(this.pan_tracks[i]));
       }
       return _results;
     };
@@ -1306,11 +1298,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           _p = _ref[_i];
-          _results.push(this.pan2pos(1.0 - (parseFloat(_p.val())) / 200.0));
+          _results.push(1.0 - parseFloat(_p.val()) / 200.0);
         }
         return _results;
       }).call(this);
-      p_master = this.pan2pos(1.0 - parseFloat(this.pan_master.val() / 200.0));
+      p_master = 1.0 - parseFloat(this.pan_master.val()) / 200.0;
       this.model.setPans(p, p_master);
       _results = [];
       for (i = _i = 0, _ref = this.pans.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -1333,7 +1325,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.pans[i].val(this.pos2pan(1.0 - (p[i] * 100.0))));
+        _results.push(this.pans[i].val((1.0 - p) * 200));
       }
       return _results;
     };
@@ -1456,6 +1448,36 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   };
 
   this.MutekiTimer = MutekiTimer;
+
+}).call(this);
+;(function() {
+  this.Panner = (function() {
+    function Panner(ctx) {
+      this.ctx = ctx;
+      this["in"] = this.ctx.createChannelSplitter(2);
+      this.out = this.ctx.createChannelMerger(2);
+      this.l = this.ctx.createGain();
+      this.r = this.ctx.createGain();
+      this["in"].connect(this.l, 0);
+      this["in"].connect(this.r, 1);
+      this.l.connect(this.out, 0, 0);
+      this.r.connect(this.out, 0, 1);
+      this.setPosition(0.5);
+    }
+
+    Panner.prototype.connect = function(dst) {
+      return this.out.connect(dst);
+    };
+
+    Panner.prototype.setPosition = function(pos) {
+      this.pos = pos;
+      this.l.gain.value = this.pos;
+      return this.r.gain.value = 1.0 - this.pos;
+    };
+
+    return Panner;
+
+  })();
 
 }).call(this);
 ;(function() {
@@ -2115,13 +2137,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       _ref3 = [350, 2000, 4000], eq1.frequency.value = _ref3[0], eq2.frequency.value = _ref3[1], eq3.frequency.value = _ref3[2];
       _ref4 = this.eq_gains, eq1.gain.value = _ref4[0], eq2.gain.value = _ref4[1], eq3.gain.value = _ref4[2];
       this.eq_nodes = [eq1, eq2, eq3];
-      this.panner = this.ctx.createPanner();
-      this.panner.panningModel = "equalpower";
-      this.pan_value = [0, 0, -1];
+      this.panner = new Panner(this.ctx);
+      this.pan_value = 0.5;
       eq1.connect(eq2);
       eq2.connect(eq3);
-      eq3.connect(this.panner);
+      eq3.connect(this.panner["in"]);
       this.panner.connect(this.node);
+      this.merger = this.ctx.createChannelMerger(2);
     }
 
     SampleNode.prototype.setSample = function(sample) {
@@ -2161,7 +2183,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       source = this.ctx.createBufferSource();
       source.buffer = this.buffer;
       node = this.ctx.createGain();
-      source.connect(node);
+      source.connect(this.merger, 0, 0);
+      source.connect(this.merger, 0, 1);
+      this.merger.connect(node);
       node.connect(this.eq_nodes[0]);
       head_time = time + this.buffer_duration * this.head;
       tail_time = time + this.buffer_duration * this.tail;
@@ -2203,7 +2227,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SampleNode.prototype.setOutputParam = function(pan_value, gain) {
       this.pan_value = pan_value;
-      this.panner.setPosition(this.pan_value[0], this.pan_value[1], this.pan_value[2]);
+      this.panner.setPosition(this.pan_value);
       return this.node.gain.value = gain;
     };
 
@@ -2395,10 +2419,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.core = new SamplerCore(this, this.ctx, this.id);
       this.is_sustaining = false;
       this.session = this.player.session;
+      this.send = this.ctx.createGain();
+      this.send.gain.value = 1.0;
+      this["return"] = this.ctx.createGain();
+      this["return"].gain.value = 1.0;
+      this.core.connect(this.send);
+      this.send.connect(this["return"]);
+      this.effects = [];
     }
 
     Sampler.prototype.connect = function(dst) {
-      return this.core.connect(dst);
+      if (dst instanceof Panner) {
+        return this["return"].connect(dst["in"]);
+      } else {
+        return this["return"].connect(dst);
+      }
     };
 
     Sampler.prototype.setDuration = function() {};
@@ -2549,6 +2584,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var p;
       p = this.core.getParam();
       p.name = this.name;
+      p.effects = this.getEffectsParam();
       return p;
     };
 
@@ -2564,6 +2600,29 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Sampler.prototype.demute = function() {
       return this.core.demute();
+    };
+
+    Sampler.prototype.getEffectsParam = function() {
+      var f, _i, _len, _ref, _results;
+      _ref = this.effects;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        _results.push(f.getParam());
+      }
+      return _results;
+    };
+
+    Sampler.prototype.insertEffect = function(fx) {
+      if (this.effects.length === 0) {
+        this.send.disconnect();
+        this.send.connect(fx["in"]);
+      } else {
+        this.effects[this.effects.length - 1].disconnect();
+        this.effects[this.effects.length - 1].connect(fx["in"]);
+      }
+      fx.connect(this["return"]);
+      return this.effects.push(fx);
     };
 
     return Sampler;
@@ -2677,7 +2736,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SamplerCoreView.prototype.setSampleOutputParam = function() {
-      return this.model.setSampleOutputParam(this.sample_now, this.pan2pos(1.0 - (parseFloat(this.panner.val()) / 100.0)), parseFloat(this.gain.val()) / 100.0);
+      return this.model.setSampleOutputParam(this.sample_now, 1.0 - (parseFloat(this.panner.val()) / 200.0), parseFloat(this.gain.val()) / 100.0);
     };
 
     SamplerCoreView.prototype.readSampleTimeParam = function(p) {
@@ -2695,7 +2754,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SamplerCoreView.prototype.readSampleOutputParam = function(p) {
       var g, pan;
       pan = p[0], g = p[1];
-      this.panner.val((1.0 - Math.acos(pan[0]) / Math.PI) * 100.0);
+      this.panner.val((1.0 - pan) * 200.0);
       return this.gain.val(g * 100.0);
     };
 
@@ -4521,6 +4580,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.add_tracks = this.tracks.find('.add-type');
       this.add_tracks_btn = this.tracks.find('.add-btn');
       this.initEvent();
+      this.model.mixer.delay.appendTo(this.master_effects);
+      this.model.mixer.reverb.appendTo(this.master_effects);
     }
 
     SidebarView.prototype.initEvent = function() {
@@ -5237,7 +5298,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }
 
     Synth.prototype.connect = function(dst) {
-      return this["return"].connect(dst);
+      if (dst instanceof Panner) {
+        return this["return"].connect(dst["in"]);
+      } else {
+        return this["return"].connect(dst);
+      }
     };
 
     Synth.prototype.disconnect = function() {};

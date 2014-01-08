@@ -355,7 +355,12 @@ class @Synth
 
         @T = new MutekiTimer()
 
-    connect: (dst) -> @return.connect(dst)
+    connect: (dst) ->
+        if dst instanceof Panner
+            @return.connect(dst.in)
+        else
+            @return.connect(dst)
+
     disconnect: () -> #@core.disconnect()
 
     setDuration: (@duration) ->

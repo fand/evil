@@ -145,9 +145,5 @@ class @DoubleView
             @model.setParam(delay: parseFloat(@delay.val()) / 1000.0)
         )
         @width.on('change', () =>
-            @model.setParam(width: @pan2pos(parseFloat(@width.val()) / 200.0 + 0.5))  # [0.5, 1.0]
+            @model.setParam(width: parseFloat(@width.val()) / 200.0 + 0.5)  # [0.5, 1.0]
         )
-
-    pan2pos: (v) ->
-        theta = v * Math.PI
-        [Math.cos(theta), 0, -Math.sin(theta)]

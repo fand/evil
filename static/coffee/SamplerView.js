@@ -104,7 +104,7 @@
     };
 
     SamplerCoreView.prototype.setSampleOutputParam = function() {
-      return this.model.setSampleOutputParam(this.sample_now, this.pan2pos(1.0 - (parseFloat(this.panner.val()) / 100.0)), parseFloat(this.gain.val()) / 100.0);
+      return this.model.setSampleOutputParam(this.sample_now, 1.0 - (parseFloat(this.panner.val()) / 200.0), parseFloat(this.gain.val()) / 100.0);
     };
 
     SamplerCoreView.prototype.readSampleTimeParam = function(p) {
@@ -122,7 +122,7 @@
     SamplerCoreView.prototype.readSampleOutputParam = function(p) {
       var g, pan;
       pan = p[0], g = p[1];
-      this.panner.val((1.0 - Math.acos(pan[0]) / Math.PI) * 100.0);
+      this.panner.val((1.0 - pan) * 200.0);
       return this.gain.val(g * 100.0);
     };
 

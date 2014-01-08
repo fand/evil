@@ -88,9 +88,8 @@
 
     Mixer.prototype.addSynth = function(synth) {
       var a, g_delay, g_reverb, p;
-      p = this.ctx.createPanner();
-      p.panningModel = "equalpower";
-      synth.connect(p);
+      p = new Panner(this.ctx);
+      synth.connect(p["in"]);
       p.connect(this.node_send);
       this.panners.push(p);
       g_delay = this.ctx.createGain();
@@ -124,13 +123,12 @@
     };
 
     Mixer.prototype.setPans = function(pan_tracks, pan_master) {
-      var i, p, _i, _ref, _results;
+      var i, _i, _ref, _results;
       this.pan_tracks = pan_tracks;
       this.pan_master = pan_master;
       _results = [];
       for (i = _i = 0, _ref = this.pan_tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        p = this.pan_tracks[i];
-        _results.push(this.panners[i].setPosition(p[0], p[1], p[2]));
+        _results.push(this.panners[i].setPosition(this.pan_tracks[i]));
       }
       return _results;
     };
