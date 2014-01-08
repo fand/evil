@@ -1,4 +1,4 @@
-<fieldset id="tmpl_fx_reverb" class="sidebar-effect">
+<fieldset id="tmpl_fx_reverb" class="sidebar-effect sidebar-module">
   <legend>Reverb</legend>
 
   <div class="clearfix">
@@ -132,11 +132,11 @@
 
 </fieldset>
 
-<fieldset id="tmpl_fx_delay" class="sidebar-effect">
+<fieldset id="tmpl_fx_delay" class="sidebar-effect sidebar-module">
   <legend>Delay</legend>
 
   <!-- <label>input</label> -->
-  <input name="input" type="hidden" min="0" max="100" value="100" />
+  <input name="input" type="hidden" min="0" max="100" value="0" />
 
   <div class="clearfix">
     <label>delay</label>
@@ -145,7 +145,7 @@
 
   <div class="clearfix">
     <label>feedback</label>
-    <input name="feedback" type="range" min="0" max="100" value="10" />
+    <input name="feedback" type="range" min="0" max="100" value="20" />
   </div>
 
   <div class="clearfix">
@@ -156,6 +156,105 @@
   <div class="clearfix">
     <label>output</label>
     <input name="output" type="range" min="0" max="100" value="8" />
+  </div>
+
+</fieldset>
+
+
+
+<fieldset id="tmpl_fx_compressor" class="sidebar-effect sidebar-module">
+  <legend>Comp</legend>
+
+  <div class="clearfix">
+    <label>input</label>
+    <input name="input" type="range" min="0" max="100" value="100" />
+  </div>
+
+  <div class="clearfix">
+    <label>attack</label>
+    <input name="attack" type="range" min="0" max="1000" value="0" />
+  </div>
+
+  <div class="clearfix">
+    <label>release</label>
+    <input name="release" type="range" min="1" max="1000" value="0" />
+  </div>
+
+  <div class="clearfix">
+    <label>threshold</label>
+    <input name="threshold" type="range" min="0" max="1000" value="0" />
+  </div>
+
+  <div class="clearfix">
+    <label>ratio</label>
+    <input name="ratio" type="range" min="1" max="20" value="4" />
+  </div>
+
+  <div class="clearfix">
+    <label>knee</label>
+    <input name="knee" type="range" min="0" max="40" value="6" />
+  </div>
+
+  <div class="clearfix">
+    <label>output</label>
+    <input name="output" type="range" min="0" max="100" value="100" />
+  </div>
+
+</fieldset>
+
+
+
+<fieldset id="tmpl_fx_fuzz" class="sidebar-effect sidebar-module">
+  <legend>Fuzz</legend>
+
+  <div class="clearfix">
+    <label>input</label>
+    <input name="input" type="range" min="0" max="100" value="100" />
+  </div>
+
+  <div class="clearfix">
+    <label>type</label>
+    <select name="type">
+      <option selected="selected">Sigmoid</option>
+      <option>Octavia</option>
+    </select>
+  </div>
+
+  <div class="clearfix">
+    <label>gain</label>
+    <input name="gain" type="range" min="8" max="99" value="10" />
+  </div>
+
+  <div class="clearfix">
+    <label>output</label>
+    <input name="output" type="range" min="0" max="100" value="100" />
+  </div>
+
+</fieldset>
+
+
+
+<fieldset id="tmpl_fx_double" class="sidebar-effect sidebar-module">
+  <legend>Double</legend>
+
+  <div class="clearfix">
+    <label>input</label>
+    <input name="input" type="range" min="0" max="100" value="100" />
+  </div>
+
+  <div class="clearfix">
+    <label>delay</label>
+    <input name="delay" type="range" min="10" max="100" value="27" />
+   </div>
+
+  <div class="clearfix">
+    <label>width</label>
+    <input name="width" type="range" min="0" max="100" value="80" />
+  </div>
+
+  <div class="clearfix">
+    <label>output</label>
+    <input name="output" type="range" min="0" max="100" value="100" />
   </div>
 
 </fieldset>

@@ -56,13 +56,13 @@
       _ref3 = [350, 2000, 4000], eq1.frequency.value = _ref3[0], eq2.frequency.value = _ref3[1], eq3.frequency.value = _ref3[2];
       _ref4 = this.eq_gains, eq1.gain.value = _ref4[0], eq2.gain.value = _ref4[1], eq3.gain.value = _ref4[2];
       this.eq_nodes = [eq1, eq2, eq3];
-      this.panner = this.ctx.createPanner();
-      this.panner.panningModel = "equalpower";
-      this.pan_value = [0, 0, -1];
+      this.panner = new Panner(this.ctx);
+      this.pan_value = 0.5;
       eq1.connect(eq2);
       eq2.connect(eq3);
-      eq3.connect(this.panner);
+      eq3.connect(this.panner["in"]);
       this.panner.connect(this.node);
+      this.merger = this.ctx.createChannelMerger(2);
     }
 
     SampleNode.prototype.setSample = function(sample) {
@@ -102,7 +102,9 @@
       source = this.ctx.createBufferSource();
       source.buffer = this.buffer;
       node = this.ctx.createGain();
-      source.connect(node);
+      source.connect(this.merger, 0, 0);
+      source.connect(this.merger, 0, 1);
+      this.merger.connect(node);
       node.connect(this.eq_nodes[0]);
       head_time = time + this.buffer_duration * this.head;
       tail_time = time + this.buffer_duration * this.tail;
@@ -144,7 +146,7 @@
 
     SampleNode.prototype.setOutputParam = function(pan_value, gain) {
       this.pan_value = pan_value;
-      this.panner.setPosition(this.pan_value[0], this.pan_value[1], this.pan_value[2]);
+      this.panner.setPosition(this.pan_value);
       return this.node.gain.value = gain;
     };
 
@@ -336,10 +338,21 @@
       this.core = new SamplerCore(this, this.ctx, this.id);
       this.is_sustaining = false;
       this.session = this.player.session;
+      this.send = this.ctx.createGain();
+      this.send.gain.value = 1.0;
+      this["return"] = this.ctx.createGain();
+      this["return"].gain.value = 1.0;
+      this.core.connect(this.send);
+      this.send.connect(this["return"]);
+      this.effects = [];
     }
 
     Sampler.prototype.connect = function(dst) {
-      return this.core.connect(dst);
+      if (dst instanceof Panner) {
+        return this["return"].connect(dst["in"]);
+      } else {
+        return this["return"].connect(dst);
+      }
     };
 
     Sampler.prototype.setDuration = function() {};
@@ -490,6 +503,7 @@
       var p;
       p = this.core.getParam();
       p.name = this.name;
+      p.effects = this.getEffectsParam();
       return p;
     };
 
@@ -505,6 +519,29 @@
 
     Sampler.prototype.demute = function() {
       return this.core.demute();
+    };
+
+    Sampler.prototype.getEffectsParam = function() {
+      var f, _i, _len, _ref, _results;
+      _ref = this.effects;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        _results.push(f.getParam());
+      }
+      return _results;
+    };
+
+    Sampler.prototype.insertEffect = function(fx) {
+      if (this.effects.length === 0) {
+        this.send.disconnect();
+        this.send.connect(fx["in"]);
+      } else {
+        this.effects[this.effects.length - 1].disconnect();
+        this.effects[this.effects.length - 1].connect(fx["in"]);
+      }
+      fx.connect(this["return"]);
+      return this.effects.push(fx);
     };
 
     return Sampler;

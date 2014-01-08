@@ -1,10 +1,14 @@
 (function() {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
   this.Sidebar = (function() {
     function Sidebar(ctx, player, session, mixer) {
       this.ctx = ctx;
       this.player = player;
       this.session = session;
       this.mixer = mixer;
+      this.addTracksEffect = __bind(this.addTracksEffect, this);
+      this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.sidebar_pos = {
         x: 0,
         y: 1,
@@ -20,8 +24,9 @@
         if (this.sidebar_pos.x === this.select_pos.x && this.sidebar_pos.type === this.select_pos.type) {
           return;
         }
+        this.saveTracksEffect(this.sidebar_pos.x);
         this.sidebar_pos = this.select_pos;
-        return this.view.showTracks(this.song.tracks[this.select_pos.x]);
+        return this.view.showTracks(this.player.synth[this.select_pos.x]);
       } else {
         if (this.sidebar_pos.y === this.select_pos.y && this.sidebar_pos.type === this.select_pos.type) {
           return;
@@ -38,11 +43,19 @@
       return this.session.saveMaster(this.sidebar_pos.y, obj);
     };
 
-    Sidebar.prototype.saveTracksEffect = function(i, param) {
+    Sidebar.prototype.saveTracksEffect = function() {
       if (this.sidebar_pos.type === 'master') {
         return;
       }
-      return this.player.synth[this.sidebar_pos.x].effects[i].saveParam();
+      return this.session.saveTracksEffect(this.sidebar_pos);
+    };
+
+    Sidebar.prototype.addMasterEffect = function(name) {
+      return this.mixer.addMasterEffect(name);
+    };
+
+    Sidebar.prototype.addTracksEffect = function(name) {
+      return this.mixer.addTracksEffect(this.sidebar_pos.x, name);
     };
 
     return Sidebar;

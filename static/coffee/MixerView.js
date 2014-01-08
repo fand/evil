@@ -128,11 +128,11 @@
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           _p = _ref[_i];
-          _results.push(this.pan2pos(1.0 - (parseFloat(_p.val())) / 200.0));
+          _results.push(1.0 - parseFloat(_p.val()) / 200.0);
         }
         return _results;
       }).call(this);
-      p_master = this.pan2pos(1.0 - parseFloat(this.pan_master.val() / 200.0));
+      p_master = 1.0 - parseFloat(this.pan_master.val()) / 200.0;
       this.model.setPans(p, p_master);
       _results = [];
       for (i = _i = 0, _ref = this.pans.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -155,7 +155,7 @@
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.pans[i].val(this.pos2pan(1.0 - (p[i] * 100.0))));
+        _results.push(this.pans[i].val((1.0 - p) * 200));
       }
       return _results;
     };

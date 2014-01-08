@@ -80,8 +80,8 @@ class @MixerView
         @model.setGains(g, g_master)
 
     setPans: ->
-        p = (@pan2pos(1.0 - (parseFloat(_p.val())) / 200.0) for _p in @pans)
-        p_master = @pan2pos(1.0 - parseFloat(@pan_master.val() / 200.0))
+        p = (1.0 - parseFloat(_p.val()) / 200.0 for _p in @pans)
+        p_master = 1.0 - parseFloat(@pan_master.val()) / 200.0
         @model.setPans(p, p_master)
 
         for i in [0...@pans.length]
@@ -97,7 +97,7 @@ class @MixerView
 
     readPans: (p, p_master)->
         for i in [0...p.length]
-            @pans[i].val(@pos2pan(1.0 - (p[i] * 100.0)))
+            @pans[i].val((1.0 - p) * 200)
 
     setParams: ->
         @setGains()

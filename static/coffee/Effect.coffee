@@ -7,12 +7,14 @@ class @FX
         @view = new FXView(this)
 
     connect: (dst) -> @out.connect(dst)
+    disconnect: () -> @out.disconnect()
 
     setInput:  (d) -> @in.gain.value = d
     setOutput: (d) -> @out.gain.value = d
 
     appendTo: (dst) ->
         $(dst).append(@view.dom)
+        console.log(dst)
 
 
 class @Delay extends @FX
@@ -23,12 +25,13 @@ class @Delay extends @FX
         @delay.delayTime.value = 0.23
 
         @lofi = @ctx.createBiquadFilter()
+        @lofi.type = "peaking"
         @lofi.frequency.value = 1200
         @lofi.Q.value = 0.0  # range is [0.0, 5.0]
         @lofi.gain.value = 1.0
 
         @feedback = @ctx.createGain()
-        @feedback.gain.value = 0.4
+        @feedback.gain.value = 0.2
 
         @in.connect(@lofi)
         @lofi.connect(@delay)
@@ -40,7 +43,7 @@ class @Delay extends @FX
 
     setDelay: (d) -> @delay.delayTime.value = d
     setFeedback: (d) -> @feedback.gain.value = d
-    setLofi: (d) -> @lofi.Q.value = d * 5.0
+    setLofi: (d) -> @lofi.Q.value = d
 
     setParam: (p) ->
         @setDelay(p.delay) if p.delay?
@@ -48,6 +51,14 @@ class @Delay extends @FX
         @setLofi(p.lofi) if p.lofi?
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
+
+    getParam: (p) ->
+        effect: 'Delay'
+        delay: @delay.delayTime.value
+        feedback: @feedback.gain.value
+        lofi: @lofi.Q.value
+        input: @in.gain.value
+        output: @out.gain.value
 
 
 
@@ -62,7 +73,7 @@ class @Reverb extends @FX
         @out.gain.value = 1.0
         @view = new ReverbView(this)
 
-    setIR: (name) ->
+    setIR: (@name) ->
         if IR_LOADED[name]?
             @reverb.buffer = IR_LOADED[name]
             return
@@ -89,6 +100,12 @@ class @Reverb extends @FX
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
 
+    getParam: (p) ->
+        effect: 'Reverb'
+        name: @name
+        input: @in.gain.value
+        output: @out.gain.value
+
 
 
 class @Compressor extends @FX
@@ -99,6 +116,8 @@ class @Compressor extends @FX
         @comp.connect(@out)
         @in.gain.value = 1.0
         @out.gain.value = 1.0
+
+        @view = new CompressorView(this)
 
     setAttack:    (d) -> @comp.attack.value = d
     setRelease:   (d) -> @comp.release.value = d
@@ -115,6 +134,16 @@ class @Compressor extends @FX
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
 
+    getParam: (p) ->
+        effect: 'Compressor'
+        attack:  @comp.attack.value
+        release: @comp.release.value
+        threshold: @comp.threshold.value
+        ratio: @comp.ratio.value
+        knee: @comp.knee.value
+        input: @in.gain.value
+        output: @out.gain.value
+
 
 
 class @Limiter  # DON'T NEED to extend FX
@@ -130,6 +159,89 @@ class @Limiter  # DON'T NEED to extend FX
 
     connect: (dst) -> @out.connect(dst)
 
+
+
+class @Fuzz extends @FX
+    constructor: (@ctx) ->
+        super(@ctx)
+        @fuzz = @ctx.createWaveShaper()
+        @in.connect(@fuzz)
+        @fuzz.connect(@out)
+        @in.gain.value = 1.0
+        @out.gain.value = 1.0
+        @type = 'Sigmoid'
+        @samples = 2048
+        @fuzz.curve = new Float32Array(@samples)
+        @setGain(0.08)
+
+        @view = new FuzzView(this)
+
+    setType: (@type) ->
+    setGain: (@gain) ->
+        sigmax = 2.0 / (1 + Math.exp(-@gain * 1.0)) - 1.0
+        ratio = 1.0 / sigmax
+        if @type == 'Sigmoid'
+            for i in [0...@samples]
+                x = i * 2.0 / @samples - 1.0
+                sigmoid = 2.0 / (1 + Math.exp(-Math.pow(@gain, 3) * 1000 * x)) - 1.0
+                @fuzz.curve[i] = sigmoid * ratio
+        else if @type == 'Octavia'
+            for i in [0...@samples]
+                x = i * 2.0 / @samples - 1.0
+                sigmoid = 2.0 / (1 + Math.exp(-Math.pow(@gain, 2) * 10 * x)) - 1.0
+                @fuzz.curve[i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0
+
+    setParam: (p) ->
+        @setType(p.type) if p.type?
+        @setGain(p.gain) if p.gain?
+        @setInput(p.input) if p.input?
+        @setOutput(p.output) if p.output?
+
+    getParam: (p) ->
+        effect: 'Fuzz'
+        type: @type
+        gain: @gain
+        input: @in.gain.value
+        output: @out.gain.value
+
+
+
+class @Double extends @FX
+    constructor: (@ctx) ->
+        super(@ctx)
+
+        @delay = @ctx.createDelay()
+        @delay.delayTime.value = 0.03
+
+        @pan_l = new Panner(@ctx)
+        @pan_r = new Panner(@ctx)
+        @setWidth([0, 0, -1])
+
+        @in.connect(@pan_l.in)
+        @in.connect(@delay)
+        @delay.connect(@pan_r.in)
+        @pan_l.connect(@out)
+        @pan_r.connect(@out)
+
+        @view = new DoubleView(this)
+
+    setDelay: (d) -> @delay.delayTime.value = d
+    setWidth: (@pos) ->
+        @pan_l.setPosition( @pos)
+        @pan_r.setPosition(-@pos)
+
+    setParam: (p) ->
+        @setDelay(p.delay) if p.delay?
+        @setWidth(p.width) if p.width?
+        @setInput(p.input) if p.input?
+        @setOutput(p.output) if p.output?
+
+    getParam: (p) ->
+        effect: 'Double'
+        delay: @delay.delayTime.value
+        width: @pos
+        input: @in.gain.value
+        output: @out.gain.value
 
 
 IR_URL =

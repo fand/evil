@@ -17,6 +17,10 @@
       return this.out.connect(dst);
     };
 
+    FX.prototype.disconnect = function() {
+      return this.out.disconnect();
+    };
+
     FX.prototype.setInput = function(d) {
       return this["in"].gain.value = d;
     };
@@ -26,7 +30,8 @@
     };
 
     FX.prototype.appendTo = function(dst) {
-      return $(dst).append(this.view.dom);
+      $(dst).append(this.view.dom);
+      return console.log(dst);
     };
 
     return FX;
@@ -42,11 +47,12 @@
       this.delay = this.ctx.createDelay();
       this.delay.delayTime.value = 0.23;
       this.lofi = this.ctx.createBiquadFilter();
+      this.lofi.type = "peaking";
       this.lofi.frequency.value = 1200;
       this.lofi.Q.value = 0.0;
       this.lofi.gain.value = 1.0;
       this.feedback = this.ctx.createGain();
-      this.feedback.gain.value = 0.4;
+      this.feedback.gain.value = 0.2;
       this["in"].connect(this.lofi);
       this.lofi.connect(this.delay);
       this.delay.connect(this.out);
@@ -64,7 +70,7 @@
     };
 
     Delay.prototype.setLofi = function(d) {
-      return this.lofi.Q.value = d * 5.0;
+      return this.lofi.Q.value = d;
     };
 
     Delay.prototype.setParam = function(p) {
@@ -83,6 +89,17 @@
       if (p.output != null) {
         return this.setOutput(p.output);
       }
+    };
+
+    Delay.prototype.getParam = function(p) {
+      return {
+        effect: 'Delay',
+        delay: this.delay.delayTime.value,
+        feedback: this.feedback.gain.value,
+        lofi: this.lofi.Q.value,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
     };
 
     return Delay;
@@ -107,6 +124,7 @@
     Reverb.prototype.setIR = function(name) {
       var req, url,
         _this = this;
+      this.name = name;
       if (IR_LOADED[name] != null) {
         this.reverb.buffer = IR_LOADED[name];
         return;
@@ -142,6 +160,15 @@
       }
     };
 
+    Reverb.prototype.getParam = function(p) {
+      return {
+        effect: 'Reverb',
+        name: this.name,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
+    };
+
     return Reverb;
 
   })(this.FX);
@@ -157,6 +184,7 @@
       this.comp.connect(this.out);
       this["in"].gain.value = 1.0;
       this.out.gain.value = 1.0;
+      this.view = new CompressorView(this);
     }
 
     Compressor.prototype.setAttack = function(d) {
@@ -203,6 +231,19 @@
       }
     };
 
+    Compressor.prototype.getParam = function(p) {
+      return {
+        effect: 'Compressor',
+        attack: this.comp.attack.value,
+        release: this.comp.release.value,
+        threshold: this.comp.threshold.value,
+        ratio: this.comp.ratio.value,
+        knee: this.comp.knee.value,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
+    };
+
     return Compressor;
 
   })(this.FX);
@@ -225,6 +266,139 @@
     return Limiter;
 
   })();
+
+  this.Fuzz = (function(_super) {
+    __extends(Fuzz, _super);
+
+    function Fuzz(ctx) {
+      this.ctx = ctx;
+      Fuzz.__super__.constructor.call(this, this.ctx);
+      this.fuzz = this.ctx.createWaveShaper();
+      this["in"].connect(this.fuzz);
+      this.fuzz.connect(this.out);
+      this["in"].gain.value = 1.0;
+      this.out.gain.value = 1.0;
+      this.type = 'Sigmoid';
+      this.samples = 2048;
+      this.fuzz.curve = new Float32Array(this.samples);
+      this.setGain(0.08);
+      this.view = new FuzzView(this);
+    }
+
+    Fuzz.prototype.setType = function(type) {
+      this.type = type;
+    };
+
+    Fuzz.prototype.setGain = function(gain) {
+      var i, ratio, sigmax, sigmoid, x, _i, _j, _ref, _ref1, _results, _results1;
+      this.gain = gain;
+      sigmax = 2.0 / (1 + Math.exp(-this.gain * 1.0)) - 1.0;
+      ratio = 1.0 / sigmax;
+      if (this.type === 'Sigmoid') {
+        _results = [];
+        for (i = _i = 0, _ref = this.samples; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          x = i * 2.0 / this.samples - 1.0;
+          sigmoid = 2.0 / (1 + Math.exp(-Math.pow(this.gain, 3) * 1000 * x)) - 1.0;
+          _results.push(this.fuzz.curve[i] = sigmoid * ratio);
+        }
+        return _results;
+      } else if (this.type === 'Octavia') {
+        _results1 = [];
+        for (i = _j = 0, _ref1 = this.samples; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+          x = i * 2.0 / this.samples - 1.0;
+          sigmoid = 2.0 / (1 + Math.exp(-Math.pow(this.gain, 2) * 10 * x)) - 1.0;
+          _results1.push(this.fuzz.curve[i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0);
+        }
+        return _results1;
+      }
+    };
+
+    Fuzz.prototype.setParam = function(p) {
+      if (p.type != null) {
+        this.setType(p.type);
+      }
+      if (p.gain != null) {
+        this.setGain(p.gain);
+      }
+      if (p.input != null) {
+        this.setInput(p.input);
+      }
+      if (p.output != null) {
+        return this.setOutput(p.output);
+      }
+    };
+
+    Fuzz.prototype.getParam = function(p) {
+      return {
+        effect: 'Fuzz',
+        type: this.type,
+        gain: this.gain,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
+    };
+
+    return Fuzz;
+
+  })(this.FX);
+
+  this.Double = (function(_super) {
+    __extends(Double, _super);
+
+    function Double(ctx) {
+      this.ctx = ctx;
+      Double.__super__.constructor.call(this, this.ctx);
+      this.delay = this.ctx.createDelay();
+      this.delay.delayTime.value = 0.03;
+      this.pan_l = new Panner(this.ctx);
+      this.pan_r = new Panner(this.ctx);
+      this.setWidth([0, 0, -1]);
+      this["in"].connect(this.pan_l["in"]);
+      this["in"].connect(this.delay);
+      this.delay.connect(this.pan_r["in"]);
+      this.pan_l.connect(this.out);
+      this.pan_r.connect(this.out);
+      this.view = new DoubleView(this);
+    }
+
+    Double.prototype.setDelay = function(d) {
+      return this.delay.delayTime.value = d;
+    };
+
+    Double.prototype.setWidth = function(pos) {
+      this.pos = pos;
+      this.pan_l.setPosition(this.pos);
+      return this.pan_r.setPosition(-this.pos);
+    };
+
+    Double.prototype.setParam = function(p) {
+      if (p.delay != null) {
+        this.setDelay(p.delay);
+      }
+      if (p.width != null) {
+        this.setWidth(p.width);
+      }
+      if (p.input != null) {
+        this.setInput(p.input);
+      }
+      if (p.output != null) {
+        return this.setOutput(p.output);
+      }
+    };
+
+    Double.prototype.getParam = function(p) {
+      return {
+        effect: 'Double',
+        delay: this.delay.delayTime.value,
+        width: this.pos,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
+    };
+
+    return Double;
+
+  })(this.FX);
 
   IR_URL = {
     'BIG_SNARE': 'static/IR/H3000/206_BIG_SNARE.wav',

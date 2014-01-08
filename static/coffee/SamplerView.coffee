@@ -121,7 +121,8 @@ class @SamplerCoreView
     setSampleOutputParam: ->
         @model.setSampleOutputParam(
             @sample_now,
-            @pan2pos(1.0 - (parseFloat(@panner.val())/100.0)),
+#            @pan2pos(1.0 - (parseFloat(@panner.val())/100.0)),
+            (1.0 - (parseFloat(@panner.val())/200.0)),
             parseFloat(@gain.val()) / 100.0
         )
 
@@ -137,7 +138,8 @@ class @SamplerCoreView
 
     readSampleOutputParam: (p) ->
         [pan, g] = p
-        @panner.val((1.0 - Math.acos(pan[0])/Math.PI) * 100.0)
+#        @panner.val((1.0 - Math.acos(pan[0])/Math.PI) * 100.0)
+        @panner.val((1.0 - pan) * 200.0)
         @gain.val(g * 100.0)
 
     setGains: ->

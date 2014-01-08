@@ -10,9 +10,15 @@
       this.master_key = this.master.find('[name=key]');
       this.master_scale = this.master.find('[name=mode]');
       this.master_save = this.master.find('[name=save]');
+      this.master_effects = this.master.find('.sidebar-effects');
+      this.add_master = this.master.find('.add-type');
+      this.add_master_btn = this.master.find('.add-btn');
+      this.tracks_effects = this.tracks.find('.sidebar-effects');
+      this.add_tracks = this.tracks.find('.add-type');
+      this.add_tracks_btn = this.tracks.find('.add-btn');
       this.initEvent();
-      this.model.mixer.delay.appendTo(this.master);
-      this.model.mixer.reverb.appendTo(this.master);
+      this.model.mixer.delay.appendTo(this.master_effects);
+      this.model.mixer.reverb.appendTo(this.master_effects);
     }
 
     SidebarView.prototype.initEvent = function() {
@@ -37,15 +43,18 @@
       this.master_save.on('click', (function() {
         return _this.saveMaster();
       }));
-      return this.tracks.find('.sidebar-effect').each(function(i) {
+      this.tracks.find('.sidebar-effect').each(function(i) {
         return $(_this).on('change', function() {
           return _this.model.readTracksEffect(i);
         });
       });
-    };
-
-    SidebarView.prototype.saveMasterPump = function(i) {
-      return this.mixer.pump(i);
+      this.add_master_btn.on('click', function() {
+        return _this.addMasterEffect(_this.add_master.val());
+      });
+      return this.add_tracks_btn.on('click', function() {
+        _this.addTracksEffect(_this.add_tracks.val());
+        return console.log('ok----');
+      });
     };
 
     SidebarView.prototype.saveMaster = function() {
@@ -72,7 +81,25 @@
       return this.showMaster(o);
     };
 
-    SidebarView.prototype.showTracks = function(o) {
+    SidebarView.prototype.saveTracksEffect = function() {
+      var f, _i, _len, _ref, _results;
+      _ref = this.tracks_effects;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        _results.push(f.getParam());
+      }
+      return _results;
+    };
+
+    SidebarView.prototype.showTracks = function(track) {
+      var f, _i, _len, _ref;
+      this.tracks_effects.find('.sidebar-effect').remove();
+      _ref = track.effects;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        f.appendTo(this.tracks_effects);
+      }
       return this.wrapper.css('left', '0px');
     };
 
@@ -90,6 +117,18 @@
         this.master_scale.val(o.scale);
       }
       return this.wrapper.css('left', '-223px');
+    };
+
+    SidebarView.prototype.addMasterEffect = function(name) {
+      var fx;
+      fx = this.model.addMasterEffect(name);
+      return fx.appendTo(this.master_effects);
+    };
+
+    SidebarView.prototype.addTracksEffect = function(name) {
+      var fx;
+      fx = this.model.addTracksEffect(name);
+      return fx.appendTo(this.tracks_effects);
     };
 
     return SidebarView;

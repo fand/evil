@@ -192,6 +192,7 @@ class @ResFilter
         @lpf.gain.value = 1.0
 
     connect:    (dst)  -> @lpf.connect(dst)
+    disconnect:    ()  -> @lpf.disconnect()
     getResonance:      -> @lpf.Q.value
     setQ: (Q) -> @lpf.Q.value = Q
 
@@ -343,9 +344,23 @@ class @Synth
         @is_performing = false
         @session = @player.session
 
+        @send = @ctx.createGain()
+        @send.gain.value = 1.0
+        @return = @ctx.createGain()
+        @return.gain.value = 1.0
+        @core.connect(@send)
+        @send.connect(@return)
+
+        @effects = []
+
         @T = new MutekiTimer()
 
-    connect: (dst) -> @core.connect(dst)
+    connect: (dst) ->
+        if dst instanceof Panner
+            @return.connect(dst.in)
+        else
+            @return.connect(dst)
+
     disconnect: () -> #@core.disconnect()
 
     setDuration: (@duration) ->
@@ -359,9 +374,6 @@ class @Synth
 
     setGain: (gain) -> @core.setGain(gain)
     getGain: ()     -> @core.gain
-
-    # noteToSemitone: (ival) ->
-    #     Math.floor((ival-1)/@scale.length) * 12 + @scale[(ival-1) % @scale.length]
 
     noteOn: (note, force) ->
         if force or not @is_performing
@@ -476,6 +488,7 @@ class @Synth
     getParam: ->
         p = @core.getParam()
         p.name = @name
+        p.effects = @getEffectsParam()
         return p
 
     readParam: (p) ->
@@ -484,3 +497,18 @@ class @Synth
 
     mute:   -> @core.mute()
     demute: -> @core.demute()
+
+    getEffectsParam: ->
+        f.getParam() for f in @effects
+
+    insertEffect: (fx) ->
+
+        if @effects.length == 0
+            @send.disconnect()
+            @send.connect(fx.in)
+        else
+            @effects[@effects.length - 1].disconnect()
+            @effects[@effects.length - 1].connect(fx.in)
+
+        fx.connect(@return)
+        @effects.push(fx)

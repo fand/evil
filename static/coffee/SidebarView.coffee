@@ -10,12 +10,18 @@ class @SidebarView
         @master_scale = @master.find('[name=mode]')
         @master_save  = @master.find('[name=save]')
 
+        @master_effects = @master.find('.sidebar-effects')
+        @add_master     = @master.find('.add-type')
+        @add_master_btn = @master.find('.add-btn')
+        @tracks_effects = @tracks.find('.sidebar-effects')
+        @add_tracks     = @tracks.find('.add-type')
+        @add_tracks_btn = @tracks.find('.add-btn')
+
         @initEvent()
 
-
         # init Master Effect
-        @model.mixer.delay.appendTo(@master)
-        @model.mixer.reverb.appendTo(@master)
+        @model.mixer.delay.appendTo(@master_effects)
+        @model.mixer.reverb.appendTo(@master_effects)
 
 
     initEvent: ->
@@ -33,14 +39,14 @@ class @SidebarView
             )
         )
 
-    saveMasterPump: (i) ->
-        @mixer.pump(i)
+        @add_master_btn.on('click', () =>
+            @addMasterEffect(@add_master.val())
+        )
 
-    # saveTracksEffect: (i) ->
-    #     @mixer.saveParam(i)
-
-
-
+        @add_tracks_btn.on('click', () =>
+            @addTracksEffect(@add_tracks.val())
+            console.log('ok----')
+        )
 
     saveMaster: ->
         name  = @master_name.val()
@@ -59,11 +65,12 @@ class @SidebarView
         @model.saveMaster(o)
         @showMaster(o)
 
-    showTracks: (o) ->
-        # @master_name.val(o.name)   if o.name?
-        # @master_bpm.val(o.bpm)     if o.bpm?
-        # @master_key.val(o.key)     if o.key?
-        # @master_scale.val(o.scale) if o.scale?
+    saveTracksEffect: ->
+        (f.getParam() for f in @tracks_effects)
+
+    showTracks: (track) ->
+        @tracks_effects.find('.sidebar-effect').remove()
+        f.appendTo(@tracks_effects) for f in track.effects
         @wrapper.css('left', '0px')
 
 
@@ -73,3 +80,11 @@ class @SidebarView
         @master_key.val(o.key)     if o.key?
         @master_scale.val(o.scale) if o.scale?
         @wrapper.css('left', '-223px')
+
+    addMasterEffect: (name) ->
+        fx = @model.addMasterEffect(name)
+        fx.appendTo(@master_effects)
+
+    addTracksEffect: (name) ->
+        fx = @model.addTracksEffect(name)
+        fx.appendTo(@tracks_effects)
