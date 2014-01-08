@@ -781,6 +781,7 @@
       var p;
       p = this.core.getParam();
       p.name = this.name;
+      p.effects = this.getEffectsParam();
       return p;
     };
 
@@ -799,7 +800,7 @@
       return this.core.demute();
     };
 
-    Synth.prototype.getEffectParam = function() {
+    Synth.prototype.getEffectsParam = function() {
       var f, _i, _len, _ref, _results;
       _ref = this.effects;
       _results = [];

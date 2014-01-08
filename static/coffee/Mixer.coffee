@@ -189,6 +189,8 @@ class @Mixer
             fx = new Reverb(@ctx)
         else if name == 'Comp'
             fx = new Compressor(@ctx)
+        else if name == 'Double'
+            fx = new Double(@ctx)
 
         @player.synth[x].insertEffect(fx)
         return fx

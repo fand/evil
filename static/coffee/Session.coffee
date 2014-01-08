@@ -213,7 +213,7 @@ class @Session
             @song.tracks[i] = param
 
     saveTracksEffect: (pos) ->
-        @song.tracks[pos.x].effects = @player.synth[pos.x].getEffectParam()
+        @song.tracks[pos.x].effects = @player.synth[pos.x].getEffectsParam()
 
     saveMaster: (y, obj) ->
         @song.master[y] = obj
@@ -236,11 +236,11 @@ class @Session
         @scene_pos = 0
         @scene_length = 0
         for i in [0...@song.tracks.length]
-            pat = @song.tracks[i].patterns[0].pattern
+            pat = @song.tracks[i].patterns[0]
             if pat?
-                @synth[i].readPattern(@song.tracks[i].patterns[0])
+                @synth[i].readPattern(pat)
                 @current_cells[i] = 0
-            @scene_length = Math.max(@scene_length, song.tracks[i].patterns[0].pattern.length)
+                @scene_length = Math.max(@scene_length, pat.pattern.length)
         @player.readScene(@song.master[0])
         @player.setSceneLength(@scene_length)
         @readTracks(@song.tracks)

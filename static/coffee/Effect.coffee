@@ -14,6 +14,7 @@ class @FX
 
     appendTo: (dst) ->
         $(dst).append(@view.dom)
+        console.log(dst)
 
 
 class @Delay extends @FX
@@ -24,12 +25,13 @@ class @Delay extends @FX
         @delay.delayTime.value = 0.23
 
         @lofi = @ctx.createBiquadFilter()
+        @lofi.type = "peaking"
         @lofi.frequency.value = 1200
         @lofi.Q.value = 0.0  # range is [0.0, 5.0]
         @lofi.gain.value = 1.0
 
         @feedback = @ctx.createGain()
-        @feedback.gain.value = 0.4
+        @feedback.gain.value = 0.2
 
         @in.connect(@lofi)
         @lofi.connect(@delay)
@@ -41,7 +43,7 @@ class @Delay extends @FX
 
     setDelay: (d) -> @delay.delayTime.value = d
     setFeedback: (d) -> @feedback.gain.value = d
-    setLofi: (d) -> @lofi.Q.value = d * 5.0
+    setLofi: (d) -> @lofi.Q.value = d
 
     setParam: (p) ->
         @setDelay(p.delay) if p.delay?
@@ -204,7 +206,42 @@ class @Fuzz extends @FX
 
 
 
+class @Double extends @FX
+    constructor: (@ctx) ->
+        super(@ctx)
 
+        @delay = @ctx.createDelay()
+        @delay.delayTime.value = 0.03
+
+        @pan_l = @ctx.createPanner()
+        @pan_r = @ctx.createPanner()
+        @setWidth([0, 0, -1])
+
+        @in.connect(@pan_l)
+        @in.connect(@delay)
+        @delay.connect(@pan_r)
+        @pan_l.connect(@out)
+        @pan_r.connect(@out)
+
+        @view = new DoubleView(this)
+
+    setDelay: (d) -> @delay.delayTime.value = d
+    setWidth: (@pos) ->
+        @pan_l.setPosition( @pos[0], @pos[1], @pos[2])
+        @pan_r.setPosition(-@pos[0], @pos[1], @pos[2])
+
+    setParam: (p) ->
+        @setDelay(p.delay) if p.delay?
+        @setWidth(p.width) if p.width?
+        @setInput(p.input) if p.input?
+        @setOutput(p.output) if p.output?
+
+    getParam: (p) ->
+        effect: 'Double'
+        delay: @delay.delayTime.value
+        width: @pos
+        input: @in.gain.value
+        output: @out.gain.value
 
 
 IR_URL =

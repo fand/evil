@@ -281,7 +281,7 @@
     };
 
     Session.prototype.saveTracksEffect = function(pos) {
-      return this.song.tracks[pos.x].effects = this.player.synth[pos.x].getEffectParam();
+      return this.song.tracks[pos.x].effects = this.player.synth[pos.x].getEffectsParam();
     };
 
     Session.prototype.saveMaster = function(y, obj) {
@@ -316,12 +316,12 @@
       this.scene_pos = 0;
       this.scene_length = 0;
       for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        pat = this.song.tracks[i].patterns[0].pattern;
+        pat = this.song.tracks[i].patterns[0];
         if (pat != null) {
-          this.synth[i].readPattern(this.song.tracks[i].patterns[0]);
+          this.synth[i].readPattern(pat);
           this.current_cells[i] = 0;
+          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
         }
-        this.scene_length = Math.max(this.scene_length, song.tracks[i].patterns[0].pattern.length);
       }
       this.player.readScene(this.song.master[0]);
       this.player.setSceneLength(this.scene_length);

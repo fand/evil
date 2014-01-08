@@ -77,7 +77,7 @@
       });
       return this.lofi.on('change', function() {
         return _this.model.setParam({
-          lofi: parseFloat(_this.lofi.val()) / 100.0
+          lofi: parseFloat(_this.lofi.val()) * 5.0 / 100.0
         });
       });
     };
@@ -181,6 +181,52 @@
     };
 
     return FuzzView;
+
+  })();
+
+  this.DoubleView = (function() {
+    function DoubleView(model) {
+      this.model = model;
+      this.dom = $('#tmpl_fx_double').clone();
+      this.dom.removeAttr('id');
+      this.delay = this.dom.find('[name=delay]');
+      this.width = this.dom.find('[name=width]');
+      this.input = this.dom.find('[name=input]');
+      this.output = this.dom.find('[name=output]');
+      this.initEvent();
+    }
+
+    DoubleView.prototype.initEvent = function() {
+      var _this = this;
+      this.input.on('change', function() {
+        return _this.model.setParam({
+          input: parseFloat(_this.input.val()) / 100.0
+        });
+      });
+      this.output.on('change', function() {
+        return _this.model.setParam({
+          output: parseFloat(_this.output.val()) / 100.0
+        });
+      });
+      this.delay.on('change', function() {
+        return _this.model.setParam({
+          delay: parseFloat(_this.delay.val()) / 1000.0
+        });
+      });
+      return this.width.on('change', function() {
+        return _this.model.setParam({
+          width: _this.pan2pos(parseFloat(_this.width.val()) / 200.0 + 0.5)
+        });
+      });
+    };
+
+    DoubleView.prototype.pan2pos = function(v) {
+      var theta;
+      theta = v * Math.PI;
+      return [Math.cos(theta), 0, -Math.sin(theta)];
+    };
+
+    return DoubleView;
 
   })();
 

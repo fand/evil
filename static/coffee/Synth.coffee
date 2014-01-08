@@ -370,9 +370,6 @@ class @Synth
     setGain: (gain) -> @core.setGain(gain)
     getGain: ()     -> @core.gain
 
-    # noteToSemitone: (ival) ->
-    #     Math.floor((ival-1)/@scale.length) * 12 + @scale[(ival-1) % @scale.length]
-
     noteOn: (note, force) ->
         if force or not @is_performing
             @core.setNote(note)
@@ -486,6 +483,7 @@ class @Synth
     getParam: ->
         p = @core.getParam()
         p.name = @name
+        p.effects = @getEffectsParam()
         return p
 
     readParam: (p) ->
@@ -495,10 +493,11 @@ class @Synth
     mute:   -> @core.mute()
     demute: -> @core.demute()
 
-    getEffectParam: ->
+    getEffectsParam: ->
         f.getParam() for f in @effects
 
     insertEffect: (fx) ->
+
         if @effects.length == 0
             @send.disconnect()
             @send.connect(fx.in)

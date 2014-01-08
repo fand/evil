@@ -136,7 +136,7 @@
   <legend>Delay</legend>
 
   <!-- <label>input</label> -->
-  <input name="input" type="hidden" min="0" max="100" value="100" />
+  <input name="input" type="hidden" min="0" max="100" value="0" />
 
   <div class="clearfix">
     <label>delay</label>
@@ -145,7 +145,7 @@
 
   <div class="clearfix">
     <label>feedback</label>
-    <input name="feedback" type="range" min="0" max="100" value="10" />
+    <input name="feedback" type="range" min="0" max="100" value="20" />
   </div>
 
   <div class="clearfix">
@@ -223,6 +223,33 @@
   <div class="clearfix">
     <label>gain</label>
     <input name="gain" type="range" min="8" max="99" value="10" />
+  </div>
+
+  <div class="clearfix">
+    <label>output</label>
+    <input name="output" type="range" min="0" max="100" value="100" />
+  </div>
+
+</fieldset>
+
+
+
+<fieldset id="tmpl_fx_double" class="sidebar-effect sidebar-module">
+  <legend>Double</legend>
+
+  <div class="clearfix">
+    <label>input</label>
+    <input name="input" type="range" min="0" max="100" value="100" />
+  </div>
+
+  <div class="clearfix">
+    <label>delay</label>
+    <input name="delay" type="range" min="10" max="100" value="27" />
+   </div>
+
+  <div class="clearfix">
+    <label>width</label>
+    <input name="width" type="range" min="0" max="100" value="80" />
   </div>
 
   <div class="clearfix">

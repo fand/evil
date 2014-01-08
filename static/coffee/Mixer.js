@@ -200,6 +200,8 @@
         fx = new Reverb(this.ctx);
       } else if (name === 'Comp') {
         fx = new Compressor(this.ctx);
+      } else if (name === 'Double') {
+        fx = new Double(this.ctx);
       }
       this.player.synth[x].insertEffect(fx);
       return fx;

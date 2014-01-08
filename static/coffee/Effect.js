@@ -30,7 +30,8 @@
     };
 
     FX.prototype.appendTo = function(dst) {
-      return $(dst).append(this.view.dom);
+      $(dst).append(this.view.dom);
+      return console.log(dst);
     };
 
     return FX;
@@ -46,11 +47,12 @@
       this.delay = this.ctx.createDelay();
       this.delay.delayTime.value = 0.23;
       this.lofi = this.ctx.createBiquadFilter();
+      this.lofi.type = "peaking";
       this.lofi.frequency.value = 1200;
       this.lofi.Q.value = 0.0;
       this.lofi.gain.value = 1.0;
       this.feedback = this.ctx.createGain();
-      this.feedback.gain.value = 0.4;
+      this.feedback.gain.value = 0.2;
       this["in"].connect(this.lofi);
       this.lofi.connect(this.delay);
       this.delay.connect(this.out);
@@ -68,7 +70,7 @@
     };
 
     Delay.prototype.setLofi = function(d) {
-      return this.lofi.Q.value = d * 5.0;
+      return this.lofi.Q.value = d;
     };
 
     Delay.prototype.setParam = function(p) {
@@ -337,6 +339,64 @@
     };
 
     return Fuzz;
+
+  })(this.FX);
+
+  this.Double = (function(_super) {
+    __extends(Double, _super);
+
+    function Double(ctx) {
+      this.ctx = ctx;
+      Double.__super__.constructor.call(this, this.ctx);
+      this.delay = this.ctx.createDelay();
+      this.delay.delayTime.value = 0.03;
+      this.pan_l = this.ctx.createPanner();
+      this.pan_r = this.ctx.createPanner();
+      this.setWidth([0, 0, -1]);
+      this["in"].connect(this.pan_l);
+      this["in"].connect(this.delay);
+      this.delay.connect(this.pan_r);
+      this.pan_l.connect(this.out);
+      this.pan_r.connect(this.out);
+      this.view = new DoubleView(this);
+    }
+
+    Double.prototype.setDelay = function(d) {
+      return this.delay.delayTime.value = d;
+    };
+
+    Double.prototype.setWidth = function(pos) {
+      this.pos = pos;
+      this.pan_l.setPosition(this.pos[0], this.pos[1], this.pos[2]);
+      return this.pan_r.setPosition(-this.pos[0], this.pos[1], this.pos[2]);
+    };
+
+    Double.prototype.setParam = function(p) {
+      if (p.delay != null) {
+        this.setDelay(p.delay);
+      }
+      if (p.width != null) {
+        this.setWidth(p.width);
+      }
+      if (p.input != null) {
+        this.setInput(p.input);
+      }
+      if (p.output != null) {
+        return this.setOutput(p.output);
+      }
+    };
+
+    Double.prototype.getParam = function(p) {
+      return {
+        effect: 'Double',
+        delay: this.delay.delayTime.value,
+        width: this.pos,
+        input: this["in"].gain.value,
+        output: this.out.gain.value
+      };
+    };
+
+    return Double;
 
   })(this.FX);
 

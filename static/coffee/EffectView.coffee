@@ -50,7 +50,7 @@ class @DelayView
             @model.setParam(feedback: parseFloat(@feedback.val()) / 100.0)
         )
         @lofi.on('change', () =>
-            @model.setParam(lofi: parseFloat(@lofi.val()) / 100.0)
+            @model.setParam(lofi: parseFloat(@lofi.val())* 5.0 / 100.0)
         )
 
 
@@ -119,3 +119,35 @@ class @FuzzView
         @gain.on('change', () =>
             @model.setParam(gain: parseFloat(@gain.val())/ 100.0)
         )
+
+
+
+class @DoubleView
+    constructor: (@model) ->
+        @dom = $('#tmpl_fx_double').clone()
+        @dom.removeAttr('id')
+
+        @delay  = @dom.find('[name=delay]')
+        @width  = @dom.find('[name=width]')
+        @input  = @dom.find('[name=input]')
+        @output = @dom.find('[name=output]')
+
+        @initEvent()
+
+    initEvent: ->
+        @input.on('change', () =>
+            @model.setParam(input: parseFloat(@input.val()) / 100.0)
+        )
+        @output.on('change', () =>
+            @model.setParam(output: parseFloat(@output.val()) / 100.0)
+        )
+        @delay.on('change', () =>
+            @model.setParam(delay: parseFloat(@delay.val()) / 1000.0)
+        )
+        @width.on('change', () =>
+            @model.setParam(width: @pan2pos(parseFloat(@width.val()) / 200.0 + 0.5))  # [0.5, 1.0]
+        )
+
+    pan2pos: (v) ->
+        theta = v * Math.PI
+        [Math.cos(theta), 0, -Math.sin(theta)]
