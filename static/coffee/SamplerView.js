@@ -169,7 +169,7 @@
     };
 
     SamplerCoreView.prototype.setSampleTimeParam = function() {
-      return this.model.setSampleTimeParam(this.sample_now, this.head_wave / 300.0, this.tail_wave / 300.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
+      return this.model.setSampleTimeParam(this.sample_now, this.head_wave / 300.0, this.tail_wave / 300.0, Math.pow(10, parseFloat(this.sample.find('.speed').val()) / 100.0 - 1.0));
     };
 
     SamplerCoreView.prototype.setSampleEQParam = function() {
@@ -181,9 +181,11 @@
     };
 
     SamplerCoreView.prototype.readSampleTimeParam = function(p) {
+      var ratio;
       this.head_wave = p[0] * 300.0;
       this.tail_wave = p[1] * 300.0;
-      return this.sample.find('.speed').val(p[2] * 100.0);
+      ratio = Math.log(p[2]) / Math.LN10 + 1.0;
+      return this.sample.find('.speed').val(ratio * 100);
     };
 
     SamplerCoreView.prototype.readSampleEQParam = function(p) {

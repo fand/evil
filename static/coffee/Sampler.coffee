@@ -14,14 +14,21 @@ SAMPLES_DEFAULT = ['kick1', 'kick2', 'snare1', 'snare2', 'clap', 'hat_closed', '
 
 class @SampleNode
     constructor: (@ctx, @id, @parent) ->
-        @node = @ctx.createGain()
-        @node.gain.value = 1.0
+        @out = @ctx.createGain()
+        @out.gain.value = 1.0
         @name = SAMPLES_DEFAULT[@id]
         @setSample(@name)
 
         @head = 0.0
         @tail = 1.0
         @speed = 1.0
+
+        # for mono source
+        @merger = @ctx.createChannelMerger(2)
+
+        # node to set gain for individual nodes
+        @node_buf = @ctx.createGain()
+        @node_buf.gain.value = 1.0
 
         @eq_gains = [0.0, 0.0, 0.0]
 
@@ -35,13 +42,12 @@ class @SampleNode
         @panner = new Panner(@ctx)
         @pan_value = 0.5
 
+        @node_buf.connect(eq1)
         eq1.connect(eq2)
         eq2.connect(eq3)
         eq3.connect(@panner.in)
-        @panner.connect(@node)
+        @panner.connect(@out)
 
-        # for mono source
-        @merger = @ctx.createChannelMerger(2)
 
     setSample: (@name) ->
         sample = SAMPLES[@name]
@@ -65,29 +71,27 @@ class @SampleNode
                 sample.data = @buffer
             req.send()
 
-    connect: (@dst) -> @node.connect(@dst)
+    connect: (@dst) -> @out.connect(@dst)
 
     noteOn: (gain, time) ->
         return if not @buffer?
+        @source_old.stop(time) if @source_old?
         source = @ctx.createBufferSource()
         source.buffer = @buffer
-        node = @ctx.createGain()
-#        source.connect(node)
-        source.connect(@merger, 0, 0)
+
+        # source.connect(@node_buf)            # for mono source
+        source.connect(@merger, 0, 0)     # for stereo source
         source.connect(@merger, 0, 1)
-        @merger.connect(node)
-        node.connect(@eq_nodes[0])
+        @merger.connect(@node_buf)
 
         head_time = time + @buffer_duration * @head
         tail_time = time + @buffer_duration * @tail
-        source.playbackRate.value = @speed; console.log(source.playbackRate.value)
+        source.playbackRate.value = @speed
         source.start(0)
-        node.gain.setValueAtTime(0, time)
-        node.gain.linearRampToValueAtTime(gain, head_time + 0.001)
-        node.gain.setValueAtTime(gain, tail_time)
-        node.gain.linearRampToValueAtTime(0, tail_time + 0.001)
+        @node_buf.gain.value = gain
+        @source_old = source
 
-    setTimeParam: (@head, @tail, @speed) -> console.log(@speed)
+    setTimeParam: (@head, @tail, @speed) ->
     getTimeParam: -> [@head, @tail, @speed]
 
     setEQParam: (@eq_gains) ->
@@ -136,8 +140,8 @@ class @SamplerCore
         if Array.isArray(notes)
             # return if notes.length == 0
             @samples[n[0] - 1].noteOn(n[1], time) for n in notes
-        else
-            @samples[notes - 1].noteOn(1, time)
+        # else
+        #     @samples[notes - 1].noteOn(1, time)
 
     noteOff: ->
         t0 = @ctx.currentTime
@@ -224,7 +228,6 @@ class @Sampler
 
 
     connect: (dst) ->
-        console.log(dst)
         if dst instanceof Panner
             @return.connect(dst.in)
         else

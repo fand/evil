@@ -2247,13 +2247,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx = ctx;
       this.id = id;
       this.parent = parent;
-      this.node = this.ctx.createGain();
-      this.node.gain.value = 1.0;
+      this.out = this.ctx.createGain();
+      this.out.gain.value = 1.0;
       this.name = SAMPLES_DEFAULT[this.id];
       this.setSample(this.name);
       this.head = 0.0;
       this.tail = 1.0;
       this.speed = 1.0;
+      this.merger = this.ctx.createChannelMerger(2);
+      this.node_buf = this.ctx.createGain();
+      this.node_buf.gain.value = 1.0;
       this.eq_gains = [0.0, 0.0, 0.0];
       _ref = [this.ctx.createBiquadFilter(), this.ctx.createBiquadFilter(), this.ctx.createBiquadFilter()], eq1 = _ref[0], eq2 = _ref[1], eq3 = _ref[2];
       _ref1 = ['lowshelf', 'peaking', 'highshelf'], eq1.type = _ref1[0], eq2.type = _ref1[1], eq3.type = _ref1[2];
@@ -2263,11 +2266,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.eq_nodes = [eq1, eq2, eq3];
       this.panner = new Panner(this.ctx);
       this.pan_value = 0.5;
+      this.node_buf.connect(eq1);
       eq1.connect(eq2);
       eq2.connect(eq3);
       eq3.connect(this.panner["in"]);
-      this.panner.connect(this.node);
-      this.merger = this.ctx.createChannelMerger(2);
+      this.panner.connect(this.out);
     }
 
     SampleNode.prototype.setSample = function(name) {
@@ -2302,37 +2305,34 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SampleNode.prototype.connect = function(dst) {
       this.dst = dst;
-      return this.node.connect(this.dst);
+      return this.out.connect(this.dst);
     };
 
     SampleNode.prototype.noteOn = function(gain, time) {
-      var head_time, node, source, tail_time;
+      var head_time, source, tail_time;
       if (this.buffer == null) {
         return;
       }
+      if (this.source_old != null) {
+        this.source_old.stop(time);
+      }
       source = this.ctx.createBufferSource();
       source.buffer = this.buffer;
-      node = this.ctx.createGain();
       source.connect(this.merger, 0, 0);
       source.connect(this.merger, 0, 1);
-      this.merger.connect(node);
-      node.connect(this.eq_nodes[0]);
+      this.merger.connect(this.node_buf);
       head_time = time + this.buffer_duration * this.head;
       tail_time = time + this.buffer_duration * this.tail;
       source.playbackRate.value = this.speed;
-      console.log(source.playbackRate.value);
       source.start(0);
-      node.gain.setValueAtTime(0, time);
-      node.gain.linearRampToValueAtTime(gain, head_time + 0.001);
-      node.gain.setValueAtTime(gain, tail_time);
-      return node.gain.linearRampToValueAtTime(0, tail_time + 0.001);
+      this.node_buf.gain.value = gain;
+      return this.source_old = source;
     };
 
     SampleNode.prototype.setTimeParam = function(head, tail, speed) {
       this.head = head;
       this.tail = tail;
       this.speed = speed;
-      return console.log(this.speed);
     };
 
     SampleNode.prototype.getTimeParam = function() {
@@ -2437,8 +2437,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           _results.push(this.samples[n[0] - 1].noteOn(n[1], time));
         }
         return _results;
-      } else {
-        return this.samples[notes - 1].noteOn(1, time);
       }
     };
 
@@ -2570,7 +2568,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }
 
     Sampler.prototype.connect = function(dst) {
-      console.log(dst);
       if (dst instanceof Panner) {
         return this["return"].connect(dst["in"]);
       } else {
@@ -2943,7 +2940,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SamplerCoreView.prototype.setSampleTimeParam = function() {
-      return this.model.setSampleTimeParam(this.sample_now, this.head_wave / 300.0, this.tail_wave / 300.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
+      return this.model.setSampleTimeParam(this.sample_now, this.head_wave / 300.0, this.tail_wave / 300.0, Math.pow(10, parseFloat(this.sample.find('.speed').val()) / 100.0 - 1.0));
     };
 
     SamplerCoreView.prototype.setSampleEQParam = function() {
@@ -2955,9 +2952,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SamplerCoreView.prototype.readSampleTimeParam = function(p) {
+      var ratio;
       this.head_wave = p[0] * 300.0;
       this.tail_wave = p[1] * 300.0;
-      return this.sample.find('.speed').val(p[2] * 100.0);
+      ratio = Math.log(p[2]) / Math.LN10 + 1.0;
+      return this.sample.find('.speed').val(ratio * 100);
     };
 
     SamplerCoreView.prototype.readSampleEQParam = function(p) {

@@ -172,17 +172,11 @@ class @SamplerCoreView
 
 
     setSampleTimeParam: ->
-        # @model.setSampleTimeParam(
-        #     @sample_now,
-        #     parseFloat(@sample.find('.head').val())  / 100.0,
-        #     parseFloat(@sample.find('.tail').val())  / 100.0,
-        #     parseFloat(@sample.find('.speed').val()) / 100.0
-        # )
         @model.setSampleTimeParam(
             @sample_now,
             @head_wave  / 300.0,
             @tail_wave  / 300.0,
-            parseFloat(@sample.find('.speed').val()) / 100.0
+            Math.pow(10, parseFloat(@sample.find('.speed').val()) / 100.0 - 1.0)
         )
 
     setSampleEQParam: ->
@@ -203,7 +197,8 @@ class @SamplerCoreView
     readSampleTimeParam: (p) ->
         @head_wave = p[0] * 300.0
         @tail_wave = p[1] * 300.0
-        @sample.find('.speed').val(p[2] * 100.0)
+        ratio = Math.log(p[2]) / Math.LN10 + 1.0
+        @sample.find('.speed').val(ratio * 100)
 
     readSampleEQParam: (p) ->
         @eq.find('.EQ_lo' ).val(p[0] + 100.0)
@@ -212,7 +207,6 @@ class @SamplerCoreView
 
     readSampleOutputParam: (p) ->
         [pan, g] = p
-#        @panner.val((1.0 - Math.acos(pan[0])/Math.PI) * 100.0)
         @panner.val((1.0 - pan) * 200.0)
         @gain.val(g * 100.0)
 
