@@ -23,9 +23,12 @@ class @SamplerCoreView
 
 
     initEvent: ->
-        @sample.on("change", () =>
+        @sample.find('input').on("change", () =>
             @setSampleTimeParam()
             @updateWaveformCanvas(@sample_now)
+        )
+        @sample.find('select').on("change", () =>
+            @setSample()
         )
         @eq.on('change', () =>
             @setSampleEQParam()
@@ -101,6 +104,11 @@ class @SamplerCoreView
     setParam: ->
         # @setNodesParam()
         # @setGains()
+
+    setSample: ->
+        name = @sample.find('.sample').val()
+        @model.setSample(@sample_now, name)
+
 
     setSampleTimeParam: ->
         @model.setSampleTimeParam(

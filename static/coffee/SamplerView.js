@@ -22,9 +22,12 @@
 
     SamplerCoreView.prototype.initEvent = function() {
       var _this = this;
-      this.sample.on("change", function() {
+      this.sample.find('input').on("change", function() {
         _this.setSampleTimeParam();
         return _this.updateWaveformCanvas(_this.sample_now);
+      });
+      this.sample.find('select').on("change", function() {
+        return _this.setSample();
       });
       this.eq.on('change', function() {
         _this.setSampleEQParam();
@@ -94,6 +97,12 @@
     };
 
     SamplerCoreView.prototype.setParam = function() {};
+
+    SamplerCoreView.prototype.setSample = function() {
+      var name;
+      name = this.sample.find('.sample').val();
+      return this.model.setSample(this.sample_now, name);
+    };
 
     SamplerCoreView.prototype.setSampleTimeParam = function() {
       return this.model.setSampleTimeParam(this.sample_now, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);

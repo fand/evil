@@ -1,16 +1,14 @@
-@SAMPLES = [
-    {name: 'kick1', url: 'static/wav/kick1.wav'},
-    {name: 'kick1', url: 'static/wav/kick1.wav'},
-    {name: 'kick1', url: 'static/wav/kick1.wav'},
-    {name: 'kick2', url: 'static/wav/kick2.wav'},
-    {name: 'snare1', url: 'static/wav/snare1.wav'},
-    {name: 'snare2', url: 'static/wav/snare2.wav'},
-    {name: 'clap', url: 'static/wav/clap.wav'},
-    {name: 'hat_closed', url: 'static/wav/hat_closed.wav'},
-    {name: 'hat_open', url: 'static/wav/hat_open.wav'},
-    {name: 'ride', url: 'static/wav/ride.wav'},
-    {name: 'ride', url: 'static/wav/ride.wav'}
-]
+@SAMPLES =
+    'kick1':  url: 'static/wav/kick1.wav'
+    'kick2':  url: 'static/wav/kick2.wav'
+    'snare1': url: 'static/wav/snare1.wav'
+    'snare2': url: 'static/wav/snare2.wav'
+    'clap':   url: 'static/wav/clap.wav'
+    'hat_closed': url: 'static/wav/hat_closed.wav'
+    'hat_open': url: 'static/wav/hat_open.wav'
+    'ride': url: 'static/wav/ride.wav'
+
+SAMPLES_DEFAULT = ['kick1', 'kick2', 'snare1', 'snare2', 'clap', 'hat_closed', 'hat_open', 'ride']
 
 
 
@@ -18,8 +16,7 @@ class @SampleNode
     constructor: (@ctx, @id, @parent) ->
         @node = @ctx.createGain()
         @node.gain.value = 1.0
-        sample = window.SAMPLES[@id]
-        @setSample(sample)
+        @setSample(SAMPLES_DEFAULT[@id])
 
         @head = 0.0
         @tail = 1.0
@@ -45,7 +42,10 @@ class @SampleNode
         # for mono source
         @merger = @ctx.createChannelMerger(2)
 
-    setSample: (sample) ->
+    setSample: (name) ->
+        sample = SAMPLES[name]
+        return if not sample?
+        @sample = sample
         if sample.data?
             @buffer = sample.data
         else
@@ -103,9 +103,10 @@ class @SampleNode
     getData: -> @buffer
 
     getParam: ->
-        time: @getTimeParam(), gains: @eq_gains, output: @getOutputParam()
+        wave: @sample.name, time: @getTimeParam(), gains: @eq_gains, output: @getOutputParam()
 
     readParam: (p) ->
+        @setSample(p.wave) if p.wave?
         @setTimeParam(p.time[0], p.time[1], p.time[2]) if p.time?
         @setEQParam(p.gains) if p.gains?
         @setOutputParam(p.output[0], p.output[1]) if p.output?
@@ -141,6 +142,8 @@ class @SamplerCore
 
     connect: (dst) ->
         @node.connect(dst)
+
+    setSample: (i, name) -> @samples[i].setSample(name)
 
     setSampleTimeParam: (i, head, tail, speed) ->
         @samples[i].setTimeParam(head, tail, speed)

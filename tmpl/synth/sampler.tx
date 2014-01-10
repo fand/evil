@@ -54,10 +54,10 @@
         <div class="file-select">
           <label>SAMPLE</label>
           <select class="sample">
-            <option selected="selected">Kick</option>
-            <option>Snare</option>
-            <option>Hat open</option>
-            <option>Hat closed</option>
+            <option selected="selected">kick1</option>
+            <option>snare1</option>
+            <option>hat_open</option>
+            <option>hat_closed</option>
           </select>
         </div>
 

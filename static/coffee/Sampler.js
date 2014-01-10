@@ -1,51 +1,44 @@
 (function() {
-  this.SAMPLES = [
-    {
-      name: 'kick1',
+  var SAMPLES_DEFAULT;
+
+  this.SAMPLES = {
+    'kick1': {
       url: 'static/wav/kick1.wav'
-    }, {
-      name: 'kick1',
-      url: 'static/wav/kick1.wav'
-    }, {
-      name: 'kick1',
-      url: 'static/wav/kick1.wav'
-    }, {
-      name: 'kick2',
+    },
+    'kick2': {
       url: 'static/wav/kick2.wav'
-    }, {
-      name: 'snare1',
+    },
+    'snare1': {
       url: 'static/wav/snare1.wav'
-    }, {
-      name: 'snare2',
+    },
+    'snare2': {
       url: 'static/wav/snare2.wav'
-    }, {
-      name: 'clap',
+    },
+    'clap': {
       url: 'static/wav/clap.wav'
-    }, {
-      name: 'hat_closed',
+    },
+    'hat_closed': {
       url: 'static/wav/hat_closed.wav'
-    }, {
-      name: 'hat_open',
+    },
+    'hat_open': {
       url: 'static/wav/hat_open.wav'
-    }, {
-      name: 'ride',
-      url: 'static/wav/ride.wav'
-    }, {
-      name: 'ride',
+    },
+    'ride': {
       url: 'static/wav/ride.wav'
     }
-  ];
+  };
+
+  SAMPLES_DEFAULT = ['kick1', 'kick2', 'snare1', 'snare2', 'clap', 'hat_closed', 'hat_open', 'ride'];
 
   this.SampleNode = (function() {
     function SampleNode(ctx, id, parent) {
-      var eq1, eq2, eq3, sample, _ref, _ref1, _ref2, _ref3, _ref4;
+      var eq1, eq2, eq3, _ref, _ref1, _ref2, _ref3, _ref4;
       this.ctx = ctx;
       this.id = id;
       this.parent = parent;
       this.node = this.ctx.createGain();
       this.node.gain.value = 1.0;
-      sample = window.SAMPLES[this.id];
-      this.setSample(sample);
+      this.setSample(SAMPLES_DEFAULT[this.id]);
       this.head = 0.0;
       this.tail = 1.0;
       this.speed = 1.0;
@@ -65,9 +58,14 @@
       this.merger = this.ctx.createChannelMerger(2);
     }
 
-    SampleNode.prototype.setSample = function(sample) {
-      var req,
+    SampleNode.prototype.setSample = function(name) {
+      var req, sample,
         _this = this;
+      sample = SAMPLES[name];
+      if (sample == null) {
+        return;
+      }
+      this.sample = sample;
       if (sample.data != null) {
         return this.buffer = sample.data;
       } else {
@@ -160,6 +158,7 @@
 
     SampleNode.prototype.getParam = function() {
       return {
+        wave: this.sample.name,
         time: this.getTimeParam(),
         gains: this.eq_gains,
         output: this.getOutputParam()
@@ -167,6 +166,9 @@
     };
 
     SampleNode.prototype.readParam = function(p) {
+      if (p.wave != null) {
+        this.setSample(p.wave);
+      }
       if (p.time != null) {
         this.setTimeParam(p.time[0], p.time[1], p.time[2]);
       }
@@ -231,6 +233,10 @@
 
     SamplerCore.prototype.connect = function(dst) {
       return this.node.connect(dst);
+    };
+
+    SamplerCore.prototype.setSample = function(i, name) {
+      return this.samples[i].setSample(name);
     };
 
     SamplerCore.prototype.setSampleTimeParam = function(i, head, tail, speed) {
