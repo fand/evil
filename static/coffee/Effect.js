@@ -40,6 +40,11 @@
       this.source = source;
     };
 
+    FX.prototype.readParam = function(p) {
+      this.setParam(p);
+      return this.view.readParam(p);
+    };
+
     return FX;
 
   })();

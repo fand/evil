@@ -60,6 +60,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.source = source;
     };
 
+    FX.prototype.readParam = function(p) {
+      this.setParam(p);
+      return this.view.readParam(p);
+    };
+
     return FX;
 
   })();
@@ -598,6 +603,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
+    ReverbView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.name != null) {
+        return this.name.val(p.name);
+      }
+    };
+
     return ReverbView;
 
   })(this.FXView);
@@ -645,6 +662,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           lofi: parseFloat(_this.lofi.val()) * 5.0 / 100.0
         });
       });
+    };
+
+    DelayView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.delays != null) {
+        this.delay.val(p.delay * 1000);
+      }
+      if (p.feedback != null) {
+        this.feedback.val(p.feedback * 100);
+      }
+      if (p.lofi != null) {
+        return this.lofi.val(p.lofi * 20);
+      }
     };
 
     return DelayView;
@@ -708,6 +743,30 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
+    CompressorView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.attacks != null) {
+        this.attack.val(p.attack * 1000);
+      }
+      if (p.release != null) {
+        this.release.val(p.release * 1000);
+      }
+      if (p.threshold != null) {
+        this.threshold.val(p.threshold * -10);
+      }
+      if (p.ratio != null) {
+        this.ratio.val(p.ratio);
+      }
+      if (p.knee != null) {
+        return this.knee.val(p.knee * 1000);
+      }
+    };
+
     return CompressorView;
 
   })(this.FXView);
@@ -751,6 +810,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
+    FuzzView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.type != null) {
+        this.type.val(p.type);
+      }
+      if (p.gain != null) {
+        return this.gain.val(p.gain * 100);
+      }
+    };
+
     return FuzzView;
 
   })(this.FXView);
@@ -792,6 +866,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           width: parseFloat(_this.width.val()) / 200.0 + 0.5
         });
       });
+    };
+
+    DoubleView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.delay != null) {
+        this.delay.val(p.delay * 1000);
+      }
+      if (p.width != null) {
+        return this.width.val((p.width - 0.5) * 200);
+      }
     };
 
     return DoubleView;
@@ -1359,10 +1448,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     MixerView.prototype.readPans = function(p, p_master) {
-      var i, _i, _ref, _results;
+      var i, l, t, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.pans[i].val((1.0 - p) * 200));
+        this.pans[i].val((1.0 - p[i]) * 200);
+        l = (p[i] * 200 - 100) * -1;
+        t = l === 0 ? 'C' : (l < 0 ? (-l) + '% L' : l + '% R');
+        _results.push(this.pans_label[i].text(t));
       }
       return _results;
     };
@@ -1387,7 +1479,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     MixerView.prototype.empty = function() {
       this.console_tracks.empty();
       this.pans = [];
-      return this.gains = [];
+      this.gains = [];
+      return this.pans_label = [];
     };
 
     return MixerView;
@@ -5528,7 +5621,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (p == null) {
         return;
       }
-      return this.core.readParam(p);
+      this.core.readParam(p);
+      if (p.effects != null) {
+        return this.readEffects(p.effects);
+      }
     };
 
     Synth.prototype.mute = function() {
@@ -5537,6 +5633,34 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Synth.prototype.demute = function() {
       return this.core.demute();
+    };
+
+    Synth.prototype.readEffects = function(effects) {
+      var e, fx, _i, _j, _len, _len1, _ref, _results;
+      _ref = this.effects;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        e = _ref[_i];
+        e.disconnect();
+      }
+      this.effects = [];
+      _results = [];
+      for (_j = 0, _len1 = effects.length; _j < _len1; _j++) {
+        e = effects[_j];
+        if (e.effect === 'Fuzz') {
+          fx = new Fuzz(this.ctx);
+        } else if (e.effect === 'Delay') {
+          fx = new Delay(this.ctx);
+        } else if (e.effect === 'Reverb') {
+          fx = new Reverb(this.ctx);
+        } else if (e.effect === 'Comp') {
+          fx = new Compressor(this.ctx);
+        } else if (e.effect === 'Double') {
+          fx = new Double(this.ctx);
+        }
+        this.insertEffect(fx);
+        _results.push(fx.readParam(e));
+      }
+      return _results;
     };
 
     Synth.prototype.getEffectsParam = function() {

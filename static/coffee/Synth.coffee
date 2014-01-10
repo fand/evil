@@ -494,9 +494,31 @@ class @Synth
     readParam: (p) ->
         return if not p?
         @core.readParam(p)
+        @readEffects(p.effects) if p.effects?
 
     mute:   -> @core.mute()
     demute: -> @core.demute()
+
+
+    readEffects: (effects) ->
+        e.disconnect() for e in @effects
+        @effects = []
+
+        for e in effects
+            if e.effect == 'Fuzz'
+                fx = new Fuzz(@ctx)
+            else if e.effect == 'Delay'
+                fx = new Delay(@ctx)
+            else if e.effect == 'Reverb'
+                fx = new Reverb(@ctx)
+            else if e.effect == 'Comp'
+                fx = new Compressor(@ctx)
+            else if e.effect == 'Double'
+                fx = new Double(@ctx)
+
+            @insertEffect(fx)
+            fx.readParam(e)
+
 
     getEffectsParam: ->
         f.getParam() for f in @effects

@@ -89,7 +89,6 @@ class @MixerView
             t = if l == 0 then 'C' else (if l < 0 then (-l) + '% L' else l + '% R')
             @pans_label[i].text(t)
 
-
     readGains: (g, g_master) ->
         for i in [0...g.length]
             @gains[i].val(g[i] * 100.0)
@@ -97,7 +96,11 @@ class @MixerView
 
     readPans: (p, p_master)->
         for i in [0...p.length]
-            @pans[i].val((1.0 - p) * 200)
+            @pans[i].val((1.0 - p[i]) * 200)
+
+            l = (p[i] * 200 - 100) * -1
+            t = if l == 0 then 'C' else (if l < 0 then (-l) + '% L' else l + '% R')
+            @pans_label[i].text(t)
 
     setParams: ->
         @setGains()
@@ -116,3 +119,4 @@ class @MixerView
         @console_tracks.empty()
         @pans = []
         @gains = []
+        @pans_label = []

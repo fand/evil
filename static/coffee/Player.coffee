@@ -192,6 +192,7 @@ class @Player
                 @addSynth(0, @song.tracks[i].name)
             if @song.tracks[i].type == 'SAMPLER'
                 @addSampler(0, @song.tracks[i].name)
+
         @session.setSynth(@synth)
         @session.readSong(@song)
         @view.setSynthNum(@synth.length, @synth_pos)

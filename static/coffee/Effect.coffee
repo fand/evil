@@ -19,6 +19,10 @@ class @FX
 
     setSource: (@source) ->
 
+    readParam: (p) ->
+        @setParam(p)
+        @view.readParam(p)
+
 
 class @Delay extends @FX
     constructor: (@ctx) ->
@@ -206,7 +210,6 @@ class @Fuzz extends @FX
         gain: @gain
         input: @in.gain.value
         output: @out.gain.value
-
 
 
 class @Double extends @FX

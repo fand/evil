@@ -793,7 +793,10 @@
       if (p == null) {
         return;
       }
-      return this.core.readParam(p);
+      this.core.readParam(p);
+      if (p.effects != null) {
+        return this.readEffects(p.effects);
+      }
     };
 
     Synth.prototype.mute = function() {
@@ -802,6 +805,34 @@
 
     Synth.prototype.demute = function() {
       return this.core.demute();
+    };
+
+    Synth.prototype.readEffects = function(effects) {
+      var e, fx, _i, _j, _len, _len1, _ref, _results;
+      _ref = this.effects;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        e = _ref[_i];
+        e.disconnect();
+      }
+      this.effects = [];
+      _results = [];
+      for (_j = 0, _len1 = effects.length; _j < _len1; _j++) {
+        e = effects[_j];
+        if (e.effect === 'Fuzz') {
+          fx = new Fuzz(this.ctx);
+        } else if (e.effect === 'Delay') {
+          fx = new Delay(this.ctx);
+        } else if (e.effect === 'Reverb') {
+          fx = new Reverb(this.ctx);
+        } else if (e.effect === 'Comp') {
+          fx = new Compressor(this.ctx);
+        } else if (e.effect === 'Double') {
+          fx = new Double(this.ctx);
+        }
+        this.insertEffect(fx);
+        _results.push(fx.readParam(e));
+      }
+      return _results;
     };
 
     Synth.prototype.getEffectsParam = function() {

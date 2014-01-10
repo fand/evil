@@ -49,6 +49,18 @@
       });
     };
 
+    ReverbView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.name != null) {
+        return this.name.val(p.name);
+      }
+    };
+
     return ReverbView;
 
   })(this.FXView);
@@ -96,6 +108,24 @@
           lofi: parseFloat(_this.lofi.val()) * 5.0 / 100.0
         });
       });
+    };
+
+    DelayView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.delays != null) {
+        this.delay.val(p.delay * 1000);
+      }
+      if (p.feedback != null) {
+        this.feedback.val(p.feedback * 100);
+      }
+      if (p.lofi != null) {
+        return this.lofi.val(p.lofi * 20);
+      }
     };
 
     return DelayView;
@@ -159,6 +189,30 @@
       });
     };
 
+    CompressorView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.attacks != null) {
+        this.attack.val(p.attack * 1000);
+      }
+      if (p.release != null) {
+        this.release.val(p.release * 1000);
+      }
+      if (p.threshold != null) {
+        this.threshold.val(p.threshold * -10);
+      }
+      if (p.ratio != null) {
+        this.ratio.val(p.ratio);
+      }
+      if (p.knee != null) {
+        return this.knee.val(p.knee * 1000);
+      }
+    };
+
     return CompressorView;
 
   })(this.FXView);
@@ -202,6 +256,21 @@
       });
     };
 
+    FuzzView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.type != null) {
+        this.type.val(p.type);
+      }
+      if (p.gain != null) {
+        return this.gain.val(p.gain * 100);
+      }
+    };
+
     return FuzzView;
 
   })(this.FXView);
@@ -243,6 +312,21 @@
           width: parseFloat(_this.width.val()) / 200.0 + 0.5
         });
       });
+    };
+
+    DoubleView.prototype.readParam = function(p) {
+      if (p.input != null) {
+        this.input.val(p.input * 100);
+      }
+      if (p.output != null) {
+        this.output.val(p.output * 100);
+      }
+      if (p.delay != null) {
+        this.delay.val(p.delay * 1000);
+      }
+      if (p.width != null) {
+        return this.width.val((p.width - 0.5) * 200);
+      }
     };
 
     return DoubleView;
