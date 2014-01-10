@@ -16,14 +16,65 @@
       this.panner = this.output.find('.pan-slider');
       this.gain = this.output.find('.gain-slider');
       this.sample_now = 0;
+      this.w_wave = 300;
+      this.h_wave = 180;
+      this.head_wave = 0;
+      this.tail_wave = this.w_wave;
+      this.clicked_wave = 0;
+      this.target = {
+        head: this.head_wave,
+        tail: this.tail_wave,
+        both: [this.tail_wave, this.head_wave]
+      };
       this.initEvent();
       this.updateEQCanvas();
     }
+
+    SamplerCoreView.prototype.getWaveformPos = function(e) {
+      return e.clientX - this.canvas_waveform.getBoundingClientRect().left;
+    };
 
     SamplerCoreView.prototype.initEvent = function() {
       var _this = this;
       this.sample.find('input').on("change", function() {
         _this.setSampleTimeParam();
+        return _this.updateWaveformCanvas(_this.sample_now);
+      });
+      this.canvas_waveform_dom.on('mousedown', function(e) {
+        var pos;
+        pos = _this.getWaveformPos(e);
+        _this.clicked_wave = pos;
+        if (Math.abs(pos - _this.head_wave) < 3) {
+          return _this.target_wave = 'head';
+        } else if (Math.abs(pos - _this.tail_wave) < 3) {
+          return _this.target_wave = 'tail';
+        } else if (_this.head_wave < pos && pos < _this.tail_wave) {
+          return _this.target_wave = 'both';
+        } else {
+          return _this.target_wave = void 0;
+        }
+      }).on('mousemove', function(e) {
+        var d, pos;
+        if (_this.target_wave != null) {
+          pos = _this.getWaveformPos(e);
+          d = pos - _this.clicked_wave;
+          if (_this.target_wave === 'head') {
+            d = Math.max(d, -_this.head_wave);
+            _this.head_wave += d;
+          } else if (_this.target_wave === 'tail') {
+            d = Math.min(d, _this.w_wave - _this.tail_wave);
+            _this.tail_wave += d;
+          } else {
+            d = Math.max(Math.min(d, _this.w_wave - _this.tail_wave), -_this.head_wave);
+            _this.head_wave += d;
+            _this.tail_wave += d;
+          }
+          _this.setSampleTimeParam();
+          _this.updateWaveformCanvas(_this.sample_now);
+          return _this.clicked_wave = pos;
+        }
+      }).on('mouseup mouseout', function() {
+        _this.target_wave = void 0;
         return _this.updateWaveformCanvas(_this.sample_now);
       });
       this.sample.find('select').on("change", function() {
@@ -50,14 +101,15 @@
       this.sample_now = sample_now;
       canvas = this.canvas_waveform;
       ctx = this.ctx_waveform;
-      w = canvas.width = 300;
-      h = canvas.height = 180;
+      w = canvas.width = this.w_wave;
+      h = canvas.height = this.h_wave - 10;
       ctx.clearRect(0, 0, w, h);
+      ctx.translate(0, 10);
       hts = this.model.getSampleTimeParam(this.sample_now);
       _data = this.model.getSampleData(this.sample_now);
       if (_data != null) {
         wave = _data.getChannelData(0);
-        ctx.translate(0, 90);
+        ctx.translate(0, h / 2);
         ctx.beginPath();
         d = wave.length / w;
         for (x = _i = 0; 0 <= w ? _i < w : _i > w; x = 0 <= w ? ++_i : --_i) {
@@ -66,14 +118,26 @@
         ctx.closePath();
         ctx.strokeStyle = 'rgb(255, 0, 220)';
         ctx.stroke();
-        ctx.translate(0, -90);
+        ctx.translate(0, -h / 2);
       }
       left = hts[0] * w;
       right = hts[1] * w;
       if (left < right) {
-        ctx.fillStyle = 'rgba(255, 0, 160, 0.2)';
-        return ctx.fillRect(left, 0, right - left, h);
+        if (this.target_wave != null) {
+          ctx.fillStyle = 'rgba(255, 0, 160, 0.1)';
+        } else {
+          ctx.fillStyle = 'rgba(255, 0, 160, 0.2)';
+        }
+        ctx.fillRect(left, 0, right - left, h);
       }
+      ctx.beginPath();
+      ctx.arc(left, -5, 5, 0, 2 * Math.PI, false);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(right, -5, 5, 0, 2 * Math.PI, false);
+      ctx.stroke();
+      return ctx.closePath();
     };
 
     SamplerCoreView.prototype.updateEQCanvas = function() {
@@ -105,7 +169,7 @@
     };
 
     SamplerCoreView.prototype.setSampleTimeParam = function() {
-      return this.model.setSampleTimeParam(this.sample_now, parseFloat(this.sample.find('.head').val()) / 100.0, parseFloat(this.sample.find('.tail').val()) / 100.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
+      return this.model.setSampleTimeParam(this.sample_now, this.head_wave / 300.0, this.tail_wave / 300.0, parseFloat(this.sample.find('.speed').val()) / 100.0);
     };
 
     SamplerCoreView.prototype.setSampleEQParam = function() {
@@ -117,8 +181,8 @@
     };
 
     SamplerCoreView.prototype.readSampleTimeParam = function(p) {
-      this.sample.find('.head').val(p[0] * 100.0);
-      this.sample.find('.tail').val(p[1] * 100.0);
+      this.head_wave = p[0] * 300.0;
+      this.tail_wave = p[1] * 300.0;
       return this.sample.find('.speed').val(p[2] * 100.0);
     };
 
@@ -142,12 +206,6 @@
         _results.push(this.model.setNodeGain(i, parseInt(this.gain_inputs.eq(i).val())));
       }
       return _results;
-    };
-
-    SamplerCoreView.prototype.pan2pos = function(v) {
-      var theta;
-      theta = v * Math.PI;
-      return [Math.cos(theta), 0, -Math.sin(theta)];
     };
 
     SamplerCoreView.prototype.readParam = function(p) {};

@@ -38,7 +38,8 @@
       this.parent = parent;
       this.node = this.ctx.createGain();
       this.node.gain.value = 1.0;
-      this.setSample(SAMPLES_DEFAULT[this.id]);
+      this.name = SAMPLES_DEFAULT[this.id];
+      this.setSample(this.name);
       this.head = 0.0;
       this.tail = 1.0;
       this.speed = 1.0;
@@ -61,7 +62,8 @@
     SampleNode.prototype.setSample = function(name) {
       var req, sample,
         _this = this;
-      sample = SAMPLES[name];
+      this.name = name;
+      sample = SAMPLES[this.name];
       if (sample == null) {
         return;
       }
@@ -106,6 +108,8 @@
       node.connect(this.eq_nodes[0]);
       head_time = time + this.buffer_duration * this.head;
       tail_time = time + this.buffer_duration * this.tail;
+      source.playbackRate.value = this.speed;
+      console.log(source.playbackRate.value);
       source.start(0);
       node.gain.setValueAtTime(0, time);
       node.gain.linearRampToValueAtTime(gain, head_time + 0.001);
@@ -117,6 +121,7 @@
       this.head = head;
       this.tail = tail;
       this.speed = speed;
+      return console.log(this.speed);
     };
 
     SampleNode.prototype.getTimeParam = function() {

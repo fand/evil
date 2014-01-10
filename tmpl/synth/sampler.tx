@@ -64,9 +64,7 @@
         <canvas class="waveform"></canvas>
       </div>
 
-      <div class="clearfix param"><label>BEGIN</label>  <input class="head" type="range" min="0" max="100" value="0"></div>
-      <div class="clearfix param"><label>END</label>  <input class="tail" type="range" min="0" max="100" value="100"></div>
-      <!-- <div class="clearfix"><label>SPEED</label> <input class="speed" type="range" min="0" max="100"   value="50"></div> -->
+      <div class="clearfix param"><label>SPEED</label> <input class="speed" type="range" min="0" max="100"   value="50"></div>
     </fieldset>
 
     <fieldset class="Sampler_module Sampler_EQ">

@@ -16,7 +16,8 @@ class @SampleNode
     constructor: (@ctx, @id, @parent) ->
         @node = @ctx.createGain()
         @node.gain.value = 1.0
-        @setSample(SAMPLES_DEFAULT[@id])
+        @name = SAMPLES_DEFAULT[@id]
+        @setSample(@name)
 
         @head = 0.0
         @tail = 1.0
@@ -42,8 +43,8 @@ class @SampleNode
         # for mono source
         @merger = @ctx.createChannelMerger(2)
 
-    setSample: (name) ->
-        sample = SAMPLES[name]
+    setSample: (@name) ->
+        sample = SAMPLES[@name]
         return if not sample?
         @sample = sample
         if sample.data?
@@ -79,13 +80,14 @@ class @SampleNode
 
         head_time = time + @buffer_duration * @head
         tail_time = time + @buffer_duration * @tail
+        source.playbackRate.value = @speed; console.log(source.playbackRate.value)
         source.start(0)
         node.gain.setValueAtTime(0, time)
         node.gain.linearRampToValueAtTime(gain, head_time + 0.001)
         node.gain.setValueAtTime(gain, tail_time)
         node.gain.linearRampToValueAtTime(0, tail_time + 0.001)
 
-    setTimeParam: (@head, @tail, @speed) ->
+    setTimeParam: (@head, @tail, @speed) -> console.log(@speed)
     getTimeParam: -> [@head, @tail, @speed]
 
     setEQParam: (@eq_gains) ->
