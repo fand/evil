@@ -361,7 +361,7 @@ class @Synth
         else
             @return.connect(dst)
 
-    disconnect: () -> #@core.disconnect()
+    disconnect: () -> @return.disconnect()
 
     setDuration: (@duration) ->
     setKey:  (key) -> @core.setKey(key)
@@ -483,6 +483,8 @@ class @Synth
         @view.setPatternName(@pattern_name)
 
     replaceWith: (s_new) ->
+        @noteOff(true)
+        @disconnect()
         @view.dom.replaceWith(s_new.view.dom)
 
     getParam: ->

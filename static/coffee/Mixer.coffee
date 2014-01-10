@@ -61,10 +61,8 @@ class @Mixer
     empty: ->
         @gain_tracks = []
         @panners = []
+        @analysers = []
         @view.empty()
-
-        @delay_tracks = []
-        @reverb_tracks = []
 
     addSynth: (synth) ->
         # Create new panner
@@ -108,8 +106,12 @@ class @Mixer
         @readPans(p.pan_tracks, p.pan_master)
 
     changeSynth: (id, synth) ->
-        synth.connect(@panners[id])
+        synth.connect(@panners[id].in)
         synth.connect(@analysers[id])
+
+        # a = @ctx.createAnalyser()
+        # synth.connect(a)
+        # @analysers[id] = a
 
 
     # You should Mute / Solo by sending messages to Synth / Samplers.

@@ -54,19 +54,17 @@
         <div class="file-select">
           <label>SAMPLE</label>
           <select class="sample">
-            <option selected="selected">Kick</option>
-            <option>Snare</option>
-            <option>Hat open</option>
-            <option>Hat closed</option>
+            <option selected="selected">kick1</option>
+            <option>snare1</option>
+            <option>hat_open</option>
+            <option>hat_closed</option>
           </select>
         </div>
 
         <canvas class="waveform"></canvas>
       </div>
 
-      <div class="clearfix param"><label>BEGIN</label>  <input class="head" type="range" min="0" max="100" value="0"></div>
-      <div class="clearfix param"><label>END</label>  <input class="tail" type="range" min="0" max="100" value="100"></div>
-      <!-- <div class="clearfix"><label>SPEED</label> <input class="speed" type="range" min="0" max="100"   value="50"></div> -->
+      <div class="clearfix param"><label>SPEED</label> <input class="speed" type="range" min="0" max="200"   value="100"></div>
     </fieldset>
 
     <fieldset class="Sampler_module Sampler_EQ">

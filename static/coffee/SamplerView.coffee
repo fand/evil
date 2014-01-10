@@ -15,6 +15,13 @@ class @SamplerCoreView
 
         @sample_now = 0
 
+        @w_wave = 300
+        @h_wave = 180
+        @head_wave = 0
+        @tail_wave = @w_wave
+        @clicked_wave = 0
+        @target = head: @head_wave, tail: @tail_wave, both: [@tail_wave, @head_wave]
+
         @initEvent()
 
         # Do not @updateWaveformCanvas in constructor
@@ -22,10 +29,52 @@ class @SamplerCoreView
         @updateEQCanvas()
 
 
+    getWaveformPos: (e) ->
+        return e.clientX - @canvas_waveform.getBoundingClientRect().left
+
     initEvent: ->
-        @sample.on("change", () =>
+        @sample.find('input').on("change", () =>
             @setSampleTimeParam()
             @updateWaveformCanvas(@sample_now)
+        )
+        @canvas_waveform_dom.on('mousedown', (e) =>
+            pos = @getWaveformPos(e)
+            @clicked_wave = pos
+            if Math.abs(pos - @head_wave) < 3
+                @target_wave = 'head'
+            else if Math.abs(pos - @tail_wave) < 3
+                @target_wave = 'tail'
+            else if @head_wave < pos and pos < @tail_wave
+                @target_wave = 'both'
+            else
+                @target_wave = undefined
+        ).on('mousemove', (e) =>
+            if @target_wave?
+                pos = @getWaveformPos(e)
+                d = pos - @clicked_wave
+
+                if @target_wave == 'head'
+                    d = Math.max(d, -@head_wave)
+                    @head_wave += d
+                else if @target_wave == 'tail'
+                    d = Math.min(d, @w_wave - @tail_wave)
+                    @tail_wave += d
+                else
+                    d = Math.max(Math.min(d, @w_wave - @tail_wave), -@head_wave)
+                    @head_wave += d
+                    @tail_wave += d
+
+                @setSampleTimeParam()
+                @updateWaveformCanvas(@sample_now)
+
+                @clicked_wave = pos
+
+        ).on('mouseup mouseout', () =>
+            @target_wave = undefined
+            @updateWaveformCanvas(@sample_now)
+        )
+        @sample.find('select').on("change", () =>
+            @setSample()
         )
         @eq.on('change', () =>
             @setSampleEQParam()
@@ -44,9 +93,11 @@ class @SamplerCoreView
         canvas  = @canvas_waveform
         ctx = @ctx_waveform
 
-        w = canvas.width = 300
-        h = canvas.height = 180
+        w = canvas.width = @w_wave
+        h = canvas.height = @h_wave - 10
         ctx.clearRect(0, 0, w, h)
+
+        ctx.translate(0, 10)
 
         hts = @model.getSampleTimeParam(@sample_now)
         _data = @model.getSampleData(@sample_now)
@@ -55,7 +106,7 @@ class @SamplerCoreView
             wave = _data.getChannelData(0)
 
             # Draw waveform
-            ctx.translate(0, 90)
+            ctx.translate(0, h/2)
             ctx.beginPath()
 
             d = wave.length / w
@@ -65,14 +116,27 @@ class @SamplerCoreView
             ctx.closePath()
             ctx.strokeStyle = 'rgb(255, 0, 220)'
             ctx.stroke()
-            ctx.translate(0, -90)
+            ctx.translate(0, -h/2)
 
         # Draw params
         left  = hts[0] * w
         right = hts[1] * w
         if left < right
-            ctx.fillStyle = 'rgba(255, 0, 160, 0.2)'
+            if @target_wave?
+                ctx.fillStyle = 'rgba(255, 0, 160, 0.1)'
+            else
+                ctx.fillStyle = 'rgba(255, 0, 160, 0.2)'
             ctx.fillRect(left, 0, right-left, h)
+
+        ctx.beginPath()
+        ctx.arc(left,  -5, 5, 0, 2 * Math.PI, false)
+        ctx.closePath()
+        ctx.stroke()
+
+        ctx.beginPath()
+        ctx.arc(right, -5, 5, 0, 2 * Math.PI, false)
+        ctx.stroke()
+        ctx.closePath()
 
     updateEQCanvas: () ->
         canvas  = @canvas_EQ
@@ -102,12 +166,17 @@ class @SamplerCoreView
         # @setNodesParam()
         # @setGains()
 
+    setSample: ->
+        name = @sample.find('.sample').val()
+        @model.setSample(@sample_now, name)
+
+
     setSampleTimeParam: ->
         @model.setSampleTimeParam(
             @sample_now,
-            parseFloat(@sample.find('.head').val())  / 100.0,
-            parseFloat(@sample.find('.tail').val())  / 100.0,
-            parseFloat(@sample.find('.speed').val()) / 100.0
+            @head_wave  / 300.0,
+            @tail_wave  / 300.0,
+            Math.pow(10, parseFloat(@sample.find('.speed').val()) / 100.0 - 1.0)
         )
 
     setSampleEQParam: ->
@@ -121,15 +190,15 @@ class @SamplerCoreView
     setSampleOutputParam: ->
         @model.setSampleOutputParam(
             @sample_now,
-#            @pan2pos(1.0 - (parseFloat(@panner.val())/100.0)),
             (1.0 - (parseFloat(@panner.val())/200.0)),
             parseFloat(@gain.val()) / 100.0
         )
 
     readSampleTimeParam: (p) ->
-        @sample.find('.head' ).val(p[0] * 100.0)
-        @sample.find('.tail' ).val(p[1] * 100.0)
-        @sample.find('.speed').val(p[2] * 100.0)
+        @head_wave = p[0] * 300.0
+        @tail_wave = p[1] * 300.0
+        ratio = Math.log(p[2]) / Math.LN10 + 1.0
+        @sample.find('.speed').val(ratio * 100)
 
     readSampleEQParam: (p) ->
         @eq.find('.EQ_lo' ).val(p[0] + 100.0)
@@ -138,17 +207,12 @@ class @SamplerCoreView
 
     readSampleOutputParam: (p) ->
         [pan, g] = p
-#        @panner.val((1.0 - Math.acos(pan[0])/Math.PI) * 100.0)
         @panner.val((1.0 - pan) * 200.0)
         @gain.val(g * 100.0)
 
     setGains: ->
         for i in [0... @gain_inputs.length]
             @model.setNodeGain(i, parseInt(@gain_inputs.eq(i).val()))
-
-    pan2pos: (v) ->
-        theta = v * Math.PI
-        [Math.cos(theta), 0, -Math.sin(theta)]
 
     readParam: (p) ->
 #        if p.samples?

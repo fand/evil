@@ -182,6 +182,9 @@
 
     MixerView.prototype.empty = function() {
       this.console_tracks.empty();
+      this.canvas_tracks_dom = [];
+      this.canvas_tracks = [];
+      this.ctx_tracks = [];
       this.pans = [];
       this.gains = [];
       return this.pans_label = [];
