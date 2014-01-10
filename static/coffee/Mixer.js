@@ -7,7 +7,6 @@
         _this = this;
       this.ctx = ctx;
       this.player = player;
-      this.addTracksEffect = __bind(this.addTracksEffect, this);
       this.addMasterEffect = __bind(this.addMasterEffect, this);
       this.gain_master = 1.0;
       this.gain_tracks = (function() {
@@ -20,23 +19,17 @@
         }
         return _results;
       }).call(this);
-      this.node = this.ctx.createGain();
-      this.node.gain.value = this.gain_master;
-      this.node_send = this.ctx.createGain();
-      this.node_send.gain.value = 1.0;
-      this.node_return = this.ctx.createGain();
-      this.node_return.gain.value = 1.0;
-      this.bus_delay = this.ctx.createGain();
-      this.bus_delay.gain.value = 1.0;
-      this.bus_reverb = this.ctx.createGain();
-      this.bus_reverb.gain.value = 1.0;
-      this.gain_delay = [];
-      this.gain_reverb = [];
+      this.out = this.ctx.createGain();
+      this.out.gain.value = this.gain_master;
+      this.send = this.ctx.createGain();
+      this.send.gain.value = 1.0;
+      this["return"] = this.ctx.createGain();
+      this["return"].gain.value = 1.0;
       this.panners = [];
       this.analysers = [];
       this.splitter_master = this.ctx.createChannelSplitter(2);
       this.analyser_master = [this.ctx.createAnalyser(), this.ctx.createAnalyser()];
-      this.node.connect(this.splitter_master);
+      this.out.connect(this.splitter_master);
       _ref = [0, 1];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         i = _ref[_i];
@@ -46,18 +39,12 @@
         this.analyser_master[i].maxDecibels = 0.0;
         this.analyser_master[i].smoothingTimeConstant = 0.0;
       }
-      this.delay = new Delay(this.ctx);
-      this.reverb = new Reverb(this.ctx);
       this.limiter = new Limiter(this.ctx);
-      this.bus_delay.connect(this.delay["in"]);
-      this.bus_reverb.connect(this.reverb["in"]);
-      this.delay.connect(this.node_send);
-      this.reverb.connect(this.node_send);
-      this.node_send.connect(this.node_return);
-      this.node_return.connect(this.limiter["in"]);
-      this.limiter.connect(this.node);
-      this.effects_master = [this.node_send];
-      this.node.connect(this.ctx.destination);
+      this.send.connect(this["return"]);
+      this["return"].connect(this.limiter["in"]);
+      this.limiter.connect(this.out);
+      this.effects_master = [];
+      this.out.connect(this.ctx.destination);
       this.view = new MixerView(this);
       setInterval((function() {
         return _this.drawGains();
@@ -87,21 +74,11 @@
     };
 
     Mixer.prototype.addSynth = function(synth) {
-      var a, g_delay, g_reverb, p;
+      var a, p;
       p = new Panner(this.ctx);
       synth.connect(p["in"]);
-      p.connect(this.node_send);
+      p.connect(this.send);
       this.panners.push(p);
-      g_delay = this.ctx.createGain();
-      g_reverb = this.ctx.createGain();
-      p.connect(g_delay);
-      p.connect(g_reverb);
-      g_delay.connect(this.bus_delay);
-      g_reverb.connect(this.bus_reverb);
-      g_delay.gain.value = 1.0;
-      g_reverb.gain.value = 1.0;
-      this.gain_delay.push(g_delay);
-      this.gain_reverb.push(g_reverb);
       a = this.ctx.createAnalyser();
       synth.connect(a);
       this.analysers.push(a);
@@ -119,7 +96,7 @@
       for (i = _i = 0, _ref = this.gain_tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         this.player.synth[i].setGain(this.gain_tracks[i]);
       }
-      return this.node.gain.value = this.gain_master;
+      return this.out.gain.value = this.gain_master;
     };
 
     Mixer.prototype.setPans = function(pan_tracks, pan_master) {
@@ -179,11 +156,19 @@
         fx = new Reverb(this.ctx);
       } else if (name === 'Comp') {
         fx = new Compressor(this.ctx);
+      } else if (name === 'Double') {
+        fx = new Double(this.ctx);
       }
       pos = this.effects_master.length;
-      this.effects_master[pos - 1].disconnect();
-      this.effects_master[pos - 1].connect(fx["in"]);
-      fx.connect(this.node_return);
+      if (pos === 0) {
+        this.send.disconnect();
+        this.send.connect(fx["in"]);
+      } else {
+        this.effects_master[pos - 1].disconnect();
+        this.effects_master[pos - 1].connect(fx["in"]);
+      }
+      fx.connect(this["return"]);
+      fx.setSource(this);
       this.effects_master.push(fx);
       return fx;
     };
@@ -203,6 +188,27 @@
       }
       this.player.synth[x].insertEffect(fx);
       return fx;
+    };
+
+    Mixer.prototype.removeEffect = function(fx) {
+      var i, prev;
+      i = this.effects_master.indexOf(fx);
+      if (i === -1) {
+        return;
+      }
+      if (i === 0) {
+        prev = this.send;
+      } else {
+        prev = this.effects_master[i - 1];
+      }
+      this.effects_master[i - 1].disconnect();
+      if (this.effects_master[i + 1] != null) {
+        prev.connect(this.effects_master[i + 1]);
+      } else {
+        prev.connect(this["return"]);
+        fx.disconnect();
+      }
+      return this.effects_master.splice(i, 1);
     };
 
     return Mixer;

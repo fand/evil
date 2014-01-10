@@ -20,8 +20,6 @@ class @SidebarView
         @initEvent()
 
         # init Master Effect
-        @model.mixer.delay.appendTo(@master_effects)
-        @model.mixer.reverb.appendTo(@master_effects)
 
 
     initEvent: ->
@@ -45,7 +43,6 @@ class @SidebarView
 
         @add_tracks_btn.on('click', () =>
             @addTracksEffect(@add_tracks.val())
-            console.log('ok----')
         )
 
     saveMaster: ->

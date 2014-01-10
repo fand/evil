@@ -3,23 +3,14 @@ class @Mixer
         @gain_master = 1.0
         @gain_tracks = (s.getGain() for s in @player.synth)
 
-        @node = @ctx.createGain()
-        @node.gain.value = @gain_master
+        @out = @ctx.createGain()
+        @out.gain.value = @gain_master
 
-        @node_send = @ctx.createGain()
-        @node_send.gain.value = 1.0
+        @send = @ctx.createGain()
+        @send.gain.value = 1.0
 
-        @node_return = @ctx.createGain()
-        @node_return.gain.value = 1.0
-
-        @bus_delay = @ctx.createGain()
-        @bus_delay.gain.value = 1.0
-
-        @bus_reverb = @ctx.createGain()
-        @bus_reverb.gain.value = 1.0
-
-        @gain_delay = []
-        @gain_reverb = []
+        @return = @ctx.createGain()
+        @return.gain.value = 1.0
 
         @panners = []
         @analysers = []
@@ -27,7 +18,7 @@ class @Mixer
         # Master VU meter
         @splitter_master = @ctx.createChannelSplitter(2)
         @analyser_master = [@ctx.createAnalyser(), @ctx.createAnalyser()]
-        @node.connect(@splitter_master)
+        @out.connect(@splitter_master)
         for i in [0,1]
             @splitter_master.connect(@analyser_master[i], i)
             @analyser_master[i].fftSize = 1024
@@ -36,22 +27,15 @@ class @Mixer
             @analyser_master[i].smoothingTimeConstant = 0.0
 
         # Master Effects
-        @delay = new Delay(@ctx)
-        @reverb = new Reverb(@ctx)
         @limiter = new Limiter(@ctx)
 
-        @bus_delay.connect(@delay.in)
-        @bus_reverb.connect(@reverb.in)
+        @send.connect(@return)
+        @return.connect(@limiter.in)
+        @limiter.connect(@out)
 
-        @delay.connect(@node_send)
-        @reverb.connect(@node_send)
-        @node_send.connect(@node_return)
-        @node_return.connect(@limiter.in)
-        @limiter.connect(@node)
+        @effects_master = []
 
-        @effects_master = [@node_send]
-
-        @node.connect(@ctx.destination)
+        @out.connect(@ctx.destination)
 
         @view = new MixerView(this)
 
@@ -86,19 +70,8 @@ class @Mixer
         # Create new panner
         p = new Panner(@ctx)
         synth.connect(p.in)
-        p.connect(@node_send)
+        p.connect(@send)
         @panners.push(p)
-
-        g_delay = @ctx.createGain()
-        g_reverb = @ctx.createGain()
-        p.connect(g_delay)
-        p.connect(g_reverb)
-        g_delay.connect(@bus_delay)
-        g_reverb.connect(@bus_reverb)
-        g_delay.gain.value = 1.0
-        g_reverb.gain.value = 1.0
-        @gain_delay.push(g_delay)
-        @gain_reverb.push(g_reverb)
 
         a = @ctx.createAnalyser()
         synth.connect(a)
@@ -112,7 +85,7 @@ class @Mixer
     setGains: (@gain_tracks, @gain_master) ->
         for i in [0...@gain_tracks.length]
             @player.synth[i].setGain(@gain_tracks[i])
-        @node.gain.value = @gain_master
+        @out.gain.value = @gain_master
 
     setPans: (@pan_tracks, @pan_master) ->
         for i in [0...@pan_tracks.length]
@@ -150,13 +123,13 @@ class @Mixer
     # desolo: (id) ->
     #     return if id >= @panners.length
     #     for i in [0...@panners.length]
-    #         @panners[i].connect(@node)
+    #         @panners[i].connect(@out)
 
     # mute: (id) ->
     #     @panners[id].disconnect()
 
     # demute: (id) ->
-    #     @panners[id].connect(@node)
+    #     @panners[id].connect(@out)
 
 
     addMasterEffect: (name) =>
@@ -168,17 +141,24 @@ class @Mixer
             fx = new Reverb(@ctx)
         else if name == 'Comp'
             fx = new Compressor(@ctx)
+        else if name == 'Double'
+            fx = new Double(@ctx)
 
         pos = @effects_master.length
-        @effects_master[pos - 1].disconnect()
-        @effects_master[pos - 1].connect(fx.in)
-        fx.connect(@node_return)
+        if pos == 0
+            @send.disconnect()
+            @send.connect(fx.in)
+        else
+            @effects_master[pos - 1].disconnect()
+            @effects_master[pos - 1].connect(fx.in)
+
+        fx.connect(@return)
+        fx.setSource(this)
         @effects_master.push(fx)
 
         return fx
 
-
-    addTracksEffect: (x, name) =>
+    addTracksEffect: (x, name) ->
         if name == 'Fuzz'
             fx = new Fuzz(@ctx)
         else if name == 'Delay'
@@ -192,3 +172,23 @@ class @Mixer
 
         @player.synth[x].insertEffect(fx)
         return fx
+
+    removeEffect: (fx) ->
+
+        i = @effects_master.indexOf(fx)
+        return if i == -1
+
+        if i == 0
+            prev = @send
+        else
+            prev = @effects_master[i - 1]
+
+        @effects_master[i - 1].disconnect()
+        if @effects_master[i + 1]?
+            prev.connect(@effects_master[i + 1])
+        else
+            prev.connect(@return)
+
+            fx.disconnect()
+
+        @effects_master.splice(i, 1)

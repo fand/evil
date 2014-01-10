@@ -787,6 +787,7 @@ canvas:active {
     min-height: 449px;
 }
 .sidebar-module {
+    position: relative;
     width: 207px;   /* (223 - 10 - 4 - 2). total size including scrollbar is 223.*/
     margin: 0px;
     padding: 0px;
@@ -850,6 +851,25 @@ canvas:active {
     margin-top: 4px;
     margin-left: 25px;
 }
+.sidebar-effect-minus {
+    display: block;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    padding: 5px;
+    min-width: 12px;
+    min-height: 12px;
+    font-size: 16px;
+    text-align: center;
+    z-index: 10;
+    color: #0df;
+    background-color: #fff;
+}
+.sidebar-effect-minus:hover {
+    color: #fff;
+    text-shadow: 0px 0px 5px #0df;
+}
+
 
 #sidebar-master-control > div {
     margin: 5px 0px;
@@ -1132,7 +1152,7 @@ canvas:active {
     position: absolute;
     top: 0px;
     right: 0px;
-    padding: 5px 5px 5px 5px;
+    padding: 5px;
     min-width: 20px;
     min-height: 20px;
     font-size: 20px;
