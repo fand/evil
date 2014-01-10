@@ -152,10 +152,13 @@
     };
 
     MixerView.prototype.readPans = function(p, p_master) {
-      var i, _i, _ref, _results;
+      var i, l, t, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.pans[i].val((1.0 - p) * 200));
+        this.pans[i].val((1.0 - p[i]) * 200);
+        l = (p[i] * 200 - 100) * -1;
+        t = l === 0 ? 'C' : (l < 0 ? (-l) + '% L' : l + '% R');
+        _results.push(this.pans_label[i].text(t));
       }
       return _results;
     };
@@ -180,7 +183,8 @@
     MixerView.prototype.empty = function() {
       this.console_tracks.empty();
       this.pans = [];
-      return this.gains = [];
+      this.gains = [];
+      return this.pans_label = [];
     };
 
     return MixerView;
