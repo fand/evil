@@ -4,7 +4,6 @@ class @FX
         @in.gain.value = 1.0
         @out = @ctx.createGain()
         @out.gain.value = 1.0
-        @view = new FXView(this)
 
     connect: (dst) -> @out.connect(dst)
     disconnect: () -> @out.disconnect()
@@ -14,7 +13,11 @@ class @FX
 
     appendTo: (dst) ->
         $(dst).append(@view.dom)
-        console.log(dst)
+
+    remove: () ->
+        @source.removeEffect(this)
+
+    setSource: (@source) ->
 
 
 class @Delay extends @FX

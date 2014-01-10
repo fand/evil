@@ -1,5 +1,6 @@
 <fieldset id="tmpl_fx_reverb" class="sidebar-effect sidebar-module">
   <legend>Reverb</legend>
+  <i class="fa fa-minus sidebar-effect-minus"></i>
 
   <div class="clearfix">
     <label>type</label>
@@ -134,6 +135,7 @@
 
 <fieldset id="tmpl_fx_delay" class="sidebar-effect sidebar-module">
   <legend>Delay</legend>
+  <i class="fa fa-minus sidebar-effect-minus"></i>
 
   <!-- <label>input</label> -->
   <input name="input" type="hidden" min="0" max="100" value="0" />
@@ -164,6 +166,7 @@
 
 <fieldset id="tmpl_fx_compressor" class="sidebar-effect sidebar-module">
   <legend>Comp</legend>
+  <i class="fa fa-minus sidebar-effect-minus"></i>
 
   <div class="clearfix">
     <label>input</label>
@@ -206,6 +209,7 @@
 
 <fieldset id="tmpl_fx_fuzz" class="sidebar-effect sidebar-module">
   <legend>Fuzz</legend>
+  <i class="fa fa-minus sidebar-effect-minus"></i>
 
   <div class="clearfix">
     <label>input</label>
@@ -236,6 +240,7 @@
 
 <fieldset id="tmpl_fx_double" class="sidebar-effect sidebar-module">
   <legend>Double</legend>
+  <i class="fa fa-minus sidebar-effect-minus"></i>
 
   <div class="clearfix">
     <label>input</label>

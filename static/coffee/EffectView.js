@@ -1,18 +1,31 @@
 (function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
   this.FXView = (function() {
-    function FXView(model) {
+    function FXView(model, dom) {
+      var _this = this;
       this.model = model;
+      this.dom = dom;
+      this.minus = this.dom.find('.sidebar-effect-minus');
+      this.minus.on('click', function() {
+        _this.model.remove();
+        return $(_this.dom).remove();
+      });
     }
 
     return FXView;
 
   })();
 
-  this.ReverbView = (function() {
+  this.ReverbView = (function(_super) {
+    __extends(ReverbView, _super);
+
     function ReverbView(model) {
       this.model = model;
       this.dom = $('#tmpl_fx_reverb').clone();
       this.dom.removeAttr('id');
+      ReverbView.__super__.constructor.call(this, this.model, this.dom);
       this.name = this.dom.find('[name=name]');
       this.input = this.dom.find('[name=input]');
       this.output = this.dom.find('[name=output]');
@@ -38,13 +51,16 @@
 
     return ReverbView;
 
-  })();
+  })(this.FXView);
 
-  this.DelayView = (function() {
+  this.DelayView = (function(_super) {
+    __extends(DelayView, _super);
+
     function DelayView(model) {
       this.model = model;
       this.dom = $('#tmpl_fx_delay').clone();
       this.dom.removeAttr('id');
+      DelayView.__super__.constructor.call(this, this.model, this.dom);
       this.delay = this.dom.find('[name=delay]');
       this.feedback = this.dom.find('[name=feedback]');
       this.lofi = this.dom.find('[name=lofi]');
@@ -84,13 +100,16 @@
 
     return DelayView;
 
-  })();
+  })(this.FXView);
 
-  this.CompressorView = (function() {
+  this.CompressorView = (function(_super) {
+    __extends(CompressorView, _super);
+
     function CompressorView(model) {
       this.model = model;
       this.dom = $('#tmpl_fx_compressor').clone();
       this.dom.removeAttr('id');
+      CompressorView.__super__.constructor.call(this, this.model, this.dom);
       this.attack = this.dom.find('[name=attack]');
       this.release = this.dom.find('[name=release]');
       this.threshold = this.dom.find('[name=threshold]');
@@ -142,13 +161,16 @@
 
     return CompressorView;
 
-  })();
+  })(this.FXView);
 
-  this.FuzzView = (function() {
+  this.FuzzView = (function(_super) {
+    __extends(FuzzView, _super);
+
     function FuzzView(model) {
       this.model = model;
       this.dom = $('#tmpl_fx_fuzz').clone();
       this.dom.removeAttr('id');
+      FuzzView.__super__.constructor.call(this, this.model, this.dom);
       this.type = this.dom.find('[name=type]');
       this.gain = this.dom.find('[name=gain]');
       this.input = this.dom.find('[name=input]');
@@ -182,13 +204,16 @@
 
     return FuzzView;
 
-  })();
+  })(this.FXView);
 
-  this.DoubleView = (function() {
+  this.DoubleView = (function(_super) {
+    __extends(DoubleView, _super);
+
     function DoubleView(model) {
       this.model = model;
       this.dom = $('#tmpl_fx_double').clone();
       this.dom.removeAttr('id');
+      DoubleView.__super__.constructor.call(this, this.model, this.dom);
       this.delay = this.dom.find('[name=delay]');
       this.width = this.dom.find('[name=width]');
       this.input = this.dom.find('[name=input]');
@@ -222,6 +247,6 @@
 
     return DoubleView;
 
-  })();
+  })(this.FXView);
 
 }).call(this);

@@ -10,7 +10,6 @@
       this["in"].gain.value = 1.0;
       this.out = this.ctx.createGain();
       this.out.gain.value = 1.0;
-      this.view = new FXView(this);
     }
 
     FX.prototype.connect = function(dst) {
@@ -30,8 +29,15 @@
     };
 
     FX.prototype.appendTo = function(dst) {
-      $(dst).append(this.view.dom);
-      return console.log(dst);
+      return $(dst).append(this.view.dom);
+    };
+
+    FX.prototype.remove = function() {
+      return this.source.removeEffect(this);
+    };
+
+    FX.prototype.setSource = function(source) {
+      this.source = source;
     };
 
     return FX;

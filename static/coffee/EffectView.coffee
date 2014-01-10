@@ -1,10 +1,18 @@
 class @FXView
-    constructor: (@model) ->
+    constructor: (@model, @dom) ->
+        @minus = @dom.find('.sidebar-effect-minus')
+        @minus.on('click', ()=>
+            @model.remove()
+            $(@dom).remove()
+        )
 
-class @ReverbView
+
+class @ReverbView extends @FXView
     constructor: (@model) ->
         @dom = $('#tmpl_fx_reverb').clone()
         @dom.removeAttr('id')
+
+        super(@model, @dom)
 
         @name   = @dom.find('[name=name]')
         @input  = @dom.find('[name=input]')
@@ -23,10 +31,12 @@ class @ReverbView
             @model.setParam(output: parseFloat(@output.val()) / 100.0)
         )
 
-class @DelayView
+class @DelayView extends @FXView
     constructor: (@model) ->
         @dom = $('#tmpl_fx_delay').clone()
         @dom.removeAttr('id')
+
+        super(@model, @dom)
 
         @delay  = @dom.find('[name=delay]')
         @feedback = @dom.find('[name=feedback]')
@@ -55,10 +65,11 @@ class @DelayView
 
 
 
-class @CompressorView
+class @CompressorView extends @FXView
     constructor: (@model) ->
         @dom = $('#tmpl_fx_compressor').clone()
         @dom.removeAttr('id')
+        super(@model, @dom)
 
         @attack    = @dom.find('[name=attack]')
         @release   = @dom.find('[name=release]')
@@ -94,10 +105,11 @@ class @CompressorView
         )
 
 
-class @FuzzView
+class @FuzzView extends @FXView
     constructor: (@model) ->
         @dom = $('#tmpl_fx_fuzz').clone()
         @dom.removeAttr('id')
+        super(@model, @dom)
 
         @type   = @dom.find('[name=type]')
         @gain   = @dom.find('[name=gain]')
@@ -122,10 +134,11 @@ class @FuzzView
 
 
 
-class @DoubleView
+class @DoubleView extends @FXView
     constructor: (@model) ->
         @dom = $('#tmpl_fx_double').clone()
         @dom.removeAttr('id')
+        super(@model, @dom)
 
         @delay  = @dom.find('[name=delay]')
         @width  = @dom.find('[name=width]')
