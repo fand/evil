@@ -348,6 +348,7 @@
     }
 
     Sampler.prototype.connect = function(dst) {
+      console.log(dst);
       if (dst instanceof Panner) {
         return this["return"].connect(dst["in"]);
       } else {

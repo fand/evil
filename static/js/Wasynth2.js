@@ -1146,9 +1146,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Mixer.prototype.empty = function() {
       this.gain_tracks = [];
       this.panners = [];
-      this.view.empty();
-      this.delay_tracks = [];
-      return this.reverb_tracks = [];
+      this.analysers = [];
+      return this.view.empty();
     };
 
     Mixer.prototype.addSynth = function(synth) {
@@ -1220,7 +1219,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Mixer.prototype.changeSynth = function(id, synth) {
-      synth.connect(this.panners[id]);
+      synth.connect(this.panners[id]["in"]);
       return synth.connect(this.analysers[id]);
     };
 
@@ -1478,6 +1477,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     MixerView.prototype.empty = function() {
       this.console_tracks.empty();
+      this.canvas_tracks_dom = [];
+      this.canvas_tracks = [];
+      this.ctx_tracks = [];
       this.pans = [];
       this.gains = [];
       return this.pans_label = [];
@@ -1807,14 +1809,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         s_new = new Synth(this.context, id, this, name);
         s_new.setScale(this.scene.scale);
         s_new.setKey(this.scene.key);
-        this.mixer.changeSynth(id, s_new);
       } else if (type === 'SAMPLER') {
         s_new = new Sampler(this.context, id, this, name);
-        this.mixer.changeSynth(id, s_new);
       }
+      this.mixer.changeSynth(id, s_new);
       this.synth[id] = s_new;
       s_old.replaceWith(s_new);
-      s_old.noteOff();
       this.synth_now = s_new;
       this.view.changeSynth(id, type);
       return s_new;
@@ -2559,6 +2559,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }
 
     Sampler.prototype.connect = function(dst) {
+      console.log(dst);
       if (dst instanceof Panner) {
         return this["return"].connect(dst["in"]);
       } else {
@@ -5432,7 +5433,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
-    Synth.prototype.disconnect = function() {};
+    Synth.prototype.disconnect = function() {
+      return this["return"].disconnect();
+    };
 
     Synth.prototype.setDuration = function(duration) {
       this.duration = duration;
@@ -5606,6 +5609,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Synth.prototype.replaceWith = function(s_new) {
+      this.noteOff(true);
+      this.disconnect();
       return this.view.dom.replaceWith(s_new.view.dom);
     };
 

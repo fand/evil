@@ -68,9 +68,8 @@
     Mixer.prototype.empty = function() {
       this.gain_tracks = [];
       this.panners = [];
-      this.view.empty();
-      this.delay_tracks = [];
-      return this.reverb_tracks = [];
+      this.analysers = [];
+      return this.view.empty();
     };
 
     Mixer.prototype.addSynth = function(synth) {
@@ -142,7 +141,7 @@
     };
 
     Mixer.prototype.changeSynth = function(id, synth) {
-      synth.connect(this.panners[id]);
+      synth.connect(this.panners[id]["in"]);
       return synth.connect(this.analysers[id]);
     };
 

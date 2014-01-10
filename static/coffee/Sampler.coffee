@@ -219,6 +219,7 @@ class @Sampler
 
 
     connect: (dst) ->
+        console.log(dst)
         if dst instanceof Panner
             @return.connect(dst.in)
         else

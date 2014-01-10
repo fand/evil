@@ -604,7 +604,9 @@
       }
     };
 
-    Synth.prototype.disconnect = function() {};
+    Synth.prototype.disconnect = function() {
+      return this["return"].disconnect();
+    };
 
     Synth.prototype.setDuration = function(duration) {
       this.duration = duration;
@@ -778,6 +780,8 @@
     };
 
     Synth.prototype.replaceWith = function(s_new) {
+      this.noteOff(true);
+      this.disconnect();
       return this.view.dom.replaceWith(s_new.view.dom);
     };
 

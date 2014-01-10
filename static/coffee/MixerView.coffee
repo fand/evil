@@ -117,6 +117,9 @@ class @MixerView
 
     empty: ->
         @console_tracks.empty()
+        @canvas_tracks_dom = []
+        @canvas_tracks = []
+        @ctx_tracks = []
         @pans = []
         @gains = []
         @pans_label = []
