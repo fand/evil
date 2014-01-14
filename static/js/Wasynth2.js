@@ -1278,7 +1278,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       } else {
         prev = this.effects_master[i - 1];
       }
-      this.effects_master[i - 1].disconnect();
+      prev.disconnect();
       if (this.effects_master[i + 1] != null) {
         prev.connect(this.effects_master[i + 1]);
       } else {
