@@ -95,7 +95,7 @@ class @SampleNode
     getData: -> @buffer
 
     getParam: ->
-        wave: @sample.name, time: @getTimeParam(), gains: @eq_gains, output: @getOutputParam()
+        wave: @name, time: @getTimeParam(), gains: @eq_gains, output: @getOutputParam()
 
     readParam: (p) ->
         @setSample(p.wave) if p.wave?
@@ -162,12 +162,10 @@ class @SamplerCore
         @samples[i].getOutputParam()
 
     sampleLoaded: (id) ->
-        console.log('m')
         @view.updateWaveformCanvas(id)
 
     bindSample: (sample_now) ->
-        @view.updateWaveformCanvas(sample_now)
-        @view.updateEQCanvas()
+        @view.bindSample(sample_now, @samples[sample_now].getParam())
         @view.readSampleTimeParam(@getSampleTimeParam(sample_now))
         @view.readSampleEQParam(@getSampleEQParam(sample_now))
         @view.readSampleOutputParam(@getSampleOutputParam(sample_now))
@@ -341,7 +339,14 @@ class @Sampler
 
 
 
-SAMPLES_DEFAULT = ['kick1', 'kick2', 'snare1', 'snare2', 'clap', 'hat_closed', 'hat_open', 'ride']
+SAMPLES_DEFAULT = [
+    'bd_909dwsd', 'bd_sub808',
+    'snr_drm909kit1', 'snr_mpc',
+    'clp_raw', 'clp_basics',
+    'hat_lilcloser', 'hat_nice909open',
+    'shaker_bot', 'tam_lifein2d'
+]
+
 @SAMPLES =
     'kick1':  url: 'static/wav/kick1.wav'
     'kick2':  url: 'static/wav/kick2.wav'

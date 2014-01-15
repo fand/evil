@@ -102,8 +102,9 @@ class @SamplerCoreView
         )
         @setParam()
 
-    bindSample: (@sample_now) ->
-        @updateWaveformParam(@sample_now)
+    bindSample: (@sample_now, param) ->
+        @sample_name.find('span').text(param.wave)
+        @updateWaveformCanvas(@sample_now)
         @updateEQCanvas()
 
     showSampleList: () ->
@@ -199,7 +200,7 @@ class @SamplerCoreView
 
     setSample: (name) ->
         @model.setSample(@sample_now, name)
-        @sample_name.text(name)
+        @sample_name.find('span').text(name)
 
     setSampleTimeParam: ->
         @model.setSampleTimeParam(
@@ -668,9 +669,3 @@ class @SamplerKeyboardView
         @ctx_on.fillStyle = 'rgba(255, 200, 230, 0.3)'
         @ctx_on.fillRect(0, (@cells_y - sample_now - 1) * @h, @w, @h)
         @sample_last = sample_now
-
-
-
-SAMPLE_BD = [
-
-]

@@ -134,7 +134,7 @@
 
     SampleNode.prototype.getParam = function() {
       return {
-        wave: this.sample.name,
+        wave: this.name,
         time: this.getTimeParam(),
         gains: this.eq_gains,
         output: this.getOutputParam()
@@ -247,13 +247,11 @@
     };
 
     SamplerCore.prototype.sampleLoaded = function(id) {
-      console.log('m');
       return this.view.updateWaveformCanvas(id);
     };
 
     SamplerCore.prototype.bindSample = function(sample_now) {
-      this.view.updateWaveformCanvas(sample_now);
-      this.view.updateEQCanvas();
+      this.view.bindSample(sample_now, this.samples[sample_now].getParam());
       this.view.readSampleTimeParam(this.getSampleTimeParam(sample_now));
       this.view.readSampleEQParam(this.getSampleEQParam(sample_now));
       return this.view.readSampleOutputParam(this.getSampleOutputParam(sample_now));
@@ -529,7 +527,7 @@
 
   })();
 
-  SAMPLES_DEFAULT = ['kick1', 'kick2', 'snare1', 'snare2', 'clap', 'hat_closed', 'hat_open', 'ride'];
+  SAMPLES_DEFAULT = ['bd_909dwsd', 'bd_sub808', 'snr_drm909kit1', 'snr_mpc', 'clp_raw', 'clp_basics', 'hat_lilcloser', 'hat_nice909open', 'shaker_bot', 'tam_lifein2d'];
 
   this.SAMPLES = {
     'kick1': {

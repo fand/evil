@@ -1,6 +1,4 @@
 (function() {
-  var SAMPLE_BD;
-
   this.SamplerCoreView = (function() {
     function SamplerCoreView(model, id, dom) {
       this.model = model;
@@ -107,9 +105,10 @@
       return this.setParam();
     };
 
-    SamplerCoreView.prototype.bindSample = function(sample_now) {
+    SamplerCoreView.prototype.bindSample = function(sample_now, param) {
       this.sample_now = sample_now;
-      this.updateWaveformParam(this.sample_now);
+      this.sample_name.find('span').text(param.wave);
+      this.updateWaveformCanvas(this.sample_now);
       return this.updateEQCanvas();
     };
 
@@ -196,7 +195,7 @@
 
     SamplerCoreView.prototype.setSample = function(name) {
       this.model.setSample(this.sample_now, name);
-      return this.sample_name.text(name);
+      return this.sample_name.find('span').text(name);
     };
 
     SamplerCoreView.prototype.setSampleTimeParam = function() {
@@ -761,7 +760,5 @@
     return SamplerKeyboardView;
 
   })();
-
-  SAMPLE_BD = [];
 
 }).call(this);

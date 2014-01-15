@@ -2345,7 +2345,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SampleNode.prototype.getParam = function() {
       return {
-        wave: this.sample.name,
+        wave: this.name,
         time: this.getTimeParam(),
         gains: this.eq_gains,
         output: this.getOutputParam()
@@ -2458,13 +2458,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SamplerCore.prototype.sampleLoaded = function(id) {
-      console.log('m');
       return this.view.updateWaveformCanvas(id);
     };
 
     SamplerCore.prototype.bindSample = function(sample_now) {
-      this.view.updateWaveformCanvas(sample_now);
-      this.view.updateEQCanvas();
+      this.view.bindSample(sample_now, this.samples[sample_now].getParam());
       this.view.readSampleTimeParam(this.getSampleTimeParam(sample_now));
       this.view.readSampleEQParam(this.getSampleEQParam(sample_now));
       return this.view.readSampleOutputParam(this.getSampleOutputParam(sample_now));
@@ -2740,7 +2738,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   })();
 
-  SAMPLES_DEFAULT = ['kick1', 'kick2', 'snare1', 'snare2', 'clap', 'hat_closed', 'hat_open', 'ride'];
+  SAMPLES_DEFAULT = ['bd_909dwsd', 'bd_sub808', 'snr_drm909kit1', 'snr_mpc', 'clp_raw', 'clp_basics', 'hat_lilcloser', 'hat_nice909open', 'shaker_bot', 'tam_lifein2d'];
 
   this.SAMPLES = {
     'kick1': {
@@ -3299,8 +3297,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
-  var SAMPLE_BD;
-
   this.SamplerCoreView = (function() {
     function SamplerCoreView(model, id, dom) {
       this.model = model;
@@ -3407,9 +3403,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.setParam();
     };
 
-    SamplerCoreView.prototype.bindSample = function(sample_now) {
+    SamplerCoreView.prototype.bindSample = function(sample_now, param) {
       this.sample_now = sample_now;
-      this.updateWaveformParam(this.sample_now);
+      this.sample_name.find('span').text(param.wave);
+      this.updateWaveformCanvas(this.sample_now);
       return this.updateEQCanvas();
     };
 
@@ -3496,7 +3493,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     SamplerCoreView.prototype.setSample = function(name) {
       this.model.setSample(this.sample_now, name);
-      return this.sample_name.text(name);
+      return this.sample_name.find('span').text(name);
     };
 
     SamplerCoreView.prototype.setSampleTimeParam = function() {
@@ -4061,8 +4058,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     return SamplerKeyboardView;
 
   })();
-
-  SAMPLE_BD = [];
 
 }).call(this);
 ;(function() {
