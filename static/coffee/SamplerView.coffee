@@ -22,6 +22,13 @@ class @SamplerCoreView
         @clicked_wave = 0
         @target = head: @head_wave, tail: @tail_wave, both: [@tail_wave, @head_wave]
 
+        @sample_name = @sample.find('.sample-name')
+        @sample_list = $('#tmpl-sample-list').clone()
+        @sample_list.removeAttr('id')
+        @sample.find('.file-select').append(@sample_list)
+        @sample_list_wrapper = $('<div class="sample-list-wrapper"></div>')
+        $('body').append(@sample_list_wrapper)
+
         @initEvent()
 
         # Do not @updateWaveformCanvas in constructor
@@ -73,9 +80,19 @@ class @SamplerCoreView
             @target_wave = undefined
             @updateWaveformCanvas(@sample_now)
         )
-        @sample.find('select').on("change", () =>
-            @setSample()
+
+        @sample_name.on('click', () =>
+            @showSampleList()
         )
+        self = this
+        @sample_list.find('div').on('click', () ->
+            self.setSample($(this).html())
+            self.hideSampleList()
+        )
+        @sample_list_wrapper.on('click', () =>
+            @hideSampleList()
+        )
+
         @eq.on('change', () =>
             @setSampleEQParam()
             @updateEQCanvas()
@@ -88,6 +105,20 @@ class @SamplerCoreView
     bindSample: (@sample_now) ->
         @updateWaveformParam(@sample_now)
         @updateEQCanvas()
+
+    showSampleList: () ->
+        position = @sample_name.position()
+        @sample_list.show().css(
+            top:  position.top + 20 + 'px'
+            left: position.left + 'px'
+        )
+        @sample_list_wrapper.show()
+
+
+    hideSampleList: () ->
+        @sample_list.hide()
+        @sample_list_wrapper.hide()
+
 
     updateWaveformCanvas: (@sample_now) ->
         canvas  = @canvas_waveform
@@ -166,10 +197,9 @@ class @SamplerCoreView
         # @setNodesParam()
         # @setGains()
 
-    setSample: ->
-        name = @sample.find('.sample').val()
+    setSample: (name) ->
         @model.setSample(@sample_now, name)
-
+        @sample_name.text(name)
 
     setSampleTimeParam: ->
         @model.setSampleTimeParam(
@@ -638,3 +668,9 @@ class @SamplerKeyboardView
         @ctx_on.fillStyle = 'rgba(255, 200, 230, 0.3)'
         @ctx_on.fillRect(0, (@cells_y - sample_now - 1) * @h, @w, @h)
         @sample_last = sample_now
+
+
+
+SAMPLE_BD = [
+
+]
