@@ -5,15 +5,23 @@ use utf8;
 use Encode;
 use Amon2::Web::Dispatcher::RouterBoom;
 
+get '/mobile' => sub {
+    my ($c) = @_;
+    return $c->render('smartphone.tx');
+};
+
 get '/' => sub {
     my ($c) = @_;
     my $ua = $c->req->headers->user_agent;
     if ( $ua =~ /msie/i ) {
-        return $c->render( 'ie.tx' );
+        return $c->render('ie.tx');
     }
-    else  {
-        if ($ENV{PLACK_ENV} =~ /pro/) {
-            return $c->render( 'index.tx' );
+    elsif ( $ua =~ /iPhone|iPod|Android/i ) {
+        return $c->render('smartphone.tx');
+    }
+    else {
+        if ( $ENV{PLACK_ENV} =~ /pro/ ) {
+            return $c->render('index.tx');
         }
         else {
             return $c->render( 'index.tx', +{ debug => 1 } );
@@ -38,7 +46,7 @@ get '/:id' => sub {
 
     my $ua = $c->req->headers->user_agent;
     if ( $ua =~ /msie/i ) {
-        return $c->render( 'ie.tx' );
+        return $c->render('ie.tx');
     }
 
     my $song_id = $args->{id};
@@ -51,7 +59,7 @@ get '/:id' => sub {
     my $json = $song->get('json');
     $json =~ s/([<>\/\+])/sprintf("\\u%04x",ord($1))/eg;
 
-    if ($ENV{PLACK_ENV} =~ /pro/) {
+    if ( $ENV{PLACK_ENV} =~ /pro/ ) {
         return $c->render( 'index.tx', +{ song => $json } );
     }
     else {
