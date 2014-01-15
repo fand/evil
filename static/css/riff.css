@@ -342,7 +342,7 @@ canvas:active {
     left: 50%;
     margin-top: -300px;
     margin-left: -470px;
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
 
     transition: all 0.2s ease 0s;
 }
@@ -1564,32 +1564,160 @@ legend {
     height: 270px;
 }
 .Sampler_sample > .wave {
-    width: 400px;
-    height: 130px;
-    margin: 0px 15px 25px 15px;
+    width: 100%;
+    height: 170px;
+    margin: 0px;
 }
 .Sampler_sample .file-select {
-    float: left;
-    width: 90px;
-    height: 100px;
+    width: 100%;
+    height: 40px;
     margin: 0px;
     text-align: left;
+    overflow: visible;
 }
 .Sampler_sample .file-select > label {
-    left: 0px;
+    float: left;
+    margin-left: 15px;
     width: 80px;
     font-size: 12px;
     text-align: left;
 }
 .Sampler_sample .file-select > select {
+    float: left;
     left: 0px;
     width: 80px;
     margin-right: 10px;
     font-size: 12px;
     text-align: left;
 }
-.Sampler_sample .waveform {
+.Sampler_sample .file-select > .sample-name {
+    position: relative;
     float: left;
+    cursor: pointer;
+    width: 100px;
+    height: 26px;
+}
+.sample-name:hover {
+    background: #fff0fd;
+}
+.file-select > .sample-name > span {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    margin-left: 5px;
+    font-size: 12px;
+}
+.file-select > .sample-name > i {
+    position:absolute;
+    top: 2px;
+    right: 0px;
+    width: 20px;
+    height: 26px;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+}
+.Sampler_sample .file-select > .sample-name:hover {
+    text-shadow: 0px 0px 4px #f0d;
+}
+.sample-list {
+    display: none;
+    position: absolute;
+    border: 1px solid #f9e;
+    z-index:10;
+}
+.sample-list, .sample-list * {
+    font-size: 9px;
+    margin: 0px;
+    padding: 0px;
+    background: #fff;
+    white-space: nowrap;
+    list-style-type: none;
+    text-align: left;
+    color: #f0d;
+    z-index: 10;
+    cursor: pointer;
+}
+.sample-list ul {
+    list-style-type: none;
+    max-height: 200px;
+    overflow-x: visible;
+    overflow-y: auto;
+    box-shadow: 0px 0px 3px #fff;
+    border: 1px solid #f9e;
+}
+
+.sample-list ul::-webkit-scrollbar {
+    width: 5px;
+    height: 0px;
+    background-color: #f6d;
+    border-radius: 2px;
+}
+.sample-list ul::-webkit-scrollbar-track {
+    width: 5px;
+    height: 0px;
+    background-color: #eee;
+    border-radius: 2px;
+}
+.sample-list ul::-webkit-scrollbar-thumb {
+    width: 5px;
+    height: 0px;
+    background-color: #f6d;
+    border-radius: 2px;
+}
+
+.sample-list li {
+    position: relative;
+    display: block;
+    width: 100px;
+    height: 20px;
+    line-height: 16px;
+    overflow: hidden;
+    background: none;
+}
+.sample-list li:hover {
+    overflow: visible;
+}
+.sample-list li > div {
+    display: block;
+    width: 80%;
+    height: 20px;
+    padding: 0px 10%;
+    line-height: 16px;
+}
+.sample-list li > div:hover {
+    background: #fde;
+}
+.sample-list li > ul {
+    position: absolute;
+    top: 0px;
+    left: 100%;
+    width: 100%;
+    line-height: 16px;
+}
+.sample-list li > i {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 16px;
+    height: 20px;
+    line-height: 16px;
+    text-align: center;
+    background: none;
+}
+.sample-list-wrapper {
+    display: none;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 9999px;
+    height: 9999px;
+    z-index: 9;
+    background: none;
+}
+
+
+.Sampler_sample .waveform {
     width: 300px;
     height: 120px;
     border-left: 1px solid #f3e;
@@ -1614,6 +1742,7 @@ legend {
     text-align: center;
     margin-top: 4px;
 }
+
 
 .Sampler_EQ {
     position: absolute;

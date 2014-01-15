@@ -26,6 +26,12 @@
         tail: this.tail_wave,
         both: [this.tail_wave, this.head_wave]
       };
+      this.sample_name = this.sample.find('.sample-name');
+      this.sample_list = $('#tmpl-sample-list').clone();
+      this.sample_list.removeAttr('id');
+      this.sample.find('.file-select').append(this.sample_list);
+      this.sample_list_wrapper = $('<div class="sample-list-wrapper"></div>');
+      $('body').append(this.sample_list_wrapper);
       this.initEvent();
       this.updateEQCanvas();
     }
@@ -35,7 +41,8 @@
     };
 
     SamplerCoreView.prototype.initEvent = function() {
-      var _this = this;
+      var self,
+        _this = this;
       this.sample.find('input').on("change", function() {
         _this.setSampleTimeParam();
         return _this.updateWaveformCanvas(_this.sample_now);
@@ -77,8 +84,16 @@
         _this.target_wave = void 0;
         return _this.updateWaveformCanvas(_this.sample_now);
       });
-      this.sample.find('select').on("change", function() {
-        return _this.setSample();
+      this.sample_name.on('click', function() {
+        return _this.showSampleList();
+      });
+      self = this;
+      this.sample_list.find('div').on('click', function() {
+        self.setSample($(this).html());
+        return self.hideSampleList();
+      });
+      this.sample_list_wrapper.on('click', function() {
+        return _this.hideSampleList();
       });
       this.eq.on('change', function() {
         _this.setSampleEQParam();
@@ -90,10 +105,26 @@
       return this.setParam();
     };
 
-    SamplerCoreView.prototype.bindSample = function(sample_now) {
+    SamplerCoreView.prototype.bindSample = function(sample_now, param) {
       this.sample_now = sample_now;
-      this.updateWaveformParam(this.sample_now);
+      this.sample_name.find('span').text(param.wave);
+      this.updateWaveformCanvas(this.sample_now);
       return this.updateEQCanvas();
+    };
+
+    SamplerCoreView.prototype.showSampleList = function() {
+      var position;
+      position = this.sample_name.position();
+      this.sample_list.show().css({
+        top: position.top + 20 + 'px',
+        left: position.left + 'px'
+      });
+      return this.sample_list_wrapper.show();
+    };
+
+    SamplerCoreView.prototype.hideSampleList = function() {
+      this.sample_list.hide();
+      return this.sample_list_wrapper.hide();
     };
 
     SamplerCoreView.prototype.updateWaveformCanvas = function(sample_now) {
@@ -162,10 +193,9 @@
 
     SamplerCoreView.prototype.setParam = function() {};
 
-    SamplerCoreView.prototype.setSample = function() {
-      var name;
-      name = this.sample.find('.sample').val();
-      return this.model.setSample(this.sample_now, name);
+    SamplerCoreView.prototype.setSample = function(name) {
+      this.model.setSample(this.sample_now, name);
+      return this.sample_name.find('span').text(name);
     };
 
     SamplerCoreView.prototype.setSampleTimeParam = function() {
