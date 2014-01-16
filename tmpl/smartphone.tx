@@ -3,8 +3,8 @@
 : override content -> {
 
 <div id="top">
-  <img src="/static/img/evil_300.png" />
-  <p>
+  <img id="logo" class="out" src="/static/img/evil_300.png" />
+  <p id="copy">
     Play it live.
   </p>
 </div>
@@ -45,8 +45,8 @@
 
 
 <footer>
-  <img src="https://pbs.twimg.com/profile_images/414307614319579137/JWkh6ZBj.png" />
-  <p><a href="http://twitter.com/amagitakayosi">amagitakayosi</a> / <a href="http://twitter.com/fand">fand</a></p>
+  <a href="http://gmork.in/"><img id="vertigo" class="in" src="static/img/vertigo.png" /></a>
+  <p><a href="http://twitter.com/amagitakayosi">@amagitakayosi</a> / <a href="http://twitter.com/fand">@fand</a></p>
 </footer>
 
 : }
