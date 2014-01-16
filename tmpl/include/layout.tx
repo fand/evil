@@ -16,7 +16,14 @@
     <meta property="og:type" content="website">
     <meta property="og:image" content="http://evil.gmork.in/static/img/evil_300.png">
 
-    <: if ! $ie { :>
+    <: if $ie { :>
+      <link href="<: static_file('/static/css/ie.css') :>" rel="stylesheet" type="text/css" media="screen" />
+    <: } else if $phone {:>
+      <link href="<: static_file('/static/css/phone.css') :>" rel="stylesheet" type="text/css" media="screen" />
+      <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+      <script src="<: uri_for('/static/js/lib/jquery-2.0.3.min.js') :>"></script>
+      <script src="<: uri_for('/static/js/phone.js') :>"></script>
+    <: } else { :>
       <link href="<: static_file('/static/css/main.css') :>" rel="stylesheet" type="text/css" media="screen" />
       <link href="<: static_file('/static/css/riff.css') :>" rel="stylesheet" type="text/css" media="screen" />
       <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" media="screen" />
@@ -45,8 +52,7 @@
       <: } else { :>
         <script src="<: uri_for('/static/js/Wasynth2.min.js') :>"></script>
       <: } :>
-    <: } else { :>
-      <link href="<: static_file('/static/css/ie.css') :>" rel="stylesheet" type="text/css" media="screen" />
+
     <: } :>
   </head>
   <body>

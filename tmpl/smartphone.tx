@@ -1,0 +1,52 @@
+: cascade "include/layout.tx" { phone => 1 }
+
+: override content -> {
+
+<div id="top">
+  <img id="logo" class="out" src="/static/img/evil_300.png" />
+  <p id="copy">
+    Play it live.
+  </p>
+</div>
+
+<div id="div1">
+  <h1>What's evil?</h1>
+  <p>
+    evil is an application to play music and share songs in Google Chrome on PC.
+  </p>
+</div>
+
+<div id="div2">
+  <h2>Instruments</h2>
+  <p>
+    Synth and Sampler.
+  </p>
+</div>
+
+<div id="div3">
+  <h2>Share song</h2>
+  <p>
+    Save your song on web.
+  </p>
+</div>
+
+<div id="div4">
+  <h2>Performance</h2>
+  <p>
+    Play your song live.
+  </p>
+</div>
+
+
+<!-- <h2>Demo</h2> -->
+<!-- <p> -->
+<!--   Play your song live. -->
+<!-- </p> -->
+
+
+<footer>
+  <a href="http://gmork.in/"><img id="vertigo" class="in" src="static/img/vertigo.png" /></a>
+  <p><a href="http://twitter.com/amagitakayosi">@amagitakayosi</a> / <a href="http://twitter.com/fand">@fand</a></p>
+</footer>
+
+: }
