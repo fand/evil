@@ -29,7 +29,8 @@
     };
 
     FX.prototype.appendTo = function(dst) {
-      return $(dst).append(this.view.dom);
+      $(dst).append(this.view.dom);
+      return this.view.initEvent();
     };
 
     FX.prototype.remove = function() {

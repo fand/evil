@@ -68,6 +68,8 @@ class @SidebarView
     showTracks: (track) ->
         @tracks_effects.find('.sidebar-effect').remove()
         f.appendTo(@tracks_effects) for f in track.effects
+        # @tracks_effects.find('.sidebar-effect').hide()
+        # f.show() for f in track.effects
         @wrapper.css('left', '0px')
 
 

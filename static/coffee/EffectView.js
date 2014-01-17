@@ -4,15 +4,18 @@
 
   this.FXView = (function() {
     function FXView(model, dom) {
-      var _this = this;
       this.model = model;
       this.dom = dom;
       this.minus = this.dom.find('.sidebar-effect-minus');
-      this.minus.on('click', function() {
+    }
+
+    FXView.prototype.initEvent = function() {
+      var _this = this;
+      return this.minus.on('click', function() {
         _this.model.remove();
         return $(_this.dom).remove();
       });
-    }
+    };
 
     return FXView;
 
@@ -34,6 +37,7 @@
 
     ReverbView.prototype.initEvent = function() {
       var _this = this;
+      ReverbView.__super__.initEvent.call(this);
       this.name.on('change', function() {
         return _this.model.setIR(_this.name.val());
       });
@@ -83,6 +87,7 @@
 
     DelayView.prototype.initEvent = function() {
       var _this = this;
+      DelayView.__super__.initEvent.call(this);
       this.input.on('change', function() {
         return _this.model.setParam({
           input: parseFloat(_this.input.val()) / 100.0
@@ -152,6 +157,7 @@
 
     CompressorView.prototype.initEvent = function() {
       var _this = this;
+      CompressorView.__super__.initEvent.call(this);
       this.input.on('change', function() {
         return _this.model.setParam({
           input: parseFloat(_this.input.val()) / 100.0
@@ -234,6 +240,7 @@
 
     FuzzView.prototype.initEvent = function() {
       var _this = this;
+      FuzzView.__super__.initEvent.call(this);
       this.input.on('change', function() {
         return _this.model.setParam({
           input: parseFloat(_this.input.val()) / 100.0
@@ -292,6 +299,7 @@
 
     DoubleView.prototype.initEvent = function() {
       var _this = this;
+      DoubleView.__super__.initEvent.call(this);
       this.input.on('change', function() {
         return _this.model.setParam({
           input: parseFloat(_this.input.val()) / 100.0

@@ -13,6 +13,7 @@ class @FX
 
     appendTo: (dst) ->
         $(dst).append(@view.dom)
+        @view.initEvent()
 
     remove: () ->
         @source.removeEffect(this)

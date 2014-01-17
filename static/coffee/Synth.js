@@ -872,7 +872,7 @@
       if (i === 0) {
         prev = this.send;
       } else {
-        prev = this.effects_master[i - 1];
+        prev = this.effects[i - 1];
       }
       prev.disconnect();
       if (this.effects[i + 1] != null) {
