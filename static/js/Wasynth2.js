@@ -49,7 +49,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     FX.prototype.appendTo = function(dst) {
-      return $(dst).append(this.view.dom);
+      $(dst).append(this.view.dom);
+      return this.view.initEvent();
     };
 
     FX.prototype.remove = function() {
@@ -558,15 +559,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   this.FXView = (function() {
     function FXView(model, dom) {
-      var _this = this;
       this.model = model;
       this.dom = dom;
       this.minus = this.dom.find('.sidebar-effect-minus');
-      this.minus.on('click', function() {
+    }
+
+    FXView.prototype.initEvent = function() {
+      var _this = this;
+      return this.minus.on('click', function() {
         _this.model.remove();
         return $(_this.dom).remove();
       });
-    }
+    };
 
     return FXView;
 
@@ -588,6 +592,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     ReverbView.prototype.initEvent = function() {
       var _this = this;
+      ReverbView.__super__.initEvent.call(this);
       this.name.on('change', function() {
         return _this.model.setIR(_this.name.val());
       });
@@ -637,6 +642,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     DelayView.prototype.initEvent = function() {
       var _this = this;
+      DelayView.__super__.initEvent.call(this);
       this.input.on('change', function() {
         return _this.model.setParam({
           input: parseFloat(_this.input.val()) / 100.0
@@ -706,6 +712,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     CompressorView.prototype.initEvent = function() {
       var _this = this;
+      CompressorView.__super__.initEvent.call(this);
       this.input.on('change', function() {
         return _this.model.setParam({
           input: parseFloat(_this.input.val()) / 100.0
@@ -788,6 +795,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     FuzzView.prototype.initEvent = function() {
       var _this = this;
+      FuzzView.__super__.initEvent.call(this);
       this.input.on('change', function() {
         return _this.model.setParam({
           input: parseFloat(_this.input.val()) / 100.0
@@ -846,6 +854,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     DoubleView.prototype.initEvent = function() {
       var _this = this;
+      DoubleView.__super__.initEvent.call(this);
       this.input.on('change', function() {
         return _this.model.setParam({
           input: parseFloat(_this.input.val()) / 100.0
@@ -1278,7 +1287,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       } else {
         prev = this.effects_master[i - 1];
       }
-      this.effects_master[i - 1].disconnect();
+      prev.disconnect();
       if (this.effects_master[i + 1] != null) {
         prev.connect(this.effects_master[i + 1]);
       } else {
@@ -6335,7 +6344,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (i === 0) {
         prev = this.send;
       } else {
-        prev = this.effects_master[i - 1];
+        prev = this.effects[i - 1];
       }
       prev.disconnect();
       if (this.effects[i + 1] != null) {

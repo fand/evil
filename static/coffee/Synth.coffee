@@ -545,7 +545,7 @@ class @Synth
         if i == 0
             prev = @send
         else
-            prev = @effects_master[i - 1]
+            prev = @effects[i - 1]
 
         prev.disconnect()
         if @effects[i + 1]?

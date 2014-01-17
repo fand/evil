@@ -1,6 +1,8 @@
 class @FXView
     constructor: (@model, @dom) ->
         @minus = @dom.find('.sidebar-effect-minus')
+
+    initEvent: ->
         @minus.on('click', ()=>
             @model.remove()
             $(@dom).remove()
@@ -21,6 +23,7 @@ class @ReverbView extends @FXView
         @initEvent()
 
     initEvent: ->
+        super()
         @name.on('change', () =>
             @model.setIR(@name.val())
         )
@@ -54,6 +57,7 @@ class @DelayView extends @FXView
         @initEvent()
 
     initEvent: ->
+        super()
         @input.on('change', () =>
             @model.setParam(input: parseFloat(@input.val()) / 100.0)
         )
@@ -96,6 +100,7 @@ class @CompressorView extends @FXView
         @initEvent()
 
     initEvent: ->
+        super()
         @input.on('change', () =>
             @model.setParam(input: parseFloat(@input.val()) / 100.0)
         )
@@ -143,6 +148,7 @@ class @FuzzView extends @FXView
         @initEvent()
 
     initEvent: ->
+        super()
         @input.on('change', () =>
             @model.setParam(input: parseFloat(@input.val()) / 100.0)
         )
@@ -178,6 +184,7 @@ class @DoubleView extends @FXView
         @initEvent()
 
     initEvent: ->
+        super()
         @input.on('change', () =>
             @model.setParam(input: parseFloat(@input.val()) / 100.0)
         )
