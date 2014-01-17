@@ -185,7 +185,7 @@ class @Mixer
         else
             prev = @effects_master[i - 1]
 
-        @effects_master[i - 1].disconnect()
+        prev.disconnect()
         if @effects_master[i + 1]?
             prev.connect(@effects_master[i + 1])
         else
