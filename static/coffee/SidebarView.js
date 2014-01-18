@@ -5,6 +5,10 @@
       this.wrapper = $('#sidebar-wrapper');
       this.tracks = this.wrapper.find('#sidebar-tracks');
       this.master = this.wrapper.find('#sidebar-master');
+      this.master_display = this.master.find('.display');
+      this.master_control = this.master.find('.control');
+      this.master_display_label = this.master.find('.display-current-control');
+      this.master_edit = this.master.find('[name=edit]');
       this.master_name = this.master.find('[name=name]');
       this.master_bpm = this.master.find('[name=bpm]');
       this.master_key = this.master.find('[name=key]');
@@ -39,7 +43,11 @@
         }));
       }
       this.master_save.on('click', (function() {
-        return _this.saveMaster();
+        _this.saveMaster();
+        return _this.hideMasterControl();
+      }));
+      this.master_edit.on('click', (function() {
+        return _this.showMasterControl();
       }));
       this.tracks.find('.sidebar-effect').each(function(i) {
         return $(_this).on('change', function() {
@@ -66,7 +74,8 @@
         key: key != null ? key : void 0,
         scale: scale != null ? scale : void 0
       };
-      return this.model.saveMaster(obj);
+      this.model.saveMaster(obj);
+      return this.showMaster(obj);
     };
 
     SidebarView.prototype.clearMaster = function() {
@@ -101,19 +110,33 @@
     };
 
     SidebarView.prototype.showMaster = function(o) {
+      var s;
+      this.hideMasterControl();
+      s = '';
       if (o.name != null) {
         this.master_name.val(o.name);
       }
       if (o.bpm != null) {
-        this.master_bpm.val(o.bpm);
+        s += o.bpm + ' BPM 　';
       }
       if (o.key != null) {
-        this.master_key.val(o.key);
+        s += o.key + ' 　';
       }
       if (o.scale != null) {
-        this.master_scale.val(o.scale);
+        s += o.scale;
       }
+      this.master_display_label.text(s);
       return this.wrapper.css('left', '-223px');
+    };
+
+    SidebarView.prototype.showMasterControl = function() {
+      this.master_control.show();
+      return this.master_display.hide();
+    };
+
+    SidebarView.prototype.hideMasterControl = function() {
+      this.master_display.show();
+      return this.master_control.hide();
     };
 
     SidebarView.prototype.addMasterEffect = function(name) {
@@ -126,6 +149,18 @@
       var fx;
       fx = this.model.addTracksEffect(name);
       return fx.appendTo(this.tracks_effects);
+    };
+
+    SidebarView.prototype.setBPM = function(b) {
+      return this.master_bpm.val(b);
+    };
+
+    SidebarView.prototype.setKey = function(k) {
+      return this.master_key.val(k);
+    };
+
+    SidebarView.prototype.setScale = function(s) {
+      return this.master_scale.val(s);
     };
 
     return SidebarView;

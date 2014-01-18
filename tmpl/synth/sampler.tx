@@ -83,7 +83,6 @@
 </div>
 
 <ul id="tmpl-sample-list" class="sample-list">
-  <div class=".sample-list-wrapper"></div>
   <li>
     <div>kick</div><i class="fa fa-angle-right"></i>
     <ul>

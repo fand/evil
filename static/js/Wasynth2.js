@@ -1651,42 +1651,39 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     }
 
     Player.prototype.setBPM = function(bpm) {
-      var s, _i, _len, _ref, _results;
+      var s, _i, _len, _ref;
       this.bpm = bpm;
       this.scene.bpm = this.bpm;
       this.duration = 7500.0 / this.bpm;
       _ref = this.synth;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        _results.push(s.setDuration(this.duration));
+        s.setDuration(this.duration);
       }
-      return _results;
+      return this.sidebar.setBPM(this.bpm);
     };
 
     Player.prototype.setKey = function(key) {
-      var s, _i, _len, _ref, _results;
+      var s, _i, _len, _ref;
       this.scene.key = key;
       _ref = this.synth;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        _results.push(s.setKey(key));
+        s.setKey(key);
       }
-      return _results;
+      return this.sidebar.setKey(this.key);
     };
 
     Player.prototype.setScale = function(scale) {
-      var s, _i, _len, _ref, _results;
+      var s, _i, _len, _ref;
       this.scale = scale;
       this.scene.scale = this.scale;
       _ref = this.synth;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        _results.push(s.setScale(this.scale));
+        s.setScale(this.scale);
       }
-      return _results;
+      return this.sidebar.setScale(this.scale);
     };
 
     Player.prototype.isPlaying = function() {
@@ -3338,7 +3335,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.sample_list.removeAttr('id');
       this.sample.find('.file-select').append(this.sample_list);
       this.sample_list_wrapper = $('<div class="sample-list-wrapper"></div>');
-      $('body').append(this.sample_list_wrapper);
+      this.sample.find('.file-select').append(this.sample_list_wrapper);
       this.initEvent();
       this.updateEQCanvas();
     }
@@ -4357,7 +4354,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Session.prototype.saveMaster = function(y, obj) {
       this.song.master[y] = obj;
-      return this.view.readSong(this.song, this.current_cells);
+      this.view.readSong(this.song, this.current_cells);
+      if (y === this.scene_pos) {
+        return this.player.readScene(obj);
+      }
     };
 
     Session.prototype.saveMasters = function() {
@@ -5246,7 +5246,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.song.master[pos.y] == null) {
         return;
       }
-      this.ctx_tracks_hover.clearRect(0, this.select_pos.y * this.h, this.w, this.h);
+      this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.clearRect(0, this.hover_pos.y * this.h, this.w_master, this.h);
       this.ctx_master_hover.clearRect(0, this.click_pos.y * this.h, this.w_master, this.h);
       this.ctx_master_hover.clearRect(0, this.select_pos.y * this.h, this.w_master, this.h);
@@ -5330,6 +5330,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.mixer.addTracksEffect(this.sidebar_pos.x, name);
     };
 
+    Sidebar.prototype.setBPM = function(b) {
+      return this.view.setBPM(b);
+    };
+
+    Sidebar.prototype.setKey = function(k) {
+      return this.view.setKey(k);
+    };
+
+    Sidebar.prototype.setScale = function(s) {
+      return this.view.setScale(s);
+    };
+
     return Sidebar;
 
   })();
@@ -5342,6 +5354,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.wrapper = $('#sidebar-wrapper');
       this.tracks = this.wrapper.find('#sidebar-tracks');
       this.master = this.wrapper.find('#sidebar-master');
+      this.master_display = this.master.find('.display');
+      this.master_control = this.master.find('.control');
+      this.master_display_label = this.master.find('.display-current-control');
+      this.master_edit = this.master.find('[name=edit]');
       this.master_name = this.master.find('[name=name]');
       this.master_bpm = this.master.find('[name=bpm]');
       this.master_key = this.master.find('[name=key]');
@@ -5376,7 +5392,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }));
       }
       this.master_save.on('click', (function() {
-        return _this.saveMaster();
+        _this.saveMaster();
+        return _this.hideMasterControl();
+      }));
+      this.master_edit.on('click', (function() {
+        return _this.showMasterControl();
       }));
       this.tracks.find('.sidebar-effect').each(function(i) {
         return $(_this).on('change', function() {
@@ -5403,7 +5423,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         key: key != null ? key : void 0,
         scale: scale != null ? scale : void 0
       };
-      return this.model.saveMaster(obj);
+      this.model.saveMaster(obj);
+      return this.showMaster(obj);
     };
 
     SidebarView.prototype.clearMaster = function() {
@@ -5438,19 +5459,33 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     SidebarView.prototype.showMaster = function(o) {
+      var s;
+      this.hideMasterControl();
+      s = '';
       if (o.name != null) {
         this.master_name.val(o.name);
       }
       if (o.bpm != null) {
-        this.master_bpm.val(o.bpm);
+        s += o.bpm + ' BPM 　';
       }
       if (o.key != null) {
-        this.master_key.val(o.key);
+        s += o.key + ' 　';
       }
       if (o.scale != null) {
-        this.master_scale.val(o.scale);
+        s += o.scale;
       }
+      this.master_display_label.text(s);
       return this.wrapper.css('left', '-223px');
+    };
+
+    SidebarView.prototype.showMasterControl = function() {
+      this.master_control.show();
+      return this.master_display.hide();
+    };
+
+    SidebarView.prototype.hideMasterControl = function() {
+      this.master_display.show();
+      return this.master_control.hide();
     };
 
     SidebarView.prototype.addMasterEffect = function(name) {
@@ -5463,6 +5498,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var fx;
       fx = this.model.addTracksEffect(name);
       return fx.appendTo(this.tracks_effects);
+    };
+
+    SidebarView.prototype.setBPM = function(b) {
+      return this.master_bpm.val(b);
+    };
+
+    SidebarView.prototype.setKey = function(k) {
+      return this.master_key.val(k);
+    };
+
+    SidebarView.prototype.setScale = function(s) {
+      return this.master_scale.val(s);
     };
 
     return SidebarView;

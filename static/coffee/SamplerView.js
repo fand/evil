@@ -31,7 +31,7 @@
       this.sample_list.removeAttr('id');
       this.sample.find('.file-select').append(this.sample_list);
       this.sample_list_wrapper = $('<div class="sample-list-wrapper"></div>');
-      $('body').append(this.sample_list_wrapper);
+      this.sample.find('.file-select').append(this.sample_list_wrapper);
       this.initEvent();
       this.updateEQCanvas();
     }

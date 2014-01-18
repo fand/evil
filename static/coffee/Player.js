@@ -28,42 +28,39 @@
     }
 
     Player.prototype.setBPM = function(bpm) {
-      var s, _i, _len, _ref, _results;
+      var s, _i, _len, _ref;
       this.bpm = bpm;
       this.scene.bpm = this.bpm;
       this.duration = 7500.0 / this.bpm;
       _ref = this.synth;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        _results.push(s.setDuration(this.duration));
+        s.setDuration(this.duration);
       }
-      return _results;
+      return this.sidebar.setBPM(this.bpm);
     };
 
     Player.prototype.setKey = function(key) {
-      var s, _i, _len, _ref, _results;
+      var s, _i, _len, _ref;
       this.scene.key = key;
       _ref = this.synth;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        _results.push(s.setKey(key));
+        s.setKey(key);
       }
-      return _results;
+      return this.sidebar.setKey(this.key);
     };
 
     Player.prototype.setScale = function(scale) {
-      var s, _i, _len, _ref, _results;
+      var s, _i, _len, _ref;
       this.scale = scale;
       this.scene.scale = this.scale;
       _ref = this.synth;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        _results.push(s.setScale(this.scale));
+        s.setScale(this.scale);
       }
-      return _results;
+      return this.sidebar.setScale(this.scale);
     };
 
     Player.prototype.isPlaying = function() {

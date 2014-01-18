@@ -606,7 +606,7 @@ class @SessionView
     selectCellMaster: (pos) ->
         return if not @song.master[pos.y]?
 
-        @ctx_tracks_hover.clearRect(0, @select_pos.y * @h, @w, @h)
+        @ctx_tracks_hover.clearRect(@select_pos.x * @w, @select_pos.y * @h, @w, @h)
 
         @ctx_master_hover.clearRect(0, @hover_pos.y * @h, @w_master, @h)
         @ctx_master_hover.clearRect(0, @click_pos.y * @h, @w_master, @h)

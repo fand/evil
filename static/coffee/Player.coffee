@@ -30,13 +30,19 @@ class @Player
         @duration = 7500.0 / @bpm
         s.setDuration(@duration) for s in @synth
 
+        @sidebar.setBPM(@bpm)
+
     setKey: (key)->
         @scene.key = key
         s.setKey(key) for s in @synth
 
+        @sidebar.setKey(@key)
+
     setScale: (@scale) ->
         @scene.scale = @scale
         s.setScale(@scale) for s in @synth
+
+        @sidebar.setScale(@scale)
 
     isPlaying: -> @is_playing
 

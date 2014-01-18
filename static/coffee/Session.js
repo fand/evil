@@ -286,7 +286,10 @@
 
     Session.prototype.saveMaster = function(y, obj) {
       this.song.master[y] = obj;
-      return this.view.readSong(this.song, this.current_cells);
+      this.view.readSong(this.song, this.current_cells);
+      if (y === this.scene_pos) {
+        return this.player.readScene(obj);
+      }
     };
 
     Session.prototype.saveMasters = function() {
