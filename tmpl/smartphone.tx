@@ -13,17 +13,33 @@
 </div>
 
 <div id="div1">
-  <h1>What's evil?</h1>
+  <h1>evil?</h1>
   <p>
-    evil is an application to play music and share songs in Google Chrome on PC.
+    Play & Create music.
   </p>
+  <div class="list">
+    <p>
+      Now available on
+      <ul>
+        <li>Google Chrome</li>
+        <li>Safari</li>
+        <li>Opera</li>
+      </ul>
+    </p>
+  </div>
 </div>
 
 <div id="div2">
   <h2>Instruments</h2>
   <p>
-    Synth and Sampler.
+    Synth & Sampler.
   </p>
+  <div class="slide-outer">
+    <div class="slide-inner">
+      <img src="static/img/phone_div1_1.png" />
+      <img src="static/img/phone_div1_2.png" />
+    </div>
+  </div>
 </div>
 
 <div id="div3">
@@ -31,6 +47,12 @@
   <p>
     Save your song on web.
   </p>
+  <div class="slide-outer">
+    <div class="slide-inner">
+      <img src="static/img/phone_div2_1.png" />
+      <img src="static/img/phone_div2_2.png" />
+    </div>
+  </div>
 </div>
 
 <div id="div4">
@@ -38,6 +60,12 @@
   <p>
     Play your song live.
   </p>
+  <!-- <div class="slide-outer"> -->
+  <!--   <div class="slide-inner"> -->
+  <!--     <img src="static/img/phone_div3_1.png" /> -->
+  <!--     <img src="static/img/phone_div3_2.png" /> -->
+  <!--   </div> -->
+  <!-- </div> -->
 </div>
 
 

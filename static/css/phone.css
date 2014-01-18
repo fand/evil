@@ -6,7 +6,8 @@
 }
 
 body {
-    -webkit-transition: all 0.5s ease;        
+    -webkit-transition: all 0.5s ease;
+    overflow-x: hidden;
 }
 
 #wrapper {
@@ -55,16 +56,16 @@ body {
 p  { font-size: 16px; }
 
 #div1, #div2, #div3, #div4, footer {
+    position: relative;
     width: 100%;
     min-height: 480px;
 }
-#div1 *, #div2 *, #div3 *, #div4 * {
+#div1 *, #div2 *, #div4 * {
     padding: 10px 5px;
     color: #fafafa;
 }
 #div1 h2, #div2 h2, #div3 h2, #div4 h2 {
     padding: 20px 5px;
-    color: #fafafa;
 }
 #div1 {
     background: #0df;
@@ -78,11 +79,50 @@ p  { font-size: 16px; }
     background: #df0;
     height: 100%;
 }
+#div3 * {
+    padding: 10px 5px;
+    color: #999;
+}
 #div4 {
     background: #456;
     height: 100%;
 }
 
+.slide-outer {
+    position: absolute;
+    top: 130px;
+    left: 4%;
+    width: 90%;
+    padding: 0px;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+.slide-inner {
+    width: 200%;
+    height: 100%;
+}
+.slide-inner:after {
+    display:block;
+    clear:both;
+    height:0px;
+    visibility:hidden;
+    content:".";
+}
+.slide-inner > img {
+    display: block;
+    float: left;
+    width: 48%;
+    margin: 2px;
+}
+
+#div1 > .list {
+    margin: 30px 0px;
+    padding: 0px;
+}
+.list li {
+    /* list-style-type: none; */
+    margin-left: 35px;
+}
 
 footer {
     position: relative;
@@ -105,7 +145,7 @@ footer > a {
 }
 #vertigo {
     width: 100px;
-    height: 100px;    
+    height: 100px;
     opacity: 0.8;
 }
 footer > p {

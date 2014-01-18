@@ -20,12 +20,8 @@
       <link href="<: static_file('/static/css/ie.css') :>" rel="stylesheet" type="text/css" media="screen" />
     <: } else if $phone {:>
       <link href="<: static_file('/static/css/phone.css') :>" rel="stylesheet" type="text/css" media="screen" />
-      <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
-      <script src="<: uri_for('/static/js/lib/jquery-2.0.3.min.js') :>"></script>
-      <!-- <script src="<: uri_for('/static/js/jquery.hammer-standalone.min.js') :>"></script> -->
-      <script src="<: uri_for('/static/js/hammer.min.js') :>"></script>
-      <script src="<: uri_for('/static/js/jquery.hammer.min.js') :>"></script>
-      <script src="<: uri_for('/static/js/phone.js') :>"></script>            
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+      <script src="<: uri_for('/static/js/phone.js') :>"></script>
     <: } else { :>
       <link href="<: static_file('/static/css/main.css') :>" rel="stylesheet" type="text/css" media="screen" />
       <link href="<: static_file('/static/css/riff.css') :>" rel="stylesheet" type="text/css" media="screen" />
