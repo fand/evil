@@ -423,7 +423,7 @@ class @SynthView
                 if @page < i
                     while @page != i
                         @model.player.forward()
-                if @page > i
+                if i < @page
                     while @page != i
                         @model.player.backward(true)  # force
             )
