@@ -42,9 +42,12 @@
       };
       this.cells_x = 32;
       this.cells_y = 20;
-      this.fold = this.dom.find('.btn-fold-core');
+      this.btn_fold = this.dom.find('.btn-fold-core');
       this.core = this.dom.find('.synth-core');
       this.is_panel_opened = true;
+      this.btn_fx = this.dom.find('.btn-fx-view');
+      this.fx = this.dom.find('.synth-fx');
+      this.is_fx_view = false;
       this.keyboard = new KeyboardView(this);
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.pattern_obj = {
@@ -202,11 +205,11 @@
           return _this.minusPattern();
         }
       }));
-      return this.fold.on('mousedown', function() {
+      this.btn_fold.on('mousedown', function() {
         if (_this.is_panel_opened) {
           _this.core.css('height', '0px');
           _this.table_wrapper.css('height', '524px');
-          _this.fold.css({
+          _this.btn_fold.css({
             top: '-22px',
             padding: '0px 5px 0px 0px'
           }).removeClass('fa-angle-down').addClass('fa-angle-up');
@@ -214,7 +217,20 @@
         } else {
           _this.core.css('height', '280px');
           _this.table_wrapper.css('height', '262px');
-          _this.fold.css({
+          _this.btn_fold.css({
+            top: '0px',
+            padding: '5px 5px 5px 5px'
+          }).removeClass('fa-angle-up').addClass('fa-angle-down');
+          return _this.is_panel_opened = true;
+        }
+      });
+      return this.btn_fx.on('mousedown', function() {
+        if (_this.is_fx_view) {
+          return _this.is_fx_view = false;
+        } else {
+          _this.core.css('height', '280px');
+          _this.table_wrapper.css('height', '262px');
+          _this.btn_fold.css({
             top: '0px',
             padding: '5px 5px 5px 5px'
           }).removeClass('fa-angle-up').addClass('fa-angle-down');

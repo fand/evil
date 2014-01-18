@@ -48,9 +48,13 @@ class @SynthView
         @cells_x = 32
         @cells_y = 20
 
-        @fold = @dom.find('.btn-fold-core')
+        @btn_fold = @dom.find('.btn-fold-core')
         @core = @dom.find('.synth-core')
         @is_panel_opened = true
+
+        @btn_fx = @dom.find('.btn-fx-view')
+        @fx = @dom.find('.synth-fx')
+        @is_fx_view = false
 
         @keyboard = new KeyboardView(this)
 
@@ -186,18 +190,32 @@ class @SynthView
                 @minusPattern()
         ))
 
-        @fold.on('mousedown', () =>
+        @btn_fold.on('mousedown', () =>
             if @is_panel_opened
                 @core.css('height', '0px')
                 @table_wrapper.css('height', '524px')
-                @fold.css(top: '-22px', padding: '0px 5px 0px 0px').removeClass('fa-angle-down').addClass('fa-angle-up')
+                @btn_fold.css(top: '-22px', padding: '0px 5px 0px 0px').removeClass('fa-angle-down').addClass('fa-angle-up')
                 @is_panel_opened = false
             else
                 @core.css('height', '280px')
                 @table_wrapper.css('height', '262px')
-                @fold.css(top: '0px', padding: '5px 5px 5px 5px').removeClass('fa-angle-up').addClass('fa-angle-down')
+                @btn_fold.css(top: '0px', padding: '5px 5px 5px 5px').removeClass('fa-angle-up').addClass('fa-angle-down')
                 @is_panel_opened = true
         )
+
+        @btn_fx.on('mousedown', () =>
+            if @is_fx_view
+                # @core.css('height', '0px')
+                # @table_wrapper.css('height', '524px')
+                # @btn_fold.css(top: '-22px', padding: '0px 5px 0px 0px').removeClass('fa-angle-down').addClass('fa-angle-up')
+                @is_fx_view = false
+            else
+                @core.css('height', '280px')
+                @table_wrapper.css('height', '262px')
+                @btn_fold.css(top: '0px', padding: '5px 5px 5px 5px').removeClass('fa-angle-up').addClass('fa-angle-down')
+                @is_panel_opened = true
+        )
+
 
     addNote: (pos) ->
         if @pattern[pos.x_abs] == 'end' or @pattern[pos.x_abs] == 'sustain'
