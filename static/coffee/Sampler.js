@@ -520,6 +520,7 @@
         this.effects[this.effects.length - 1].connect(fx["in"]);
       }
       fx.connect(this["return"]);
+      fx.setSource(this);
       return this.effects.push(fx);
     };
 

@@ -334,6 +334,7 @@ class @Sampler
             @effects[@effects.length - 1].connect(fx.in)
 
         fx.connect(@return)
+        fx.setSource(this)
         @effects.push(fx)
 
 
