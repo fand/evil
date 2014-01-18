@@ -555,5 +555,3 @@ class @Synth
 
         fx.disconnect()
         @effects.splice(i, 1)
-
-        # delete fx

@@ -520,7 +520,29 @@
         this.effects[this.effects.length - 1].connect(fx["in"]);
       }
       fx.connect(this["return"]);
+      fx.setSource(this);
       return this.effects.push(fx);
+    };
+
+    Sampler.prototype.removeEffect = function(fx) {
+      var i, prev;
+      i = this.effects.indexOf(fx);
+      if (i === -1) {
+        return;
+      }
+      if (i === 0) {
+        prev = this.send;
+      } else {
+        prev = this.effects[i - 1];
+      }
+      prev.disconnect();
+      if (this.effects[i + 1] != null) {
+        prev.connect(this.effects[i + 1]["in"]);
+      } else {
+        prev.connect(this["return"]);
+      }
+      fx.disconnect();
+      return this.effects.splice(i, 1);
     };
 
     return Sampler;

@@ -334,10 +334,33 @@ class @Sampler
             @effects[@effects.length - 1].connect(fx.in)
 
         fx.connect(@return)
+        fx.setSource(this)
         @effects.push(fx)
 
 
+    removeEffect: (fx) ->
+        i = @effects.indexOf(fx)
+        return if i == -1
 
+        if i == 0
+            prev = @send
+        else
+            prev = @effects[i - 1]
+
+        prev.disconnect()
+        if @effects[i + 1]?
+            prev.connect(@effects[i + 1].in)
+        else
+            prev.connect(@return)
+
+        fx.disconnect()
+        @effects.splice(i, 1)
+
+
+
+# -------------------------------
+# Samples DATA
+#
 
 SAMPLES_DEFAULT = [
     'bd_909dwsd', 'bd_sub808',

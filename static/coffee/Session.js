@@ -1,14 +1,14 @@
 (function() {
-  var SONG_DEFAULT, _master;
+  var _master;
 
   _master = {
     name: 'section-0',
-    bpm: 120,
+    bpm: 144,
     key: 'A',
-    scale: 'Major'
+    scale: 'minor'
   };
 
-  SONG_DEFAULT = {
+  this.SONG_DEFAULT = {
     tracks: [],
     length: 1,
     master: [_master]
@@ -97,7 +97,7 @@
           continue;
         }
         pat = this.song.tracks[i].patterns[this.scene_pos];
-        if (pat != null) {
+        if ((pat != null) && pat !== null) {
           this.synth[i].readPattern(pat);
           this.scene_length = Math.max(this.scene_length, pat.pattern.length);
           this.current_cells[i] = pos;
@@ -260,11 +260,7 @@
     };
 
     Session.prototype.savePattern = function(x, y) {
-      if (this.song.tracks[x].patterns[y] != null) {
-        return this.song.tracks[x].patterns[y] = this.player.synth[x].getPattern();
-      } else {
-        return this.song.tracks[x].patterns[y] = this.player.synth[x].getPattern();
-      }
+      return this.song.tracks[x].patterns[y] = this.player.synth[x].getPattern();
     };
 
     Session.prototype.saveTracks = function() {
@@ -320,10 +316,12 @@
       this.scene_length = 0;
       for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         pat = this.song.tracks[i].patterns[0];
-        if (pat != null) {
+        if ((pat != null) && pat !== null) {
           this.synth[i].readPattern(pat);
           this.current_cells[i] = 0;
           this.scene_length = Math.max(this.scene_length, pat.pattern.length);
+        } else {
+          this.current_cells[i] = void 0;
         }
       }
       this.player.readScene(this.song.master[0]);

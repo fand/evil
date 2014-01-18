@@ -351,7 +351,7 @@ class @SessionView
             @current_cells = cells
 
         for i in [0...@current_cells.length]
-            @drawActive(i, @current_cells[i])
+            @drawActive(i, @current_cells[i]) if @current_cells[i]?
 
         @drawActiveMaster(pos)
         @scene_pos = pos

@@ -418,7 +418,9 @@
         this.current_cells = cells;
       }
       for (i = _i = 0, _ref = this.current_cells.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.drawActive(i, this.current_cells[i]);
+        if (this.current_cells[i] != null) {
+          this.drawActive(i, this.current_cells[i]);
+        }
       }
       this.drawActiveMaster(pos);
       this.scene_pos = pos;

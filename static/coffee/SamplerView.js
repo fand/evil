@@ -550,7 +550,7 @@
               _this.model.player.forward();
             }
           }
-          if (_this.page > i) {
+          if (i < _this.page) {
             _results = [];
             while (_this.page !== i) {
               _results.push(_this.model.player.backward(true));

@@ -1,10 +1,10 @@
 _master =
     name: 'section-0'
-    bpm: 120
+    bpm: 144
     key: 'A'
-    scale: 'Major'
+    scale: 'minor'
 
-SONG_DEFAULT =
+@SONG_DEFAULT =
     tracks: []
     length: 1
     master: [_master]
@@ -74,7 +74,7 @@ class @Session
         for i in [0...@synth.length]
             continue if not @song.tracks[i].patterns[@scene_pos]?
             pat = @song.tracks[i].patterns[@scene_pos]
-            if pat?
+            if pat? and pat != null
                 @synth[i].readPattern(pat)
                 @scene_length = Math.max(@scene_length, pat.pattern.length)
                 @current_cells[i] = pos
@@ -200,10 +200,7 @@ class @Session
             @savePattern(i, @current_cells[i])
 
     savePattern: (x, y) ->
-        if @song.tracks[x].patterns[y]?
-            @song.tracks[x].patterns[y] = @player.synth[x].getPattern()
-        else
-            @song.tracks[x].patterns[y] = @player.synth[x].getPattern()
+        @song.tracks[x].patterns[y] = @player.synth[x].getPattern()
 
     saveTracks: ->
         for i in [0...@player.synth.length]
@@ -239,10 +236,12 @@ class @Session
         @scene_length = 0
         for i in [0...@song.tracks.length]
             pat = @song.tracks[i].patterns[0]
-            if pat?
+            if pat? and pat != null
                 @synth[i].readPattern(pat)
                 @current_cells[i] = 0
                 @scene_length = Math.max(@scene_length, pat.pattern.length)
+            else
+                @current_cells[i] = undefined
         @player.readScene(@song.master[0])
         @player.setSceneLength(@scene_length)
         @readTracks(@song.tracks)

@@ -1,40 +1,72 @@
 class @FXView
-    constructor: (@model, @dom) ->
-        @minus = @dom.find('.sidebar-effect-minus')
+    constructor: (@model, @dom_side, @dom_synth) ->
+        @minus_side = @dom_side.find('.sidebar-effect-minus')
+        @minus_synth = @dom_side.find('.sidebar-effect-minus')
 
     initEvent: ->
-        @minus.on('click', ()=>
+        @minus_side.on('click', ()=>
             @model.remove()
-            $(@dom).remove()
+            $(@dom_side).remove()
+            $(@dom_synth).remove()
+        )
+        @minus_synth.on('click', ()=>
+            @model.remove()
+            $(@dom_side).remove()
+            $(@dom_synth).remove()
         )
 
 
 class @ReverbView extends @FXView
     constructor: (@model) ->
         @dom = $('#tmpl_fx_reverb').clone()
+        @dom_synth = $('#tmpl_fx_synth_reverb').clone()
         @dom.removeAttr('id')
 
-        super(@model, @dom)
+        super(@model, @dom, @dom_synth)
 
         @name   = @dom.find('[name=name]')
         @input  = @dom.find('[name=input]')
         @output = @dom.find('[name=output]')
+
+        @name_synth   = @dom_synth.find('[name=name]')
+        @input_synth  = @dom_synth.find('[name=input]')
+        @output_synth = @dom_synth.find('[name=output]')
 
         @initEvent()
 
     initEvent: ->
         super()
         @name.on('change', () =>
+            @name_synth.val(@name.val())
             @model.setIR(@name.val())
         )
         @input.on('change', () =>
+            @input_synth.val(@input.val())
             @model.setParam(input: parseFloat(@input.val()) / 100.0)
         )
         @output.on('change', () =>
+            @output_synth.val(@output.val())
             @model.setParam(output: parseFloat(@output.val()) / 100.0)
         )
 
+        @name_synth.on('change', () =>
+            @name.val(@name_synth.val())
+            @model.setIR(@name_synth.val())
+        )
+        @input_synth.on('change', () =>
+            @input.val(@input_synth.val())
+            @model.setParam(input: parseFloat(@input_synth.val()) / 100.0)
+        )
+        @output_synth.on('change', () =>
+            @output.val(@output_synth.val())
+            @model.setParam(output: parseFloat(@output_synth.val()) / 100.0)
+        )
+
     readParam: (p) ->
+        @input.val(p.input * 100) if p.input?
+        @output.val(p.output * 100) if p.output?
+        @name.val(p.name) if p.name?
+
         @input.val(p.input * 100) if p.input?
         @output.val(p.output * 100) if p.output?
         @name.val(p.name) if p.name?

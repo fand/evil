@@ -81,6 +81,7 @@ class @Player
                 @time = @time - (@time % 32)
         @synth_now.redraw(@time)
 
+
     toggleLoop: -> @session.toggleLoop()
 
     noteOn: (note, force) -> @synth_now.noteOn(note, force)
