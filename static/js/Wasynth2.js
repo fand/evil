@@ -5246,7 +5246,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.song.master[pos.y] == null) {
         return;
       }
-      this.ctx_tracks_hover.clearRect(0, this.select_pos.y * this.h, this.w, this.h);
+      this.ctx_tracks_hover.clearRect(this.select_pos.x * this.w, this.select_pos.y * this.h, this.w, this.h);
       this.ctx_master_hover.clearRect(0, this.hover_pos.y * this.h, this.w_master, this.h);
       this.ctx_master_hover.clearRect(0, this.click_pos.y * this.h, this.w_master, this.h);
       this.ctx_master_hover.clearRect(0, this.select_pos.y * this.h, this.w_master, this.h);
