@@ -124,7 +124,13 @@
               <fieldset id="sidebar-master-control" class="sidebar-module sidebar-name">
                 <legend><input name="name" type="text" value="section-0" /></legend>
 
-                <div class="clearfix">
+                <div class="display clearfix">
+                  <div class="display-current-control"></div>
+                  <input name="edit" type="button" value="edit"/>
+                </div>
+
+
+                <div class="control clearfix">
                   <label>key</label>
                   <select name="key">
                     <option selected="selected">A</option>
@@ -142,7 +148,7 @@
                   </select>
                 </div>
 
-                <div class="clearfix">
+                <div class="control clearfix">
                   <label>scale</label>
                   <select name="mode">
                     <option selected="selected">Major</option>
@@ -157,12 +163,12 @@
                   </select>
                 </div>
 
-                <div class="clearfix">
+                <div class="control clearfix">
                   <label>bpm</label>
                   <input name="bpm"   type="number" min="0" max="50000" value="120">
                 </div>
 
-                <div class="clearfix">
+                <div class="control clearfix">
                   <input name="save" type="button" value="save"/>
                 </div>
               </fieldset>

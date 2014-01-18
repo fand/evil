@@ -218,6 +218,8 @@ class @Session
     saveMaster: (y, obj) ->
         @song.master[y] = obj
         @view.readSong(@song, @current_cells)
+        if y == @scene_pos
+            @player.readScene(obj)
 
     saveMasters: ->
         if @song.master == []

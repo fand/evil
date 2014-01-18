@@ -871,7 +871,8 @@ canvas:active {
 }
 
 
-#sidebar-master-control > div {
+#sidebar-master-control > .control {
+    display: none;
     margin: 5px 0px;
     height: 26px;
 }
@@ -882,7 +883,7 @@ canvas:active {
     padding-right: 5px;
     text-align: right;
 }
-#sidebar-master-control > div > select {
+#sidebar-master-control > .control > select {
     float: right;
     width: 70px;
     font-size: 10px;
@@ -890,7 +891,7 @@ canvas:active {
     margin-top: 4px;
     margin-right: 12px;
 }
-#sidebar-master-control > div > input {
+#sidebar-master-control > .control > input {
     float: right;
     width: 65px;
     font-size: 10px;
@@ -898,6 +899,21 @@ canvas:active {
     margin-top: 4px;
     margin-right: 12px;
 }
+#sidebar-master-control .display-current-control {
+    float: left;
+    width: 130px;
+    margin-left: 10px;
+    font-size: 11px;
+}
+#sidebar-master-control > .display > input {
+    float: right;
+    width: 45px;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 4px;
+    margin-right: 12px;
+}
+
 
 .sidebar-add-effect {
     margin-top: 10px;

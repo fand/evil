@@ -58,6 +58,18 @@
       return this.mixer.addTracksEffect(this.sidebar_pos.x, name);
     };
 
+    Sidebar.prototype.setBPM = function(b) {
+      return this.view.setBPM(b);
+    };
+
+    Sidebar.prototype.setKey = function(k) {
+      return this.view.setKey(k);
+    };
+
+    Sidebar.prototype.setScale = function(s) {
+      return this.view.setScale(s);
+    };
+
     return Sidebar;
 
   })();

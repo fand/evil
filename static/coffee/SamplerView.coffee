@@ -27,7 +27,7 @@ class @SamplerCoreView
         @sample_list.removeAttr('id')
         @sample.find('.file-select').append(@sample_list)
         @sample_list_wrapper = $('<div class="sample-list-wrapper"></div>')
-        $('body').append(@sample_list_wrapper)
+        @sample.find('.file-select').append(@sample_list_wrapper)
 
         @initEvent()
 

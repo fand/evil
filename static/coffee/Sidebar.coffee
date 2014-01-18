@@ -29,3 +29,7 @@ class @Sidebar
 
     addTracksEffect: (name) =>
         @mixer.addTracksEffect(@sidebar_pos.x, name)
+
+    setBPM:   (b) -> @view.setBPM(b)
+    setKey:   (k) -> @view.setKey(k)
+    setScale: (s) -> @view.setScale(s)
