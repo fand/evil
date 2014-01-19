@@ -1,36 +1,23 @@
 class @FXView
-    constructor: (@model, @dom_side, @dom_synth) ->
+    constructor: (@model, @dom_side) ->
         @minus_side = @dom_side.find('.sidebar-effect-minus')
-        @minus_synth = @dom_side.find('.sidebar-effect-minus')
 
     initEvent: ->
         @minus_side.on('click', ()=>
             @model.remove()
             $(@dom_side).remove()
-            $(@dom_synth).remove()
-        )
-        @minus_synth.on('click', ()=>
-            @model.remove()
-            $(@dom_side).remove()
-            $(@dom_synth).remove()
         )
 
 
 class @ReverbView extends @FXView
     constructor: (@model) ->
         @dom = $('#tmpl_fx_reverb').clone()
-        @dom_synth = $('#tmpl_fx_synth_reverb').clone()
         @dom.removeAttr('id')
 
-        super(@model, @dom, @dom_synth)
+        super(@model, @dom)
 
         @name   = @dom.find('[name=name]')
-        @input  = @dom.find('[name=input]')
-        @output = @dom.find('[name=output]')
-
-        @name_synth   = @dom_synth.find('[name=name]')
-        @input_synth  = @dom_synth.find('[name=input]')
-        @output_synth = @dom_synth.find('[name=output]')
+        @wet  = @dom.find('[name=wet]')
 
         @initEvent()
 
@@ -40,36 +27,13 @@ class @ReverbView extends @FXView
             @name_synth.val(@name.val())
             @model.setIR(@name.val())
         )
-        @input.on('change', () =>
-            @input_synth.val(@input.val())
-            @model.setParam(input: parseFloat(@input.val()) / 100.0)
-        )
-        @output.on('change', () =>
-            @output_synth.val(@output.val())
-            @model.setParam(output: parseFloat(@output.val()) / 100.0)
-        )
-
-        @name_synth.on('change', () =>
-            @name.val(@name_synth.val())
-            @model.setIR(@name_synth.val())
-        )
-        @input_synth.on('change', () =>
-            @input.val(@input_synth.val())
-            @model.setParam(input: parseFloat(@input_synth.val()) / 100.0)
-        )
-        @output_synth.on('change', () =>
-            @output.val(@output_synth.val())
-            @model.setParam(output: parseFloat(@output_synth.val()) / 100.0)
+        @wet.on('change', () =>
+            @model.setParam(wet: parseFloat(@wet.val()) / 100.0)
         )
 
     readParam: (p) ->
-        @input.val(p.input * 100) if p.input?
-        @output.val(p.output * 100) if p.output?
         @name.val(p.name) if p.name?
-
-        @input.val(p.input * 100) if p.input?
-        @output.val(p.output * 100) if p.output?
-        @name.val(p.name) if p.name?
+        @wet.val(p.wet * 100) if p.wet?
 
 
 
@@ -83,18 +47,14 @@ class @DelayView extends @FXView
         @delay  = @dom.find('[name=delay]')
         @feedback = @dom.find('[name=feedback]')
         @lofi   = @dom.find('[name=lofi]')
-        @input  = @dom.find('[name=input]')
-        @output = @dom.find('[name=output]')
+        @wet = @dom.find('[name=wet]')
 
         @initEvent()
 
     initEvent: ->
         super()
-        @input.on('change', () =>
-            @model.setParam(input: parseFloat(@input.val()) / 100.0)
-        )
-        @output.on('change', () =>
-            @model.setParam(output: parseFloat(@output.val()) / 100.0)
+        @wet.on('change', () =>
+            @model.setParam(wet: parseFloat(@wet.val()) / 100.0)
         )
         @delay.on('change', () =>
             @model.setParam(delay: parseFloat(@delay.val()) / 1000.0)
@@ -107,12 +67,10 @@ class @DelayView extends @FXView
         )
 
     readParam: (p) ->
-        @input.val(p.input * 100) if p.input?
-        @output.val(p.output * 100) if p.output?
         @delay.val(p.delay * 1000) if p.delays?
         @feedback.val(p.feedback * 100) if p.feedback?
         @lofi.val(p.lofi * 20) if p.lofi?
-
+        @wet.val(p.wet * 100) if p.wet?
 
 
 class @CompressorView extends @FXView
@@ -210,19 +168,11 @@ class @DoubleView extends @FXView
 
         @delay  = @dom.find('[name=delay]')
         @width  = @dom.find('[name=width]')
-        @input  = @dom.find('[name=input]')
-        @output = @dom.find('[name=output]')
 
         @initEvent()
 
     initEvent: ->
         super()
-        @input.on('change', () =>
-            @model.setParam(input: parseFloat(@input.val()) / 100.0)
-        )
-        @output.on('change', () =>
-            @model.setParam(output: parseFloat(@output.val()) / 100.0)
-        )
         @delay.on('change', () =>
             @model.setParam(delay: parseFloat(@delay.val()) / 1000.0)
         )
@@ -231,7 +181,5 @@ class @DoubleView extends @FXView
         )
 
     readParam: (p) ->
-        @input.val(p.input * 100) if p.input?
-        @output.val(p.output * 100) if p.output?
         @delay.val(p.delay * 1000) if p.delay?
         @width.val((p.width - 0.5) * 200) if p.width?

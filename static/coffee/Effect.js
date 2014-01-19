@@ -8,6 +8,10 @@
       this.ctx = ctx;
       this["in"] = this.ctx.createGain();
       this["in"].gain.value = 1.0;
+      this.dry = this.ctx.createGain();
+      this.dry.gain.value = 1.0;
+      this.wet = this.ctx.createGain();
+      this.wet.gain.value = 1.0;
       this.out = this.ctx.createGain();
       this.out.gain.value = 1.0;
     }
@@ -26,6 +30,14 @@
 
     FX.prototype.setOutput = function(d) {
       return this.out.gain.value = d;
+    };
+
+    FX.prototype.setDry = function(d) {
+      return this.dry.gain.value = d;
+    };
+
+    FX.prototype.setWet = function(d) {
+      return this.wet.gain.value = d;
     };
 
     FX.prototype.appendTo = function(dst) {
@@ -67,9 +79,11 @@
       this.feedback.gain.value = 0.2;
       this["in"].connect(this.lofi);
       this.lofi.connect(this.delay);
-      this.delay.connect(this.out);
+      this.delay.connect(this.wet);
       this.delay.connect(this.feedback);
       this.feedback.connect(this.lofi);
+      this.wet.connect(this.out);
+      this["in"].connect(this.out);
       this.view = new DelayView(this);
     }
 
@@ -95,11 +109,8 @@
       if (p.lofi != null) {
         this.setLofi(p.lofi);
       }
-      if (p.input != null) {
-        this.setInput(p.input);
-      }
-      if (p.output != null) {
-        return this.setOutput(p.output);
+      if (p.wet != null) {
+        return this.setWet(p.wet);
       }
     };
 
@@ -109,8 +120,7 @@
         delay: this.delay.delayTime.value,
         feedback: this.feedback.gain.value,
         lofi: this.lofi.Q.value,
-        input: this["in"].gain.value,
-        output: this.out.gain.value
+        wet: this.wet.gain.value
       };
     };
 
@@ -126,10 +136,10 @@
       Reverb.__super__.constructor.call(this, this.ctx);
       this.reverb = this.ctx.createConvolver();
       this["in"].connect(this.reverb);
-      this.reverb.connect(this.out);
+      this.reverb.connect(this.wet);
+      this.wet.connect(this.out);
+      this["in"].connect(this.out);
       this.setIR('BIG_SNARE');
-      this["in"].gain.value = 1.0;
-      this.out.gain.value = 1.0;
       this.view = new ReverbView(this);
     }
 
@@ -164,11 +174,8 @@
       if (p.name != null) {
         this.setIR(p.name);
       }
-      if (p.input != null) {
-        this.setInput(p.input);
-      }
-      if (p.output != null) {
-        return this.setOutput(p.output);
+      if (p.wet != null) {
+        return this.setWet(p.wet);
       }
     };
 
@@ -176,8 +183,7 @@
       return {
         effect: 'Reverb',
         name: this.name,
-        input: this["in"].gain.value,
-        output: this.out.gain.value
+        wet: this.wet.gain.value
       };
     };
 
@@ -370,6 +376,7 @@
       this.delay.connect(this.pan_r["in"]);
       this.pan_l.connect(this.out);
       this.pan_r.connect(this.out);
+      this.out.gain.value = 0.6;
       this.view = new DoubleView(this);
     }
 
@@ -388,13 +395,7 @@
         this.setDelay(p.delay);
       }
       if (p.width != null) {
-        this.setWidth(p.width);
-      }
-      if (p.input != null) {
-        this.setInput(p.input);
-      }
-      if (p.output != null) {
-        return this.setOutput(p.output);
+        return this.setWidth(p.width);
       }
     };
 
@@ -402,9 +403,7 @@
       return {
         effect: 'Double',
         delay: this.delay.delayTime.value,
-        width: this.pos,
-        input: this["in"].gain.value,
-        output: this.out.gain.value
+        width: this.pos
       };
     };
 

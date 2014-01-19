@@ -28,6 +28,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.ctx = ctx;
       this["in"] = this.ctx.createGain();
       this["in"].gain.value = 1.0;
+      this.dry = this.ctx.createGain();
+      this.dry.gain.value = 1.0;
+      this.wet = this.ctx.createGain();
+      this.wet.gain.value = 1.0;
       this.out = this.ctx.createGain();
       this.out.gain.value = 1.0;
     }
@@ -46,6 +50,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     FX.prototype.setOutput = function(d) {
       return this.out.gain.value = d;
+    };
+
+    FX.prototype.setDry = function(d) {
+      return this.dry.gain.value = d;
+    };
+
+    FX.prototype.setWet = function(d) {
+      return this.wet.gain.value = d;
     };
 
     FX.prototype.appendTo = function(dst) {
@@ -87,9 +99,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.feedback.gain.value = 0.2;
       this["in"].connect(this.lofi);
       this.lofi.connect(this.delay);
-      this.delay.connect(this.out);
+      this.delay.connect(this.wet);
       this.delay.connect(this.feedback);
       this.feedback.connect(this.lofi);
+      this.wet.connect(this.out);
+      this["in"].connect(this.out);
       this.view = new DelayView(this);
     }
 
@@ -115,11 +129,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (p.lofi != null) {
         this.setLofi(p.lofi);
       }
-      if (p.input != null) {
-        this.setInput(p.input);
-      }
-      if (p.output != null) {
-        return this.setOutput(p.output);
+      if (p.wet != null) {
+        return this.setWet(p.wet);
       }
     };
 
@@ -129,8 +140,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         delay: this.delay.delayTime.value,
         feedback: this.feedback.gain.value,
         lofi: this.lofi.Q.value,
-        input: this["in"].gain.value,
-        output: this.out.gain.value
+        wet: this.wet.gain.value
       };
     };
 
@@ -146,10 +156,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       Reverb.__super__.constructor.call(this, this.ctx);
       this.reverb = this.ctx.createConvolver();
       this["in"].connect(this.reverb);
-      this.reverb.connect(this.out);
+      this.reverb.connect(this.wet);
+      this.wet.connect(this.out);
+      this["in"].connect(this.out);
       this.setIR('BIG_SNARE');
-      this["in"].gain.value = 1.0;
-      this.out.gain.value = 1.0;
       this.view = new ReverbView(this);
     }
 
@@ -184,11 +194,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (p.name != null) {
         this.setIR(p.name);
       }
-      if (p.input != null) {
-        this.setInput(p.input);
-      }
-      if (p.output != null) {
-        return this.setOutput(p.output);
+      if (p.wet != null) {
+        return this.setWet(p.wet);
       }
     };
 
@@ -196,8 +203,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return {
         effect: 'Reverb',
         name: this.name,
-        input: this["in"].gain.value,
-        output: this.out.gain.value
+        wet: this.wet.gain.value
       };
     };
 
@@ -390,6 +396,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.delay.connect(this.pan_r["in"]);
       this.pan_l.connect(this.out);
       this.pan_r.connect(this.out);
+      this.out.gain.value = 0.6;
       this.view = new DoubleView(this);
     }
 
@@ -408,13 +415,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.setDelay(p.delay);
       }
       if (p.width != null) {
-        this.setWidth(p.width);
-      }
-      if (p.input != null) {
-        this.setInput(p.input);
-      }
-      if (p.output != null) {
-        return this.setOutput(p.output);
+        return this.setWidth(p.width);
       }
     };
 
@@ -422,9 +423,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return {
         effect: 'Double',
         delay: this.delay.delayTime.value,
-        width: this.pos,
-        input: this["in"].gain.value,
-        output: this.out.gain.value
+        width: this.pos
       };
     };
 
@@ -558,25 +557,17 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   this.FXView = (function() {
-    function FXView(model, dom_side, dom_synth) {
+    function FXView(model, dom_side) {
       this.model = model;
       this.dom_side = dom_side;
-      this.dom_synth = dom_synth;
       this.minus_side = this.dom_side.find('.sidebar-effect-minus');
-      this.minus_synth = this.dom_side.find('.sidebar-effect-minus');
     }
 
     FXView.prototype.initEvent = function() {
       var _this = this;
-      this.minus_side.on('click', function() {
+      return this.minus_side.on('click', function() {
         _this.model.remove();
-        $(_this.dom_side).remove();
-        return $(_this.dom_synth).remove();
-      });
-      return this.minus_synth.on('click', function() {
-        _this.model.remove();
-        $(_this.dom_side).remove();
-        return $(_this.dom_synth).remove();
+        return $(_this.dom_side).remove();
       });
     };
 
@@ -590,15 +581,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     function ReverbView(model) {
       this.model = model;
       this.dom = $('#tmpl_fx_reverb').clone();
-      this.dom_synth = $('#tmpl_fx_synth_reverb').clone();
       this.dom.removeAttr('id');
-      ReverbView.__super__.constructor.call(this, this.model, this.dom, this.dom_synth);
+      ReverbView.__super__.constructor.call(this, this.model, this.dom);
       this.name = this.dom.find('[name=name]');
-      this.input = this.dom.find('[name=input]');
-      this.output = this.dom.find('[name=output]');
-      this.name_synth = this.dom_synth.find('[name=name]');
-      this.input_synth = this.dom_synth.find('[name=input]');
-      this.output_synth = this.dom_synth.find('[name=output]');
+      this.wet = this.dom.find('[name=wet]');
       this.initEvent();
     }
 
@@ -609,54 +595,19 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _this.name_synth.val(_this.name.val());
         return _this.model.setIR(_this.name.val());
       });
-      this.input.on('change', function() {
-        _this.input_synth.val(_this.input.val());
+      return this.wet.on('change', function() {
         return _this.model.setParam({
-          input: parseFloat(_this.input.val()) / 100.0
-        });
-      });
-      this.output.on('change', function() {
-        _this.output_synth.val(_this.output.val());
-        return _this.model.setParam({
-          output: parseFloat(_this.output.val()) / 100.0
-        });
-      });
-      this.name_synth.on('change', function() {
-        _this.name.val(_this.name_synth.val());
-        return _this.model.setIR(_this.name_synth.val());
-      });
-      this.input_synth.on('change', function() {
-        _this.input.val(_this.input_synth.val());
-        return _this.model.setParam({
-          input: parseFloat(_this.input_synth.val()) / 100.0
-        });
-      });
-      return this.output_synth.on('change', function() {
-        _this.output.val(_this.output_synth.val());
-        return _this.model.setParam({
-          output: parseFloat(_this.output_synth.val()) / 100.0
+          wet: parseFloat(_this.wet.val()) / 100.0
         });
       });
     };
 
     ReverbView.prototype.readParam = function(p) {
-      if (p.input != null) {
-        this.input.val(p.input * 100);
-      }
-      if (p.output != null) {
-        this.output.val(p.output * 100);
-      }
       if (p.name != null) {
         this.name.val(p.name);
       }
-      if (p.input != null) {
-        this.input.val(p.input * 100);
-      }
-      if (p.output != null) {
-        this.output.val(p.output * 100);
-      }
-      if (p.name != null) {
-        return this.name.val(p.name);
+      if (p.wet != null) {
+        return this.wet.val(p.wet * 100);
       }
     };
 
@@ -675,22 +626,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.delay = this.dom.find('[name=delay]');
       this.feedback = this.dom.find('[name=feedback]');
       this.lofi = this.dom.find('[name=lofi]');
-      this.input = this.dom.find('[name=input]');
-      this.output = this.dom.find('[name=output]');
+      this.wet = this.dom.find('[name=wet]');
       this.initEvent();
     }
 
     DelayView.prototype.initEvent = function() {
       var _this = this;
       DelayView.__super__.initEvent.call(this);
-      this.input.on('change', function() {
+      this.wet.on('change', function() {
         return _this.model.setParam({
-          input: parseFloat(_this.input.val()) / 100.0
-        });
-      });
-      this.output.on('change', function() {
-        return _this.model.setParam({
-          output: parseFloat(_this.output.val()) / 100.0
+          wet: parseFloat(_this.wet.val()) / 100.0
         });
       });
       this.delay.on('change', function() {
@@ -711,12 +656,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     DelayView.prototype.readParam = function(p) {
-      if (p.input != null) {
-        this.input.val(p.input * 100);
-      }
-      if (p.output != null) {
-        this.output.val(p.output * 100);
-      }
       if (p.delays != null) {
         this.delay.val(p.delay * 1000);
       }
@@ -724,7 +663,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.feedback.val(p.feedback * 100);
       }
       if (p.lofi != null) {
-        return this.lofi.val(p.lofi * 20);
+        this.lofi.val(p.lofi * 20);
+      }
+      if (p.wet != null) {
+        return this.wet.val(p.wet * 100);
       }
     };
 
@@ -887,24 +829,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       DoubleView.__super__.constructor.call(this, this.model, this.dom);
       this.delay = this.dom.find('[name=delay]');
       this.width = this.dom.find('[name=width]');
-      this.input = this.dom.find('[name=input]');
-      this.output = this.dom.find('[name=output]');
       this.initEvent();
     }
 
     DoubleView.prototype.initEvent = function() {
       var _this = this;
       DoubleView.__super__.initEvent.call(this);
-      this.input.on('change', function() {
-        return _this.model.setParam({
-          input: parseFloat(_this.input.val()) / 100.0
-        });
-      });
-      this.output.on('change', function() {
-        return _this.model.setParam({
-          output: parseFloat(_this.output.val()) / 100.0
-        });
-      });
       this.delay.on('change', function() {
         return _this.model.setParam({
           delay: parseFloat(_this.delay.val()) / 1000.0
@@ -918,12 +848,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     DoubleView.prototype.readParam = function(p) {
-      if (p.input != null) {
-        this.input.val(p.input * 100);
-      }
-      if (p.output != null) {
-        this.output.val(p.output * 100);
-      }
       if (p.delay != null) {
         this.delay.val(p.delay * 1000);
       }
