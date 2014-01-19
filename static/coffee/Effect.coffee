@@ -2,6 +2,10 @@ class @FX
     constructor: (@ctx) ->
         @in = @ctx.createGain()
         @in.gain.value = 1.0
+        @dry = @ctx.createGain()
+        @dry.gain.value = 1.0
+        @wet = @ctx.createGain()
+        @wet.gain.value = 1.0
         @out = @ctx.createGain()
         @out.gain.value = 1.0
 
@@ -10,6 +14,8 @@ class @FX
 
     setInput:  (d) -> @in.gain.value = d
     setOutput: (d) -> @out.gain.value = d
+    setDry:    (d) -> @dry.gain.value = d
+    setWet:    (d) -> @wet.gain.value = d
 
     appendTo: (dst) ->
         $(dst).append(@view.dom)
@@ -43,9 +49,12 @@ class @Delay extends @FX
 
         @in.connect(@lofi)
         @lofi.connect(@delay)
-        @delay.connect(@out)
+        @delay.connect(@wet)
         @delay.connect(@feedback)
         @feedback.connect(@lofi)
+
+        @wet.connect(@out)
+        @in.connect(@out)
 
         @view = new DelayView(this)
 
@@ -57,16 +66,14 @@ class @Delay extends @FX
         @setDelay(p.delay) if p.delay?
         @setFeedback(p.feedback) if p.feedback?
         @setLofi(p.lofi) if p.lofi?
-        @setInput(p.input) if p.input?
-        @setOutput(p.output) if p.output?
+        @setWet(p.wet) if p.wet?
 
     getParam: (p) ->
         effect: 'Delay'
         delay: @delay.delayTime.value
         feedback: @feedback.gain.value
         lofi: @lofi.Q.value
-        input: @in.gain.value
-        output: @out.gain.value
+        wet: @wet.gain.value
 
 
 
@@ -75,10 +82,12 @@ class @Reverb extends @FX
         super(@ctx)
         @reverb = @ctx.createConvolver()
         @in.connect(@reverb)
-        @reverb.connect(@out)
+        @reverb.connect(@wet)
+        @wet.connect(@out)
+        @in.connect(@out)
+
         @setIR('BIG_SNARE')
-        @in.gain.value = 1.0
-        @out.gain.value = 1.0
+
         @view = new ReverbView(this)
 
     setIR: (@name) ->
@@ -105,14 +114,12 @@ class @Reverb extends @FX
 
     setParam: (p) ->
         @setIR(p.name) if p.name?
-        @setInput(p.input) if p.input?
-        @setOutput(p.output) if p.output?
+        @setWet(p.wet) if p.wet?
 
     getParam: (p) ->
         effect: 'Reverb'
         name: @name
-        input: @in.gain.value
-        output: @out.gain.value
+        wet: @wet.gain.value
 
 
 
@@ -213,6 +220,7 @@ class @Fuzz extends @FX
         output: @out.gain.value
 
 
+
 class @Double extends @FX
     constructor: (@ctx) ->
         super(@ctx)
@@ -230,6 +238,8 @@ class @Double extends @FX
         @pan_l.connect(@out)
         @pan_r.connect(@out)
 
+        @out.gain.value = 0.6
+
         @view = new DoubleView(this)
 
     setDelay: (d) -> @delay.delayTime.value = d
@@ -240,15 +250,11 @@ class @Double extends @FX
     setParam: (p) ->
         @setDelay(p.delay) if p.delay?
         @setWidth(p.width) if p.width?
-        @setInput(p.input) if p.input?
-        @setOutput(p.output) if p.output?
 
     getParam: (p) ->
         effect: 'Double'
         delay: @delay.delayTime.value
         width: @pos
-        input: @in.gain.value
-        output: @out.gain.value
 
 
 IR_URL =

@@ -3,25 +3,17 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   this.FXView = (function() {
-    function FXView(model, dom_side, dom_synth) {
+    function FXView(model, dom_side) {
       this.model = model;
       this.dom_side = dom_side;
-      this.dom_synth = dom_synth;
       this.minus_side = this.dom_side.find('.sidebar-effect-minus');
-      this.minus_synth = this.dom_side.find('.sidebar-effect-minus');
     }
 
     FXView.prototype.initEvent = function() {
       var _this = this;
-      this.minus_side.on('click', function() {
+      return this.minus_side.on('click', function() {
         _this.model.remove();
-        $(_this.dom_side).remove();
-        return $(_this.dom_synth).remove();
-      });
-      return this.minus_synth.on('click', function() {
-        _this.model.remove();
-        $(_this.dom_side).remove();
-        return $(_this.dom_synth).remove();
+        return $(_this.dom_side).remove();
       });
     };
 
@@ -35,15 +27,10 @@
     function ReverbView(model) {
       this.model = model;
       this.dom = $('#tmpl_fx_reverb').clone();
-      this.dom_synth = $('#tmpl_fx_synth_reverb').clone();
       this.dom.removeAttr('id');
-      ReverbView.__super__.constructor.call(this, this.model, this.dom, this.dom_synth);
+      ReverbView.__super__.constructor.call(this, this.model, this.dom);
       this.name = this.dom.find('[name=name]');
-      this.input = this.dom.find('[name=input]');
-      this.output = this.dom.find('[name=output]');
-      this.name_synth = this.dom_synth.find('[name=name]');
-      this.input_synth = this.dom_synth.find('[name=input]');
-      this.output_synth = this.dom_synth.find('[name=output]');
+      this.wet = this.dom.find('[name=wet]');
       this.initEvent();
     }
 
@@ -54,54 +41,19 @@
         _this.name_synth.val(_this.name.val());
         return _this.model.setIR(_this.name.val());
       });
-      this.input.on('change', function() {
-        _this.input_synth.val(_this.input.val());
+      return this.wet.on('change', function() {
         return _this.model.setParam({
-          input: parseFloat(_this.input.val()) / 100.0
-        });
-      });
-      this.output.on('change', function() {
-        _this.output_synth.val(_this.output.val());
-        return _this.model.setParam({
-          output: parseFloat(_this.output.val()) / 100.0
-        });
-      });
-      this.name_synth.on('change', function() {
-        _this.name.val(_this.name_synth.val());
-        return _this.model.setIR(_this.name_synth.val());
-      });
-      this.input_synth.on('change', function() {
-        _this.input.val(_this.input_synth.val());
-        return _this.model.setParam({
-          input: parseFloat(_this.input_synth.val()) / 100.0
-        });
-      });
-      return this.output_synth.on('change', function() {
-        _this.output.val(_this.output_synth.val());
-        return _this.model.setParam({
-          output: parseFloat(_this.output_synth.val()) / 100.0
+          wet: parseFloat(_this.wet.val()) / 100.0
         });
       });
     };
 
     ReverbView.prototype.readParam = function(p) {
-      if (p.input != null) {
-        this.input.val(p.input * 100);
-      }
-      if (p.output != null) {
-        this.output.val(p.output * 100);
-      }
       if (p.name != null) {
         this.name.val(p.name);
       }
-      if (p.input != null) {
-        this.input.val(p.input * 100);
-      }
-      if (p.output != null) {
-        this.output.val(p.output * 100);
-      }
-      if (p.name != null) {
-        return this.name.val(p.name);
+      if (p.wet != null) {
+        return this.wet.val(p.wet * 100);
       }
     };
 
@@ -120,22 +72,16 @@
       this.delay = this.dom.find('[name=delay]');
       this.feedback = this.dom.find('[name=feedback]');
       this.lofi = this.dom.find('[name=lofi]');
-      this.input = this.dom.find('[name=input]');
-      this.output = this.dom.find('[name=output]');
+      this.wet = this.dom.find('[name=wet]');
       this.initEvent();
     }
 
     DelayView.prototype.initEvent = function() {
       var _this = this;
       DelayView.__super__.initEvent.call(this);
-      this.input.on('change', function() {
+      this.wet.on('change', function() {
         return _this.model.setParam({
-          input: parseFloat(_this.input.val()) / 100.0
-        });
-      });
-      this.output.on('change', function() {
-        return _this.model.setParam({
-          output: parseFloat(_this.output.val()) / 100.0
+          wet: parseFloat(_this.wet.val()) / 100.0
         });
       });
       this.delay.on('change', function() {
@@ -156,12 +102,6 @@
     };
 
     DelayView.prototype.readParam = function(p) {
-      if (p.input != null) {
-        this.input.val(p.input * 100);
-      }
-      if (p.output != null) {
-        this.output.val(p.output * 100);
-      }
       if (p.delays != null) {
         this.delay.val(p.delay * 1000);
       }
@@ -169,7 +109,10 @@
         this.feedback.val(p.feedback * 100);
       }
       if (p.lofi != null) {
-        return this.lofi.val(p.lofi * 20);
+        this.lofi.val(p.lofi * 20);
+      }
+      if (p.wet != null) {
+        return this.wet.val(p.wet * 100);
       }
     };
 
@@ -332,24 +275,12 @@
       DoubleView.__super__.constructor.call(this, this.model, this.dom);
       this.delay = this.dom.find('[name=delay]');
       this.width = this.dom.find('[name=width]');
-      this.input = this.dom.find('[name=input]');
-      this.output = this.dom.find('[name=output]');
       this.initEvent();
     }
 
     DoubleView.prototype.initEvent = function() {
       var _this = this;
       DoubleView.__super__.initEvent.call(this);
-      this.input.on('change', function() {
-        return _this.model.setParam({
-          input: parseFloat(_this.input.val()) / 100.0
-        });
-      });
-      this.output.on('change', function() {
-        return _this.model.setParam({
-          output: parseFloat(_this.output.val()) / 100.0
-        });
-      });
       this.delay.on('change', function() {
         return _this.model.setParam({
           delay: parseFloat(_this.delay.val()) / 1000.0
@@ -363,12 +294,6 @@
     };
 
     DoubleView.prototype.readParam = function(p) {
-      if (p.input != null) {
-        this.input.val(p.input * 100);
-      }
-      if (p.output != null) {
-        this.output.val(p.output * 100);
-      }
       if (p.delay != null) {
         this.delay.val(p.delay * 1000);
       }
