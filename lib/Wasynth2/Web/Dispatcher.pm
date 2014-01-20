@@ -5,6 +5,11 @@ use utf8;
 use Encode;
 use Amon2::Web::Dispatcher::RouterBoom;
 
+get '/test' => sub {
+    my ($c) = @_;
+    return $c->render( 'index.tx', +{ debug => 1, test => 1 } );
+};
+
 get '/mobile' => sub {
     my ($c) = @_;
     return $c->render('smartphone.tx');
