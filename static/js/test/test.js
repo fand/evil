@@ -90,11 +90,39 @@
       assertEq(p.key, c.key, 'key');
       return assertEq(p.scale, c.scale, 'scale');
     });
-    subtest('Player with Keyboard', function() {
-      return assert(true, 'fake');
-    });
-    return subtest('Patterns JSON', function() {
-      return assert(true, 'fake');
+    return subtest('Synth Sequencer', function() {
+      var canvas, e, events, i, offset, p0, p1, s, _i;
+      s = p.synth[0];
+      p0 = [0, 0, 0, -10, 'sustain', 'sustain', 'sustain', 'sustain', 'sustain', 'end', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      s.pattern = p0;
+      canvas = $('#synth0 > .sequencer .table-hover');
+      offset = canvas.offset();
+      events = [];
+      for (i = _i = 0; _i < 3; i = ++_i) {
+        e = new $.Event("mousedown");
+        e.clientX = 26 * i + 10 + offset.left;
+        e.clientY = 10 + offset.top;
+        canvas.trigger(e);
+        canvas.trigger('mouseup');
+      }
+      p1 = s.getPattern();
+      p0[0] = 20;
+      p0[1] = 20;
+      p0[2] = 20;
+      assertArrayEq(p0, p1.pattern, 'click');
+      e = new $.Event("mousedown");
+      e.clientX = 26 * 5 + 10 + offset.left;
+      e.clientY = 10 + offset.top;
+      canvas.trigger(e);
+      e = new $.Event("mousemove");
+      e.clientX = 26 * 6 + 10 + offset.left;
+      e.clientY = 10 + offset.top;
+      canvas.trigger(e);
+      e = new $.Event("mouseup");
+      e.clientX = 26 * 6 + 10 + offset.left;
+      e.clientY = 10 + offset.top;
+      canvas.trigger(e);
+      return p0 = [0, 0, 0, -10, 'end', -20, 'end', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     });
   };
 
@@ -163,16 +191,18 @@
       res = false;
     }
     for (i = _i = 0, _ref = v1.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      if (v1[i] === +v2[i] && v1[i] === v2[i] + '') {
+      if (v1[i] !== +v2[i] && v1[i] !== v2[i] + '') {
         res = false;
       }
     }
     if (res) {
       console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
-      console.log('v1: ' + v1 + ', v2:' + v2);
+      console.log('v1: ' + v1);
+      console.log('v2: ' + v2);
     } else {
       console.group('%c FAILED! ... ' + s, 'color: #f44;');
-      console.log('v1: ' + v1 + ', v2: ' + v2);
+      console.log('v1: ' + v1);
+      console.log('v2: ' + v2);
     }
     return console.groupEnd();
   };
@@ -184,7 +214,7 @@
       res = false;
     }
     for (i = _i = 0, _ref = v1.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      if (v1[i] === v2[i]) {
+      if (v1[i] !== +v2[i] && v1[i] !== v2[i] + '') {
         res = false;
       }
     }

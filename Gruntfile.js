@@ -39,7 +39,7 @@ module.exports = function(grunt) {
         },
         watch: {
             coffee: {
-                files: ['static/coffee/*.coffee'],
+                files: ['static/coffee/*.coffee', 'static/coffee/test/*.coffee'],
                 tasks: ['coffee', 'concat', 'uglify']
             }
         }

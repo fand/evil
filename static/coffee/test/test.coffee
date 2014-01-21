@@ -66,11 +66,53 @@ test = ->
         assertEq(p.key, c.key, 'key')
         assertEq(p.scale, c.scale, 'scale')
 
-    subtest 'Player with Keyboard', ->
-        assert(true, 'fake')
+    subtest 'Synth Sequencer', ->
+        s = p.synth[0]
+        p0 = [0, 0, 0, -10,'sustain', 'sustain', 'sustain', 'sustain',
+              'sustain', 'end', 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+        s.pattern = p0
 
-    subtest 'Patterns JSON', ->
-        assert(true, 'fake')
+        canvas = $('#synth0 > .sequencer .table-hover')
+        offset = canvas.offset()
+
+        events = []
+        for i in [0...3]
+            e = new $.Event("mousedown")
+            e.clientX = 26 * i + 10 + offset.left
+            e.clientY = 10 + offset.top
+            canvas.trigger(e)
+            canvas.trigger('mouseup')
+
+        p1 = s.getPattern()
+        p0[0] = 20
+        p0[1] = 20
+        p0[2] = 20
+        assertArrayEq(p0, p1.pattern, 'click')
+
+
+        e = new $.Event("mousedown")
+        e.clientX = 26 * 5 + 10 + offset.left
+        e.clientY = 10 + offset.top
+        canvas.trigger(e)
+
+        e = new $.Event("mousemove")
+        e.clientX = 26 * 6 + 10 + offset.left
+        e.clientY = 10 + offset.top
+        canvas.trigger(e)
+
+        e = new $.Event("mouseup")
+        e.clientX = 26 * 6 + 10 + offset.left
+        e.clientY = 10 + offset.top
+        canvas.trigger(e)
+
+        p0 = [0, 0, 0, -10, 'end', -20, 'end', 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+
+
 
 
 
@@ -125,21 +167,23 @@ assertArrayEq = (v1, v2, s) ->
     res = true
     res = false if v1.length != v2.length
     for i in [0...v1.length]
-        res = false if v1[i] == +v2[i] and v1[i] == v2[i] + ''
+        res = false if v1[i] != +v2[i] and v1[i] != v2[i] + ''
 
     if res
         console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;')
-        console.log('v1: ' + v1 + ', v2:' + v2)
+        console.log('v1: ' + v1)
+        console.log('v2: ' + v2)
     else
         console.group('%c FAILED! ... ' + s, 'color: #f44;')
-        console.log('v1: ' + v1 + ', v2: ' + v2)
+        console.log('v1: ' + v1)
+        console.log('v2: ' + v2)
     console.groupEnd()
 
 assertArrayNotEq = (v1, v2, s) ->
     res = true
     res = false if v1.length != v2.length
     for i in [0...v1.length]
-        res = false if v1[i] == v2[i]
+        res = false if v1[i] != +v2[i] and v1[i] != v2[i] + ''
 
     if not res
         console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;')
