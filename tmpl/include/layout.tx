@@ -50,7 +50,7 @@
         <script src="<: uri_for('/static/coffee/main.js') :>"></script>
 
         <: if $test { :>
-          <script src="<: uri_for('/static/coffee/test.js') :>"></script>
+          <script src="<: uri_for('/static/js/test/test.js') :>"></script>
         <: } :>
 
       <: } else { :>

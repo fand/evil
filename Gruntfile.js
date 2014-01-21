@@ -19,7 +19,13 @@ module.exports = function(grunt) {
                     src: ['*.coffee'],
                     dest: 'static/coffee/',
                     ext: '.js'
-                }]            
+                }, {
+                    expand: true,
+                    cwd: 'static/coffee/test',
+                    src: ['*.coffee'],
+                    dest: 'static/js/test',
+                    ext: '.js'
+                }]
             }
         },
         concat: {
@@ -35,13 +41,13 @@ module.exports = function(grunt) {
             coffee: {
                 files: ['static/coffee/*.coffee'],
                 tasks: ['coffee', 'concat', 'uglify']
-            }           
+            }
         }
     });
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-coffee');    
-    
+    grunt.loadNpmTasks('grunt-contrib-coffee');
+
     grunt.registerTask('default', ['coffee', 'concat', 'uglify']);
 };
