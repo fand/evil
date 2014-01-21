@@ -32,9 +32,9 @@ class @Player
 
         @sidebar.setBPM(@bpm)
 
-    setKey: (key)->
-        @scene.key = key
-        s.setKey(key) for s in @synth
+    setKey: (@key)->
+        @scene.key = @key
+        s.setKey(@key) for s in @synth
 
         @sidebar.setKey(@key)
 
@@ -43,6 +43,18 @@ class @Player
         s.setScale(@scale) for s in @synth
 
         @sidebar.setScale(@scale)
+
+    readBPM: (@bpm) ->
+        @setBPM(@bpm)
+        @view.readBPM(@bpm)
+
+    readKey: (@key)->
+        @setKey(@key)
+        @view.readKey(@key)
+
+    readScale: (@scale) ->
+        @setScale(@scale)
+        @view.readScale(@scale)
 
     isPlaying: -> @is_playing
 
@@ -198,6 +210,8 @@ class @Player
             if @song.tracks[i].type == 'SAMPLER'
                 @addSampler(0, @song.tracks[i].name)
 
+        @synth_now = @synth[0]
+
         @session.setSynth(@synth)
         @session.readSong(@song)
         @view.setSynthNum(@synth.length, @synth_pos)
@@ -208,10 +222,10 @@ class @Player
         @num_id = 0
 
     readScene: (scene) ->
-        @setBPM(scene.bpm) if scene.bpm?
-        @setKey(scene.key) if scene.key?
-        @setScale(scene.scale) if scene.scale?
-        @view.readParam(@bpm, @freq_key, @scale)
+        @readBPM(scene.bpm) if scene.bpm?
+        @readKey(scene.key) if scene.key?
+        @readScale(scene.scale) if scene.scale?
+        @view.readParam(scene.bpm, scene.key, scene.scale)
 
     getScene: -> @scene
 

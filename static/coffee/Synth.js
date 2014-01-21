@@ -405,7 +405,7 @@
         eg: this.eg.getParam(),
         feg: this.feg.getParam(),
         filter: [this.feg.getRange()[1], this.filter.getParam()],
-        harmony: this.harmony
+        harmony: this.is_harmony
       };
     };
 
@@ -789,6 +789,7 @@
       var p;
       p = this.core.getParam();
       p.name = this.name;
+      p.scale_name = this.scale_name;
       p.effects = this.getEffectsParam();
       return p;
     };

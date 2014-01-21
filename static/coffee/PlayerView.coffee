@@ -6,10 +6,6 @@ class @PlayerView
         @key   = @dom.find("[name=key]")
         @scale = @dom.find("[name=mode]")
 
-        @setBPM()
-        @setKey()
-        @setScale()
-
         @footer = $('footer')
 
         @play  = $('#control-play')
@@ -80,16 +76,18 @@ class @PlayerView
     setKey:   ->  @model.setKey(@key.val())
     setScale: ->  @model.setScale(@scale.val())
 
-    readParam: (bpm, key, scale) ->
-        @bpm.val(bpm)
-        for k, v of SCALE_LIST
-            if v = scale
-                @scale.val(k)
-                break
+    readBPM: (bpm) -> @bpm.val(bpm)
+    readScale: (scale) -> @scale.val(scale)
+    readKey: (key) ->
         for k, v of KEY_LIST
             if v = key
                 @key.val(k)
                 break
+
+    readParam: (bpm, key, scale) ->
+        @readBPM(bpm)
+        @readKey(key)
+        @readScale(scale)
 
     moveRight: ->
         return if @is_mixer
