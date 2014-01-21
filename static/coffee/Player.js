@@ -37,7 +37,8 @@
         s = _ref[_i];
         s.setDuration(this.duration);
       }
-      return this.sidebar.setBPM(this.bpm);
+      this.sidebar.setBPM(this.bpm);
+      return this.view.readBPM(this.bpm);
     };
 
     Player.prototype.setKey = function(key) {
@@ -48,7 +49,8 @@
         s = _ref[_i];
         s.setKey(key);
       }
-      return this.sidebar.setKey(this.key);
+      this.sidebar.setKey(this.key);
+      return this.view.readKey(this.key);
     };
 
     Player.prototype.setScale = function(scale) {
@@ -60,7 +62,8 @@
         s = _ref[_i];
         s.setScale(this.scale);
       }
-      return this.sidebar.setScale(this.scale);
+      this.sidebar.setScale(this.scale);
+      return this.view.readScale(this.scale);
     };
 
     Player.prototype.isPlaying = function() {
@@ -309,7 +312,7 @@
       if (scene.scale != null) {
         this.setScale(scene.scale);
       }
-      return this.view.readParam(this.bpm, this.freq_key, this.scale);
+      return this.view.readParam(scene.bpm, scene.key, scene.scale);
     };
 
     Player.prototype.getScene = function() {

@@ -31,18 +31,21 @@ class @Player
         s.setDuration(@duration) for s in @synth
 
         @sidebar.setBPM(@bpm)
+        @view.readBPM(@bpm)
 
     setKey: (key)->
         @scene.key = key
         s.setKey(key) for s in @synth
 
         @sidebar.setKey(@key)
+        @view.readKey(@key)
 
     setScale: (@scale) ->
         @scene.scale = @scale
         s.setScale(@scale) for s in @synth
 
         @sidebar.setScale(@scale)
+        @view.readScale(@scale)
 
     isPlaying: -> @is_playing
 
@@ -211,7 +214,7 @@ class @Player
         @setBPM(scene.bpm) if scene.bpm?
         @setKey(scene.key) if scene.key?
         @setScale(scene.scale) if scene.scale?
-        @view.readParam(@bpm, @freq_key, @scale)
+        @view.readParam(scene.bpm, scene.key, scene.scale)
 
     getScene: -> @scene
 

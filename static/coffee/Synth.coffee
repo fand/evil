@@ -239,7 +239,7 @@ class @SynthCore
         eg:  @eg.getParam()
         feg: @feg.getParam()
         filter: [@feg.getRange()[1], @filter.getParam()]
-        harmony: @harmony
+        harmony: @is_harmony
 
     readParam: (p) ->
         if p.vcos?
@@ -490,6 +490,7 @@ class @Synth
     getParam: ->
         p = @core.getParam()
         p.name = @name
+        p.scale_name = @scale_name
         p.effects = @getEffectsParam()
         return p
 

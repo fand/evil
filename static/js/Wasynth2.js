@@ -1624,7 +1624,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         s = _ref[_i];
         s.setDuration(this.duration);
       }
-      return this.sidebar.setBPM(this.bpm);
+      this.sidebar.setBPM(this.bpm);
+      return this.view.readBPM(this.bpm);
     };
 
     Player.prototype.setKey = function(key) {
@@ -1635,7 +1636,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         s = _ref[_i];
         s.setKey(key);
       }
-      return this.sidebar.setKey(this.key);
+      this.sidebar.setKey(this.key);
+      return this.view.readKey(this.key);
     };
 
     Player.prototype.setScale = function(scale) {
@@ -1647,7 +1649,8 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         s = _ref[_i];
         s.setScale(this.scale);
       }
-      return this.sidebar.setScale(this.scale);
+      this.sidebar.setScale(this.scale);
+      return this.view.readScale(this.scale);
     };
 
     Player.prototype.isPlaying = function() {
@@ -1896,7 +1899,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (scene.scale != null) {
         this.setScale(scene.scale);
       }
-      return this.view.readParam(this.bpm, this.freq_key, this.scale);
+      return this.view.readParam(scene.bpm, scene.key, scene.scale);
     };
 
     Player.prototype.getScene = function() {
@@ -1941,9 +1944,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.bpm = this.dom.find("[name=bpm]");
       this.key = this.dom.find("[name=key]");
       this.scale = this.dom.find("[name=mode]");
-      this.setBPM();
-      this.setKey();
-      this.setScale();
       this.footer = $('footer');
       this.play = $('#control-play');
       this.stop = $('#control-stop');
@@ -2051,16 +2051,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.model.setScale(this.scale.val());
     };
 
-    PlayerView.prototype.readParam = function(bpm, key, scale) {
+    PlayerView.prototype.readBPM = function(bpm) {
+      return this.bpm.val(bpm);
+    };
+
+    PlayerView.prototype.readScale = function(scale) {
+      return this.scale.val(scale);
+    };
+
+    PlayerView.prototype.readKey = function(key) {
       var k, v, _results;
-      this.bpm.val(bpm);
-      for (k in SCALE_LIST) {
-        v = SCALE_LIST[k];
-        if (v = scale) {
-          this.scale.val(k);
-          break;
-        }
-      }
       _results = [];
       for (k in KEY_LIST) {
         v = KEY_LIST[k];
@@ -2072,6 +2072,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
       }
       return _results;
+    };
+
+    PlayerView.prototype.readParam = function(bpm, key, scale) {
+      this.readBPM(bpm);
+      this.readKey(key);
+      return this.readScale(scale);
     };
 
     PlayerView.prototype.moveRight = function() {
@@ -5910,7 +5916,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         eg: this.eg.getParam(),
         feg: this.feg.getParam(),
         filter: [this.feg.getRange()[1], this.filter.getParam()],
-        harmony: this.harmony
+        harmony: this.is_harmony
       };
     };
 
@@ -6294,6 +6300,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var p;
       p = this.core.getParam();
       p.name = this.name;
+      p.scale_name = this.scale_name;
       p.effects = this.getEffectsParam();
       return p;
     };
@@ -7276,7 +7283,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
 }).call(this);
 ;(function() {
-  var assert, assertEq, assertMatch, assertNotEq, assertNotMatch, subtest, test;
+  var assert, assertArrayEq, assertArrayNotEq, assertEq, assertMatch, assertNotEq, assertNotMatch, subtest, test;
 
   test = function() {
     var p;
@@ -7286,17 +7293,78 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       assertEq($('#control > [name=key]').val(), p.key + '', 'key');
       return assertEq($('#control > [name=mode]').val(), p.scale + '', 'scale');
     });
-    return subtest('Initial View: Synth at 0', function() {
+    subtest('Initial View: Synth at 0', function() {
       assertEq($('#btn-left').css('display'), 'none', 'btn-left hide');
       assertMatch($('#btn-left').attr('data-line1'), /prev/, 'btn-right text');
       assertEq($('#btn-right').css('display'), 'block', 'btn-right display');
       return assertMatch($('#btn-right').attr('data-line1'), /new/, 'btn-right text =~ "new"');
     });
+    return subtest('Synth JSON', function() {
+      var i, s, s0, s1, song, v0, v1, _i, _ref, _results;
+      song = p.session.song;
+      s = p.synth[0];
+      s0 = {
+        name: "s0",
+        pattern_name: "p1",
+        scale_name: "minor",
+        gains: [0, 1, 2],
+        filter: [3, 4],
+        eg: {
+          adsr: [11, 22, 33, 44],
+          range: [1, 5]
+        },
+        feg: {
+          adsr: [55, 66, 77, 88],
+          range: [10, 50]
+        },
+        vcos: [
+          {
+            fine: 1,
+            interval: 2,
+            octave: 3,
+            shape: 'SINE'
+          }, {
+            fine: 4,
+            interval: 5,
+            octave: 6,
+            shape: 'SAW'
+          }, {
+            fine: 7,
+            interval: 8,
+            octave: 9,
+            shape: 'RECT'
+          }
+        ],
+        harmony: 'harmony'
+      };
+      s.setSynthName(s0.name);
+      s.setScale(s0.scale_name);
+      s.core.readParam(s0);
+      s1 = s.getParam();
+      assertEq(s0.name, s1.name, 'synth name');
+      assertEq(s0.scale_name, s1.scale_name, 'scale');
+      assertArrayEq(s0.gains, s1.gains, 'mixer gains');
+      assertArrayEq(s0.filter, s1.filter, 'filter');
+      assertArrayEq(s0.eg.adsr, s1.eg.adsr, 'eg adsr');
+      assertArrayEq(s0.feg.adsr, s1.feg.adsr, 'feg adsr');
+      assertEq(s0.shape, s1.shape, 'harmony');
+      _results = [];
+      for (i = _i = 0, _ref = s0.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        v0 = s0.vcos[i];
+        v1 = s1.vcos[i];
+        assertEq(v0.fine, v1.fine, 'fine');
+        assertEq(v0.interval, v1.interval, 'interval');
+        assertEq(v0.octave, v1.octave, 'octave');
+        _results.push(assertEq(v0.shape, v1.shape, 'shape'));
+      }
+      return _results;
+    });
   };
 
   subtest = function(s, t) {
-    console.log(s);
-    return t();
+    console.group(s);
+    t();
+    return console.groupEnd();
   };
 
   assert = function(v, s) {
@@ -7309,38 +7377,88 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   assertEq = function(v1, v2, s) {
     if (v1 === v2) {
-      return console.log('%c OK ... ' + s, 'color: #4f4;');
+      console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
+      console.log('v1: ' + v1 + ', v2:' + v2);
     } else {
-      console.log('%c FAILED! ... ' + s, 'color: #f44;');
-      return console.log('v1: ' + v1 + ', v2: ' + v2);
+      console.group('%c FAILED! ... ' + s, 'color: #f44;');
+      console.log('v1: ' + v1 + ', v2: ' + v2);
     }
+    return console.groupEnd();
   };
 
   assertNotEq = function(v1, v2, s) {
     if (v1 !== v2) {
-      return console.log('%c OK ... ' + s, 'color: #4f4;');
+      console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
+      console.log('v1: ' + v1 + ', v2:' + v2);
     } else {
-      console.log('%c FAILED! ... ' + s, 'color: #f44;');
-      return console.log('v1: ' + v1 + ', v2: ' + v2);
+      console.group('%c FAILED! ... ' + s, 'color: #f44;');
+      console.log('v1: ' + v1 + ', v2: ' + v2);
     }
+    return console.groupEnd();
   };
 
   assertMatch = function(v1, v2, s) {
     if (v1.match(v2)) {
-      return console.log('%c OK ... ' + s, 'color: #4f4;');
+      console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
+      console.log('v1: ' + v1 + ', v2:' + v2);
     } else {
-      console.log('%c FAILED! ... ' + s, 'color: #f44;');
-      return console.log('v1: ' + v1 + ', v2: ' + v2);
+      console.group('%c FAILED! ... ' + s, 'color: #f44;');
+      console.log('v1: ' + v1 + ', v2: ' + v2);
     }
+    return console.groupEnd();
   };
 
   assertNotMatch = function(v1, v2, s) {
     if (!v1.match(v2)) {
-      return console.log('%c OK ... ' + s, 'color: #4f4;');
+      console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
+      console.log('v1: ' + v1 + ', v2:' + v2);
     } else {
-      console.log('%c FAILED! ... ' + s, 'color: #f44;');
-      return console.log('v1: ' + v1 + ', v2: ' + v2);
+      console.group('%c FAILED! ... ' + s, 'color: #f44;');
+      console.log('v1: ' + v1 + ', v2: ' + v2);
     }
+    return console.groupEnd();
+  };
+
+  assertArrayEq = function(v1, v2, s) {
+    var i, res, _i, _ref;
+    res = true;
+    if (v1.length !== v2.length) {
+      res = false;
+    }
+    for (i = _i = 0, _ref = v1.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      if (v1[i] === +v2[i] && v1[i] === v2[i] + '') {
+        res = false;
+      }
+    }
+    if (res) {
+      console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
+      console.log('v1: ' + v1 + ', v2:' + v2);
+    } else {
+      console.group('%c FAILED! ... ' + s, 'color: #f44;');
+      console.log('v1: ' + v1 + ', v2: ' + v2);
+    }
+    return console.groupEnd();
+  };
+
+  assertArrayNotEq = function(v1, v2, s) {
+    var i, res, _i, _ref;
+    res = true;
+    if (v1.length !== v2.length) {
+      res = false;
+    }
+    for (i = _i = 0, _ref = v1.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      if (v1[i] === v2[i]) {
+        res = false;
+      }
+    }
+    if (!res) {
+      console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
+      console.log('v1: ' + v1 + ', v2:' + v2);
+    } else {
+      console.group('%c FAILED! ... ' + s, 'color: #f44;');
+      console.log('v1: ' + v1 + ', v2: ' + v2);
+    }
+    return console.groupEnd();
   };
 
   $(function() {

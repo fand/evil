@@ -6,9 +6,6 @@
       this.bpm = this.dom.find("[name=bpm]");
       this.key = this.dom.find("[name=key]");
       this.scale = this.dom.find("[name=mode]");
-      this.setBPM();
-      this.setKey();
-      this.setScale();
       this.footer = $('footer');
       this.play = $('#control-play');
       this.stop = $('#control-stop');
@@ -116,16 +113,16 @@
       return this.model.setScale(this.scale.val());
     };
 
-    PlayerView.prototype.readParam = function(bpm, key, scale) {
+    PlayerView.prototype.readBPM = function(bpm) {
+      return this.bpm.val(bpm);
+    };
+
+    PlayerView.prototype.readScale = function(scale) {
+      return this.scale.val(scale);
+    };
+
+    PlayerView.prototype.readKey = function(key) {
       var k, v, _results;
-      this.bpm.val(bpm);
-      for (k in SCALE_LIST) {
-        v = SCALE_LIST[k];
-        if (v = scale) {
-          this.scale.val(k);
-          break;
-        }
-      }
       _results = [];
       for (k in KEY_LIST) {
         v = KEY_LIST[k];
@@ -137,6 +134,12 @@
         }
       }
       return _results;
+    };
+
+    PlayerView.prototype.readParam = function(bpm, key, scale) {
+      this.readBPM(bpm);
+      this.readKey(key);
+      return this.readScale(scale);
     };
 
     PlayerView.prototype.moveRight = function() {
