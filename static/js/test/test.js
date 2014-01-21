@@ -1,5 +1,5 @@
 (function() {
-  var assert, assertArrayEq, assertArrayNotEq, assertEq, assertMatch, assertNotEq, assertNotMatch, subtest, test;
+  var assert, assertArrayEq, assertArrayNotEq, assertEq, assertMatch, assertNotEq, assertNotMatch, mousedown, mousedrag, mouseup, subtest, test;
 
   test = function() {
     var k, p;
@@ -91,39 +91,85 @@
       return assertEq(p.scale, c.scale, 'scale');
     });
     return subtest('Synth Sequencer', function() {
-      var canvas, e, events, i, offset, p0, p1, s, _i;
+      var canvas, i, p0, s, _i;
       s = p.synth[0];
-      p0 = [0, 0, 0, -10, 'sustain', 'sustain', 'sustain', 'sustain', 'sustain', 'end', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      s.pattern = p0;
       canvas = $('#synth0 > .sequencer .table-hover');
-      offset = canvas.offset();
-      events = [];
+      p0 = s.getPattern().pattern;
       for (i = _i = 0; _i < 3; i = ++_i) {
-        e = new $.Event("mousedown");
-        e.clientX = 26 * i + 10 + offset.left;
-        e.clientY = 10 + offset.top;
-        canvas.trigger(e);
-        canvas.trigger('mouseup');
+        mousedown(canvas, 26 * i + 10, 10);
+        mouseup(canvas);
       }
-      p1 = s.getPattern();
       p0[0] = 20;
       p0[1] = 20;
       p0[2] = 20;
-      assertArrayEq(p0, p1.pattern, 'click');
-      e = new $.Event("mousedown");
-      e.clientX = 26 * 5 + 10 + offset.left;
-      e.clientY = 10 + offset.top;
-      canvas.trigger(e);
-      e = new $.Event("mousemove");
-      e.clientX = 26 * 6 + 10 + offset.left;
-      e.clientY = 10 + offset.top;
-      canvas.trigger(e);
-      e = new $.Event("mouseup");
-      e.clientX = 26 * 6 + 10 + offset.left;
-      e.clientY = 10 + offset.top;
-      canvas.trigger(e);
-      return p0 = [0, 0, 0, -10, 'end', -20, 'end', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      assertArrayEq(p0, s.getPattern().pattern, 'click');
+      mousedrag(canvas, [
+        {
+          x: 26 * 8 + 10,
+          y: 10
+        }, {
+          x: 26 * 14 + 10,
+          y: 10
+        }
+      ]);
+      p0 = [20, 20, 20, 0, 0, 0, 0, 0, -20, 'sustain', 'sustain', 'sustain', 'sustain', 'sustain', 'end', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      assertArrayEq(p0, s.getPattern().pattern, 'drag');
+      mousedrag(canvas, [
+        {
+          x: 26 * 10 + 10,
+          y: 26 * 1 + 10
+        }, {
+          x: 26 * 11 + 10,
+          y: 26 * 1 + 10
+        }, {
+          x: 26 * 12 + 10,
+          y: 26 * 1 + 10
+        }
+      ]);
+      p0 = [20, 20, 20, 0, 0, 0, 0, 0, -20, 'end', -19, 'sustain', 'end', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      assertArrayEq(p0, s.getPattern().pattern, 'drag and divide sustain');
+      mousedrag(canvas, [
+        {
+          x: 26 * 9 + 10,
+          y: 26 * 2 + 10
+        }, {
+          x: 26 * 10 + 10,
+          y: 26 * 2 + 10
+        }
+      ]);
+      p0 = [20, 20, 20, 0, 0, 0, 0, 0, 20, -18, 'end', -19, 'end', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      return assertArrayEq(p0, s.getPattern().pattern, 'drag and join sustain');
     });
+  };
+
+  mousedown = function(target, x, y) {
+    var e, offset;
+    offset = target.offset();
+    e = new $.Event('mousedown');
+    e.clientX = x + offset.left;
+    e.clientY = y + offset.top;
+    return target.trigger(e);
+  };
+
+  mouseup = function(target) {
+    return target.trigger('mouseup');
+  };
+
+  mousedrag = function(target, pos) {
+    var e, offset, p, _i, _len;
+    offset = target.offset();
+    e = new $.Event('mousedown');
+    e.clientX = pos[0].x + offset.left;
+    e.clientY = pos[0].y + offset.top;
+    target.trigger(e);
+    for (_i = 0, _len = pos.length; _i < _len; _i++) {
+      p = pos[_i];
+      e = new $.Event('mousemove');
+      e.clientX = p.x + offset.left;
+      e.clientY = p.y + offset.top;
+      target.trigger(e);
+    }
+    return target.trigger('mouseup');
   };
 
   subtest = function(s, t) {

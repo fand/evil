@@ -68,51 +68,81 @@ test = ->
 
     subtest 'Synth Sequencer', ->
         s = p.synth[0]
-        p0 = [0, 0, 0, -10,'sustain', 'sustain', 'sustain', 'sustain',
-              'sustain', 'end', 0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 0]
-        s.pattern = p0
-
         canvas = $('#synth0 > .sequencer .table-hover')
-        offset = canvas.offset()
+        p0 = s.getPattern().pattern
 
-        events = []
         for i in [0...3]
-            e = new $.Event("mousedown")
-            e.clientX = 26 * i + 10 + offset.left
-            e.clientY = 10 + offset.top
-            canvas.trigger(e)
-            canvas.trigger('mouseup')
+            mousedown(canvas, 26 * i + 10, 10)
+            mouseup(canvas)
 
-        p1 = s.getPattern()
         p0[0] = 20
         p0[1] = 20
         p0[2] = 20
-        assertArrayEq(p0, p1.pattern, 'click')
+        assertArrayEq(p0, s.getPattern().pattern, 'click')
 
+        mousedrag(canvas, [
+            (x: 26 * 8  + 10, y: 10),
+            (x: 26 * 14 + 10, y: 10)
+        ])
 
-        e = new $.Event("mousedown")
-        e.clientX = 26 * 5 + 10 + offset.left
-        e.clientY = 10 + offset.top
-        canvas.trigger(e)
-
-        e = new $.Event("mousemove")
-        e.clientX = 26 * 6 + 10 + offset.left
-        e.clientY = 10 + offset.top
-        canvas.trigger(e)
-
-        e = new $.Event("mouseup")
-        e.clientX = 26 * 6 + 10 + offset.left
-        e.clientY = 10 + offset.top
-        canvas.trigger(e)
-
-        p0 = [0, 0, 0, -10, 'end', -20, 'end', 0,
-              0, 0, 0, 0, 0, 0, 0, 0,
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              -20, 'sustain', 'sustain', 'sustain', 'sustain', 'sustain', 'end', 0,
               0, 0, 0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0]
 
+        assertArrayEq(p0, s.getPattern().pattern, 'drag')
 
+        mousedrag(canvas, [
+            (x: 26 * 10 + 10, y: 26 * 1 + 10),
+            (x: 26 * 11 + 10, y: 26 * 1 + 10),
+            (x: 26 * 12 + 10, y: 26 * 1 + 10)
+        ])
+
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              -20, 'end', -19, 'sustain', 'end', 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+
+        assertArrayEq(p0, s.getPattern().pattern, 'drag and divide sustain')
+
+        mousedrag(canvas, [
+            (x: 26 * 9  + 10, y: 26 * 2 + 10),
+            (x: 26 * 10 + 10, y: 26 * 2 + 10)
+        ])
+
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              20, -18, 'end', -19, 'end', 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+
+        assertArrayEq(p0, s.getPattern().pattern, 'drag and join sustain')
+
+
+
+
+
+mousedown = (target, x, y) ->
+    offset = target.offset()
+    e = new $.Event('mousedown')
+    e.clientX = x + offset.left
+    e.clientY = y + offset.top
+    target.trigger(e)
+
+mouseup = (target) ->
+    target.trigger('mouseup')
+
+mousedrag = (target, pos) ->
+    offset = target.offset()
+    e = new $.Event('mousedown')
+    e.clientX = pos[0].x + offset.left
+    e.clientY = pos[0].y + offset.top
+    target.trigger(e)
+    for p in pos
+        e = new $.Event('mousemove')
+        e.clientX = p.x + offset.left
+        e.clientY = p.y + offset.top
+        target.trigger(e)
+    target.trigger('mouseup')
 
 
 
