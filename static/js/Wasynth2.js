@@ -1624,20 +1624,19 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         s = _ref[_i];
         s.setDuration(this.duration);
       }
-      this.sidebar.setBPM(this.bpm);
-      return this.view.readBPM(this.bpm);
+      return this.sidebar.setBPM(this.bpm);
     };
 
     Player.prototype.setKey = function(key) {
       var s, _i, _len, _ref;
-      this.scene.key = key;
+      this.key = key;
+      this.scene.key = this.key;
       _ref = this.synth;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
-        s.setKey(key);
+        s.setKey(this.key);
       }
-      this.sidebar.setKey(this.key);
-      return this.view.readKey(this.key);
+      return this.sidebar.setKey(this.key);
     };
 
     Player.prototype.setScale = function(scale) {
@@ -1649,7 +1648,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         s = _ref[_i];
         s.setScale(this.scale);
       }
-      this.sidebar.setScale(this.scale);
+      return this.sidebar.setScale(this.scale);
+    };
+
+    Player.prototype.readBPM = function(bpm) {
+      this.bpm = bpm;
+      this.setBPM(this.bpm);
+      return this.view.readBPM(this.bpm);
+    };
+
+    Player.prototype.readKey = function(key) {
+      this.key = key;
+      this.setKey(this.key);
+      return this.view.readKey(this.key);
+    };
+
+    Player.prototype.readScale = function(scale) {
+      this.scale = scale;
+      this.setScale(this.scale);
       return this.view.readScale(this.scale);
     };
 
@@ -1878,6 +1894,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           this.addSampler(0, this.song.tracks[i].name);
         }
       }
+      this.synth_now = this.synth[0];
       this.session.setSynth(this.synth);
       this.session.readSong(this.song);
       this.view.setSynthNum(this.synth.length, this.synth_pos);
@@ -1891,13 +1908,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Player.prototype.readScene = function(scene) {
       if (scene.bpm != null) {
-        this.setBPM(scene.bpm);
+        this.readBPM(scene.bpm);
       }
       if (scene.key != null) {
-        this.setKey(scene.key);
+        this.readKey(scene.key);
       }
       if (scene.scale != null) {
-        this.setScale(scene.scale);
+        this.readScale(scene.scale);
       }
       return this.view.readParam(scene.bpm, scene.key, scene.scale);
     };
@@ -7286,8 +7303,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
   var assert, assertArrayEq, assertArrayNotEq, assertEq, assertMatch, assertNotEq, assertNotMatch, subtest, test;
 
   test = function() {
-    var p;
+    var k, p;
     p = window.player;
+    k = window.keyboard;
     subtest('Main Control', function() {
       assertEq($('#control > [name=bpm]').val(), p.bpm + '', 'bpm');
       assertEq($('#control > [name=key]').val(), p.key + '', 'key');
@@ -7299,7 +7317,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       assertEq($('#btn-right').css('display'), 'block', 'btn-right display');
       return assertMatch($('#btn-right').attr('data-line1'), /new/, 'btn-right text =~ "new"');
     });
-    return subtest('Synth JSON', function() {
+    subtest('Synth JSON', function() {
       var i, s, s0, s1, song, v0, v1, _i, _ref, _results;
       song = p.session.song;
       s = p.synth[0];
@@ -7358,6 +7376,26 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         _results.push(assertEq(v0.shape, v1.shape, 'shape'));
       }
       return _results;
+    });
+    subtest('Main Control Change', function() {
+      var c;
+      c = {
+        bpm: 200,
+        key: 'D',
+        scale: 'Major'
+      };
+      $('#control > [name=bpm]').val(c.bpm).change();
+      $('#control > [name=key]').val(c.key).change();
+      $('#control > [name=mode]').val(c.scale).change();
+      assertEq(p.bpm, c.bpm, 'bpm');
+      assertEq(p.key, c.key, 'key');
+      return assertEq(p.scale, c.scale, 'scale');
+    });
+    subtest('Player with Keyboard', function() {
+      return assert(true, 'fake');
+    });
+    return subtest('Patterns JSON', function() {
+      return assert(true, 'fake');
     });
   };
 

@@ -1,5 +1,6 @@
 test = ->
     p = window.player
+    k = window.keyboard
 
     subtest 'Main Control', ->
         assertEq($('#control > [name=bpm]').val(), p.bpm + '', 'bpm')
@@ -53,6 +54,23 @@ test = ->
             assertEq(v0.octave, v1.octave, 'octave')
             assertEq(v0.shape, v1.shape, 'shape')
 
+    subtest 'Main Control Change', ->
+        c =
+            bpm: 200
+            key: 'D'
+            scale: 'Major'
+        $('#control > [name=bpm]').val(c.bpm).change()
+        $('#control > [name=key]').val(c.key).change()
+        $('#control > [name=mode]').val(c.scale).change()
+        assertEq(p.bpm, c.bpm, 'bpm')
+        assertEq(p.key, c.key, 'key')
+        assertEq(p.scale, c.scale, 'scale')
+
+    subtest 'Player with Keyboard', ->
+        assert(true, 'fake')
+
+    subtest 'Patterns JSON', ->
+        assert(true, 'fake')
 
 
 

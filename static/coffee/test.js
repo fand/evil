@@ -2,8 +2,9 @@
   var assert, assertArrayEq, assertArrayNotEq, assertEq, assertMatch, assertNotEq, assertNotMatch, subtest, test;
 
   test = function() {
-    var p;
+    var k, p;
     p = window.player;
+    k = window.keyboard;
     subtest('Main Control', function() {
       assertEq($('#control > [name=bpm]').val(), p.bpm + '', 'bpm');
       assertEq($('#control > [name=key]').val(), p.key + '', 'key');
@@ -15,7 +16,7 @@
       assertEq($('#btn-right').css('display'), 'block', 'btn-right display');
       return assertMatch($('#btn-right').attr('data-line1'), /new/, 'btn-right text =~ "new"');
     });
-    return subtest('Synth JSON', function() {
+    subtest('Synth JSON', function() {
       var i, s, s0, s1, song, v0, v1, _i, _ref, _results;
       song = p.session.song;
       s = p.synth[0];
@@ -74,6 +75,26 @@
         _results.push(assertEq(v0.shape, v1.shape, 'shape'));
       }
       return _results;
+    });
+    subtest('Main Control Change', function() {
+      var c;
+      c = {
+        bpm: 200,
+        key: 'D',
+        scale: 'Major'
+      };
+      $('#control > [name=bpm]').val(c.bpm).change();
+      $('#control > [name=key]').val(c.key).change();
+      $('#control > [name=mode]').val(c.scale).change();
+      assertEq(p.bpm, c.bpm, 'bpm');
+      assertEq(p.key, c.key, 'key');
+      return assertEq(p.scale, c.scale, 'scale');
+    });
+    subtest('Player with Keyboard', function() {
+      return assert(true, 'fake');
+    });
+    return subtest('Patterns JSON', function() {
+      return assert(true, 'fake');
     });
   };
 
