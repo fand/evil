@@ -66,11 +66,118 @@ test = ->
         assertEq(p.key, c.key, 'key')
         assertEq(p.scale, c.scale, 'scale')
 
-    subtest 'Player with Keyboard', ->
-        assert(true, 'fake')
+    subtest 'Synth Sequencer', ->
+        s = p.synth[0]
+        canvas = $('#synth0 > .sequencer .table-hover')
+        p0 = s.getPattern().pattern
 
-    subtest 'Patterns JSON', ->
-        assert(true, 'fake')
+        for i in [0...3]
+            mousedown(canvas, 26 * i + 10, 10)
+            mouseup(canvas)
+
+        p0[0] = 20
+        p0[1] = 20
+        p0[2] = 20
+        assertArrayEq(p0, s.getPattern().pattern, 'click')
+
+        mousedrag(canvas, [
+            (x: 26 * 8  + 10, y: 10),
+            (x: 26 * 14 + 10, y: 10)
+        ])
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              -20, 'sustain', 'sustain', 'sustain', 'sustain', 'sustain', 'end', 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+        assertArrayEq(p0, s.getPattern().pattern, 'drag')
+
+        mousedrag(canvas, [
+            (x: 26 * 10 + 10, y: 26 * 1 + 10),
+            (x: 26 * 11 + 10, y: 26 * 1 + 10),
+            (x: 26 * 12 + 10, y: 26 * 1 + 10)
+        ])
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              -20, 'end', -19, 'sustain', 'end', 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+        assertArrayEq(p0, s.getPattern().pattern, 'drag and divide sustain')
+
+
+        mousedrag(canvas, [
+            (x: 26 * 9  + 10, y: 26 * 2 + 10),
+            (x: 26 * 10 + 10, y: 26 * 2 + 10)
+        ])
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              20, -18, 'end', -19, 'end', 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+        assertArrayEq(p0, s.getPattern().pattern, 'drag and join sustain')
+
+
+        mousedrag(canvas, [
+            (x: 26 * 8  + 10, y: 10),
+            (x: 26 * 14 + 10, y: 10)
+        ])
+        mousedrag(canvas, [
+            (x: 26 * 10 + 10, y: 26 * 1 + 10),
+            (x: 26 * 11 + 10, y: 26 * 1 + 10),
+            (x: 26 * 12 + 10, y: 26 * 1 + 10)
+        ])
+        mousedrag(canvas, [
+            (x: 26 * 9  + 10, y: 26 * 2 + 10),
+            (x: 26 * 10 + 10, y: 26 * 2 + 10),
+            (x: 26 * 11 + 10, y: 26 * 2 + 10)
+        ])
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              20, -18, 'sustain', 'end', 19, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+        assertArrayEq(p0, s.getPattern().pattern, 'drag and join sustain')
+
+        mousedrag(canvas, [
+            (x: 26 * 14 + 10, y: 10),
+            (x: 26 *  8 + 10, y: 10)
+        ])
+        mousedrag(canvas, [
+            (x: 26 * 12 + 10, y: 26 * 1 + 10),
+            (x: 26 * 11 + 10, y: 26 * 1 + 10),
+            (x: 26 * 10 + 10, y: 26 * 1 + 10)
+        ])
+        mousedrag(canvas, [
+            (x: 26 * 11 + 10, y: 26 * 2 + 10),
+            (x: 26 * 10 + 10, y: 26 * 2 + 10),
+            (x: 26 *  9 + 10, y: 26 * 2 + 10)
+        ])
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              20, -18, 'sustain', 'end', 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+        assertArrayEq(p0, s.getPattern().pattern, 'drag RL')
+
+
+
+
+mousedown = (target, x, y) ->
+    offset = target.offset()
+    e = new $.Event('mousedown')
+    e.clientX = x + offset.left
+    e.clientY = y + offset.top
+    target.trigger(e)
+
+mouseup = (target) ->
+    target.trigger('mouseup')
+
+mousedrag = (target, pos) ->
+    offset = target.offset()
+    e = new $.Event('mousedown')
+    e.clientX = pos[0].x + offset.left
+    e.clientY = pos[0].y + offset.top
+    target.trigger(e)
+    for p in pos
+        e = new $.Event('mousemove')
+        e.clientX = p.x + offset.left
+        e.clientY = p.y + offset.top
+        target.trigger(e)
+    target.trigger('mouseup')
 
 
 
@@ -125,21 +232,23 @@ assertArrayEq = (v1, v2, s) ->
     res = true
     res = false if v1.length != v2.length
     for i in [0...v1.length]
-        res = false if v1[i] == +v2[i] and v1[i] == v2[i] + ''
+        res = false if v1[i] != +v2[i] and v1[i] != v2[i] + ''
 
     if res
         console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;')
-        console.log('v1: ' + v1 + ', v2:' + v2)
+        console.log('v1: ' + v1)
+        console.log('v2: ' + v2)
     else
         console.group('%c FAILED! ... ' + s, 'color: #f44;')
-        console.log('v1: ' + v1 + ', v2: ' + v2)
+        console.log('v1: ' + v1)
+        console.log('v2: ' + v2)
     console.groupEnd()
 
 assertArrayNotEq = (v1, v2, s) ->
     res = true
     res = false if v1.length != v2.length
     for i in [0...v1.length]
-        res = false if v1[i] == v2[i]
+        res = false if v1[i] != +v2[i] and v1[i] != v2[i] + ''
 
     if not res
         console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;')
