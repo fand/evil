@@ -84,12 +84,10 @@ test = ->
             (x: 26 * 8  + 10, y: 10),
             (x: 26 * 14 + 10, y: 10)
         ])
-
         p0 = [20, 20, 20, 0, 0, 0, 0, 0,
               -20, 'sustain', 'sustain', 'sustain', 'sustain', 'sustain', 'end', 0,
               0, 0, 0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0]
-
         assertArrayEq(p0, s.getPattern().pattern, 'drag')
 
         mousedrag(canvas, [
@@ -97,26 +95,63 @@ test = ->
             (x: 26 * 11 + 10, y: 26 * 1 + 10),
             (x: 26 * 12 + 10, y: 26 * 1 + 10)
         ])
-
         p0 = [20, 20, 20, 0, 0, 0, 0, 0,
               -20, 'end', -19, 'sustain', 'end', 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0]
-
         assertArrayEq(p0, s.getPattern().pattern, 'drag and divide sustain')
+
 
         mousedrag(canvas, [
             (x: 26 * 9  + 10, y: 26 * 2 + 10),
             (x: 26 * 10 + 10, y: 26 * 2 + 10)
         ])
-
         p0 = [20, 20, 20, 0, 0, 0, 0, 0,
               20, -18, 'end', -19, 'end', 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0]
-
         assertArrayEq(p0, s.getPattern().pattern, 'drag and join sustain')
 
+
+        mousedrag(canvas, [
+            (x: 26 * 8  + 10, y: 10),
+            (x: 26 * 14 + 10, y: 10)
+        ])
+        mousedrag(canvas, [
+            (x: 26 * 10 + 10, y: 26 * 1 + 10),
+            (x: 26 * 11 + 10, y: 26 * 1 + 10),
+            (x: 26 * 12 + 10, y: 26 * 1 + 10)
+        ])
+        mousedrag(canvas, [
+            (x: 26 * 9  + 10, y: 26 * 2 + 10),
+            (x: 26 * 10 + 10, y: 26 * 2 + 10),
+            (x: 26 * 11 + 10, y: 26 * 2 + 10)
+        ])
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              20, -18, 'sustain', 'end', 19, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+        assertArrayEq(p0, s.getPattern().pattern, 'drag and join sustain')
+
+        mousedrag(canvas, [
+            (x: 26 * 14 + 10, y: 10),
+            (x: 26 *  8 + 10, y: 10)
+        ])
+        mousedrag(canvas, [
+            (x: 26 * 12 + 10, y: 26 * 1 + 10),
+            (x: 26 * 11 + 10, y: 26 * 1 + 10),
+            (x: 26 * 10 + 10, y: 26 * 1 + 10)
+        ])
+        mousedrag(canvas, [
+            (x: 26 * 11 + 10, y: 26 * 2 + 10),
+            (x: 26 * 10 + 10, y: 26 * 2 + 10),
+            (x: 26 *  9 + 10, y: 26 * 2 + 10)
+        ])
+        p0 = [20, 20, 20, 0, 0, 0, 0, 0,
+              20, -18, 'sustain', 'end', 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0]
+        assertArrayEq(p0, s.getPattern().pattern, 'drag RL')
 
 
 
