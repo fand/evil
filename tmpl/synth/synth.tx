@@ -18,6 +18,7 @@
         <span>input:</span>
         <i class="fa fa-pencil sequencer-pencil btn-true"></i>
         <i class="fa fa-ellipsis-h sequencer-step btn-false"></i>
+        <i class="fa fa-eraser sequencer-eraser btn-false"></i>
       </div>
 
 
