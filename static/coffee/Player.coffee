@@ -212,8 +212,15 @@ class @Player
 
         @synth_now = @synth[0]
 
+        @readScene(@song.master[0])
+        @setSceneLength(@song.master.length)
+        for i in [0...@song.tracks.length]
+            @synth[i].readParam(@song.tracks[i])
+
         @session.setSynth(@synth)
         @session.readSong(@song)
+        @mixer.readParam(@song.mixer)
+
         @view.setSynthNum(@synth.length, @synth_pos)
         @resetSceneLength()
 

@@ -292,7 +292,7 @@
     };
 
     Player.prototype.readSong = function(song) {
-      var i, _i, _ref;
+      var i, _i, _j, _ref, _ref1;
       this.song = song;
       this.synth = [];
       this.num_id = 0;
@@ -308,8 +308,14 @@
         }
       }
       this.synth_now = this.synth[0];
+      this.readScene(this.song.master[0]);
+      this.setSceneLength(this.song.master.length);
+      for (i = _j = 0, _ref1 = this.song.tracks.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+        this.synth[i].readParam(this.song.tracks[i]);
+      }
       this.session.setSynth(this.synth);
       this.session.readSong(this.song);
+      this.mixer.readParam(this.song.mixer);
       this.view.setSynthNum(this.synth.length, this.synth_pos);
       return this.resetSceneLength();
     };

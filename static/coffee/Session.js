@@ -291,22 +291,11 @@
     Session.prototype.saveMasters = function() {
       if (this.song.master === []) {
         return this.song.master.push(this.player.getScene());
-      } else {
-
       }
     };
 
     Session.prototype.saveMixer = function() {
       return this.song.mixer = this.player.mixer.getParam();
-    };
-
-    Session.prototype.readTracks = function(tracks) {
-      var i, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.player.synth[i].readParam(tracks[i]));
-      }
-      return _results;
     };
 
     Session.prototype.readSong = function(song) {
@@ -324,10 +313,6 @@
           this.current_cells[i] = void 0;
         }
       }
-      this.player.readScene(this.song.master[0]);
-      this.player.setSceneLength(this.scene_length);
-      this.readTracks(this.song.tracks);
-      this.player.mixer.readParam(this.song.mixer);
       return this.view.readSong(this.song, this.current_cells);
     };
 

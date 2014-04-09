@@ -1,5 +1,6 @@
 class @SessionView
     constructor: (@model, @song) ->
+        # DOMs for session view.
         @wrapper_mixer = $('#mixer-tracks')
         @wrapper_master = $('#session-master-wrapper')
         @wrapper_tracks = $('#session-tracks-wrapper')
@@ -26,12 +27,12 @@ class @SessionView
         @ctx_tracks_hover = @canvas_tracks_hover.getContext('2d')
         @ctx_master_hover = @canvas_master_hover.getContext('2d')
 
+        # dimensions for cells in canvas
         @w = 70
         @h = 20
         @w_master = 80
         @color = ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)',]
-
         @color_schemes =
             REZ: ['rgba(200, 200, 200, 1.0)', 'rgba(  0, 220, 250, 0.7)', 'rgba(100, 230, 255, 0.7)',
                   'rgba(200, 200, 200, 1.0)', 'rgba(255, 255, 255, 1.0)', 'rgba(100, 230, 255, 0.2)',]
@@ -53,8 +54,7 @@ class @SessionView
         @select_pos = x:0, y:0, type: 'master'
         @last_clicked = performance.now()
 
-
-
+        # DOMs to save songs.
         @dialog = $('#dialog')
         @dialog_wrapper = $('#dialog-wrapper')
         @dialog_close = @dialog.find('.dialog-close')
@@ -67,7 +67,6 @@ class @SessionView
         @social_twitter  = $('#twitter')
         @social_facebook = $('#facebook')
         @social_hatena   = $('#hatena')
-
 
     initCanvas: ->
         @canvas_tracks.width  = @canvas_tracks_on.width  = @canvas_tracks_hover.width  = @w*8 + 1
@@ -122,6 +121,7 @@ class @SessionView
         @ctx_tracks_hover.translate(0, @offset_y)
         @ctx_master_hover.translate(0, @offset_y)
 
+    # Get the cell under the mouse
     getPos: (rect, wrapper, e, type) ->
         _x = Math.floor((e.clientX - rect.left + @wrapper_mixer.scrollLeft()) / @w)
         _y = Math.floor((e.clientY - rect.top  + wrapper.scrollTop() - @offset_translate) / @h)
@@ -450,6 +450,7 @@ class @SessionView
         @ctx_tracks_on.clearRect(0, 0, 10000, 10000)
         @ctx_master_on.clearRect(0, 0, 10000, 10000)
 
+    # Cue the cells to play
     cueTracks: (x, y) ->
         if @song.tracks[x]? and @song.tracks[x].patterns[y]?
             @model.cuePattern(x, y)
@@ -462,6 +463,7 @@ class @SessionView
             @ctx_master_on.drawImage(@img_play, 36, 0, 18, 18,  4, y*@h + 4, 15, 16)
             window.setTimeout(( => @ctx_master_on.clearRect(4, y*@h + 4, 15, 16)), 100)
 
+    # Light the play buttons on beat.
     beat: (is_master, cells) ->
         if is_master
             c = cells
@@ -479,7 +481,7 @@ class @SessionView
     addSynth: (@song) ->
         @readSong(@song, @current_cells)
 
-
+    # Dialogs
     showSuccess: (_url, song_title, user_name) ->
 
         if song_title?
@@ -515,8 +517,10 @@ class @SessionView
     closeDialog: ->
         @dialog.css(opacity: '1', 'z-index': '-10000')
 
+    # Share button on dialogue
     share: (service) ->
 
+        # Prepare the default text to share
         if @song.title?
             if @song.creator?
                 text = '"' + @song.title + '" by ' + @song.creator
@@ -544,6 +548,7 @@ class @SessionView
         @readSong(@song, @current_cells)
 
 
+    # Copy cells by drag.
     copyCell: (src, dst) ->
         return if not @song.tracks[src.x]?
         return if not @song.tracks[src.x].patterns[src.y]?
@@ -578,6 +583,7 @@ class @SessionView
         # save @song.master to @session.song.master
         @model.readMaster(@song.master[dst.y], dst.y)
 
+    # Select cell on click.
     selectCell: (pos) ->
         return if not @song.tracks[pos.x]?
         return if not @song.tracks[pos.x].patterns[pos.y]?
@@ -601,7 +607,6 @@ class @SessionView
         @select_pos.type = 'tracks'
 
         @model.player.sidebar.show(@song, @select_pos)
-
 
     selectCellMaster: (pos) ->
         return if not @song.master[pos.y]?

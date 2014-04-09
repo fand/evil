@@ -1879,7 +1879,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Player.prototype.readSong = function(song) {
-      var i, _i, _ref;
+      var i, _i, _j, _ref, _ref1;
       this.song = song;
       this.synth = [];
       this.num_id = 0;
@@ -1895,8 +1895,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
       }
       this.synth_now = this.synth[0];
+      this.readScene(this.song.master[0]);
+      this.setSceneLength(this.song.master.length);
+      for (i = _j = 0, _ref1 = this.song.tracks.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+        this.synth[i].readParam(this.song.tracks[i]);
+      }
       this.session.setSynth(this.synth);
       this.session.readSong(this.song);
+      this.mixer.readParam(this.song.mixer);
       this.view.setSynthNum(this.synth.length, this.synth_pos);
       return this.resetSceneLength();
     };
@@ -4368,22 +4374,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Session.prototype.saveMasters = function() {
       if (this.song.master === []) {
         return this.song.master.push(this.player.getScene());
-      } else {
-
       }
     };
 
     Session.prototype.saveMixer = function() {
       return this.song.mixer = this.player.mixer.getParam();
-    };
-
-    Session.prototype.readTracks = function(tracks) {
-      var i, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.player.synth[i].readParam(tracks[i]));
-      }
-      return _results;
     };
 
     Session.prototype.readSong = function(song) {
@@ -4401,10 +4396,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           this.current_cells[i] = void 0;
         }
       }
-      this.player.readScene(this.song.master[0]);
-      this.player.setSceneLength(this.scene_length);
-      this.readTracks(this.song.tracks);
-      this.player.mixer.readParam(this.song.mixer);
       return this.view.readSong(this.song, this.current_cells);
     };
 
