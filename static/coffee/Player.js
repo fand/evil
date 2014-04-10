@@ -64,24 +64,6 @@
       return this.sidebar.setScale(this.scale);
     };
 
-    Player.prototype.readBPM = function(bpm) {
-      this.bpm = bpm;
-      this.setBPM(this.bpm);
-      return this.view.readBPM(this.bpm);
-    };
-
-    Player.prototype.readKey = function(key) {
-      this.key = key;
-      this.setKey(this.key);
-      return this.view.readKey(this.key);
-    };
-
-    Player.prototype.readScale = function(scale) {
-      this.scale = scale;
-      this.setScale(this.scale);
-      return this.view.readScale(this.scale);
-    };
-
     Player.prototype.isPlaying = function() {
       return this.is_playing;
     };
@@ -326,15 +308,18 @@
 
     Player.prototype.readScene = function(scene) {
       if (scene.bpm != null) {
-        this.readBPM(scene.bpm);
+        this.setBPM(scene.bpm);
+        this.view.setBPM(scene.bpm);
       }
       if (scene.key != null) {
-        this.readKey(scene.key);
+        this.setKey(scene.key);
+        this.view.setKey(scene.key);
       }
       if (scene.scale != null) {
-        this.readScale(scene.scale);
+        this.setScale(scene.scale);
+        this.view.setScale(scene.scale);
       }
-      return this.view.readParam(scene.bpm, scene.key, scene.scale);
+      return this.view.setParam(scene.bpm, scene.key, scene.scale);
     };
 
     Player.prototype.getScene = function() {

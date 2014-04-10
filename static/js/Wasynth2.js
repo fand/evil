@@ -1651,24 +1651,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.sidebar.setScale(this.scale);
     };
 
-    Player.prototype.readBPM = function(bpm) {
-      this.bpm = bpm;
-      this.setBPM(this.bpm);
-      return this.view.readBPM(this.bpm);
-    };
-
-    Player.prototype.readKey = function(key) {
-      this.key = key;
-      this.setKey(this.key);
-      return this.view.readKey(this.key);
-    };
-
-    Player.prototype.readScale = function(scale) {
-      this.scale = scale;
-      this.setScale(this.scale);
-      return this.view.readScale(this.scale);
-    };
-
     Player.prototype.isPlaying = function() {
       return this.is_playing;
     };
@@ -1913,15 +1895,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Player.prototype.readScene = function(scene) {
       if (scene.bpm != null) {
-        this.readBPM(scene.bpm);
+        this.setBPM(scene.bpm);
+        this.view.setBPM(scene.bpm);
       }
       if (scene.key != null) {
-        this.readKey(scene.key);
+        this.setKey(scene.key);
+        this.view.setKey(scene.key);
       }
       if (scene.scale != null) {
-        this.readScale(scene.scale);
+        this.setScale(scene.scale);
+        this.view.setScale(scene.scale);
       }
-      return this.view.readParam(scene.bpm, scene.key, scene.scale);
+      return this.view.setParam(scene.bpm, scene.key, scene.scale);
     };
 
     Player.prototype.getScene = function() {
@@ -1989,9 +1974,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     PlayerView.prototype.initEvent = function() {
       var _this = this;
       this.dom.on("change", function() {
-        _this.setBPM();
-        _this.setKey();
-        return _this.setScale();
+        _this.model.setBPM(parseInt(_this.bpm.val()));
+        _this.model.setKey(_this.key.val());
+        return _this.model.setScale(_this.scale.val());
       });
       this.bpm.on('focus', (function() {
         return window.keyboard.beginInput();
@@ -2061,27 +2046,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.play.removeClass("fa-pause").addClass("fa-play");
     };
 
-    PlayerView.prototype.setBPM = function() {
-      return this.model.setBPM(parseInt(this.bpm.val()));
-    };
-
-    PlayerView.prototype.setKey = function() {
-      return this.model.setKey(this.key.val());
-    };
-
-    PlayerView.prototype.setScale = function() {
-      return this.model.setScale(this.scale.val());
-    };
-
-    PlayerView.prototype.readBPM = function(bpm) {
+    PlayerView.prototype.setBPM = function(bpm) {
       return this.bpm.val(bpm);
     };
 
-    PlayerView.prototype.readScale = function(scale) {
+    PlayerView.prototype.setScale = function(scale) {
       return this.scale.val(scale);
     };
 
-    PlayerView.prototype.readKey = function(key) {
+    PlayerView.prototype.setKey = function(key) {
       var k, v, _results;
       _results = [];
       for (k in KEY_LIST) {
@@ -2096,10 +2069,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
-    PlayerView.prototype.readParam = function(bpm, key, scale) {
-      this.readBPM(bpm);
-      this.readKey(key);
-      return this.readScale(scale);
+    PlayerView.prototype.setParam = function(bpm, key, scale) {
+      this.setBPM(bpm);
+      this.setKey(key);
+      return this.setScale(scale);
     };
 
     PlayerView.prototype.moveRight = function() {

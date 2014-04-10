@@ -44,18 +44,6 @@ class @Player
 
         @sidebar.setScale(@scale)
 
-    readBPM: (@bpm) ->
-        @setBPM(@bpm)
-        @view.readBPM(@bpm)
-
-    readKey: (@key)->
-        @setKey(@key)
-        @view.readKey(@key)
-
-    readScale: (@scale) ->
-        @setScale(@scale)
-        @view.readScale(@scale)
-
     isPlaying: -> @is_playing
 
     play: ->
@@ -132,6 +120,7 @@ class @Player
         @mixer.addSynth(s)
         @session.addSynth(s, scene_pos)
 
+    # Called by instruments.
     changeSynth: (id, type) ->
         s_old  = @synth[id]
 
@@ -151,7 +140,7 @@ class @Player
 
         return s_new
 
-
+    # Called by PlayerView.
     moveRight: (next_idx) ->
         if next_idx == @synth.length
             @addSynth()
@@ -227,10 +216,16 @@ class @Player
         @num_id = 0
 
     readScene: (scene) ->
-        @readBPM(scene.bpm) if scene.bpm?
-        @readKey(scene.key) if scene.key?
-        @readScale(scene.scale) if scene.scale?
-        @view.readParam(scene.bpm, scene.key, scene.scale)
+        if scene.bpm?
+            @setBPM(scene.bpm)
+            @view.setBPM(scene.bpm)
+        if scene.key?
+            @setKey(scene.key)
+            @view.setKey(scene.key)
+        if scene.scale?
+            @setScale(scene.scale)
+            @view.setScale(scene.scale)
+        @view.setParam(scene.bpm, scene.key, scene.scale)
 
     getScene: -> @scene
 

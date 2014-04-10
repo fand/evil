@@ -31,9 +31,9 @@ class @PlayerView
 
     initEvent: ->
         @dom.on("change", () =>
-            @setBPM()
-            @setKey()
-            @setScale()
+            @model.setBPM(parseInt(@bpm.val()))
+            @model.setKey(@key.val())
+            @model.setScale(@scale.val())
         )
 
         @bpm.on('focus', ( => window.keyboard.beginInput())).on('blur', ( => window.keyboard.endInput()))
@@ -71,23 +71,18 @@ class @PlayerView
         receiver.stop() if receiver?
         @play.removeClass("fa-pause").addClass("fa-play")
 
-
-    setBPM:   ->  @model.setBPM(parseInt(@bpm.val()))
-    setKey:   ->  @model.setKey(@key.val())
-    setScale: ->  @model.setScale(@scale.val())
-
-    readBPM: (bpm) -> @bpm.val(bpm)
-    readScale: (scale) -> @scale.val(scale)
-    readKey: (key) ->
+    setBPM: (bpm) -> @bpm.val(bpm)
+    setScale: (scale) -> @scale.val(scale)
+    setKey: (key) ->
         for k, v of KEY_LIST
             if v = key
                 @key.val(k)
                 break
 
-    readParam: (bpm, key, scale) ->
-        @readBPM(bpm)
-        @readKey(key)
-        @readScale(scale)
+    setParam: (bpm, key, scale) ->
+        @setBPM(bpm)
+        @setKey(key)
+        @setScale(scale)
 
     moveRight: ->
         return if @is_mixer
