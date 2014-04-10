@@ -336,11 +336,7 @@
       return this.lpf.Q.value = Q;
     };
 
-    ResFilter.prototype.readParam = function(p) {
-      return this.lpf.Q.value = p[1];
-    };
-
-    ResFilter.prototype.getParam = function() {
+    ResFilter.prototype.getQ = function() {
       return this.lpf.Q.value;
     };
 
@@ -404,7 +400,7 @@
         }).call(this),
         eg: this.eg.getParam(),
         feg: this.feg.getParam(),
-        filter: [this.feg.getRange()[1], this.filter.getParam()],
+        filter: [this.feg.getRange()[1], this.filter.getQ()],
         harmony: this.is_harmony
       };
     };
@@ -428,7 +424,8 @@
         this.feg.readParam(p.feg);
       }
       if (p.filter != null) {
-        this.filter.readParam(p.filter);
+        this.feg.setRange(this.feg.getRange()[0], p.filter[0]);
+        this.filter.setQ(p.filter[1]);
       }
       return this.view.readParam(p);
     };

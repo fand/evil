@@ -195,10 +195,7 @@ class @ResFilter
     disconnect:    ()  -> @lpf.disconnect()
     getResonance:      -> @lpf.Q.value
     setQ: (Q) -> @lpf.Q.value = Q
-
-
-    readParam: (p) -> @lpf.Q.value = p[1]
-    getParam: () -> @lpf.Q.value
+    getQ: ()  -> @lpf.Q.value
 
 
 
@@ -238,7 +235,7 @@ class @SynthCore
         gains: (g.gain.value for g in @gains)
         eg:  @eg.getParam()
         feg: @feg.getParam()
-        filter: [@feg.getRange()[1], @filter.getParam()]
+        filter: [@feg.getRange()[1], @filter.getQ()]
         harmony: @is_harmony
 
     readParam: (p) ->
@@ -250,7 +247,9 @@ class @SynthCore
                 @gains[i].gain.value = p.gains[i]
         @eg.readParam(p.eg) if p.eg?
         @feg.readParam(p.feg) if p.feg?
-        @filter.readParam(p.filter) if p.filter?
+        if p.filter?
+            @feg.setRange(@feg.getRange()[0], p.filter[0])
+            @filter.setQ(p.filter[1])
         @view.readParam(p)
 
     setVCOParam: (i, shape, oct, interval, fine, harmony) ->
