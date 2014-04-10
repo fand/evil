@@ -226,8 +226,14 @@ class @SessionView
         )
         @dialog_close.on('mousedown', () => @closeDialog())
 
-        @song_title.on('focus', () => window.keyboard.beginInput()).on('change', () => @model.setSongTitle(@song_title.val())).on('blur', () => window.keyboard.endInput())
-        @song_creator.on('focus', () => window.keyboard.beginInput()).on('change', () => @model.setCreatorName(@song_creator.val())).on('blur', () => window.keyboard.endInput())
+        @song_title
+            .on('focus', () => window.keyboard.beginInput())
+            .on('change', () => @setSongTitle())
+            .on('blur', () => window.keyboard.endInput())
+        @song_creator
+            .on('focus', () => window.keyboard.beginInput())
+            .on('change', () => @setCreatorName())
+            .on('blur', () => window.keyboard.endInput())
 
         @social_twitter.on('click',  () => @share('twitter'))
         @social_facebook.on('click', () => @share('facebook'))
@@ -235,7 +241,14 @@ class @SessionView
 
         @readSong(@song, @current_cells)
 
+    # Set params for @song (ref to @model.song).
+    setSongTitle: ->
+        @song.title = @song_title.val()
 
+    setCreatorName: ->
+        @song.creator = @song_creator.val()
+
+    # Read song from @song.
     readSong: (@song, @current_cells) ->
         @resize()
 

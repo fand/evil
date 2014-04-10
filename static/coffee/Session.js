@@ -298,24 +298,6 @@
       return this.song.mixer = this.player.mixer.getParam();
     };
 
-    Session.prototype.readSong = function(song) {
-      var i, pat, _i, _ref;
-      this.song = song;
-      this.scene_pos = 0;
-      this.scene_length = 0;
-      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        pat = this.song.tracks[i].patterns[0];
-        if ((pat != null) && pat !== null) {
-          this.synth[i].readPattern(pat);
-          this.current_cells[i] = 0;
-          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
-        } else {
-          this.current_cells[i] = void 0;
-        }
-      }
-      return this.view.readSong(this.song, this.current_cells);
-    };
-
     Session.prototype.saveSong = function() {
       var csrf_token, song_json,
         _this = this;
@@ -340,6 +322,24 @@
       });
     };
 
+    Session.prototype.readSong = function(song) {
+      var i, pat, _i, _ref;
+      this.song = song;
+      this.scene_pos = 0;
+      this.scene_length = 0;
+      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        pat = this.song.tracks[i].patterns[0];
+        if ((pat != null) && pat !== null) {
+          this.synth[i].readPattern(pat);
+          this.current_cells[i] = 0;
+          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
+        } else {
+          this.current_cells[i] = void 0;
+        }
+      }
+      return this.view.readSong(this.song, this.current_cells);
+    };
+
     Session.prototype.setSynthName = function(synth_id, name) {
       this.song.tracks[synth_id].name = name;
       return this.view.drawTrackName(synth_id, name, this.song.tracks[synth_id].type);
@@ -356,14 +356,6 @@
         };
       }
       return this.view.drawPatternName(synth_id, pat_num, this.song.tracks[synth_id].patterns[pat_num]);
-    };
-
-    Session.prototype.setSongTitle = function(title) {
-      return this.song.title = this.view.song.title = title;
-    };
-
-    Session.prototype.setCreatorName = function(name) {
-      return this.song.creator = this.view.song.creator = name;
     };
 
     Session.prototype.changeSynth = function(id, type) {

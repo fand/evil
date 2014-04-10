@@ -4381,24 +4381,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.song.mixer = this.player.mixer.getParam();
     };
 
-    Session.prototype.readSong = function(song) {
-      var i, pat, _i, _ref;
-      this.song = song;
-      this.scene_pos = 0;
-      this.scene_length = 0;
-      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        pat = this.song.tracks[i].patterns[0];
-        if ((pat != null) && pat !== null) {
-          this.synth[i].readPattern(pat);
-          this.current_cells[i] = 0;
-          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
-        } else {
-          this.current_cells[i] = void 0;
-        }
-      }
-      return this.view.readSong(this.song, this.current_cells);
-    };
-
     Session.prototype.saveSong = function() {
       var csrf_token, song_json,
         _this = this;
@@ -4423,6 +4405,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
+    Session.prototype.readSong = function(song) {
+      var i, pat, _i, _ref;
+      this.song = song;
+      this.scene_pos = 0;
+      this.scene_length = 0;
+      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        pat = this.song.tracks[i].patterns[0];
+        if ((pat != null) && pat !== null) {
+          this.synth[i].readPattern(pat);
+          this.current_cells[i] = 0;
+          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
+        } else {
+          this.current_cells[i] = void 0;
+        }
+      }
+      return this.view.readSong(this.song, this.current_cells);
+    };
+
     Session.prototype.setSynthName = function(synth_id, name) {
       this.song.tracks[synth_id].name = name;
       return this.view.drawTrackName(synth_id, name, this.song.tracks[synth_id].type);
@@ -4439,14 +4439,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         };
       }
       return this.view.drawPatternName(synth_id, pat_num, this.song.tracks[synth_id].patterns[pat_num]);
-    };
-
-    Session.prototype.setSongTitle = function(title) {
-      return this.song.title = this.view.song.title = title;
-    };
-
-    Session.prototype.setCreatorName = function(name) {
-      return this.song.creator = this.view.song.creator = name;
     };
 
     Session.prototype.changeSynth = function(id, type) {
@@ -4795,14 +4787,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.song_title.on('focus', function() {
         return window.keyboard.beginInput();
       }).on('change', function() {
-        return _this.model.setSongTitle(_this.song_title.val());
+        return _this.setSongTitle();
       }).on('blur', function() {
         return window.keyboard.endInput();
       });
       this.song_creator.on('focus', function() {
         return window.keyboard.beginInput();
       }).on('change', function() {
-        return _this.model.setCreatorName(_this.song_creator.val());
+        return _this.setCreatorName();
       }).on('blur', function() {
         return window.keyboard.endInput();
       });
@@ -4816,6 +4808,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.share('hatena');
       });
       return this.readSong(this.song, this.current_cells);
+    };
+
+    SessionView.prototype.setSongTitle = function() {
+      return this.song.title = this.song_title.val();
+    };
+
+    SessionView.prototype.setCreatorName = function() {
+      return this.song.creator = this.song_creator.val();
     };
 
     SessionView.prototype.readSong = function(song, current_cells) {

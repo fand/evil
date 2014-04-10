@@ -272,14 +272,14 @@
       this.song_title.on('focus', function() {
         return window.keyboard.beginInput();
       }).on('change', function() {
-        return _this.model.setSongTitle(_this.song_title.val());
+        return _this.setSongTitle();
       }).on('blur', function() {
         return window.keyboard.endInput();
       });
       this.song_creator.on('focus', function() {
         return window.keyboard.beginInput();
       }).on('change', function() {
-        return _this.model.setCreatorName(_this.song_creator.val());
+        return _this.setCreatorName();
       }).on('blur', function() {
         return window.keyboard.endInput();
       });
@@ -293,6 +293,14 @@
         return _this.share('hatena');
       });
       return this.readSong(this.song, this.current_cells);
+    };
+
+    SessionView.prototype.setSongTitle = function() {
+      return this.song.title = this.song_title.val();
+    };
+
+    SessionView.prototype.setCreatorName = function() {
+      return this.song.creator = this.song_creator.val();
     };
 
     SessionView.prototype.readSong = function(song, current_cells) {

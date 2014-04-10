@@ -235,21 +235,6 @@ class @Session
     saveMixer: ->
         @song.mixer = @player.mixer.getParam()
 
-    # Read the song given by Player.
-    readSong: (@song) ->
-        @scene_pos = 0
-        @scene_length = 0
-        for i in [0...@song.tracks.length]
-            pat = @song.tracks[i].patterns[0]
-            if pat? and pat != null
-                @synth[i].readPattern(pat)
-                @current_cells[i] = 0
-                @scene_length = Math.max(@scene_length, pat.pattern.length)
-            else
-                @current_cells[i] = undefined
-
-        @view.readSong(@song, @current_cells)
-
     saveSong: () ->
         # Save patterns and parameters into JSON.
         @savePatterns()
@@ -273,10 +258,29 @@ class @Session
             @view.showError(err)
         )
 
+    # Read the song given by Player.
+    readSong: (@song) ->
+        @scene_pos = 0
+        @scene_length = 0
+        for i in [0...@song.tracks.length]
+            pat = @song.tracks[i].patterns[0]
+            if pat? and pat != null
+                @synth[i].readPattern(pat)
+                @current_cells[i] = 0
+                @scene_length = Math.max(@scene_length, pat.pattern.length)
+            else
+                @current_cells[i] = undefined
+
+        @view.readSong(@song, @current_cells)
+
+    # Set a track name of @song.
+    # called by Synth, Sampler
     setSynthName: (synth_id, name) ->
         @song.tracks[synth_id].name = name
         @view.drawTrackName(synth_id, name, @song.tracks[synth_id].type)
 
+    # Set current pattern name of a synth.
+    # called by Synth, Sampler
     setPatternName: (synth_id, name) ->
         pat_num = @current_cells[synth_id]
 
@@ -287,8 +291,6 @@ class @Session
 
         @view.drawPatternName(synth_id, pat_num, @song.tracks[synth_id].patterns[pat_num])
 
-    setSongTitle: (title) -> @song.title = @view.song.title = title
-    setCreatorName: (name) -> @song.creator = @view.song.creator = name
 
     changeSynth: (id, type) ->
         s = @player.changeSynth(id, type)
