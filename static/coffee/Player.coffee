@@ -50,7 +50,7 @@ class @Player
         @is_playing = true
         @session.play()
         T.setTimeout(( =>
-            s.play() for s in @synth
+            # s.play() for s in @synth
             @playNext()
          ), 150)
 
@@ -202,7 +202,7 @@ class @Player
         @readScene(@song.master[0])
         @setSceneLength(@song.master.length)
         for i in [0...@song.tracks.length]
-            @synth[i].readParam(@song.tracks[i])
+            @synth[i].setParam(@song.tracks[i])
 
         @session.setSynth(@synth)
         @session.readSong(@song)

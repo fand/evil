@@ -85,7 +85,7 @@ class @SynthView
                     0, 0, 26, 26,           # src (x, y, w, h)
                     j * 26, i * 26, 26, 26  # dst (x, y, w, h)
                 )
-        @readPattern(@pattern_obj)
+        @setPattern(@pattern_obj)
 
     getPos: (e) ->
         @rect = @canvas_off.getBoundingClientRect()
@@ -101,6 +101,8 @@ class @SynthView
         # Sequencer
         @canvas_hover_dom.on('mousemove', (e) =>
             pos = @getPos(e)
+
+            # Show current pos.
             if pos != @hover_pos
                 @ctx_hover.clearRect(
                     @hover_pos.x * 26, @hover_pos.y * 26, 26, 26
@@ -111,6 +113,7 @@ class @SynthView
                 )
                 @hover_pos = pos
 
+            # Add / Remove notes.
             if @is_clicked and @click_pos != pos
                 if @is_sustaining
                     @sustain_l = Math.min(pos.x_abs, @sustain_l)
@@ -145,6 +148,7 @@ class @SynthView
                 else
                     @is_adding = true
                     @addNote(pos)
+
         ).on('mouseup', (e) =>
             @is_clicked = false
             if not @is_step
@@ -175,7 +179,7 @@ class @SynthView
         ).on('blur',
             ( => window.keyboard.endInput())
         ).on('change',
-            ( => @model.setPatternName(@pattern_name.val()))
+            ( => @model.inputPatternName(@pattern_name.val()))
         )
         @pencil.on('click', ( => @pencilMode()))
         @step.on('click', ( => @stepMode()))
@@ -256,7 +260,6 @@ class @SynthView
         @ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26)
         @model.removeNote(pos.x_abs)
 
-
     sustainNote: (l, r, pos) ->
         if l == r
             @addNote(pos)
@@ -327,6 +330,7 @@ class @SynthView
                 @pattern[time-1] *= -1
             @is_sustaining = false
 
+    # Show the position bar.
     playAt: (@time) ->
         return if @is_nosync
 
@@ -344,7 +348,7 @@ class @SynthView
             )
         @last_time = time
 
-    readPattern: (@pattern_obj) ->
+    setPattern: (@pattern_obj) ->
         @pattern = @pattern_obj.pattern
         @page = 0
         @page_total = @pattern.length / @cells_x
@@ -493,12 +497,12 @@ class @SynthCoreView
         @initEvent()
 
     initEvent: ->
-        @vcos.on("change",          () => @setVCOParam())
-        @gain_inputs.on("change",   () => @setGains())
-        @filter_inputs.on("change", () => @setFilterParam())
-        @EG_inputs.on("change",     () => @setEGParam())
-        @FEG_inputs.on("change",    () => @setFEGParam())
-        @setParam()
+        @vcos.on("change",          () => @fetchVCOParam())
+        @gain_inputs.on("change",   () => @fetchGains())
+        @filter_inputs.on("change", () => @fetchFilterParam())
+        @EG_inputs.on("change",     () => @fetchEGParam())
+        @FEG_inputs.on("change",    () => @fetchFEGParam())
+        @fetchParam()
 
     updateCanvas: (name) ->
         canvas  = null
@@ -526,14 +530,14 @@ class @SynthCoreView
         context.strokeStyle = 'rgb(0, 220, 255)'
         context.stroke()
 
-    setParam: ->
-        @setVCOParam()
-        @setEGParam()
-        @setFEGParam()
-        @setFilterParam()
-        @setGains()
+    fetchParam: ->
+        @fetchVCOParam()
+        @fetchEGParam()
+        @fetchFEGParam()
+        @fetchFilterParam()
+        @fetchGains()
 
-    setVCOParam: ->
+    fetchVCOParam: ->
         harmony = @vcos.eq(0).find('.harmony').val()
         for i in [0...@vcos.length]
             vco = @vcos.eq(i)
@@ -546,7 +550,7 @@ class @SynthCoreView
                 harmony
             )
 
-    readVCOParam: (p) ->
+    setVCOParam: (p) ->
         for i in [0...@vcos.length]
             vco = @vcos.eq(i)
             vco.find('.shape').val(p[i].shape)
@@ -554,7 +558,7 @@ class @SynthCoreView
             vco.find('.interval').val(p[i].interval)
             vco.find('.fine').val(p[i].fine)
 
-    setEGParam: ->
+    fetchEGParam: ->
         @model.setEGParam(
             parseFloat(@EG_inputs.eq(0).val()),
             parseFloat(@EG_inputs.eq(1).val()),
@@ -563,13 +567,13 @@ class @SynthCoreView
         )
         @updateCanvas("EG");
 
-    readEGParam: (p) ->
+    setEGParam: (p) ->
         @EG_inputs.eq(0).val(p.adsr[0] * 50000)
         @EG_inputs.eq(1).val(p.adsr[1] * 50000)
         @EG_inputs.eq(2).val(p.adsr[2] * 100)
         @EG_inputs.eq(3).val(p.adsr[3] * 50000)
 
-    setFEGParam: ->
+    fetchFEGParam: ->
         @model.setFEGParam(
             parseFloat(@FEG_inputs.eq(0).val()),
             parseFloat(@FEG_inputs.eq(1).val()),
@@ -578,33 +582,33 @@ class @SynthCoreView
         );
         @updateCanvas("FEG");
 
-    readFEGParam: (p) ->
+    setFEGParam: (p) ->
         for i in [0...p.length]
             @FEG_inputs.eq(i).val(p.adsr[i])
 
-    setFilterParam: ->
+    fetchFilterParam: ->
         @model.setFilterParam(
             parseFloat(@filter_inputs.eq(0).val()),
             parseFloat(@filter_inputs.eq(1).val())
         )
 
-    readFilterParam: (p) ->
+    setFilterParam: (p) ->
         @filter_inputs.eq(0).val(p[0])
         @filter_inputs.eq(1).val(p[1])
 
-    setGains: ->
+    fetchGains: ->
         for i in [0... @gain_inputs.length]
             @model.setVCOGain(i, parseInt(@gain_inputs.eq(i).val()))
 
-    readParam: (p) ->
+    setParam: (p) ->
         if p.vcos?
-            @readVCOParam(p.vcos)
+            @setVCOParam(p.vcos)
         if p.gains?
             for i in [0...p.gains.length]
                 @gain_inputs.eq(i).val(p.gains[i] / 0.3 * 100)
-        @readEGParam(p.eg) if p.eg?
-        @readFEGParam(p.feg) if p.feg?
-        @readFilterParam(p.filter) if p.filter?
+        @setEGParam(p.eg) if p.eg?
+        @setFEGParam(p.feg) if p.feg?
+        @setFilterParam(p.filter) if p.filter?
 
 
 

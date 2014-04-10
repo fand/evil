@@ -73,12 +73,6 @@
       this.is_playing = true;
       this.session.play();
       return T.setTimeout((function() {
-        var s, _i, _len, _ref;
-        _ref = _this.synth;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          s = _ref[_i];
-          s.play();
-        }
         return _this.playNext();
       }), 150);
     };
@@ -292,7 +286,7 @@
       this.readScene(this.song.master[0]);
       this.setSceneLength(this.song.master.length);
       for (i = _j = 0, _ref1 = this.song.tracks.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-        this.synth[i].readParam(this.song.tracks[i]);
+        this.synth[i].setParam(this.song.tracks[i]);
       }
       this.session.setSynth(this.synth);
       this.session.readSong(this.song);
