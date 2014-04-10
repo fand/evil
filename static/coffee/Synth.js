@@ -779,10 +779,12 @@
       return this.view.setPatternName(this.pattern_name);
     };
 
-    Synth.prototype.replaceWith = function(s_new) {
+    Synth.prototype.changeSynth = function(type) {
+      var s_new;
+      s_new = this.player.changeSynth(this.id, type, s_new);
+      this.view.dom.replaceWith(s_new.view.dom);
       this.noteOff(true);
-      this.disconnect();
-      return this.view.dom.replaceWith(s_new.view.dom);
+      return this.disconnect();
     };
 
     Synth.prototype.getParam = function() {

@@ -482,11 +482,13 @@ class @Synth
     readPatternName: (@pattern_name) ->
         @view.setPatternName(@pattern_name)
 
-    replaceWith: (s_new) ->
+    changeSynth: (type) ->
+        s_new = @player.changeSynth(@id, type, s_new)
+        @view.dom.replaceWith(s_new.view.dom)
         @noteOff(true)
         @disconnect()
-        @view.dom.replaceWith(s_new.view.dom)
 
+    # Get params as object.
     getParam: ->
         p = @core.getParam()
         p.name = @name
@@ -502,7 +504,7 @@ class @Synth
     mute:   -> @core.mute()
     demute: -> @core.demute()
 
-
+    # Read effect params from the song.
     readEffects: (effects) ->
         e.disconnect() for e in @effects
         @effects = []
@@ -521,7 +523,6 @@ class @Synth
 
             @insertEffect(fx)
             fx.readParam(e)
-
 
     getEffectsParam: ->
         f.getParam() for f in @effects

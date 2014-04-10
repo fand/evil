@@ -358,27 +358,26 @@
       return this.view.drawPatternName(synth_id, pat_num, this.song.tracks[synth_id].patterns[pat_num]);
     };
 
-    Session.prototype.changeSynth = function(id, type) {
-      var pat_name, pp, s, s_obj, _ref;
-      s = this.player.changeSynth(id, type);
-      pat_name = s.id + '-' + this.scene_pos;
-      s.readPatternName(pat_name);
-      pp = [];
-      pp[this.scene_pos] = {
+    Session.prototype.changeSynth = function(id, type, synth_new) {
+      var pat_name, patterns, s_params, _ref;
+      pat_name = id + '-' + this.scene_pos;
+      synth_new.readPatternName(pat_name);
+      patterns = [];
+      patterns[this.scene_pos] = {
         name: pat_name,
-        pattern: s.pattern
+        pattern: synth_new.pattern
       };
-      s_obj = {
-        id: s.id,
+      s_params = {
+        id: id,
         type: type,
-        name: 'Synth #' + s.id,
-        patterns: pp,
+        name: 'Synth #' + id,
+        patterns: patterns,
         params: [],
         gain: 1.0,
         pan: 0.0
       };
-      this.song.tracks[id] = s_obj;
-      s.readPattern(pp[this.scene_pos]);
+      this.song.tracks[id] = s_params;
+      synth_new.readPattern(patterns[this.scene_pos]);
       _ref = [this.song.tracks[id].patterns[this.current_cells[id]], this.song.tracks[id].patterns[0]], this.song.tracks[id].patterns[0] = _ref[0], this.song.tracks[id].patterns[this.current_cells[id]] = _ref[1];
       return this.view.addSynth(this.song, [id, this.scene_pos]);
     };

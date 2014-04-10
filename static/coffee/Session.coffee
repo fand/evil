@@ -291,21 +291,19 @@ class @Session
 
         @view.drawPatternName(synth_id, pat_num, @song.tracks[synth_id].patterns[pat_num])
 
+    # called by Player.
+    changeSynth: (id, type, synth_new) ->
+        pat_name = id + '-' + @scene_pos
+        synth_new.readPatternName(pat_name)
 
-    changeSynth: (id, type) ->
-        s = @player.changeSynth(id, type)
+        patterns = []
+        patterns[@scene_pos] = name: pat_name, pattern: synth_new.pattern
 
-        pat_name = s.id + '-' + @scene_pos
-        s.readPatternName(pat_name)
+        s_params = id: id, type: type, name: 'Synth #' + id, patterns: patterns, params: [], gain: 1.0, pan: 0.0
+        @song.tracks[id] = s_params
+        synth_new.readPattern(patterns[@scene_pos])
 
-        pp = []
-        pp[@scene_pos] = name: pat_name, pattern: s.pattern
-
-        s_obj = id: s.id, type: type, name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
-        @song.tracks[id] = s_obj
-        s.readPattern(pp[@scene_pos])
-
-        # swap
+        # Swap patterns[0] and current patterns.
         [@song.tracks[id].patterns[0], @song.tracks[id].patterns[@current_cells[id]]] = [@song.tracks[id].patterns[@current_cells[id]], @song.tracks[id].patterns[0]]
 
         @view.addSynth(@song, [id, @scene_pos])

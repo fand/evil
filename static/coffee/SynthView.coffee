@@ -162,7 +162,7 @@ class @SynthView
         )
 
         # Headers
-        @synth_type.on('change', () => @model.session.changeSynth(@id, @synth_type.val()))
+        @synth_type.on('change', () => @model.changeSynth(@synth_type.val()))
         @synth_name.on('focus',
             ( => window.keyboard.beginInput())
         ).on('blur',

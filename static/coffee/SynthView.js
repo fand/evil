@@ -166,7 +166,7 @@
         return _this.is_adding = false;
       });
       this.synth_type.on('change', function() {
-        return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
+        return _this.model.changeSynth(_this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
         return window.keyboard.beginInput();

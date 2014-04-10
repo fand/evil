@@ -204,20 +204,19 @@
     };
 
     Player.prototype.changeSynth = function(id, type) {
-      var name, s_new, s_old;
+      var s_new, s_old;
       s_old = this.synth[id];
-      name = s_old.name;
       if (type === 'REZ') {
-        s_new = new Synth(this.context, id, this, name);
+        s_new = new Synth(this.context, id, this, s_old.name);
         s_new.setScale(this.scene.scale);
         s_new.setKey(this.scene.key);
       } else if (type === 'SAMPLER') {
-        s_new = new Sampler(this.context, id, this, name);
+        s_new = new Sampler(this.context, id, this, s_old.name);
       }
-      this.mixer.changeSynth(id, s_new);
-      this.synth[id] = s_new;
-      s_old.replaceWith(s_new);
+      this.synth_now = this.synth[id] = s_new;
       this.synth_now = s_new;
+      this.mixer.changeSynth(id, s_new);
+      this.session.changeSynth(id, type, s_new);
       this.view.changeSynth(id, type);
       return s_new;
     };
