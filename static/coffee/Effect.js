@@ -53,11 +53,6 @@
       this.source = source;
     };
 
-    FX.prototype.readParam = function(p) {
-      this.setParam(p);
-      return this.view.readParam(p);
-    };
-
     return FX;
 
   })();
@@ -110,8 +105,9 @@
         this.setLofi(p.lofi);
       }
       if (p.wet != null) {
-        return this.setWet(p.wet);
+        this.setWet(p.wet);
       }
+      return this.view.setParam(p);
     };
 
     Delay.prototype.getParam = function(p) {
@@ -175,8 +171,9 @@
         this.setIR(p.name);
       }
       if (p.wet != null) {
-        return this.setWet(p.wet);
+        this.setWet(p.wet);
       }
+      return this.view.setParam(p);
     };
 
     Reverb.prototype.getParam = function(p) {
@@ -245,8 +242,9 @@
         this.setInput(p.input);
       }
       if (p.output != null) {
-        return this.setOutput(p.output);
+        this.setOutput(p.output);
       }
+      return this.view.setParam(p);
     };
 
     Compressor.prototype.getParam = function(p) {
@@ -342,8 +340,9 @@
         this.setInput(p.input);
       }
       if (p.output != null) {
-        return this.setOutput(p.output);
+        this.setOutput(p.output);
       }
+      return this.view.setParam(p);
     };
 
     Fuzz.prototype.getParam = function(p) {
@@ -395,8 +394,9 @@
         this.setDelay(p.delay);
       }
       if (p.width != null) {
-        return this.setWidth(p.width);
+        this.setWidth(p.width);
       }
+      return this.view.setParam(p);
     };
 
     Double.prototype.getParam = function(p) {

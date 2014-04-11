@@ -58,7 +58,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         q = _ref[_i];
         pat = this.song.tracks[q[0]].patterns[q[1]];
-        this.synth[q[0]].readPattern(pat);
+        this.synth[q[0]].setPattern(pat);
         this.current_cells[q[0]] = q[1];
       }
       this.view.drawScene(this.scene_pos, this.current_cells);
@@ -98,7 +98,7 @@
         }
         pat = this.song.tracks[i].patterns[this.scene_pos];
         if ((pat != null) && pat !== null) {
-          this.synth[i].readPattern(pat);
+          this.synth[i].setPattern(pat);
           this.scene_length = Math.max(this.scene_length, pat.pattern.length);
           this.current_cells[i] = pos;
         }
@@ -150,7 +150,7 @@
       var name, patterns, pos, s_obj;
       pos = _pos ? _pos : this.scene_pos;
       name = s.id + '-' + pos;
-      s.readPatternName(name);
+      s.setPatternName(name);
       patterns = [];
       patterns[pos] = {
         name: s.pattern_name,
@@ -209,7 +209,7 @@
         this.song.length = pat_num + 1;
       }
       if (this.current_cells[synth_num] === pat_num) {
-        return this.player.synth[synth_num].readPattern(pat);
+        return this.player.synth[synth_num].setPattern(pat);
       }
     };
 
@@ -237,11 +237,11 @@
       }
       this.savePattern(synth_num, this.current_cells[synth_num]);
       if (this.song.tracks[synth_num].patterns[pat_num] != null) {
-        this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num]);
+        this.player.synth[synth_num].setPattern(this.song.tracks[synth_num].patterns[pat_num]);
       } else {
         pat_name = synth_num + '-' + pat_num;
         this.player.synth[synth_num].clearPattern();
-        this.player.synth[synth_num].readPatternName(pat_name);
+        this.player.synth[synth_num].setPatternName(pat_name);
         this.song.tracks[synth_num].patterns[pat_num] = this.player.synth[synth_num].getPattern();
       }
       this.current_cells[synth_num] = pat_num;
@@ -291,44 +291,11 @@
     Session.prototype.saveMasters = function() {
       if (this.song.master === []) {
         return this.song.master.push(this.player.getScene());
-      } else {
-
       }
     };
 
     Session.prototype.saveMixer = function() {
       return this.song.mixer = this.player.mixer.getParam();
-    };
-
-    Session.prototype.readTracks = function(tracks) {
-      var i, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.player.synth[i].readParam(tracks[i]));
-      }
-      return _results;
-    };
-
-    Session.prototype.readSong = function(song) {
-      var i, pat, _i, _ref;
-      this.song = song;
-      this.scene_pos = 0;
-      this.scene_length = 0;
-      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        pat = this.song.tracks[i].patterns[0];
-        if ((pat != null) && pat !== null) {
-          this.synth[i].readPattern(pat);
-          this.current_cells[i] = 0;
-          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
-        } else {
-          this.current_cells[i] = void 0;
-        }
-      }
-      this.player.readScene(this.song.master[0]);
-      this.player.setSceneLength(this.scene_length);
-      this.readTracks(this.song.tracks);
-      this.player.mixer.readParam(this.song.mixer);
-      return this.view.readSong(this.song, this.current_cells);
     };
 
     Session.prototype.saveSong = function() {
@@ -355,6 +322,24 @@
       });
     };
 
+    Session.prototype.readSong = function(song) {
+      var i, pat, _i, _ref;
+      this.song = song;
+      this.scene_pos = 0;
+      this.scene_length = 0;
+      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        pat = this.song.tracks[i].patterns[0];
+        if ((pat != null) && pat !== null) {
+          this.synth[i].setPattern(pat);
+          this.current_cells[i] = 0;
+          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
+        } else {
+          this.current_cells[i] = void 0;
+        }
+      }
+      return this.view.readSong(this.song, this.current_cells);
+    };
+
     Session.prototype.setSynthName = function(synth_id, name) {
       this.song.tracks[synth_id].name = name;
       return this.view.drawTrackName(synth_id, name, this.song.tracks[synth_id].type);
@@ -373,35 +358,26 @@
       return this.view.drawPatternName(synth_id, pat_num, this.song.tracks[synth_id].patterns[pat_num]);
     };
 
-    Session.prototype.setSongTitle = function(title) {
-      return this.song.title = this.view.song.title = title;
-    };
-
-    Session.prototype.setCreatorName = function(name) {
-      return this.song.creator = this.view.song.creator = name;
-    };
-
-    Session.prototype.changeSynth = function(id, type) {
-      var pat_name, pp, s, s_obj, _ref;
-      s = this.player.changeSynth(id, type);
-      pat_name = s.id + '-' + this.scene_pos;
-      s.readPatternName(pat_name);
-      pp = [];
-      pp[this.scene_pos] = {
+    Session.prototype.changeSynth = function(id, type, synth_new) {
+      var pat_name, patterns, s_params, _ref;
+      pat_name = id + '-' + this.scene_pos;
+      synth_new.setPatternName(pat_name);
+      patterns = [];
+      patterns[this.scene_pos] = {
         name: pat_name,
-        pattern: s.pattern
+        pattern: synth_new.pattern
       };
-      s_obj = {
-        id: s.id,
+      s_params = {
+        id: id,
         type: type,
-        name: 'Synth #' + s.id,
-        patterns: pp,
+        name: 'Synth #' + id,
+        patterns: patterns,
         params: [],
         gain: 1.0,
         pan: 0.0
       };
-      this.song.tracks[id] = s_obj;
-      s.readPattern(pp[this.scene_pos]);
+      this.song.tracks[id] = s_params;
+      synth_new.setPattern(patterns[this.scene_pos]);
       _ref = [this.song.tracks[id].patterns[this.current_cells[id]], this.song.tracks[id].patterns[0]], this.song.tracks[id].patterns[0] = _ref[0], this.song.tracks[id].patterns[this.current_cells[id]] = _ref[1];
       return this.view.addSynth(this.song, [id, this.scene_pos]);
     };

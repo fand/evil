@@ -306,9 +306,11 @@ class @Sampler
     selectSample: (sample_now) ->
         @core.bindSample(sample_now)
 
-    replaceWith: (s_new) ->
+    changeSynth: (type) ->
+        s_new = @player.changeSynth(@id, type, s_new)
         @view.dom.replaceWith(s_new.view.dom)
-
+        @noteOff(true)
+        @disconnect()
 
     getParam: ->
         p = @core.getParam()

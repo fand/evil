@@ -64,24 +64,6 @@
       return this.sidebar.setScale(this.scale);
     };
 
-    Player.prototype.readBPM = function(bpm) {
-      this.bpm = bpm;
-      this.setBPM(this.bpm);
-      return this.view.readBPM(this.bpm);
-    };
-
-    Player.prototype.readKey = function(key) {
-      this.key = key;
-      this.setKey(this.key);
-      return this.view.readKey(this.key);
-    };
-
-    Player.prototype.readScale = function(scale) {
-      this.scale = scale;
-      this.setScale(this.scale);
-      return this.view.readScale(this.scale);
-    };
-
     Player.prototype.isPlaying = function() {
       return this.is_playing;
     };
@@ -91,12 +73,6 @@
       this.is_playing = true;
       this.session.play();
       return T.setTimeout((function() {
-        var s, _i, _len, _ref;
-        _ref = _this.synth;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          s = _ref[_i];
-          s.play();
-        }
         return _this.playNext();
       }), 150);
     };
@@ -204,20 +180,19 @@
     };
 
     Player.prototype.changeSynth = function(id, type) {
-      var name, s_new, s_old;
+      var s_new, s_old;
       s_old = this.synth[id];
-      name = s_old.name;
       if (type === 'REZ') {
-        s_new = new Synth(this.context, id, this, name);
+        s_new = new Synth(this.context, id, this, s_old.name);
         s_new.setScale(this.scene.scale);
         s_new.setKey(this.scene.key);
       } else if (type === 'SAMPLER') {
-        s_new = new Sampler(this.context, id, this, name);
+        s_new = new Sampler(this.context, id, this, s_old.name);
       }
-      this.mixer.changeSynth(id, s_new);
-      this.synth[id] = s_new;
-      s_old.replaceWith(s_new);
+      this.synth_now = this.synth[id] = s_new;
       this.synth_now = s_new;
+      this.mixer.changeSynth(id, s_new);
+      this.session.changeSynth(id, type, s_new);
       this.view.changeSynth(id, type);
       return s_new;
     };
@@ -292,7 +267,7 @@
     };
 
     Player.prototype.readSong = function(song) {
-      var i, _i, _ref;
+      var i, _i, _j, _ref, _ref1;
       this.song = song;
       this.synth = [];
       this.num_id = 0;
@@ -308,8 +283,14 @@
         }
       }
       this.synth_now = this.synth[0];
+      this.readScene(this.song.master[0]);
+      this.setSceneLength(this.song.master.length);
+      for (i = _j = 0, _ref1 = this.song.tracks.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+        this.synth[i].setParam(this.song.tracks[i]);
+      }
       this.session.setSynth(this.synth);
       this.session.readSong(this.song);
+      this.mixer.readParam(this.song.mixer);
       this.view.setSynthNum(this.synth.length, this.synth_pos);
       return this.resetSceneLength();
     };
@@ -321,15 +302,18 @@
 
     Player.prototype.readScene = function(scene) {
       if (scene.bpm != null) {
-        this.readBPM(scene.bpm);
+        this.setBPM(scene.bpm);
+        this.view.setBPM(scene.bpm);
       }
       if (scene.key != null) {
-        this.readKey(scene.key);
+        this.setKey(scene.key);
+        this.view.setKey(scene.key);
       }
       if (scene.scale != null) {
-        this.readScale(scene.scale);
+        this.setScale(scene.scale);
+        this.view.setScale(scene.scale);
       }
-      return this.view.readParam(scene.bpm, scene.key, scene.scale);
+      return this.view.setParam(scene.bpm, scene.key, scene.scale);
     };
 
     Player.prototype.getScene = function() {

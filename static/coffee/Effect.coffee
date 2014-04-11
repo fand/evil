@@ -26,9 +26,6 @@ class @FX
 
     setSource: (@source) ->
 
-    readParam: (p) ->
-        @setParam(p)
-        @view.readParam(p)
 
 
 class @Delay extends @FX
@@ -67,6 +64,7 @@ class @Delay extends @FX
         @setFeedback(p.feedback) if p.feedback?
         @setLofi(p.lofi) if p.lofi?
         @setWet(p.wet) if p.wet?
+        @view.setParam(p)
 
     getParam: (p) ->
         effect: 'Delay'
@@ -115,6 +113,7 @@ class @Reverb extends @FX
     setParam: (p) ->
         @setIR(p.name) if p.name?
         @setWet(p.wet) if p.wet?
+        @view.setParam(p)
 
     getParam: (p) ->
         effect: 'Reverb'
@@ -148,6 +147,7 @@ class @Compressor extends @FX
         @setKnee(p.knee) if p.knee?
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
+        @view.setParam(p)
 
     getParam: (p) ->
         effect: 'Compressor'
@@ -211,6 +211,7 @@ class @Fuzz extends @FX
         @setGain(p.gain) if p.gain?
         @setInput(p.input) if p.input?
         @setOutput(p.output) if p.output?
+        @view.setParam(p)
 
     getParam: (p) ->
         effect: 'Fuzz'
@@ -250,6 +251,7 @@ class @Double extends @FX
     setParam: (p) ->
         @setDelay(p.delay) if p.delay?
         @setWidth(p.width) if p.width?
+        @view.setParam(p)
 
     getParam: (p) ->
         effect: 'Double'

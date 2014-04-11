@@ -73,11 +73,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.source = source;
     };
 
-    FX.prototype.readParam = function(p) {
-      this.setParam(p);
-      return this.view.readParam(p);
-    };
-
     return FX;
 
   })();
@@ -130,8 +125,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.setLofi(p.lofi);
       }
       if (p.wet != null) {
-        return this.setWet(p.wet);
+        this.setWet(p.wet);
       }
+      return this.view.setParam(p);
     };
 
     Delay.prototype.getParam = function(p) {
@@ -195,8 +191,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.setIR(p.name);
       }
       if (p.wet != null) {
-        return this.setWet(p.wet);
+        this.setWet(p.wet);
       }
+      return this.view.setParam(p);
     };
 
     Reverb.prototype.getParam = function(p) {
@@ -265,8 +262,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.setInput(p.input);
       }
       if (p.output != null) {
-        return this.setOutput(p.output);
+        this.setOutput(p.output);
       }
+      return this.view.setParam(p);
     };
 
     Compressor.prototype.getParam = function(p) {
@@ -362,8 +360,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.setInput(p.input);
       }
       if (p.output != null) {
-        return this.setOutput(p.output);
+        this.setOutput(p.output);
       }
+      return this.view.setParam(p);
     };
 
     Fuzz.prototype.getParam = function(p) {
@@ -415,8 +414,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.setDelay(p.delay);
       }
       if (p.width != null) {
-        return this.setWidth(p.width);
+        this.setWidth(p.width);
       }
+      return this.view.setParam(p);
     };
 
     Double.prototype.getParam = function(p) {
@@ -602,7 +602,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
-    ReverbView.prototype.readParam = function(p) {
+    ReverbView.prototype.setParam = function(p) {
       if (p.name != null) {
         this.name.val(p.name);
       }
@@ -655,7 +655,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
-    DelayView.prototype.readParam = function(p) {
+    DelayView.prototype.setParam = function(p) {
       if (p.delays != null) {
         this.delay.val(p.delay * 1000);
       }
@@ -732,7 +732,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
-    CompressorView.prototype.readParam = function(p) {
+    CompressorView.prototype.setParam = function(p) {
       if (p.input != null) {
         this.input.val(p.input * 100);
       }
@@ -800,7 +800,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
-    FuzzView.prototype.readParam = function(p) {
+    FuzzView.prototype.setParam = function(p) {
       if (p.input != null) {
         this.input.val(p.input * 100);
       }
@@ -847,7 +847,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
-    DoubleView.prototype.readParam = function(p) {
+    DoubleView.prototype.setParam = function(p) {
       if (p.delay != null) {
         this.delay.val(p.delay * 1000);
       }
@@ -1651,24 +1651,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.sidebar.setScale(this.scale);
     };
 
-    Player.prototype.readBPM = function(bpm) {
-      this.bpm = bpm;
-      this.setBPM(this.bpm);
-      return this.view.readBPM(this.bpm);
-    };
-
-    Player.prototype.readKey = function(key) {
-      this.key = key;
-      this.setKey(this.key);
-      return this.view.readKey(this.key);
-    };
-
-    Player.prototype.readScale = function(scale) {
-      this.scale = scale;
-      this.setScale(this.scale);
-      return this.view.readScale(this.scale);
-    };
-
     Player.prototype.isPlaying = function() {
       return this.is_playing;
     };
@@ -1678,12 +1660,6 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.is_playing = true;
       this.session.play();
       return T.setTimeout((function() {
-        var s, _i, _len, _ref;
-        _ref = _this.synth;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          s = _ref[_i];
-          s.play();
-        }
         return _this.playNext();
       }), 150);
     };
@@ -1791,20 +1767,19 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Player.prototype.changeSynth = function(id, type) {
-      var name, s_new, s_old;
+      var s_new, s_old;
       s_old = this.synth[id];
-      name = s_old.name;
       if (type === 'REZ') {
-        s_new = new Synth(this.context, id, this, name);
+        s_new = new Synth(this.context, id, this, s_old.name);
         s_new.setScale(this.scene.scale);
         s_new.setKey(this.scene.key);
       } else if (type === 'SAMPLER') {
-        s_new = new Sampler(this.context, id, this, name);
+        s_new = new Sampler(this.context, id, this, s_old.name);
       }
-      this.mixer.changeSynth(id, s_new);
-      this.synth[id] = s_new;
-      s_old.replaceWith(s_new);
+      this.synth_now = this.synth[id] = s_new;
       this.synth_now = s_new;
+      this.mixer.changeSynth(id, s_new);
+      this.session.changeSynth(id, type, s_new);
       this.view.changeSynth(id, type);
       return s_new;
     };
@@ -1879,7 +1854,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     Player.prototype.readSong = function(song) {
-      var i, _i, _ref;
+      var i, _i, _j, _ref, _ref1;
       this.song = song;
       this.synth = [];
       this.num_id = 0;
@@ -1895,8 +1870,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
       }
       this.synth_now = this.synth[0];
+      this.readScene(this.song.master[0]);
+      this.setSceneLength(this.song.master.length);
+      for (i = _j = 0, _ref1 = this.song.tracks.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+        this.synth[i].setParam(this.song.tracks[i]);
+      }
       this.session.setSynth(this.synth);
       this.session.readSong(this.song);
+      this.mixer.readParam(this.song.mixer);
       this.view.setSynthNum(this.synth.length, this.synth_pos);
       return this.resetSceneLength();
     };
@@ -1908,15 +1889,18 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
     Player.prototype.readScene = function(scene) {
       if (scene.bpm != null) {
-        this.readBPM(scene.bpm);
+        this.setBPM(scene.bpm);
+        this.view.setBPM(scene.bpm);
       }
       if (scene.key != null) {
-        this.readKey(scene.key);
+        this.setKey(scene.key);
+        this.view.setKey(scene.key);
       }
       if (scene.scale != null) {
-        this.readScale(scene.scale);
+        this.setScale(scene.scale);
+        this.view.setScale(scene.scale);
       }
-      return this.view.readParam(scene.bpm, scene.key, scene.scale);
+      return this.view.setParam(scene.bpm, scene.key, scene.scale);
     };
 
     Player.prototype.getScene = function() {
@@ -1984,9 +1968,9 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     PlayerView.prototype.initEvent = function() {
       var _this = this;
       this.dom.on("change", function() {
-        _this.setBPM();
-        _this.setKey();
-        return _this.setScale();
+        _this.model.setBPM(parseInt(_this.bpm.val()));
+        _this.model.setKey(_this.key.val());
+        return _this.model.setScale(_this.scale.val());
       });
       this.bpm.on('focus', (function() {
         return window.keyboard.beginInput();
@@ -2056,27 +2040,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.play.removeClass("fa-pause").addClass("fa-play");
     };
 
-    PlayerView.prototype.setBPM = function() {
-      return this.model.setBPM(parseInt(this.bpm.val()));
-    };
-
-    PlayerView.prototype.setKey = function() {
-      return this.model.setKey(this.key.val());
-    };
-
-    PlayerView.prototype.setScale = function() {
-      return this.model.setScale(this.scale.val());
-    };
-
-    PlayerView.prototype.readBPM = function(bpm) {
+    PlayerView.prototype.setBPM = function(bpm) {
       return this.bpm.val(bpm);
     };
 
-    PlayerView.prototype.readScale = function(scale) {
+    PlayerView.prototype.setScale = function(scale) {
       return this.scale.val(scale);
     };
 
-    PlayerView.prototype.readKey = function(key) {
+    PlayerView.prototype.setKey = function(key) {
       var k, v, _results;
       _results = [];
       for (k in KEY_LIST) {
@@ -2091,10 +2063,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
-    PlayerView.prototype.readParam = function(bpm, key, scale) {
-      this.readBPM(bpm);
-      this.readKey(key);
-      return this.readScale(scale);
+    PlayerView.prototype.setParam = function(bpm, key, scale) {
+      this.setBPM(bpm);
+      this.setKey(key);
+      return this.setScale(scale);
     };
 
     PlayerView.prototype.moveRight = function() {
@@ -2678,8 +2650,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.core.bindSample(sample_now);
     };
 
-    Sampler.prototype.replaceWith = function(s_new) {
-      return this.view.dom.replaceWith(s_new.view.dom);
+    Sampler.prototype.changeSynth = function(type) {
+      var s_new;
+      s_new = this.player.changeSynth(this.id, type, s_new);
+      this.view.dom.replaceWith(s_new.view.dom);
+      this.noteOff(true);
+      return this.disconnect();
     };
 
     Sampler.prototype.getParam = function() {
@@ -3706,7 +3682,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.is_removing = false;
       });
       this.synth_type.on('change', function() {
-        return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
+        return _this.model.changeSynth(_this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
         return window.keyboard.beginInput();
@@ -4135,7 +4111,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         q = _ref[_i];
         pat = this.song.tracks[q[0]].patterns[q[1]];
-        this.synth[q[0]].readPattern(pat);
+        this.synth[q[0]].setPattern(pat);
         this.current_cells[q[0]] = q[1];
       }
       this.view.drawScene(this.scene_pos, this.current_cells);
@@ -4175,7 +4151,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
         pat = this.song.tracks[i].patterns[this.scene_pos];
         if ((pat != null) && pat !== null) {
-          this.synth[i].readPattern(pat);
+          this.synth[i].setPattern(pat);
           this.scene_length = Math.max(this.scene_length, pat.pattern.length);
           this.current_cells[i] = pos;
         }
@@ -4227,7 +4203,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       var name, patterns, pos, s_obj;
       pos = _pos ? _pos : this.scene_pos;
       name = s.id + '-' + pos;
-      s.readPatternName(name);
+      s.setPatternName(name);
       patterns = [];
       patterns[pos] = {
         name: s.pattern_name,
@@ -4286,7 +4262,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         this.song.length = pat_num + 1;
       }
       if (this.current_cells[synth_num] === pat_num) {
-        return this.player.synth[synth_num].readPattern(pat);
+        return this.player.synth[synth_num].setPattern(pat);
       }
     };
 
@@ -4314,11 +4290,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
       this.savePattern(synth_num, this.current_cells[synth_num]);
       if (this.song.tracks[synth_num].patterns[pat_num] != null) {
-        this.player.synth[synth_num].readPattern(this.song.tracks[synth_num].patterns[pat_num]);
+        this.player.synth[synth_num].setPattern(this.song.tracks[synth_num].patterns[pat_num]);
       } else {
         pat_name = synth_num + '-' + pat_num;
         this.player.synth[synth_num].clearPattern();
-        this.player.synth[synth_num].readPatternName(pat_name);
+        this.player.synth[synth_num].setPatternName(pat_name);
         this.song.tracks[synth_num].patterns[pat_num] = this.player.synth[synth_num].getPattern();
       }
       this.current_cells[synth_num] = pat_num;
@@ -4368,44 +4344,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Session.prototype.saveMasters = function() {
       if (this.song.master === []) {
         return this.song.master.push(this.player.getScene());
-      } else {
-
       }
     };
 
     Session.prototype.saveMixer = function() {
       return this.song.mixer = this.player.mixer.getParam();
-    };
-
-    Session.prototype.readTracks = function(tracks) {
-      var i, _i, _ref, _results;
-      _results = [];
-      for (i = _i = 0, _ref = tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.player.synth[i].readParam(tracks[i]));
-      }
-      return _results;
-    };
-
-    Session.prototype.readSong = function(song) {
-      var i, pat, _i, _ref;
-      this.song = song;
-      this.scene_pos = 0;
-      this.scene_length = 0;
-      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        pat = this.song.tracks[i].patterns[0];
-        if ((pat != null) && pat !== null) {
-          this.synth[i].readPattern(pat);
-          this.current_cells[i] = 0;
-          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
-        } else {
-          this.current_cells[i] = void 0;
-        }
-      }
-      this.player.readScene(this.song.master[0]);
-      this.player.setSceneLength(this.scene_length);
-      this.readTracks(this.song.tracks);
-      this.player.mixer.readParam(this.song.mixer);
-      return this.view.readSong(this.song, this.current_cells);
     };
 
     Session.prototype.saveSong = function() {
@@ -4432,6 +4375,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       });
     };
 
+    Session.prototype.readSong = function(song) {
+      var i, pat, _i, _ref;
+      this.song = song;
+      this.scene_pos = 0;
+      this.scene_length = 0;
+      for (i = _i = 0, _ref = this.song.tracks.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        pat = this.song.tracks[i].patterns[0];
+        if ((pat != null) && pat !== null) {
+          this.synth[i].setPattern(pat);
+          this.current_cells[i] = 0;
+          this.scene_length = Math.max(this.scene_length, pat.pattern.length);
+        } else {
+          this.current_cells[i] = void 0;
+        }
+      }
+      return this.view.readSong(this.song, this.current_cells);
+    };
+
     Session.prototype.setSynthName = function(synth_id, name) {
       this.song.tracks[synth_id].name = name;
       return this.view.drawTrackName(synth_id, name, this.song.tracks[synth_id].type);
@@ -4450,35 +4411,26 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.view.drawPatternName(synth_id, pat_num, this.song.tracks[synth_id].patterns[pat_num]);
     };
 
-    Session.prototype.setSongTitle = function(title) {
-      return this.song.title = this.view.song.title = title;
-    };
-
-    Session.prototype.setCreatorName = function(name) {
-      return this.song.creator = this.view.song.creator = name;
-    };
-
-    Session.prototype.changeSynth = function(id, type) {
-      var pat_name, pp, s, s_obj, _ref;
-      s = this.player.changeSynth(id, type);
-      pat_name = s.id + '-' + this.scene_pos;
-      s.readPatternName(pat_name);
-      pp = [];
-      pp[this.scene_pos] = {
+    Session.prototype.changeSynth = function(id, type, synth_new) {
+      var pat_name, patterns, s_params, _ref;
+      pat_name = id + '-' + this.scene_pos;
+      synth_new.setPatternName(pat_name);
+      patterns = [];
+      patterns[this.scene_pos] = {
         name: pat_name,
-        pattern: s.pattern
+        pattern: synth_new.pattern
       };
-      s_obj = {
-        id: s.id,
+      s_params = {
+        id: id,
         type: type,
-        name: 'Synth #' + s.id,
-        patterns: pp,
+        name: 'Synth #' + id,
+        patterns: patterns,
         params: [],
         gain: 1.0,
         pan: 0.0
       };
-      this.song.tracks[id] = s_obj;
-      s.readPattern(pp[this.scene_pos]);
+      this.song.tracks[id] = s_params;
+      synth_new.setPattern(patterns[this.scene_pos]);
       _ref = [this.song.tracks[id].patterns[this.current_cells[id]], this.song.tracks[id].patterns[0]], this.song.tracks[id].patterns[0] = _ref[0], this.song.tracks[id].patterns[this.current_cells[id]] = _ref[1];
       return this.view.addSynth(this.song, [id, this.scene_pos]);
     };
@@ -4804,14 +4756,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.song_title.on('focus', function() {
         return window.keyboard.beginInput();
       }).on('change', function() {
-        return _this.model.setSongTitle(_this.song_title.val());
+        return _this.setSongTitle();
       }).on('blur', function() {
         return window.keyboard.endInput();
       });
       this.song_creator.on('focus', function() {
         return window.keyboard.beginInput();
       }).on('change', function() {
-        return _this.model.setCreatorName(_this.song_creator.val());
+        return _this.setCreatorName();
       }).on('blur', function() {
         return window.keyboard.endInput();
       });
@@ -4825,6 +4777,14 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.share('hatena');
       });
       return this.readSong(this.song, this.current_cells);
+    };
+
+    SessionView.prototype.setSongTitle = function() {
+      return this.song.title = this.song_title.val();
+    };
+
+    SessionView.prototype.setCreatorName = function() {
+      return this.song.creator = this.song_creator.val();
     };
 
     SessionView.prototype.readSong = function(song, current_cells) {
@@ -5621,7 +5581,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       };
     };
 
-    Noise.prototype.readParam = function(p) {
+    Noise.prototype.setParam = function(p) {
       this.shape = p.shape;
       this.octave = p.octave;
       this.interval = p.interval;
@@ -5757,7 +5717,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       };
     };
 
-    VCO.prototype.readParam = function(p) {
+    VCO.prototype.setParam = function(p) {
       this.octave = p.octave;
       this.interval = p.interval;
       this.fine = p.fine;
@@ -5790,23 +5750,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.release = release / 50000.0;
     };
 
-    EG.prototype.readADSR = function(attack, decay, sustain, release) {
-      this.attack = attack;
-      this.decay = decay;
-      this.sustain = sustain;
-      this.release = release;
-    };
-
     EG.prototype.getRange = function() {
       return [this.min, this.max];
     };
 
     EG.prototype.setRange = function(min, max) {
-      this.min = min;
-      this.max = max;
-    };
-
-    EG.prototype.readRange = function(min, max) {
       this.min = min;
       this.max = max;
     };
@@ -5818,9 +5766,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       };
     };
 
-    EG.prototype.readParam = function(p) {
-      this.readADSR(p.adsr[0], p.adsr[1], p.adsr[2], p.adsr[3]);
-      return this.readRange(p.range[0], p.range[1]);
+    EG.prototype.setParam = function(p) {
+      var _ref;
+      _ref = p.adsr, this.attack = _ref[0], this.decay = _ref[1], this.sustain = _ref[2], this.release = _ref[3];
+      return this.setRange(p.range[0], p.range[1]);
     };
 
     EG.prototype.noteOn = function(time) {
@@ -5864,11 +5813,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.lpf.Q.value = Q;
     };
 
-    ResFilter.prototype.readParam = function(p) {
-      return this.lpf.Q.value = p[1];
-    };
-
-    ResFilter.prototype.getParam = function() {
+    ResFilter.prototype.getQ = function() {
       return this.lpf.Q.value;
     };
 
@@ -5932,16 +5877,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }).call(this),
         eg: this.eg.getParam(),
         feg: this.feg.getParam(),
-        filter: [this.feg.getRange()[1], this.filter.getParam()],
+        filter: [this.feg.getRange()[1], this.filter.getQ()],
         harmony: this.is_harmony
       };
     };
 
-    SynthCore.prototype.readParam = function(p) {
+    SynthCore.prototype.setParam = function(p) {
       var i, _i, _j, _ref, _ref1;
       if (p.vcos != null) {
         for (i = _i = 0, _ref = p.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          this.vcos[i].readParam(p.vcos[i]);
+          this.vcos[i].setParam(p.vcos[i]);
         }
       }
       if (p.gains != null) {
@@ -5950,15 +5895,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
       }
       if (p.eg != null) {
-        this.eg.readParam(p.eg);
+        this.eg.setParam(p.eg);
       }
       if (p.feg != null) {
-        this.feg.readParam(p.feg);
+        this.feg.setParam(p.feg);
       }
       if (p.filter != null) {
-        this.filter.readParam(p.filter);
+        this.feg.setRange(this.feg.getRange()[0], p.filter[0]);
+        this.filter.setQ(p.filter[1]);
       }
-      return this.view.readParam(p);
+      return this.view.setParam(p);
     };
 
     SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine, harmony) {
@@ -6226,11 +6172,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.core.noteOff();
     };
 
-    Synth.prototype.readPattern = function(_pattern_obj) {
+    Synth.prototype.setPattern = function(_pattern_obj) {
       this.pattern_obj = $.extend(true, {}, _pattern_obj);
       this.pattern = this.pattern_obj.pattern;
       this.pattern_name = this.pattern_obj.name;
-      return this.view.readPattern(this.pattern_obj);
+      return this.view.setPattern(this.pattern_obj);
     };
 
     Synth.prototype.getPattern = function() {
@@ -6244,7 +6190,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     Synth.prototype.clearPattern = function() {
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.pattern_obj.pattern = this.pattern;
-      return this.view.readPattern(this.pattern_obj);
+      return this.view.setPattern(this.pattern_obj);
     };
 
     Synth.prototype.plusPattern = function() {
@@ -6297,20 +6243,22 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.view.setSynthName(this.name);
     };
 
-    Synth.prototype.setPatternName = function(pattern_name) {
+    Synth.prototype.inputPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.session.setPatternName(this.id, this.pattern_name);
     };
 
-    Synth.prototype.readPatternName = function(pattern_name) {
+    Synth.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.view.setPatternName(this.pattern_name);
     };
 
-    Synth.prototype.replaceWith = function(s_new) {
+    Synth.prototype.changeSynth = function(type) {
+      var s_new;
+      s_new = this.player.changeSynth(this.id, type, s_new);
+      this.view.dom.replaceWith(s_new.view.dom);
       this.noteOff(true);
-      this.disconnect();
-      return this.view.dom.replaceWith(s_new.view.dom);
+      return this.disconnect();
     };
 
     Synth.prototype.getParam = function() {
@@ -6322,11 +6270,11 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return p;
     };
 
-    Synth.prototype.readParam = function(p) {
+    Synth.prototype.setParam = function(p) {
       if (p == null) {
         return;
       }
-      this.core.readParam(p);
+      this.core.setParam(p);
       if (p.effects != null) {
         return this.readEffects(p.effects);
       }
@@ -6363,7 +6311,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           fx = new Double(this.ctx);
         }
         this.insertEffect(fx);
-        _results.push(fx.readParam(e));
+        _results.push(fx.setParam(e));
       }
       return _results;
     };
@@ -6504,7 +6452,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
           this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
         }
       }
-      return this.readPattern(this.pattern_obj);
+      return this.setPattern(this.pattern_obj);
     };
 
     SynthView.prototype.getPos = function(e) {
@@ -6586,7 +6534,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         return _this.is_adding = false;
       });
       this.synth_type.on('change', function() {
-        return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
+        return _this.model.changeSynth(_this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
         return window.keyboard.beginInput();
@@ -6600,7 +6548,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       })).on('blur', (function() {
         return window.keyboard.endInput();
       })).on('change', (function() {
-        return _this.model.setPatternName(_this.pattern_name.val());
+        return _this.model.inputPatternName(_this.pattern_name.val());
       }));
       this.pencil.on('click', (function() {
         return _this.pencilMode();
@@ -6767,7 +6715,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return this.last_time = time;
     };
 
-    SynthView.prototype.readPattern = function(pattern_obj) {
+    SynthView.prototype.setPattern = function(pattern_obj) {
       this.pattern_obj = pattern_obj;
       this.pattern = this.pattern_obj.pattern;
       this.page = 0;
@@ -6951,21 +6899,21 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     SynthCoreView.prototype.initEvent = function() {
       var _this = this;
       this.vcos.on("change", function() {
-        return _this.setVCOParam();
+        return _this.fetchVCOParam();
       });
       this.gain_inputs.on("change", function() {
-        return _this.setGains();
+        return _this.fetchGains();
       });
       this.filter_inputs.on("change", function() {
-        return _this.setFilterParam();
+        return _this.fetchFilterParam();
       });
       this.EG_inputs.on("change", function() {
-        return _this.setEGParam();
+        return _this.fetchEGParam();
       });
       this.FEG_inputs.on("change", function() {
-        return _this.setFEGParam();
+        return _this.fetchFEGParam();
       });
-      return this.setParam();
+      return this.fetchParam();
     };
 
     SynthCoreView.prototype.updateCanvas = function(name) {
@@ -6996,15 +6944,15 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return context.stroke();
     };
 
-    SynthCoreView.prototype.setParam = function() {
-      this.setVCOParam();
-      this.setEGParam();
-      this.setFEGParam();
-      this.setFilterParam();
-      return this.setGains();
+    SynthCoreView.prototype.fetchParam = function() {
+      this.fetchVCOParam();
+      this.fetchEGParam();
+      this.fetchFEGParam();
+      this.fetchFilterParam();
+      return this.fetchGains();
     };
 
-    SynthCoreView.prototype.setVCOParam = function() {
+    SynthCoreView.prototype.fetchVCOParam = function() {
       var harmony, i, vco, _i, _ref, _results;
       harmony = this.vcos.eq(0).find('.harmony').val();
       _results = [];
@@ -7015,7 +6963,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
-    SynthCoreView.prototype.readVCOParam = function(p) {
+    SynthCoreView.prototype.setVCOParam = function(p) {
       var i, vco, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -7028,24 +6976,24 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
-    SynthCoreView.prototype.setEGParam = function() {
+    SynthCoreView.prototype.fetchEGParam = function() {
       this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
       return this.updateCanvas("EG");
     };
 
-    SynthCoreView.prototype.readEGParam = function(p) {
+    SynthCoreView.prototype.setEGParam = function(p) {
       this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
       this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
       this.EG_inputs.eq(2).val(p.adsr[2] * 100);
       return this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
     };
 
-    SynthCoreView.prototype.setFEGParam = function() {
+    SynthCoreView.prototype.fetchFEGParam = function() {
       this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
       return this.updateCanvas("FEG");
     };
 
-    SynthCoreView.prototype.readFEGParam = function(p) {
+    SynthCoreView.prototype.setFEGParam = function(p) {
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -7054,16 +7002,16 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
-    SynthCoreView.prototype.setFilterParam = function() {
+    SynthCoreView.prototype.fetchFilterParam = function() {
       return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
     };
 
-    SynthCoreView.prototype.readFilterParam = function(p) {
+    SynthCoreView.prototype.setFilterParam = function(p) {
       this.filter_inputs.eq(0).val(p[0]);
       return this.filter_inputs.eq(1).val(p[1]);
     };
 
-    SynthCoreView.prototype.setGains = function() {
+    SynthCoreView.prototype.fetchGains = function() {
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -7072,10 +7020,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       return _results;
     };
 
-    SynthCoreView.prototype.readParam = function(p) {
+    SynthCoreView.prototype.setParam = function(p) {
       var i, _i, _ref;
       if (p.vcos != null) {
-        this.readVCOParam(p.vcos);
+        this.setVCOParam(p.vcos);
       }
       if (p.gains != null) {
         for (i = _i = 0, _ref = p.gains.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -7083,13 +7031,13 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
         }
       }
       if (p.eg != null) {
-        this.readEGParam(p.eg);
+        this.setEGParam(p.eg);
       }
       if (p.feg != null) {
-        this.readFEGParam(p.feg);
+        this.setFEGParam(p.feg);
       }
       if (p.filter != null) {
-        return this.readFilterParam(p.filter);
+        return this.setFilterParam(p.filter);
       }
     };
 

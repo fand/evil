@@ -474,8 +474,12 @@
       return this.core.bindSample(sample_now);
     };
 
-    Sampler.prototype.replaceWith = function(s_new) {
-      return this.view.dom.replaceWith(s_new.view.dom);
+    Sampler.prototype.changeSynth = function(type) {
+      var s_new;
+      s_new = this.player.changeSynth(this.id, type, s_new);
+      this.view.dom.replaceWith(s_new.view.dom);
+      this.noteOff(true);
+      return this.disconnect();
     };
 
     Sampler.prototype.getParam = function() {

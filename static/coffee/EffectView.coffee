@@ -31,7 +31,7 @@ class @ReverbView extends @FXView
             @model.setParam(wet: parseFloat(@wet.val()) / 100.0)
         )
 
-    readParam: (p) ->
+    setParam: (p) ->
         @name.val(p.name) if p.name?
         @wet.val(p.wet * 100) if p.wet?
 
@@ -66,7 +66,7 @@ class @DelayView extends @FXView
             @model.setParam(lofi: parseFloat(@lofi.val())* 5.0 / 100.0)
         )
 
-    readParam: (p) ->
+    setParam: (p) ->
         @delay.val(p.delay * 1000) if p.delays?
         @feedback.val(p.feedback * 100) if p.feedback?
         @lofi.val(p.lofi * 20) if p.lofi?
@@ -113,7 +113,7 @@ class @CompressorView extends @FXView
             @model.setParam(knee: parseFloat(@knee.val()) / 1000.0)
         )
 
-    readParam: (p) ->
+    setParam: (p) ->
         @input.val(p.input * 100) if p.input?
         @output.val(p.output * 100) if p.output?
         @attack.val(p.attack * 1000) if p.attacks?
@@ -152,7 +152,7 @@ class @FuzzView extends @FXView
             @model.setParam(gain: parseFloat(@gain.val())/ 100.0)
         )
 
-    readParam: (p) ->
+    setParam: (p) ->
         @input.val(p.input * 100) if p.input?
         @output.val(p.output * 100) if p.output?
         @type.val(p.type) if p.type?
@@ -180,6 +180,6 @@ class @DoubleView extends @FXView
             @model.setParam(width: parseFloat(@width.val()) / 200.0 + 0.5)  # [0.5, 1.0]
         )
 
-    readParam: (p) ->
+    setParam: (p) ->
         @delay.val(p.delay * 1000) if p.delay?
         @width.val((p.width - 0.5) * 200) if p.width?

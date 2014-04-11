@@ -58,7 +58,7 @@ class @Noise
     getParam: ->
         shape: @shape, octave: @octave, interval: @interval, fine: @fine
 
-    readParam: (p) ->
+    setParam: (p) ->
         @shape = p.shape
         @octave = p.octave
         @interval = p.interval
@@ -137,7 +137,7 @@ class @VCO
     getParam: ->
         shape: @shape, octave: @octave, interval: @interval, fine: @fine
 
-    readParam: (p) ->
+    setParam: (p) ->
         @octave = p.octave
         @interval = p.interval
         @fine = p.fine
@@ -158,16 +158,14 @@ class @EG
         @decay   = decay   / 50000.0
         @sustain = sustain / 100.0
         @release = release / 50000.0
-    readADSR: (@attack, @decay, @sustain, @release) ->
 
     getRange: -> [@min, @max]
     setRange:  (@min, @max) ->
-    readRange: (@min, @max) ->
 
     getParam: -> adsr: @getADSR(), range: @getRange()
-    readParam: (p) ->
-        @readADSR(p.adsr[0], p.adsr[1], p.adsr[2], p.adsr[3])
-        @readRange(p.range[0], p.range[1])
+    setParam: (p) ->
+        [@attack, @decay, @sustain, @release] = p.adsr
+        @setRange(p.range[0], p.range[1])
 
     noteOn: (time) ->
         @target.cancelScheduledValues(time)
@@ -184,7 +182,6 @@ class @EG
 
 
 
-
 class @ResFilter
     constructor: (@ctx) ->
         @lpf = @ctx.createBiquadFilter()
@@ -195,10 +192,7 @@ class @ResFilter
     disconnect:    ()  -> @lpf.disconnect()
     getResonance:      -> @lpf.Q.value
     setQ: (Q) -> @lpf.Q.value = Q
-
-
-    readParam: (p) -> @lpf.Q.value = p[1]
-    getParam: () -> @lpf.Q.value
+    getQ: ()  -> @lpf.Q.value
 
 
 
@@ -238,20 +232,22 @@ class @SynthCore
         gains: (g.gain.value for g in @gains)
         eg:  @eg.getParam()
         feg: @feg.getParam()
-        filter: [@feg.getRange()[1], @filter.getParam()]
+        filter: [@feg.getRange()[1], @filter.getQ()]
         harmony: @is_harmony
 
-    readParam: (p) ->
+    setParam: (p) ->
         if p.vcos?
             for i in [0...p.vcos.length]
-                @vcos[i].readParam(p.vcos[i])
+                @vcos[i].setParam(p.vcos[i])
         if p.gains?
             for i in [0...p.gains.length]
                 @gains[i].gain.value = p.gains[i]
-        @eg.readParam(p.eg) if p.eg?
-        @feg.readParam(p.feg) if p.feg?
-        @filter.readParam(p.filter) if p.filter?
-        @view.readParam(p)
+        @eg.setParam(p.eg) if p.eg?
+        @feg.setParam(p.feg) if p.feg?
+        if p.filter?
+            @feg.setRange(@feg.getRange()[0], p.filter[0])
+            @filter.setQ(p.filter[1])
+        @view.setParam(p)
 
     setVCOParam: (i, shape, oct, interval, fine, harmony) ->
         @vcos[i].setShape(shape)
@@ -428,11 +424,11 @@ class @Synth
     pause: (time) ->
         @core.noteOff()
 
-    readPattern: (_pattern_obj) ->
+    setPattern: (_pattern_obj) ->
         @pattern_obj = $.extend(true, {}, _pattern_obj)
         @pattern = @pattern_obj.pattern
         @pattern_name = @pattern_obj.name
-        @view.readPattern(@pattern_obj)
+        @view.setPattern(@pattern_obj)
 
     getPattern: () ->
         @pattern_obj = name: @pattern_name, pattern: @pattern
@@ -441,7 +437,7 @@ class @Synth
     clearPattern: () ->
         @pattern = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         @pattern_obj.pattern = @pattern
-        @view.readPattern(@pattern_obj)
+        @view.setPattern(@pattern_obj)
 
     plusPattern: ->
         @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
@@ -476,17 +472,19 @@ class @Synth
         @session.setSynthName(@id, @name)
         @view.setSynthName(@name)
 
-    setPatternName: (@pattern_name) ->
+    inputPatternName: (@pattern_name) ->
         @session.setPatternName(@id, @pattern_name)
 
-    readPatternName: (@pattern_name) ->
+    setPatternName: (@pattern_name) ->
         @view.setPatternName(@pattern_name)
 
-    replaceWith: (s_new) ->
+    changeSynth: (type) ->
+        s_new = @player.changeSynth(@id, type, s_new)
+        @view.dom.replaceWith(s_new.view.dom)
         @noteOff(true)
         @disconnect()
-        @view.dom.replaceWith(s_new.view.dom)
 
+    # Get params as object.
     getParam: ->
         p = @core.getParam()
         p.name = @name
@@ -494,15 +492,15 @@ class @Synth
         p.effects = @getEffectsParam()
         return p
 
-    readParam: (p) ->
+    setParam: (p) ->
         return if not p?
-        @core.readParam(p)
+        @core.setParam(p)
         @readEffects(p.effects) if p.effects?
 
     mute:   -> @core.mute()
     demute: -> @core.demute()
 
-
+    # Read effect params from the song.
     readEffects: (effects) ->
         e.disconnect() for e in @effects
         @effects = []
@@ -520,8 +518,7 @@ class @Synth
                 fx = new Double(@ctx)
 
             @insertEffect(fx)
-            fx.readParam(e)
-
+            fx.setParam(e)
 
     getEffectsParam: ->
         f.getParam() for f in @effects

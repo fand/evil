@@ -84,7 +84,7 @@
           this.ctx_off.drawImage(this.cell, 0, 0, 26, 26, j * 26, i * 26, 26, 26);
         }
       }
-      return this.readPattern(this.pattern_obj);
+      return this.setPattern(this.pattern_obj);
     };
 
     SynthView.prototype.getPos = function(e) {
@@ -166,7 +166,7 @@
         return _this.is_adding = false;
       });
       this.synth_type.on('change', function() {
-        return _this.model.session.changeSynth(_this.id, _this.synth_type.val());
+        return _this.model.changeSynth(_this.synth_type.val());
       });
       this.synth_name.on('focus', (function() {
         return window.keyboard.beginInput();
@@ -180,7 +180,7 @@
       })).on('blur', (function() {
         return window.keyboard.endInput();
       })).on('change', (function() {
-        return _this.model.setPatternName(_this.pattern_name.val());
+        return _this.model.inputPatternName(_this.pattern_name.val());
       }));
       this.pencil.on('click', (function() {
         return _this.pencilMode();
@@ -347,7 +347,7 @@
       return this.last_time = time;
     };
 
-    SynthView.prototype.readPattern = function(pattern_obj) {
+    SynthView.prototype.setPattern = function(pattern_obj) {
       this.pattern_obj = pattern_obj;
       this.pattern = this.pattern_obj.pattern;
       this.page = 0;
@@ -531,21 +531,21 @@
     SynthCoreView.prototype.initEvent = function() {
       var _this = this;
       this.vcos.on("change", function() {
-        return _this.setVCOParam();
+        return _this.fetchVCOParam();
       });
       this.gain_inputs.on("change", function() {
-        return _this.setGains();
+        return _this.fetchGains();
       });
       this.filter_inputs.on("change", function() {
-        return _this.setFilterParam();
+        return _this.fetchFilterParam();
       });
       this.EG_inputs.on("change", function() {
-        return _this.setEGParam();
+        return _this.fetchEGParam();
       });
       this.FEG_inputs.on("change", function() {
-        return _this.setFEGParam();
+        return _this.fetchFEGParam();
       });
-      return this.setParam();
+      return this.fetchParam();
     };
 
     SynthCoreView.prototype.updateCanvas = function(name) {
@@ -576,15 +576,15 @@
       return context.stroke();
     };
 
-    SynthCoreView.prototype.setParam = function() {
-      this.setVCOParam();
-      this.setEGParam();
-      this.setFEGParam();
-      this.setFilterParam();
-      return this.setGains();
+    SynthCoreView.prototype.fetchParam = function() {
+      this.fetchVCOParam();
+      this.fetchEGParam();
+      this.fetchFEGParam();
+      this.fetchFilterParam();
+      return this.fetchGains();
     };
 
-    SynthCoreView.prototype.setVCOParam = function() {
+    SynthCoreView.prototype.fetchVCOParam = function() {
       var harmony, i, vco, _i, _ref, _results;
       harmony = this.vcos.eq(0).find('.harmony').val();
       _results = [];
@@ -595,7 +595,7 @@
       return _results;
     };
 
-    SynthCoreView.prototype.readVCOParam = function(p) {
+    SynthCoreView.prototype.setVCOParam = function(p) {
       var i, vco, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -608,24 +608,24 @@
       return _results;
     };
 
-    SynthCoreView.prototype.setEGParam = function() {
+    SynthCoreView.prototype.fetchEGParam = function() {
       this.model.setEGParam(parseFloat(this.EG_inputs.eq(0).val()), parseFloat(this.EG_inputs.eq(1).val()), parseFloat(this.EG_inputs.eq(2).val()), parseFloat(this.EG_inputs.eq(3).val()));
       return this.updateCanvas("EG");
     };
 
-    SynthCoreView.prototype.readEGParam = function(p) {
+    SynthCoreView.prototype.setEGParam = function(p) {
       this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
       this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
       this.EG_inputs.eq(2).val(p.adsr[2] * 100);
       return this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
     };
 
-    SynthCoreView.prototype.setFEGParam = function() {
+    SynthCoreView.prototype.fetchFEGParam = function() {
       this.model.setFEGParam(parseFloat(this.FEG_inputs.eq(0).val()), parseFloat(this.FEG_inputs.eq(1).val()), parseFloat(this.FEG_inputs.eq(2).val()), parseFloat(this.FEG_inputs.eq(3).val()));
       return this.updateCanvas("FEG");
     };
 
-    SynthCoreView.prototype.readFEGParam = function(p) {
+    SynthCoreView.prototype.setFEGParam = function(p) {
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = p.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -634,16 +634,16 @@
       return _results;
     };
 
-    SynthCoreView.prototype.setFilterParam = function() {
+    SynthCoreView.prototype.fetchFilterParam = function() {
       return this.model.setFilterParam(parseFloat(this.filter_inputs.eq(0).val()), parseFloat(this.filter_inputs.eq(1).val()));
     };
 
-    SynthCoreView.prototype.readFilterParam = function(p) {
+    SynthCoreView.prototype.setFilterParam = function(p) {
       this.filter_inputs.eq(0).val(p[0]);
       return this.filter_inputs.eq(1).val(p[1]);
     };
 
-    SynthCoreView.prototype.setGains = function() {
+    SynthCoreView.prototype.fetchGains = function() {
       var i, _i, _ref, _results;
       _results = [];
       for (i = _i = 0, _ref = this.gain_inputs.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -652,10 +652,10 @@
       return _results;
     };
 
-    SynthCoreView.prototype.readParam = function(p) {
+    SynthCoreView.prototype.setParam = function(p) {
       var i, _i, _ref;
       if (p.vcos != null) {
-        this.readVCOParam(p.vcos);
+        this.setVCOParam(p.vcos);
       }
       if (p.gains != null) {
         for (i = _i = 0, _ref = p.gains.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -663,13 +663,13 @@
         }
       }
       if (p.eg != null) {
-        this.readEGParam(p.eg);
+        this.setEGParam(p.eg);
       }
       if (p.feg != null) {
-        this.readFEGParam(p.feg);
+        this.setFEGParam(p.feg);
       }
       if (p.filter != null) {
-        return this.readFilterParam(p.filter);
+        return this.setFilterParam(p.filter);
       }
     };
 

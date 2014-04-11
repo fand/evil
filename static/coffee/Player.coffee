@@ -44,25 +44,13 @@ class @Player
 
         @sidebar.setScale(@scale)
 
-    readBPM: (@bpm) ->
-        @setBPM(@bpm)
-        @view.readBPM(@bpm)
-
-    readKey: (@key)->
-        @setKey(@key)
-        @view.readKey(@key)
-
-    readScale: (@scale) ->
-        @setScale(@scale)
-        @view.readScale(@scale)
-
     isPlaying: -> @is_playing
 
     play: ->
         @is_playing = true
         @session.play()
         T.setTimeout(( =>
-            s.play() for s in @synth
+            # s.play() for s in @synth
             @playNext()
          ), 150)
 
@@ -132,28 +120,27 @@ class @Player
         @mixer.addSynth(s)
         @session.addSynth(s, scene_pos)
 
+    # Called by instruments.
     changeSynth: (id, type) ->
         s_old  = @synth[id]
-        name = s_old.name
 
         if type == 'REZ'
-            s_new = new Synth(@context, id, this, name)
+            s_new = new Synth(@context, id, this, s_old.name)
             s_new.setScale(@scene.scale)
             s_new.setKey(@scene.key)
         else if type == 'SAMPLER'
-            s_new = new Sampler(@context, id, this, name)
+            s_new = new Sampler(@context, id, this, s_old.name)
+
+        @synth_now = @synth[id] = s_new
+        @synth_now = s_new
 
         @mixer.changeSynth(id, s_new)
-
-        @synth[id] = s_new
-        s_old.replaceWith(s_new)
-
-        @synth_now = s_new
+        @session.changeSynth(id, type, s_new)
         @view.changeSynth(id, type)
 
         return s_new
 
-
+    # Called by PlayerView.
     moveRight: (next_idx) ->
         if next_idx == @synth.length
             @addSynth()
@@ -212,8 +199,15 @@ class @Player
 
         @synth_now = @synth[0]
 
+        @readScene(@song.master[0])
+        @setSceneLength(@song.master.length)
+        for i in [0...@song.tracks.length]
+            @synth[i].setParam(@song.tracks[i])
+
         @session.setSynth(@synth)
         @session.readSong(@song)
+        @mixer.readParam(@song.mixer)
+
         @view.setSynthNum(@synth.length, @synth_pos)
         @resetSceneLength()
 
@@ -222,10 +216,16 @@ class @Player
         @num_id = 0
 
     readScene: (scene) ->
-        @readBPM(scene.bpm) if scene.bpm?
-        @readKey(scene.key) if scene.key?
-        @readScale(scene.scale) if scene.scale?
-        @view.readParam(scene.bpm, scene.key, scene.scale)
+        if scene.bpm?
+            @setBPM(scene.bpm)
+            @view.setBPM(scene.bpm)
+        if scene.key?
+            @setKey(scene.key)
+            @view.setKey(scene.key)
+        if scene.scale?
+            @setScale(scene.scale)
+            @view.setScale(scene.scale)
+        @view.setParam(scene.bpm, scene.key, scene.scale)
 
     getScene: -> @scene
 
