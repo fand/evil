@@ -749,12 +749,6 @@
       return this.view.drawPattern(this.time);
     };
 
-    Synth.prototype.setSynthName = function(name) {
-      this.name = name;
-      this.session.setSynthName(this.id, this.name);
-      return this.view.setSynthName(this.name);
-    };
-
     Synth.prototype.inputPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.session.setPatternName(this.id, this.pattern_name);
@@ -763,6 +757,12 @@
     Synth.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.view.setPatternName(this.pattern_name);
+    };
+
+    Synth.prototype.setSynthName = function(name) {
+      this.name = name;
+      this.session.setSynthName(this.id, this.name);
+      return this.view.setSynthName(this.name);
     };
 
     Synth.prototype.changeSynth = function(type) {
@@ -788,7 +788,7 @@
       }
       this.core.setParam(p);
       if (p.effects != null) {
-        return this.readEffects(p.effects);
+        return this.setEffects(p.effects);
       }
     };
 
@@ -800,7 +800,7 @@
       return this.core.demute();
     };
 
-    Synth.prototype.readEffects = function(effects) {
+    Synth.prototype.setEffects = function(effects_new) {
       var e, fx, _i, _j, _len, _len1, _ref, _results;
       _ref = this.effects;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -809,8 +809,8 @@
       }
       this.effects = [];
       _results = [];
-      for (_j = 0, _len1 = effects.length; _j < _len1; _j++) {
-        e = effects[_j];
+      for (_j = 0, _len1 = effects_new.length; _j < _len1; _j++) {
+        e = effects_new[_j];
         if (e.effect === 'Fuzz') {
           fx = new Fuzz(this.ctx);
         } else if (e.effect === 'Delay') {
