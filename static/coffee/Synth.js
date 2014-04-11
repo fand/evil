@@ -93,7 +93,7 @@
       };
     };
 
-    Noise.prototype.readParam = function(p) {
+    Noise.prototype.setParam = function(p) {
       this.shape = p.shape;
       this.octave = p.octave;
       this.interval = p.interval;
@@ -229,7 +229,7 @@
       };
     };
 
-    VCO.prototype.readParam = function(p) {
+    VCO.prototype.setParam = function(p) {
       this.octave = p.octave;
       this.interval = p.interval;
       this.fine = p.fine;
@@ -262,23 +262,11 @@
       return this.release = release / 50000.0;
     };
 
-    EG.prototype.readADSR = function(attack, decay, sustain, release) {
-      this.attack = attack;
-      this.decay = decay;
-      this.sustain = sustain;
-      this.release = release;
-    };
-
     EG.prototype.getRange = function() {
       return [this.min, this.max];
     };
 
     EG.prototype.setRange = function(min, max) {
-      this.min = min;
-      this.max = max;
-    };
-
-    EG.prototype.readRange = function(min, max) {
       this.min = min;
       this.max = max;
     };
@@ -290,9 +278,10 @@
       };
     };
 
-    EG.prototype.readParam = function(p) {
-      this.readADSR(p.adsr[0], p.adsr[1], p.adsr[2], p.adsr[3]);
-      return this.readRange(p.range[0], p.range[1]);
+    EG.prototype.setParam = function(p) {
+      var _ref;
+      _ref = p.adsr, this.attack = _ref[0], this.decay = _ref[1], this.sustain = _ref[2], this.release = _ref[3];
+      return this.setRange(p.range[0], p.range[1]);
     };
 
     EG.prototype.noteOn = function(time) {
@@ -336,11 +325,7 @@
       return this.lpf.Q.value = Q;
     };
 
-    ResFilter.prototype.readParam = function(p) {
-      return this.lpf.Q.value = p[1];
-    };
-
-    ResFilter.prototype.getParam = function() {
+    ResFilter.prototype.getQ = function() {
       return this.lpf.Q.value;
     };
 
@@ -404,16 +389,16 @@
         }).call(this),
         eg: this.eg.getParam(),
         feg: this.feg.getParam(),
-        filter: [this.feg.getRange()[1], this.filter.getParam()],
+        filter: [this.feg.getRange()[1], this.filter.getQ()],
         harmony: this.is_harmony
       };
     };
 
-    SynthCore.prototype.readParam = function(p) {
+    SynthCore.prototype.setParam = function(p) {
       var i, _i, _j, _ref, _ref1;
       if (p.vcos != null) {
         for (i = _i = 0, _ref = p.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          this.vcos[i].readParam(p.vcos[i]);
+          this.vcos[i].setParam(p.vcos[i]);
         }
       }
       if (p.gains != null) {
@@ -422,15 +407,16 @@
         }
       }
       if (p.eg != null) {
-        this.eg.readParam(p.eg);
+        this.eg.setParam(p.eg);
       }
       if (p.feg != null) {
-        this.feg.readParam(p.feg);
+        this.feg.setParam(p.feg);
       }
       if (p.filter != null) {
-        this.filter.readParam(p.filter);
+        this.feg.setRange(this.feg.getRange()[0], p.filter[0]);
+        this.filter.setQ(p.filter[1]);
       }
-      return this.view.readParam(p);
+      return this.view.setParam(p);
     };
 
     SynthCore.prototype.setVCOParam = function(i, shape, oct, interval, fine, harmony) {
@@ -698,11 +684,11 @@
       return this.core.noteOff();
     };
 
-    Synth.prototype.readPattern = function(_pattern_obj) {
+    Synth.prototype.setPattern = function(_pattern_obj) {
       this.pattern_obj = $.extend(true, {}, _pattern_obj);
       this.pattern = this.pattern_obj.pattern;
       this.pattern_name = this.pattern_obj.name;
-      return this.view.readPattern(this.pattern_obj);
+      return this.view.setPattern(this.pattern_obj);
     };
 
     Synth.prototype.getPattern = function() {
@@ -716,7 +702,7 @@
     Synth.prototype.clearPattern = function() {
       this.pattern = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       this.pattern_obj.pattern = this.pattern;
-      return this.view.readPattern(this.pattern_obj);
+      return this.view.setPattern(this.pattern_obj);
     };
 
     Synth.prototype.plusPattern = function() {
@@ -769,20 +755,22 @@
       return this.view.setSynthName(this.name);
     };
 
-    Synth.prototype.setPatternName = function(pattern_name) {
+    Synth.prototype.inputPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.session.setPatternName(this.id, this.pattern_name);
     };
 
-    Synth.prototype.readPatternName = function(pattern_name) {
+    Synth.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.view.setPatternName(this.pattern_name);
     };
 
-    Synth.prototype.replaceWith = function(s_new) {
+    Synth.prototype.changeSynth = function(type) {
+      var s_new;
+      s_new = this.player.changeSynth(this.id, type, s_new);
+      this.view.dom.replaceWith(s_new.view.dom);
       this.noteOff(true);
-      this.disconnect();
-      return this.view.dom.replaceWith(s_new.view.dom);
+      return this.disconnect();
     };
 
     Synth.prototype.getParam = function() {
@@ -794,11 +782,11 @@
       return p;
     };
 
-    Synth.prototype.readParam = function(p) {
+    Synth.prototype.setParam = function(p) {
       if (p == null) {
         return;
       }
-      this.core.readParam(p);
+      this.core.setParam(p);
       if (p.effects != null) {
         return this.readEffects(p.effects);
       }
@@ -835,7 +823,7 @@
           fx = new Double(this.ctx);
         }
         this.insertEffect(fx);
-        _results.push(fx.readParam(e));
+        _results.push(fx.setParam(e));
       }
       return _results;
     };

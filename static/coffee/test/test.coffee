@@ -34,7 +34,7 @@ test = ->
         s.setSynthName(s0.name)
         # s.setPatternName(s0.pattern_name)  # pattern_name is not synth param
         s.setScale(s0.scale_name)
-        s.core.readParam(s0)
+        s.core.setParam(s0)
 
         s1 = s.getParam()
 

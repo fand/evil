@@ -48,7 +48,7 @@
       });
     };
 
-    ReverbView.prototype.readParam = function(p) {
+    ReverbView.prototype.setParam = function(p) {
       if (p.name != null) {
         this.name.val(p.name);
       }
@@ -101,7 +101,7 @@
       });
     };
 
-    DelayView.prototype.readParam = function(p) {
+    DelayView.prototype.setParam = function(p) {
       if (p.delays != null) {
         this.delay.val(p.delay * 1000);
       }
@@ -178,7 +178,7 @@
       });
     };
 
-    CompressorView.prototype.readParam = function(p) {
+    CompressorView.prototype.setParam = function(p) {
       if (p.input != null) {
         this.input.val(p.input * 100);
       }
@@ -246,7 +246,7 @@
       });
     };
 
-    FuzzView.prototype.readParam = function(p) {
+    FuzzView.prototype.setParam = function(p) {
       if (p.input != null) {
         this.input.val(p.input * 100);
       }
@@ -293,7 +293,7 @@
       });
     };
 
-    DoubleView.prototype.readParam = function(p) {
+    DoubleView.prototype.setParam = function(p) {
       if (p.delay != null) {
         this.delay.val(p.delay * 1000);
       }

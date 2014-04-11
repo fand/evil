@@ -11,5 +11,6 @@ my $app = Plack::Util::load_psgi 'script/wasynth2-server';
 
 my $mech = Test::WWW::Mechanize::PSGI->new(app => $app);
 $mech->get_ok('/');
+$mech->get_ok('/test');
 
 done_testing;

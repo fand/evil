@@ -56,7 +56,7 @@
       };
       s.setSynthName(s0.name);
       s.setScale(s0.scale_name);
-      s.core.readParam(s0);
+      s.core.setParam(s0);
       s1 = s.getParam();
       assertEq(s0.name, s1.name, 'synth name');
       assertEq(s0.scale_name, s1.scale_name, 'scale');

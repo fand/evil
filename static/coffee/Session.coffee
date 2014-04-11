@@ -9,7 +9,7 @@ _master =
     length: 1
     master: [_master]
 
-
+# Control the patterns for tracks.
 class @Session
     constructor: (@ctx, @player) ->
         @scenes = []
@@ -33,6 +33,7 @@ class @Session
 
     toggleLoop: -> @is_loop = !@is_loop
 
+    # Read patterns for the next measure.
     nextMeasure: (@synth, time) ->
         if @is_loop
             if @is_waiting_next_scene
@@ -42,18 +43,20 @@ class @Session
         else
             @nextScene()
 
+    # Read patterns for cued tracks.
     nextPattern: () ->
         @savePatterns()
 
         @is_waiting_next_pattern = false
         for q in @cue_queue
             pat = @song.tracks[q[0]].patterns[q[1]]
-            @synth[q[0]].readPattern(pat)
+            @synth[q[0]].setPattern(pat)
             @current_cells[q[0]] = q[1]
         @view.drawScene(@scene_pos, @current_cells)
         @next_pattern_pos = []
         @cue_queue = []
 
+    # Read patterns for the next scene.
     nextScene: (pos) ->
         @savePatterns()
 
@@ -75,7 +78,7 @@ class @Session
             continue if not @song.tracks[i].patterns[@scene_pos]?
             pat = @song.tracks[i].patterns[@scene_pos]
             if pat? and pat != null
-                @synth[i].readPattern(pat)
+                @synth[i].setPattern(pat)
                 @scene_length = Math.max(@scene_length, pat.pattern.length)
                 @current_cells[i] = pos
 
@@ -89,6 +92,7 @@ class @Session
 
     getScene: (i) -> @song.master[i]
 
+    # Display current states via SessionView.
     play: () ->
         @view.drawScene(@scene_pos, @current_cells)
 
@@ -98,6 +102,7 @@ class @Session
         else
             @view.beat(false, @cue_queue)
 
+    # Cue patterns to play next.
     cuePattern: (synth_num, pat_num) ->
         @is_waiting_next_pattern = true
         @next_pattern_pos[synth_num] = pat_num
@@ -115,7 +120,7 @@ class @Session
         pos = if _pos then _pos else @scene_pos
 
         name = s.id + '-' + pos
-        s.readPatternName(name)
+        s.setPatternName(name)
 
         patterns = []
         patterns[pos] = name: s.pattern_name, pattern: s.pattern
@@ -128,6 +133,7 @@ class @Session
 
     setSynth: (@synth) ->
 
+    # Read given song, called by Player.
     readTrack: (@song, src, dst) ->
         # add master
         if not @song.master[dst.y]?
@@ -156,7 +162,7 @@ class @Session
         if pat_num + 1 > @song.length
             @song.length = pat_num + 1
         if @current_cells[synth_num] == pat_num
-            @player.synth[synth_num].readPattern(pat)
+            @player.synth[synth_num].setPattern(pat)
 
     readMaster: (pat, pat_num) ->
         @song.master[pat_num] = pat
@@ -180,12 +186,12 @@ class @Session
         @savePattern(synth_num, @current_cells[synth_num])
 
         if @song.tracks[synth_num].patterns[pat_num]?
-            @player.synth[synth_num].readPattern(@song.tracks[synth_num].patterns[pat_num])
+            @player.synth[synth_num].setPattern(@song.tracks[synth_num].patterns[pat_num])
         else
             # set new pattern
             pat_name = synth_num + '-' + pat_num
             @player.synth[synth_num].clearPattern()
-            @player.synth[synth_num].readPatternName(pat_name)
+            @player.synth[synth_num].setPatternName(pat_name)
             @song.tracks[synth_num].patterns[pat_num] = @player.synth[synth_num].getPattern()
 
         # draw
@@ -195,6 +201,7 @@ class @Session
 
         return [synth_num, pat_num, @song.tracks[synth_num].patterns[pat_num]]
 
+    # Save patterns into @song.
     savePatterns: ->
         for i in [0...@current_cells.length]
             @savePattern(i, @current_cells[i])
@@ -202,6 +209,7 @@ class @Session
     savePattern: (x, y) ->
         @song.tracks[x].patterns[y] = @player.synth[x].getPattern()
 
+    # Save parameters for tracks into @song.
     saveTracks: ->
         for i in [0...@player.synth.length]
             param = @player.synth[i].getParam()
@@ -212,6 +220,7 @@ class @Session
     saveTracksEffect: (pos) ->
         @song.tracks[pos.x].effects = @player.synth[pos.x].getEffectsParam()
 
+    # Save master track into @song.
     saveMaster: (y, obj) ->
         @song.master[y] = obj
         @view.readSong(@song, @current_cells)
@@ -221,39 +230,20 @@ class @Session
     saveMasters: ->
         if @song.master == []
             @song.master.push(@player.getScene())
-        else
-            return
 
+    # Save mixer into @song.
     saveMixer: ->
         @song.mixer = @player.mixer.getParam()
 
-    readTracks: (tracks) ->
-        for i in [0...tracks.length]
-            @player.synth[i].readParam(tracks[i])
-
-    readSong: (@song) ->
-        @scene_pos = 0
-        @scene_length = 0
-        for i in [0...@song.tracks.length]
-            pat = @song.tracks[i].patterns[0]
-            if pat? and pat != null
-                @synth[i].readPattern(pat)
-                @current_cells[i] = 0
-                @scene_length = Math.max(@scene_length, pat.pattern.length)
-            else
-                @current_cells[i] = undefined
-        @player.readScene(@song.master[0])
-        @player.setSceneLength(@scene_length)
-        @readTracks(@song.tracks)
-        @player.mixer.readParam(@song.mixer)
-        @view.readSong(@song, @current_cells)
-
     saveSong: () ->
+        # Save patterns and parameters into JSON.
         @savePatterns()
         @saveTracks()
         @saveMasters()
         @saveMixer()
         song_json = JSON.stringify(@song)
+
+        # Save the song via ajax.
         csrf_token = $('#ajax-form > input[name=csrf_token]').val()
         $.ajax(
             url: '/'
@@ -268,10 +258,29 @@ class @Session
             @view.showError(err)
         )
 
+    # Read the song given by Player.
+    readSong: (@song) ->
+        @scene_pos = 0
+        @scene_length = 0
+        for i in [0...@song.tracks.length]
+            pat = @song.tracks[i].patterns[0]
+            if pat? and pat != null
+                @synth[i].setPattern(pat)
+                @current_cells[i] = 0
+                @scene_length = Math.max(@scene_length, pat.pattern.length)
+            else
+                @current_cells[i] = undefined
+
+        @view.readSong(@song, @current_cells)
+
+    # Set a track name of @song.
+    # called by Synth, Sampler
     setSynthName: (synth_id, name) ->
         @song.tracks[synth_id].name = name
         @view.drawTrackName(synth_id, name, @song.tracks[synth_id].type)
 
+    # Set current pattern name of a synth.
+    # called by Synth, Sampler
     setPatternName: (synth_id, name) ->
         pat_num = @current_cells[synth_id]
 
@@ -282,23 +291,19 @@ class @Session
 
         @view.drawPatternName(synth_id, pat_num, @song.tracks[synth_id].patterns[pat_num])
 
-    setSongTitle: (title) -> @song.title = @view.song.title = title
-    setCreatorName: (name) -> @song.creator = @view.song.creator = name
+    # called by Player.
+    changeSynth: (id, type, synth_new) ->
+        pat_name = id + '-' + @scene_pos
+        synth_new.setPatternName(pat_name)
 
-    changeSynth: (id, type) ->
-        s = @player.changeSynth(id, type)
+        patterns = []
+        patterns[@scene_pos] = name: pat_name, pattern: synth_new.pattern
 
-        pat_name = s.id + '-' + @scene_pos
-        s.readPatternName(pat_name)
+        s_params = id: id, type: type, name: 'Synth #' + id, patterns: patterns, params: [], gain: 1.0, pan: 0.0
+        @song.tracks[id] = s_params
+        synth_new.setPattern(patterns[@scene_pos])
 
-        pp = []
-        pp[@scene_pos] = name: pat_name, pattern: s.pattern
-
-        s_obj = id: s.id, type: type, name: 'Synth #' + s.id, patterns: pp, params: [], gain: 1.0, pan: 0.0
-        @song.tracks[id] = s_obj
-        s.readPattern(pp[@scene_pos])
-
-        # swap
+        # Swap patterns[0] and current patterns.
         [@song.tracks[id].patterns[0], @song.tracks[id].patterns[@current_cells[id]]] = [@song.tracks[id].patterns[@current_cells[id]], @song.tracks[id].patterns[0]]
 
         @view.addSynth(@song, [id, @scene_pos])
