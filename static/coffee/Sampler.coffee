@@ -97,7 +97,7 @@ class @SampleNode
     getParam: ->
         wave: @name, time: @getTimeParam(), gains: @eq_gains, output: @getOutputParam()
 
-    readParam: (p) ->
+    setParam: (p) ->
         @setSample(p.wave) if p.wave?
         @setTimeParam(p.time[0], p.time[1], p.time[2]) if p.time?
         @setEQParam(p.gains) if p.gains?
@@ -166,18 +166,18 @@ class @SamplerCore
 
     bindSample: (sample_now) ->
         @view.bindSample(sample_now, @samples[sample_now].getParam())
-        @view.readSampleTimeParam(@getSampleTimeParam(sample_now))
-        @view.readSampleEQParam(@getSampleEQParam(sample_now))
-        @view.readSampleOutputParam(@getSampleOutputParam(sample_now))
+        @view.setSampleTimeParam(@getSampleTimeParam(sample_now))
+        @view.setSampleEQParam(@getSampleEQParam(sample_now))
+        @view.setSampleOutputParam(@getSampleOutputParam(sample_now))
 
     getParam: ->
         type: 'SAMPLER'
         samples: (s.getParam() for s in @samples)
 
-    readParam: (p) ->
+    setParam: (p) ->
         if p.samples?
             for i in [0...p.samples.length]
-                @samples[i].readParam(p.samples[i])
+                @samples[i].setParam(p.samples[i])
         @bindSample(0)
 
 
@@ -249,11 +249,11 @@ class @Sampler
     pause: (time) ->
         @core.noteOff()
 
-    readPattern: (_pattern_obj) ->
+    setPattern: (_pattern_obj) ->
         @pattern_obj = $.extend(true, {}, _pattern_obj)
         @pattern = @pattern_obj.pattern
         @pattern_name = @pattern_obj.name
-        @view.readPattern(@pattern_obj)
+        @view.setPattern(@pattern_obj)
 
     getPattern: () ->
         @pattern_obj = name: @pattern_name, pattern: @pattern
@@ -262,7 +262,7 @@ class @Sampler
     clearPattern: () ->
         @pattern = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
         @pattern_obj.pattern = @pattern
-        @view.readPattern(@pattern_obj)
+        @view.setPattern(@pattern_obj)
 
     plusPattern: ->
         @pattern = @pattern.concat([[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]])
@@ -297,10 +297,11 @@ class @Sampler
         @session.setSynthName(@id, @name)
         @view.setSynthName(@name)
 
-    setPatternName: (@pattern_name) ->
+    # called by SamplerView.
+    inputPatternName: (@pattern_name) ->
         @session.setPatternName(@id, @pattern_name)
 
-    readPatternName: (@pattern_name) ->
+    setPatternName: (@pattern_name) ->
         @view.setPatternName(@pattern_name)
 
     selectSample: (sample_now) ->
@@ -318,7 +319,7 @@ class @Sampler
         p.effects = @getEffectsParam()
         return p
 
-    readParam: (p) -> @core.readParam(p) if p?
+    setParam: (p) -> @core.setParam(p) if p?
 
     mute:   -> @core.mute()
     demute: -> @core.demute()

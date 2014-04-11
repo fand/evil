@@ -41,7 +41,7 @@ class @SamplerCoreView
 
     initEvent: ->
         @sample.find('input').on("change", () =>
-            @setSampleTimeParam()
+            @fetchSampleTimeParam()
             @updateWaveformCanvas(@sample_now)
         )
         @canvas_waveform_dom.on('mousedown', (e) =>
@@ -71,7 +71,7 @@ class @SamplerCoreView
                     @head_wave += d
                     @tail_wave += d
 
-                @setSampleTimeParam()
+                @fetchSampleTimeParam()
                 @updateWaveformCanvas(@sample_now)
 
                 @clicked_wave = pos
@@ -94,13 +94,12 @@ class @SamplerCoreView
         )
 
         @eq.on('change', () =>
-            @setSampleEQParam()
+            @fetchSampleEQParam()
             @updateEQCanvas()
         )
         @output.on('change', () =>
-            @setSampleOutputParam()
+            @fetchSampleOutputParam()
         )
-        @setParam()
 
     bindSample: (@sample_now, param) ->
         @sample_name.find('span').text(param.wave)
@@ -193,16 +192,11 @@ class @SamplerCoreView
         ctx.closePath()
         ctx.translate(0, -h / 2)
 
-
-    setParam: ->
-        # @setNodesParam()
-        # @setGains()
-
     setSample: (name) ->
         @model.setSample(@sample_now, name)
         @sample_name.find('span').text(name)
 
-    setSampleTimeParam: ->
+    fetchSampleTimeParam: ->
         @model.setSampleTimeParam(
             @sample_now,
             @head_wave  / 300.0,
@@ -210,7 +204,7 @@ class @SamplerCoreView
             Math.pow(10, parseFloat(@sample.find('.speed').val()) / 100.0 - 1.0)
         )
 
-    setSampleEQParam: ->
+    fetchSampleEQParam: ->
         @model.setSampleEQParam(
             @sample_now,
             parseFloat(@eq.find('.EQ_lo').val())  - 100.0,
@@ -218,37 +212,32 @@ class @SamplerCoreView
             parseFloat(@eq.find('.EQ_hi').val())  - 100.0
         )
 
-    setSampleOutputParam: ->
+    fetchSampleOutputParam: ->
         @model.setSampleOutputParam(
             @sample_now,
             (1.0 - (parseFloat(@panner.val())/200.0)),
             parseFloat(@gain.val()) / 100.0
         )
 
-    readSampleTimeParam: (p) ->
+    setSampleTimeParam: (p) ->
         @head_wave = p[0] * 300.0
         @tail_wave = p[1] * 300.0
         ratio = Math.log(p[2]) / Math.LN10 + 1.0
         @sample.find('.speed').val(ratio * 100)
 
-    readSampleEQParam: (p) ->
+    setSampleEQParam: (p) ->
         @eq.find('.EQ_lo' ).val(p[0] + 100.0)
         @eq.find('.EQ_mid').val(p[1] + 100.0)
         @eq.find('.EQ_hi' ).val(p[2] + 100.0)
 
-    readSampleOutputParam: (p) ->
+    setSampleOutputParam: (p) ->
         [pan, g] = p
         @panner.val((1.0 - pan) * 200.0)
         @gain.val(g * 100.0)
 
-    setGains: ->
+    fetchGains: ->
         for i in [0... @gain_inputs.length]
             @model.setNodeGain(i, parseInt(@gain_inputs.eq(i).val()))
-
-    readParam: (p) ->
-#        if p.samples?
-
-
 
 
 
@@ -331,7 +320,7 @@ class @SamplerView
                     0, 26, 26, 26,           # src (x, y, w, h)
                     j * 26, i * 26, 26, 26  # dst (x, y, w, h)
                 )
-        @readPattern(@pattern_obj)
+        @setPattern(@pattern_obj)
 
     getPos: (e) ->
         @rect = @canvas_off.getBoundingClientRect()
@@ -463,7 +452,7 @@ class @SamplerView
             )
         @last_time = time
 
-    readPattern: (@pattern_obj) ->
+    setPattern: (@pattern_obj) ->
         @pattern = @pattern_obj.pattern
         @page = 0
         @page_total = @pattern.length / @cells_x
