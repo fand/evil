@@ -2510,6 +2510,10 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       }
     };
 
+    Sampler.prototype.disconnect = function() {
+      return this["return"].disconnect();
+    };
+
     Sampler.prototype.setDuration = function() {};
 
     Sampler.prototype.setKey = function() {};

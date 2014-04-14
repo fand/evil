@@ -334,6 +334,10 @@
       }
     };
 
+    Sampler.prototype.disconnect = function() {
+      return this["return"].disconnect();
+    };
+
     Sampler.prototype.setDuration = function() {};
 
     Sampler.prototype.setKey = function() {};
