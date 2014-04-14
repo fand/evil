@@ -218,6 +218,8 @@ class @Sampler
         else
             @return.connect(dst)
 
+    disconnect: ->
+        @return.disconnect()
 
     setDuration: ->
     setKey:  ->

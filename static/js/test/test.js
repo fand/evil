@@ -76,6 +76,15 @@
       }
       return s.setParam(param_original);
     });
+    subtest('Change synth type', function() {
+      var s;
+      s = p.synth[0];
+      $('.synth-type').eq(0).val('SAMPLER').change();
+      assertEq(p.synth[0].type, 'SAMPLER', 'changed to SAMPLER');
+      assertEq(p.synth.length, 1, 'only 1 synth');
+      $('.synth-type').eq(0).val('REZ').change();
+      return assertEq(p.synth[0].type, 'REZ', 'changed to REZ');
+    });
     subtest('Main Control Change', function() {
       var c;
       c = {

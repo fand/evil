@@ -60,6 +60,14 @@ test = ->
         # Reset params
         s.setParam(param_original)
 
+    subtest 'Change synth type', ->
+        s = p.synth[0]
+        $('.synth-type').eq(0).val('SAMPLER').change()
+        assertEq(p.synth[0].type, 'SAMPLER', 'changed to SAMPLER')
+        assertEq(p.synth.length, 1, 'only 1 synth')
+        $('.synth-type').eq(0).val('REZ').change()
+        assertEq(p.synth[0].type, 'REZ', 'changed to REZ')
+
     subtest 'Main Control Change', ->
         c =
             bpm: 200
