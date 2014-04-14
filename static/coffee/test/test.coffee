@@ -17,6 +17,9 @@ test = ->
         song = p.session.song
         s = p.synth[0]
 
+        # Save original param.
+        param_original = s.getParam()
+
         s0 =
             name: "s0"
             pattern_name: "p1"
@@ -53,6 +56,9 @@ test = ->
             assertEq(v0.interval, v1.interval, 'interval')
             assertEq(v0.octave, v1.octave, 'octave')
             assertEq(v0.shape, v1.shape, 'shape')
+
+        # Reset params
+        s.setParam(param_original)
 
     subtest 'Main Control Change', ->
         c =

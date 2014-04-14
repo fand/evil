@@ -17,9 +17,10 @@
       return assertMatch($('#btn-right').attr('data-line1'), /new/, 'btn-right text =~ "new"');
     });
     subtest('Synth JSON', function() {
-      var i, s, s0, s1, song, v0, v1, _i, _ref, _results;
+      var i, param_original, s, s0, s1, song, v0, v1, _i, _ref;
       song = p.session.song;
       s = p.synth[0];
+      param_original = s.getParam();
       s0 = {
         name: "s0",
         pattern_name: "p1",
@@ -65,16 +66,15 @@
       assertArrayEq(s0.eg.adsr, s1.eg.adsr, 'eg adsr');
       assertArrayEq(s0.feg.adsr, s1.feg.adsr, 'feg adsr');
       assertEq(s0.shape, s1.shape, 'harmony');
-      _results = [];
       for (i = _i = 0, _ref = s0.vcos.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         v0 = s0.vcos[i];
         v1 = s1.vcos[i];
         assertEq(v0.fine, v1.fine, 'fine');
         assertEq(v0.interval, v1.interval, 'interval');
         assertEq(v0.octave, v1.octave, 'octave');
-        _results.push(assertEq(v0.shape, v1.shape, 'shape'));
+        assertEq(v0.shape, v1.shape, 'shape');
       }
-      return _results;
+      return s.setParam(param_original);
     });
     subtest('Main Control Change', function() {
       var c;
