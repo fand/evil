@@ -50,7 +50,14 @@
         <script src="<: uri_for('/static/coffee/main.js') :>"></script>
 
         <: if $test { :>
-          <script src="<: uri_for('/static/js/test/test.js') :>"></script>
+          <script src="<: uri_for('/static/js/test/test_lib.js') :>"></script>
+
+          <script src="<: uri_for('/static/js/test/test_control.js') :>"></script>
+          <script src="<: uri_for('/static/js/test/test_initial.js') :>"></script>
+          <script src="<: uri_for('/static/js/test/test_synth.js') :>"></script>
+          <script src="<: uri_for('/static/js/test/test_sampler.js') :>"></script>
+
+          <script src="<: uri_for('/static/js/test/test_main.js') :>"></script>
         <: } :>
 
       <: } else { :>

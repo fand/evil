@@ -141,7 +141,7 @@
       };
     };
 
-    SampleNode.prototype.readParam = function(p) {
+    SampleNode.prototype.setParam = function(p) {
       if (p.wave != null) {
         this.setSample(p.wave);
       }
@@ -252,9 +252,9 @@
 
     SamplerCore.prototype.bindSample = function(sample_now) {
       this.view.bindSample(sample_now, this.samples[sample_now].getParam());
-      this.view.readSampleTimeParam(this.getSampleTimeParam(sample_now));
-      this.view.readSampleEQParam(this.getSampleEQParam(sample_now));
-      return this.view.readSampleOutputParam(this.getSampleOutputParam(sample_now));
+      this.view.setSampleTimeParam(this.getSampleTimeParam(sample_now));
+      this.view.setSampleEQParam(this.getSampleEQParam(sample_now));
+      return this.view.setSampleOutputParam(this.getSampleOutputParam(sample_now));
     };
 
     SamplerCore.prototype.getParam = function() {
@@ -274,11 +274,11 @@
       };
     };
 
-    SamplerCore.prototype.readParam = function(p) {
+    SamplerCore.prototype.setParam = function(p) {
       var i, _i, _ref;
       if (p.samples != null) {
         for (i = _i = 0, _ref = p.samples.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          this.samples[i].readParam(p.samples[i]);
+          this.samples[i].setParam(p.samples[i]);
         }
       }
       return this.bindSample(0);
@@ -334,6 +334,10 @@
       }
     };
 
+    Sampler.prototype.disconnect = function() {
+      return this["return"].disconnect();
+    };
+
     Sampler.prototype.setDuration = function() {};
 
     Sampler.prototype.setKey = function() {};
@@ -384,11 +388,11 @@
       return this.core.noteOff();
     };
 
-    Sampler.prototype.readPattern = function(_pattern_obj) {
+    Sampler.prototype.setPattern = function(_pattern_obj) {
       this.pattern_obj = $.extend(true, {}, _pattern_obj);
       this.pattern = this.pattern_obj.pattern;
       this.pattern_name = this.pattern_obj.name;
-      return this.view.readPattern(this.pattern_obj);
+      return this.view.setPattern(this.pattern_obj);
     };
 
     Sampler.prototype.getPattern = function() {
@@ -402,7 +406,7 @@
     Sampler.prototype.clearPattern = function() {
       this.pattern = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
       this.pattern_obj.pattern = this.pattern;
-      return this.view.readPattern(this.pattern_obj);
+      return this.view.setPattern(this.pattern_obj);
     };
 
     Sampler.prototype.plusPattern = function() {
@@ -460,12 +464,12 @@
       return this.view.setSynthName(this.name);
     };
 
-    Sampler.prototype.setPatternName = function(pattern_name) {
+    Sampler.prototype.inputPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.session.setPatternName(this.id, this.pattern_name);
     };
 
-    Sampler.prototype.readPatternName = function(pattern_name) {
+    Sampler.prototype.setPatternName = function(pattern_name) {
       this.pattern_name = pattern_name;
       return this.view.setPatternName(this.pattern_name);
     };
@@ -490,9 +494,9 @@
       return p;
     };
 
-    Sampler.prototype.readParam = function(p) {
+    Sampler.prototype.setParam = function(p) {
       if (p != null) {
-        return this.core.readParam(p);
+        return this.core.setParam(p);
       }
     };
 

@@ -36,7 +36,7 @@ TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17]
 FREQ_OFFSET = [0.1, 0.15, 0.25, 0.35, 0.55, 0.65, 0.85]
 
 
-
+# Noise Oscillator.
 class @Noise
     constructor: (@ctx) ->
         @node = @ctx.createScriptProcessor(STREAM_LENGTH)
@@ -65,7 +65,7 @@ class @Noise
         @fine = p.fine
 
 
-
+# Oscillators.
 class @VCO
     constructor: (@ctx) ->
         @freq_key = 55
@@ -145,6 +145,7 @@ class @VCO
 
 
 
+# Envelope generator.
 class @EG
     constructor: (@target, @min, @max) ->
         @attack  = 0
@@ -182,6 +183,7 @@ class @EG
 
 
 
+# Manages filter params.
 class @ResFilter
     constructor: (@ctx) ->
         @lpf = @ctx.createBiquadFilter()
@@ -196,6 +198,7 @@ class @ResFilter
 
 
 
+# Manages VCO, Noise, ResFilter, EG.
 class @SynthCore
     constructor: (@parent, @ctx, @id) ->
         @node = @ctx.createGain()
@@ -218,7 +221,7 @@ class @SynthCore
         @eg  = new EG(@node.gain, 0.0, @gain)
         @feg = new EG(@filter.lpf.frequency, 0, 0)
 
-        # resonance用ノイズ生成
+        # Noise generator for resonance.
         @gain_res = @ctx.createGain()
         @gain_res.gain.value = 0
         @vcos[2].connect(@gain_res)
@@ -302,6 +305,7 @@ class @SynthCore
         @filter.disconnect()
         @node.disconnect()
 
+    # Converts interval (n-th note) to semitones.
     noteToSemitone: (note, shift) ->
         if @is_harmony
             note = note + shift
@@ -310,7 +314,6 @@ class @SynthCore
             semitone = Math.floor((note-1)/@scale.length) * 12 + @scale[(note-1) % @scale.length]
         else
             semitone = Math.floor((note-1)/@scale.length) * 12 + @scale[(note-1) % @scale.length] + shift
-
 
     setNote: (@note) ->
         for v in @vcos
@@ -322,6 +325,7 @@ class @SynthCore
 
 
 
+# Manages SynthCore, SynthView.
 class @Synth
     constructor: (@ctx, @id, @player, @name) ->
         @type = 'REZ'
@@ -413,7 +417,6 @@ class @Synth
             @core.noteOn()
             T2.setTimeout((() => @core.noteOff()), @duration - 10)
 
-
     play: () ->
         @view.play()
 
@@ -439,6 +442,7 @@ class @Synth
         @pattern_obj.pattern = @pattern
         @view.setPattern(@pattern_obj)
 
+    # Changes the length of @pattern.
     plusPattern: ->
         @pattern = @pattern.concat([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
         @player.resetSceneLength()
@@ -468,16 +472,19 @@ class @Synth
     redraw: (@time) ->
         @view.drawPattern(@time)
 
-    setSynthName: (@name) ->
-        @session.setSynthName(@id, @name)
-        @view.setSynthName(@name)
-
+    # called by SynthView.
     inputPatternName: (@pattern_name) ->
         @session.setPatternName(@id, @pattern_name)
 
     setPatternName: (@pattern_name) ->
         @view.setPatternName(@pattern_name)
 
+    setSynthName: (@name) ->
+        @session.setSynthName(@id, @name)
+        @view.setSynthName(@name)
+
+    # Get new Synth and replace.
+    # called by SynthView.
     changeSynth: (type) ->
         s_new = @player.changeSynth(@id, type, s_new)
         @view.dom.replaceWith(s_new.view.dom)
@@ -495,17 +502,17 @@ class @Synth
     setParam: (p) ->
         return if not p?
         @core.setParam(p)
-        @readEffects(p.effects) if p.effects?
+        @setEffects(p.effects) if p.effects?
 
     mute:   -> @core.mute()
     demute: -> @core.demute()
 
-    # Read effect params from the song.
-    readEffects: (effects) ->
+    # Set effects' params from the song.
+    setEffects: (effects_new) ->
         e.disconnect() for e in @effects
         @effects = []
 
-        for e in effects
+        for e in effects_new
             if e.effect == 'Fuzz'
                 fx = new Fuzz(@ctx)
             else if e.effect == 'Delay'
