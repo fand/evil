@@ -1,6 +1,4 @@
-: cascade "include/layout.tx" { debug => $debug }
-
-: override content -> {
+<% extend 'include/layout' %>
 
 <div id="top">
   <div id="top-logo">
@@ -40,7 +38,7 @@
 <div id="btn-save" class="fa fa-save"></div>
 <!-- <div id="btn-clear" class="fa fa-file-o"></div> -->
 <form id="ajax-form" method="POST"></form>
-<script id="song"><: if $song { :> var song_read = <: $song | mark_raw :> <: } :></script>
+<script id="song"><% if @song : %> var song_read = <%- @song %> <% end %></script>
 
 <!-- top right -->
 <div id="social" class="clearfix">
@@ -62,11 +60,11 @@
     <div id="mixer-body">
       <div id="mixer-tracks">
         <div id="session-tracks-wrapper">
-         <div id="session-tracks-wrapper-sub">
-          <canvas id="session-tracks"></canvas>
-          <canvas id="session-tracks-on"></canvas>
-          <canvas id="session-tracks-hover"></canvas>
-         </div>
+          <div id="session-tracks-wrapper-sub">
+            <canvas id="session-tracks"></canvas>
+            <canvas id="session-tracks-on"></canvas>
+            <canvas id="session-tracks-hover"></canvas>
+          </div>
         </div>
         <div id="effects-tracks" class="clearfix"></div>
         <div id="console-tracks" class="clearfix"></div>
@@ -193,10 +191,10 @@
   </div>
 
   <div id="templates">
-    <: include 'synth/synth.tx' :>
-    <: include 'synth/sampler.tx' :>
+    <% include 'synth/synth' %>
+    <% include 'synth/sampler' %>
 
-    <: include 'effect.tx' :>
+    <% include 'effect' %>
 
     <div class="console-track">
       <div class="pan-label">C</div>
@@ -260,4 +258,4 @@
 <i id="btn-bottom" class="btn fa fa-angle-down"  data-line1="synths"></i>
 
 
-: }
+<% end %>

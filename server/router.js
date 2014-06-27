@@ -1,6 +1,5 @@
 'use strict';
 
-var api = require('./routes/api');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var songs = require('./routes/songs');

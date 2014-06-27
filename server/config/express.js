@@ -11,7 +11,13 @@ var express = require('express'),
     errorHandler = require('errorhandler'),
     path = require('path'),
     config = require('./config'),
+    passport = require('passport'),
+    mongoStore = require('connect-mongo')(session),
     middleware = require('../middleware');
+
+var ECT = require('ect');
+var ectRenderer = ECT({ watch: true, root: config.root + '/app/views', ext : '.ect' });
+
 
 /**
  * Express configuration
@@ -40,10 +46,12 @@ module.exports = function(app) {
     app.use(favicon(path.join(config.root, 'static', 'favicon.ico')));
   }
 
-  app.use(express.static(path.join(config.root, 'app')));
-  app.use(express.static(path.join(config.root, 'static')));
-  app.engine('html', require('ejs').renderFile);
-  app.set('view engine', 'html');
+  app.use('/app', express.static(path.join(config.root, 'app')));
+  app.use('/static', express.static(path.join(config.root, 'static')));
+  // app.engine('html', require('ejs').renderFile);
+  // app.set('view engine', 'html');
+  app.engine('ect', ectRenderer.render);
+  app.set('view engine', 'ect');
   app.set('views', config.root + '/app/views');
   app.use(logger('dev'));
 

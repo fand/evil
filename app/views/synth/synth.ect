@@ -23,7 +23,7 @@
 
       <div class="markers clearfix">
         <i class="fa fa-angle-left marker-prev"></i>
-        <: for [0..7] -> $_ { :><i class="fa fa-circle marker"></i><: } :>
+        <% for i in [0..7] : %><i class="fa fa-circle marker"></i><% end %>
         <i class="fa fa-angle-right marker-next"></i>
 
         <span class="marker-pos">1</span>

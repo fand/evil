@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title><% @title || 'evil' %></title>
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <meta http-equiv="Content-Script-Type" content="text/javascript" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta name="description" content="Play Music for Google Chrome, with Web Audio API" />
+    <meta property="og:site_name" content="evil" />
+    <meta property="og:title" content="evil">
+    <meta property="og:url" content="http://evil.gmork.in/" />
+    <meta property="og:description" content="Play Music for Google Chrome, with Web Audio API" />
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="http://evil.gmork.in/static/img/evil_300.png">
+
+    <% if @ie : %>
+      <link href="/static/css/ie.css" rel="stylesheet" type="text/css" media="screen" />
+    <% else if @phone : %>
+      <link href="/static/css/phone.css" rel="stylesheet" type="text/css" media="screen" />
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+      <script src="/static/js/phone.js"></script>
+    <% else : %>
+      <link href="/static/css/main.css" rel="stylesheet" type="text/css" media="screen" />
+      <link href="/static/css/riff.css" rel="stylesheet" type="text/css" media="screen" />
+      <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" media="screen" />
+      <% if @debug : %>
+        <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+        <script src="/app/lib/jquery-2.0.3.min.js"></script>
+        <script src="/app/lib/jquery-2.0.3.min.js"></script>
+
+        <script src="/app/MutekiTimer.js"></script>
+        <script src="/app/Panner.js"></script>
+        <script src="/app/Player.js"></script>
+        <script src="/app/Session.js"></script>
+        <script src="/app/Effect.js"></script>
+        <script src="/app/Mixer.js"></script>
+        <script src="/app/Sidebar.js"></script>
+        <script src="/app/Synth.js"></script>
+        <script src="/app/Sampler.js"></script>
+
+        <script src="/app/PlayerView.js"></script>
+        <script src="/app/SessionView.js"></script>
+        <script src="/app/EffectView.js"></script>
+        <script src="/app/MixerView.js"></script>
+        <script src="/app/SidebarView.js"></script>
+        <script src="/app/SynthView.js"></script>
+        <script src="/app/SamplerView.js"></script>
+
+        <script src="/app/Keyboard.js"></script>
+
+        <script src="/app/main.js"></script>
+
+        <% if @test : %>
+          <script src="/test/test_lib.js"></script>
+
+          <script src="/test/test_control.js"></script>
+          <script src="/test/test_initial.js"></script>
+          <script src="/test/test_synth.js"></script>
+          <script src="/test/test_sampler.js"></script>
+
+          <script src="/test/test_main.js"></script>
+        <% end %>
+
+      <% else : %>
+        <script src="/static/js/Wasynth2.min.js"></script>
+      <% end %>
+
+    <% end %>
+  </head>
+  <body>
+
+    <% content %>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-41787635-9', 'gmork.in');
+      ga('send', 'pageview');
+    </script>
+
+  </body>
+</html>
