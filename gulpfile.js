@@ -25,14 +25,6 @@ gulp.task('test', function () {
     });
 });
 
-gulp.task('serve', function () {
-  nodemon({ script: 'server.js', ext: 'html js', ignore: [] })
-      .on('change', ['coffee'])
-      .on('restart', function () {
-        console.log('restarted!');
-      });
-});
-
 gulp.task('test-coffee', ['coffee'], function () {
   gulp.start('test');
 });
@@ -42,4 +34,25 @@ gulp.task('watch', function () {
   gulp.watch('app/**/*.coffee', ['watch-coffee']);
   // gulp.watch('test/*.coffee', ['test']);
 });
+
+
+gulp.task('serve', function () {
+  nodemon({ script: 'server.js', ext: 'html js', ignore: [] })
+      .on('change', ['coffee'])
+      .on('restart', function () {
+        console.log('restarted!');
+      });
+});
+
+gulp.task('serve-dev', function () {
+  process.env.NODE_ENV = 'development';
+  gulp.start('serve');
+});
+
+gulp.task('serve-pro', function () {
+  process.env.NODE_ENV = 'production';
+  gulp.start('serve');
+});
+
+
 gulp.task('default', ['coffee', 'test-coffee']);
