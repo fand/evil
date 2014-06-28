@@ -57,11 +57,12 @@ class @SidebarView
         bpm   = @master_bpm.val()
         key   = @master_key.val()
         scale = @master_scale.val()
-        obj =
+        obj = {
             name:  name if name?
             bpm:   bpm if bpm?
             key:   key if key?
             scale: scale if scale?
+        }
         @model.saveMaster(obj)
         @showMaster(obj)
 

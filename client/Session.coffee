@@ -244,14 +244,14 @@ class @Session
         song_json = JSON.stringify(@song)
 
         # Save the song via ajax.
-        csrf_token = $('#ajax-form > input[name=csrf_token]').val()
         $.ajax(
-            url: '/'
+            urpl: '/api/songs/'
             type: 'POST'
             dataType: 'text'
             data:
+                title: @song.title
+                composer: @song.creator
                 json: song_json
-                csrf_token: csrf_token
         ).done((d) =>
             @view.showSuccess(d, @song.title, @song.creator)
         ).fail((err) =>

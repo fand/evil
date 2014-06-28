@@ -17,8 +17,9 @@ module.exports = {
     if(req.user) {
       res.cookie('user', JSON.stringify(req.user.userInfo));
     }
-    next();
+    return next();
   },
+
   redirector: function(req, res, next){
     var ua = req.headers['user-agent'];
     var is_ie = !!ua.match(/msid/);
@@ -31,6 +32,11 @@ module.exports = {
       return res.redirect('/mobile');
     }
 
-    next();
+    return next();
+  },
+
+  csrf: function (req, res, next) {
+    if (!req.xhr) { return res.send(401); }
+    return next();
   }
 };

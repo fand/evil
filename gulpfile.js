@@ -1,58 +1,65 @@
 var gulp = require('gulp');
 var coffee = require('gulp-coffee');
 var plumber = require('gulp-plumber');
-var nodemon = require('gulp-nodemon');
+var changed = require('gulp-changed');
+var uglify = require('gulp-uglify');
+
+// Server process handler
+var nodemon;
 
 
-gulp.task('coffee', function () {
-  return gulp.src('app/coffee/**/*.coffee')
+// Compile only the updated file.
+gulp.task('coffee-update', function(){
+  if (nodemon) { nodemon.kill(); }
+  return gulp.src('app/**/*.coffee')
+    .pipe(changed('app/**/*.coffee'))
     .pipe(plumber())
     .pipe(coffee())
-    .pipe(gulp.dest('app/**/*.js'));
+    .pipe(uglify())
+    .pipe(gulp.dest('app'));
 });
 
-gulp.task('test', function () {
-  require('coffee-script/register');
-  return gulp.src('test/*.coffee')
+// Compile all coffee file.
+gulp.task('coffee', function () {
+  return gulp.src('app/**/*.coffee')
     .pipe(plumber())
-    .pipe(mocha({
-      ui: 'bdd',
-      reporter: 'spec',
-      timeout: 100000
-    }))
-    .once('end', function () {
-      process.exit();
-    });
+    .pipe(coffee())
+    .pipe(uglify())
+    .pipe(gulp.dest('app'));
 });
 
-gulp.task('test-coffee', ['coffee'], function () {
-  gulp.start('test');
-});
-gulp.task('watch-coffee', ['coffee', 'test-coffee']);
-
-gulp.task('watch', function () {
-  gulp.watch('app/**/*.coffee', ['watch-coffee']);
-  // gulp.watch('test/*.coffee', ['test']);
-});
-
-
-gulp.task('serve', function () {
-  nodemon({ script: 'server.js', ext: 'html js', ignore: [] })
-      .on('change', ['coffee'])
-      .on('restart', function () {
-        console.log('restarted!');
-      });
+// Keep the server alive.
+gulp.task('nodemon', function () {
+  if (nodemon) { nodemon.kill(); }
+  nodemon = require('child_process').spawn(
+    './node_modules/.bin/nodemon',
+    ['./server.js'],
+    {
+      env: process.env,
+      stdio: 'inherit'
+    }
+  ).on('close', function () {
+    console.log('nodemon: process killed!');
+  });
 });
 
-gulp.task('serve-dev', function () {
+// alias for dev task dependency
+gulp.task('nodemon-dev', ['coffee-update'], function () {
+  gulp.start('nodemon');
+});
+
+
+// Server tasks.
+gulp.task('serve-dev', ['coffee'], function () {
   process.env.NODE_ENV = 'development';
-  gulp.start('serve');
+  gulp.start('nodemon');
+  gulp.watch('app/**/*.coffee', ['coffee-update', 'nodemon-dev']);
 });
-
 gulp.task('serve-pro', function () {
   process.env.NODE_ENV = 'production';
-  gulp.start('serve');
+  gulp.start('nodemon');
 });
 
 
-gulp.task('default', ['coffee', 'test-coffee']);
+// Build all coffee and launch the server.
+gulp.task('default', ['coffee', 'serve-dev']);

@@ -1,0 +1,1 @@
+(function(){$(function(){return setTimeout(function(){return function(){return window.t.runAll()}}(this),1e3)})}).call(this);
