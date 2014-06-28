@@ -15,6 +15,8 @@ var express = require('express'),
     mongoStore = require('connect-mongo')(session),
     middleware = require('../middleware');
 
+var secret = require('../../secret.js');
+
 var ECT = require('ect');
 var ectRenderer = ECT({ watch: true, root: config.root + '/app/views', ext : '.ect' });
 
@@ -67,7 +69,7 @@ module.exports = function(app) {
 
   // Persist sessions with mongoStore
   app.use(session({
-    secret: 'angular-fullstack secret',
+    secret: secret.session,
     store: new mongoStore({
       url: config.mongo.uri,
       collection: 'sessions'

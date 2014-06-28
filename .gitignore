@@ -20,3 +20,5 @@ node_modules/
 
 static/IR/
 static/wav/
+
+secret.js
