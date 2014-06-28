@@ -26,11 +26,11 @@ module.exports = function(app) {
 
   app.route('/api/songs')
     .get(songs.list)
-    .post(songs.create);
+    .post(middleware.csrf, songs.create);
 
   app.route('/api/songs/:song_id')
     .get(songs.get)
-    .put(songs.update);
+    .put(middleware.csrf, songs.update);
 
   // All undefined api routes should return a 404
   app.route('/api/*')
@@ -49,5 +49,5 @@ module.exports = function(app) {
     .get(index.mobile);
 
   app.route('/*')
-    .get( middleware.setUserCookie, index.index);
+    .get(middleware.setUserCookie, index.index);
 };
