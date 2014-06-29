@@ -11,21 +11,21 @@ var nodemon;
 // Compile only the updated file.
 gulp.task('coffee-update', function(){
   if (nodemon) { nodemon.kill(); }
-  return gulp.src('app/**/*.coffee')
-    .pipe(changed('app/**/*.coffee'))
+  return gulp.src('client/**/*.coffee')
+    .pipe(changed('client/**/*.coffee'))
     .pipe(plumber())
     .pipe(coffee())
     .pipe(uglify())
-    .pipe(gulp.dest('app'));
+    .pipe(gulp.dest('client'));
 });
 
 // Compile all coffee file.
 gulp.task('coffee', function () {
-  return gulp.src('app/**/*.coffee')
+  return gulp.src('client/**/*.coffee')
     .pipe(plumber())
     .pipe(coffee())
     .pipe(uglify())
-    .pipe(gulp.dest('app'));
+    .pipe(gulp.dest('client'));
 });
 
 // Keep the server alive.
@@ -53,7 +53,7 @@ gulp.task('nodemon-dev', ['coffee-update'], function () {
 gulp.task('serve-dev', ['coffee'], function () {
   process.env.NODE_ENV = 'development';
   gulp.start('nodemon');
-  gulp.watch('app/**/*.coffee', ['coffee-update', 'nodemon-dev']);
+  gulp.watch('client/**/*.coffee', ['coffee-update', 'nodemon-dev']);
 });
 gulp.task('serve-pro', function () {
   process.env.NODE_ENV = 'production';

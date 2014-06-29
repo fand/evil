@@ -16,12 +16,12 @@ var get = function (req, res, next) {
 var create = function (req, res, next) {
   var song = new Song();
   song.title    = req.body.title;
-  song.composer = req.body.composer;
+  song.creator = req.body.creator;
   song.json     = req.body.json;
 
   song.save(function(err) {
     if (err) return res.json(400, err);
-    res.send(200);
+    res.send(song.id);
   });
 };
 
@@ -33,7 +33,7 @@ var update = function(req, res, next) {
     if (!song) return res.send(404);
 
     song.title    = req.body.title;
-    song.composer = req.body.composer;
+    song.creator = req.body.creator;
     song.json     = req.body.json;
 
     song.validate(function (err) {

@@ -48,6 +48,11 @@ module.exports = function(app) {
   app.route('/mobile')
     .get(index.mobile);
 
+  app.route('/:song_id')
+    .get(middleware.setUserCookie, index.song);
+
   app.route('/*')
-    .get(middleware.setUserCookie, index.index);
+    .get(middleware.setUserCookie, index.index)
+    .post(middleware.csrf, songs.create);
+
 };

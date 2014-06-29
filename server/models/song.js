@@ -2,12 +2,19 @@
 
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
-    ObjectId = Schema.ObjectId;
+    ObjectId = Schema.ObjectId,
+    ShortId = require('mongoose-shortid');
 
 
 var SongSchema = new Schema({
+  _id: {
+    type: ShortId,
+    len: 7,
+    base: 64,
+    retries: 4
+  },
   title:    { type: String, default: 'Untitled' },
-  composer: { type: String, default: 'Anonymous' },
+  creator: { type: String, default: 'Anonymous' },
   user_id: ObjectId,
   json: { type: String, required: true }
 });
@@ -15,7 +22,8 @@ var SongSchema = new Schema({
 SongSchema
   .path('json')
   .validate(function(json) {
-    return (this.json !== json);
+    // return (this.json !== json);
+    return true;
   }, 'json cant be saved without any updates');
 
 SongSchema.methods = {};

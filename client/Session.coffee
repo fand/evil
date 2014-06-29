@@ -250,7 +250,7 @@ class @Session
             dataType: 'text'
             data:
                 title: @song.title
-                composer: @song.creator
+                creator: @song.creator
                 json: song_json
         ).done((d) =>
             @view.showSuccess(d, @song.title, @song.creator)
