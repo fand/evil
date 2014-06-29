@@ -18,7 +18,7 @@ var express = require('express'),
 var secret = require('../../secret.js');
 
 var ECT = require('ect');
-var ectRenderer = ECT({ watch: true, root: config.root + '/app/views', ext : '.ect' });
+var ectRenderer = ECT({ watch: true, root: config.root + '/client/views', ext : '.ect' });
 
 
 /**
@@ -48,13 +48,13 @@ module.exports = function(app) {
     app.use(favicon(path.join(config.root, 'static', 'favicon.ico')));
   }
 
-  app.use('/app', express.static(path.join(config.root, 'app')));
+  app.use('/js', express.static(path.join(config.root, 'client')));
   app.use('/static', express.static(path.join(config.root, 'static')));
   // app.engine('html', require('ejs').renderFile);
   // app.set('view engine', 'html');
   app.engine('ect', ectRenderer.render);
   app.set('view engine', 'ect');
-  app.set('views', config.root + '/app/views');
+  app.set('views', config.root + '/client/views');
   app.use(logger('dev'));
 
   app.use(bodyParser());
