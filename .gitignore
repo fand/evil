@@ -1,3 +1,4 @@
+client/*.js
 *.bak
 *.old
 node_modules/
