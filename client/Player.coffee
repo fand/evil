@@ -184,7 +184,8 @@ class @Player
             else
                 s.mute()
 
-    readSong: (@song) ->
+    readSong: (song) ->
+        @song = JSON.parse(song.json)
         @synth = []
         @num_id = 0
         @mixer.empty()

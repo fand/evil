@@ -53,7 +53,7 @@ $(() ->
 
 
     # Read song
-    if song_read?
-        player.readSong(song_read)
+    if song?
+        player.readSong(song)
     else
         player.readSong(SONG_DEFAULT)
