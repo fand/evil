@@ -25,6 +25,8 @@ var index = function(req, res) {
 // Show a song.
 var song = function(req, res) {
 
+  var is_dev = !!(process.env.NODE_ENV.match(/dev/));
+
   // Get the song data.
   var song_id = req.params.song_id;
 
