@@ -7,12 +7,12 @@ var test = function(req, res) {
   res.render('index', { debug: true, test: true });
 };
 
-var pc = function(req, res) {
-  res.render('pc');
+var ie = function(req, res) {
+  res.render('ie', { ie: true });
 };
 
 var mobile = function(req, res) {
-  res.render('mobile');
+  res.render('mobile', { mobile: true });
 };
 
 
@@ -44,7 +44,7 @@ var song = function(req, res) {
 
 module.exports = {
   test: test,
-  pc: pc,
+  ie: ie,
   mobile: mobile,
   index: index,
   song: song

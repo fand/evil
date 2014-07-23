@@ -42,8 +42,8 @@ module.exports = function(app) {
   // app.route('/partials/*')
   //   .get(index.partials);
 
-  app.route('/pc')
-    .get(index.pc);
+  app.route('/ie')
+    .get(index.ie);
 
   app.route('/mobile')
     .get(index.mobile);

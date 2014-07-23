@@ -9,13 +9,16 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 300px;
-    height: 300px;
+    width: 240px;
+    height: 240px;
     margin-top: -170px;
-    margin-left: -150px;
+    margin-left: -120px;
 }
 img {
     border: none;
+    width: 240px;
+    height: 240px;
+    opacity: 0.5;
 }
 #sorry {
     position: absolute;
@@ -23,10 +26,11 @@ img {
     height: 40px;
     top: 50%;
     left: 50%;
-    margin-top: 150px;
+    margin-top: 100px;
     margin-left: -200px;
     text-align: center;
 }
 a:hover {
-    color: #def;
+    color: #0df;
+    border-bottom: 2px solid #0df;
 }

@@ -25,7 +25,7 @@ module.exports = {
     var is_ie = !!ua.match(/msid/);
 
     if (ua.match(/msie/)) {
-      return res.redirect('/pc');
+      return res.redirect('/ie');
     }
 
     if (ua.match(/iPhone|iPod|Android/)) {

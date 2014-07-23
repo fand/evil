@@ -1,7 +1,4 @@
-: cascade "include/layout.tx" { phone => 1 }
-
-: override content -> {
-
+<% extend 'include/layout' %>
 
 <div id="debug"></div>
 
@@ -13,7 +10,7 @@
 </div>
 
 <div id="div1">
-  <h1>evil?</h1>
+  <h1>evil</h1>
   <p>
     Play & Create music.
   </p>
@@ -79,6 +76,3 @@
   <a href="http://gmork.in/"><img id="vertigo" class="in" src="static/img/vertigo.png" /></a>
   <p><a href="http://twitter.com/amagitakayosi">@amagitakayosi</a> / <a href="http://twitter.com/fand">@fand</a></p>
 </footer>
-
-
-: }
