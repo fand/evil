@@ -25,11 +25,11 @@ module.exports = {
     var is_ie = !!ua.match(/msid/);
 
     if (ua.match(/msie/)) {
-      return res.redirect('/ie');
+      req.is_ie = true;
     }
 
     if (ua.match(/iPhone|iPod|Android/)) {
-      return res.redirect('/mobile');
+      req.is_mobile = true;
     }
 
     return next();

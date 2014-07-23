@@ -25,6 +25,13 @@ var index = function(req, res) {
 // Show a song.
 var song = function(req, res) {
 
+  if (req.is_ie) {
+    return res.render('ie', { ie: true });
+  }
+  if (req.is_mobile) {
+    return res.render('mobile', { mobile: true });
+  }
+
   var is_dev = !!(process.env.NODE_ENV.match(/dev/));
 
   // Get the song data.
