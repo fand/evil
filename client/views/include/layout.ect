@@ -20,7 +20,7 @@
       <link href="/static/css/ie.css" rel="stylesheet" type="text/css" media="screen" />
     <% else if @mobile : %>
       <link href="/static/css/phone.css" rel="stylesheet" type="text/css" media="screen" />
-      <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
       <script src="/static/js/phone.js"></script>
     <% else : %>
       <link href="/static/css/main.css" rel="stylesheet" type="text/css" media="screen" />
@@ -28,10 +28,9 @@
       <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" media="screen" />
       <% if @debug : %>
         <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
-        <script src="/js/lib/jquery-2.0.3.min.js"></script>
-        <script src="/js/lib/jquery-2.0.3.min.js"></script>
-
+        <script src="/js/lib/jquery/dist/jquery.min.js"></script>
         <script src="/js/MutekiTimer.js"></script>
+
         <script src="/js/Panner.js"></script>
         <script src="/js/Player.js"></script>
         <script src="/js/Session.js"></script>
@@ -54,14 +53,12 @@
         <script src="/js/main.js"></script>
 
         <% if @test : %>
-          <script src="/test/test_lib.js"></script>
-
-          <script src="/test/test_control.js"></script>
-          <script src="/test/test_initial.js"></script>
-          <script src="/test/test_synth.js"></script>
-          <script src="/test/test_sampler.js"></script>
-
-          <script src="/test/test_main.js"></script>
+          <script src="/js/test/test_lib.js"></script>
+          <script src="/js/test/test_control.js"></script>
+          <script src="/js/test/test_initial.js"></script>
+          <script src="/js/test/test_synth.js"></script>
+          <script src="/js/test/test_sampler.js"></script>
+          <script src="/js/test/test_main.js"></script>
         <% end %>
 
       <% else : %>

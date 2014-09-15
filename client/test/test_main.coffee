@@ -1,3 +1,1 @@
-$( ->
-    setTimeout((=> window.t.runAll()), 1000)
-)
+setTimeout((=> window.t.runAll()), 1000)

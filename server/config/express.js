@@ -41,6 +41,7 @@ module.exports = function(app) {
     });
 
     app.use(express.static(path.join(config.root, '.tmp')));
+    app.use('/js/test', express.static(path.join(config.root, 'client/js/test')));
   }
 
   if ('production' === env) {
@@ -48,7 +49,8 @@ module.exports = function(app) {
     app.use(favicon(path.join(config.root, 'static', 'favicon.ico')));
   }
 
-  app.use('/js', express.static(path.join(config.root, 'client')));
+  app.use('/js', express.static(path.join(config.root, 'client/js')));
+  app.use('/js/lib', express.static(path.join(config.root, 'bower_components')));
   app.use('/static', express.static(path.join(config.root, 'static')));
   // app.engine('html', require('ejs').renderFile);
   // app.set('view engine', 'html');

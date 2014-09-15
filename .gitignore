@@ -1,5 +1,4 @@
-client/*.js
-client/test/*.js
+client/js/
 *.bak
 *.old
 node_modules/

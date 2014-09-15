@@ -42,11 +42,16 @@ module.exports = function(app) {
   // app.route('/partials/*')
   //   .get(index.partials);
 
-  app.route('/ie')
-    .get(index.ie);
+  if (app.get('env') === 'development') {
+    app.route('/ie')
+      .get(index.ie);
 
-  app.route('/mobile')
-    .get(index.mobile);
+    app.route('/mobile')
+      .get(index.mobile);
+
+    app.route('/test')
+      .get(index.test);
+  }
 
   app.route('/:song_id')
     .get(middleware.setUserCookie, index.song);
@@ -54,5 +59,4 @@ module.exports = function(app) {
   app.route('/*')
     .get(middleware.setUserCookie, index.index)
     .post(middleware.csrf, songs.create);
-
 };
