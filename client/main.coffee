@@ -53,7 +53,7 @@ $(() ->
 
 
     # Read song
-    if song?
-        player.readSong(song)
+    if @song_loaded?
+        player.readSong(JSON.parse(@song_loaded.json))
     else
         player.readSong(SONG_DEFAULT)
