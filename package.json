@@ -31,5 +31,7 @@
     "passport": "^0.2.0",
     "static-favicon": "~1.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "gulp-sourcemaps": "^1.1.5"
+  }
 }
