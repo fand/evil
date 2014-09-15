@@ -24,10 +24,10 @@
     'Harm-minor': [0,2,3,5,7,8,11]
 
 OSC_TYPE =
-    SINE:     0
-    RECT:     1
-    SAW:      2
-    TRIANGLE: 3
+    SINE:     'sine'
+    RECT:     'square'
+    SAW:      'sawtooth'
+    TRIANGLE: 'triangle'
 
 T2 = new MutekiTimer()
 
