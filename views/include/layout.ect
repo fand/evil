@@ -46,45 +46,15 @@
       <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
       <script src="/static/js/phone.js"></script>
     <% else : %>
-      <% if @debug : %>
-        <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
-        <script src="/js/lib/jquery/dist/jquery.min.js"></script>
-        <script src="/js/MutekiTimer.js"></script>
-
-        <script src="/js/Panner.js"></script>
-        <script src="/js/Player.js"></script>
-        <script src="/js/Session.js"></script>
-        <script src="/js/Effect.js"></script>
-        <script src="/js/Mixer.js"></script>
-        <script src="/js/Sidebar.js"></script>
-        <script src="/js/Synth.js"></script>
-        <script src="/js/Sampler.js"></script>
-
-        <script src="/js/PlayerView.js"></script>
-        <script src="/js/SessionView.js"></script>
-        <script src="/js/EffectView.js"></script>
-        <script src="/js/MixerView.js"></script>
-        <script src="/js/SidebarView.js"></script>
-        <script src="/js/SynthView.js"></script>
-        <script src="/js/SamplerView.js"></script>
-
-        <script src="/js/Keyboard.js"></script>
-
-        <script src="/js/main.js"></script>
-
-        <% if @test : %>
-          <script src="/js/test/test_lib.js"></script>
-          <script src="/js/test/test_control.js"></script>
-          <script src="/js/test/test_initial.js"></script>
-          <script src="/js/test/test_synth.js"></script>
-          <script src="/js/test/test_sampler.js"></script>
-          <script src="/js/test/test_main.js"></script>
-        <% end %>
-
-      <% else : %>
-        <script src="/static/js/Wasynth2.min.js"></script>
+      <script src="/js/evil.js"></script>
+      <% if @test : %>
+        <script src="/js/test/test_lib.js"></script>
+        <script src="/js/test/test_control.js"></script>
+        <script src="/js/test/test_initial.js"></script>
+        <script src="/js/test/test_synth.js"></script>
+        <script src="/js/test/test_sampler.js"></script>
+        <script src="/js/test/test_main.js"></script>
       <% end %>
-
     <% end %>
 
   </body>

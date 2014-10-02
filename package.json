@@ -32,6 +32,12 @@
     "static-favicon": "~1.0.0"
   },
   "devDependencies": {
-    "gulp-sourcemaps": "^1.1.5"
+    "browser-sync": "^1.5.2",
+    "browserify": "^5.12.1",
+    "coffeeify": "^0.7.0",
+    "gulp-if": "^1.2.4",
+    "gulp-sourcemaps": "^1.1.5",
+    "require-directory": "^2.0.0",
+    "watchify": "^1.0.6"
   }
 }

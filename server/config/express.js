@@ -18,7 +18,7 @@ var express = require('express'),
 var secret = require('../../secret.js');
 
 var ECT = require('ect');
-var ectRenderer = ECT({ watch: true, root: config.root + '/client/views', ext : '.ect' });
+var ectRenderer = ECT({ watch: true, root: config.root + '/views', ext : '.ect' });
 
 
 /**
@@ -41,7 +41,7 @@ module.exports = function(app) {
     });
 
     app.use(express.static(path.join(config.root, '.tmp')));
-    app.use('/js/test', express.static(path.join(config.root, 'client/js/test')));
+    app.use('/js/test', express.static(path.join(config.root, 'build/js/test')));
   }
 
   if ('production' === env) {
@@ -49,14 +49,15 @@ module.exports = function(app) {
     app.use(favicon(path.join(config.root, 'static', 'favicon.ico')));
   }
 
-  app.use('/js', express.static(path.join(config.root, 'client/js')));
+  app.use('/js', express.static(path.join(config.root, 'build/js')));
   app.use('/js/lib', express.static(path.join(config.root, 'bower_components')));
+  app.use('/css', express.static(path.join(config.root, 'build/css')));
   app.use('/static', express.static(path.join(config.root, 'static')));
   // app.engine('html', require('ejs').renderFile);
   // app.set('view engine', 'html');
   app.engine('ect', ectRenderer.render);
   app.set('view engine', 'ect');
-  app.set('views', config.root + '/client/views');
+  app.set('views', config.root + '/views');
   app.use(logger('dev'));
 
   app.use(bodyParser());

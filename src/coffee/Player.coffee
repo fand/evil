@@ -1,4 +1,4 @@
-class @Player
+class Player
     constructor: ->
         @bpm = 120
         @duration = 500  # msec
@@ -242,3 +242,6 @@ class @Player
 
     showError: (error) ->
         console.log(error)
+
+
+module.exports = Player
