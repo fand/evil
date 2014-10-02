@@ -22,13 +22,11 @@ module.exports = {
 
   redirector: function(req, res, next){
     var ua = req.headers['user-agent'];
-    var is_ie = !!ua.match(/msid/);
 
-    if (ua.match(/msie/)) {
+    if (ua.match(/msie/ig)) {
       req.is_ie = true;
     }
-
-    if (ua.match(/iPhone|iPod|Android/)) {
+    if (ua.match(/iPhone|iPod|Android/ig)) {
       req.is_mobile = true;
     }
 
