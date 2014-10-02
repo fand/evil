@@ -1,9 +1,10 @@
-client/js/
+build/
+static/IR/
+static/wav/
+
 *.bak
 *.old
 node_modules/
-
-static/IR/
-static/wav/
+bower_components/
 
 secret.js

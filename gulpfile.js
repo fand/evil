@@ -9,8 +9,8 @@ var sourcemaps = require('gulp-sourcemaps');
 var nodemon;
 
 // PATH
-const JS_PATH = 'client/js';
-const COFFEE_PATH = 'client/**/*.coffee';
+const JS_PATH = 'build/js';
+const COFFEE_PATH = 'src/coffee/**/*.coffee';
 
 // Compile only the updated file.
 gulp.task('coffee-update', function(){
