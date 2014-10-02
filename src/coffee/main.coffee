@@ -1,4 +1,7 @@
+$ = require 'jquery'
+#MutekiTimer = require './MutekiTimer'
 Player = require './Player'
+
 
 # ------------------------------------------------------------------------------
 # CONSTANT
@@ -8,32 +11,12 @@ Player = require './Player'
 @SEMITONE = 1.05946309
 @T = new MutekiTimer()
 
-
-
-# ------------------------------------------------------------------------------
-# Main
-
-$(() ->
-
-    console.log('Welcome to evil!')
-
-    ua = window.navigator.userAgent.toLowerCase()
-    if ua.match(/chrome/g)
-        initEvil()
-    else
-        sorry()
-
-)
-
-
-
-@sorry = ->
+sorry = ->
     $('#top-sorry').show()
     $('#top-logo-wrapper').addClass('logo-sorry')
 
 
-@initEvil = ->
-
+initEvil = ->
     # Don't use MutekiTimer here!!
     # (it causes freeze)
     setTimeout((() =>
@@ -59,3 +42,16 @@ $(() ->
         player.readSong(JSON.parse(@song_loaded.json))
     else
         player.readSong(SONG_DEFAULT)
+
+
+# ------------------------------------------------------------------------------
+# Main
+
+do ->
+    console.log('Welcome to evil!')
+
+    ua = window.navigator.userAgent.toLowerCase()
+    if ua.match(/chrome/g)
+        initEvil()
+    else
+        sorry()

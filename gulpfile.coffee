@@ -14,6 +14,7 @@ JS_PATH = 'build/js'
 CLIENT_PATH = 'src/coffee/**/*.coffee'
 SERVER_PATH = 'server/**/*'
 
+is_dev = true
 nodemon = null
 watching = false
 
@@ -25,15 +26,14 @@ gulp.task 'browserify', ->
     bundler = browserify
         entries: ['./src/coffee/main.coffee'],
         extensions: ['.coffee'],
-        debug: true,
+        debug: is_dev,
         cache: {}, packageCache: {}, fullPaths: true
 
     bundler = watchify(bundler) if watching
-
     bundler.transform 'coffeeify'
 
     rebundle = ->
-        console.log '#####################regundle'
+        console.log '#### browserify: rebuild'
         bundler.bundle()
             .on 'error', -> gutil.log.bind(gutil, 'Browserify error')
             .pipe source 'evil.js'
@@ -41,41 +41,12 @@ gulp.task 'browserify', ->
 
     if watching?
         bundler.on 'update', rebundle
-    rebundle()
+    else
+        rebundle()
 
 gulp.task 'watch', ->
     gulp.start 'browserify-watch'
     gulp.watch SERVER_PATH, ['nodemon']
-
-gulp.task 'coffee-update', ->
-    nodemon.kill() if nodemon?
-    gulp.src(CLIENT_PATH)
-        .pipe changed(CLIENT_PATH)
-        .pipe plumber()
-        .pipe sourcemaps.init()
-        .pipe coffee()
-        .pipe uglify()
-        .pipe sourcemaps.write()
-        .pipe gulp.dest(JS_PATH)
-
-gulp.task 'coffee-dev', ->
-    gulp.src(CLIENT_PATH)
-        .pipe plumber()
-        .pipe sourcemaps.init()
-        .pipe coffee()
-        .pipe uglify()
-        .pipe sourcemaps.write()
-        .pipe gulp.dest(JS_PATH)
-
-gulp.task 'coffee-pro', ->
-    gulp.src(CLIENT_PATH)
-        .pipe plumber()
-        .pipe coffee()
-        .pipe uglify()
-        .pipe gulp.dest(JS_PATH)
-
-gulp.task 'coffee', ['coffee-dev']
-
 
 gulp.task 'nodemon', ->
     nodemon.kill() if nodemon?
@@ -85,18 +56,15 @@ gulp.task 'nodemon', ->
         .on 'close', ->
             console.log 'nodemon: process killed!'
 
-gulp.task 'nodemon-dev', ['coffee-update'], ->
-    gulp.start 'nodemon'
+gulp.task 'build', ['browserify']
 
-
-gulp.task 'serve-dev', ['coffee'], ->
+gulp.task 'dev', ->
     process.env.NODE_ENV = 'development'
-    gulp.start 'nodemon'
-    gulp.watch CLIENT_PATH, ['coffee-update', 'nodemon-dev']
+    gulp.start ['build', 'watch', 'nodemon']
 
-gulp.task 'serve-pro', ->
+gulp.task 'pro', ->
+    is_dev = false
     process.env.NODE_ENV = 'production'
-    gulp.start 'nodemon'
+    gulp.start ['build', 'nodemon']
 
-
-gulp.task 'default', ['coffee-dev', 'serve-dev']
+gulp.task 'default', ['dev']
