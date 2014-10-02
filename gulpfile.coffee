@@ -1,15 +1,38 @@
 gulp       = require 'gulp'
+gutil      = require 'gulp-util'
 coffee     = require 'gulp-coffee'
 plumber    = require 'gulp-plumber'
 changed    = require 'gulp-changed'
 uglify     = require 'gulp-uglify'
 sourcemaps = require 'gulp-sourcemaps'
+browserify = require 'browserify'
+source     = require 'vinyl-source-stream'
 spawn      = require('child_process').spawn
 
 JS_PATH = 'build/js'
 COFFEE_PATH = 'src/coffee/**/*.coffee'
 
 nodemon = null
+watching = false
+
+gulp.task 'browserify', ->
+    bundleMethod = if watching then watchify else browserify
+    bundler = bundleMethod
+        entries: ['./src/coffee/main.coffee'],
+        extensions: ['.coffee'],
+        debug: true
+
+    bundler.transform 'coffeeify'
+
+    rebundle = ->
+        bundler.bundle()
+            .on 'error', -> gutil.log.bind(gutil, 'Browserify error')
+            .pipe source 'evil.js'
+            .pipe gulp.dest JS_PATH
+
+    bundler.on 'update', rebundle
+    rebundle()
+
 
 
 gulp.task 'coffee-update', ->
