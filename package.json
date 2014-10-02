@@ -37,6 +37,7 @@
     "coffeeify": "^0.7.0",
     "gulp-if": "^1.2.4",
     "gulp-sourcemaps": "^1.1.5",
+    "require-directory": "^2.0.0",
     "watchify": "^1.0.6"
   }
 }
