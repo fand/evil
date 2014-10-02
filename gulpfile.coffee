@@ -1,14 +1,18 @@
-gulp       = require 'gulp'
-gutil      = require 'gulp-util'
-coffee     = require 'gulp-coffee'
-plumber    = require 'gulp-plumber'
-changed    = require 'gulp-changed'
-uglify     = require 'gulp-uglify'
-sourcemaps = require 'gulp-sourcemaps'
-browserify = require 'browserify'
-watchify   = require 'watchify'
-source     = require 'vinyl-source-stream'
-spawn      = require('child_process').spawn
+gulp        = require 'gulp'
+gutil       = require 'gulp-util'
+gulpif      = require 'gulp-if'
+coffee      = require 'gulp-coffee'
+plumber     = require 'gulp-plumber'
+changed     = require 'gulp-changed'
+uglify      = require 'gulp-uglify'
+sourcemaps  = require 'gulp-sourcemaps'
+browserify  = require 'browserify'
+watchify    = require 'watchify'
+source      = require 'vinyl-source-stream'
+spawn       = require('child_process').spawn
+browserSync = require 'browser-sync'
+reload      = browserSync.reload
+
 
 JS_PATH = 'build/js'
 CLIENT_PATH = 'src/coffee/**/*.coffee'
@@ -18,7 +22,10 @@ is_dev = true
 nodemon = null
 watching = false
 
-gulp.task 'browserify-watch', ->
+gulp.task 'browserSync', ->
+    browserSync proxy: 'localhost:9000'
+
+gulp.task 'browserify-watch', ['browserSync'], ->
     watching = true
     gulp.start 'browserify'
 
@@ -38,6 +45,7 @@ gulp.task 'browserify', ->
             .on 'error', -> gutil.log.bind(gutil, 'Browserify error')
             .pipe source 'evil.js'
             .pipe gulp.dest JS_PATH
+            .pipe gulpif watching, reload stream: true
 
     if watching?
         bundler.on 'update', rebundle
