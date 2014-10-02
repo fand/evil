@@ -6,7 +6,7 @@ watchify   = require 'watchify'
 source     = require 'vinyl-source-stream'
 reload     = require('browser-sync').reload
 config     = require('../config').browserify
-
+notify = require '../utils/notify'
 
 ##
 # util
@@ -36,7 +36,7 @@ cafe = (c, callback) ->
     rebundle = ->
         console.log '#### browserify: rebuild'
         bundler.bundle()
-            .on 'error', -> gutil.log.bind(gutil, 'Browserify error')
+            .on 'error', notify.error('Compile Error')
             .pipe source c.name
             .pipe gulp.dest c.dst
             .pipe gulpif watching, reload stream: true
