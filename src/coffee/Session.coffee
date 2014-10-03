@@ -1,5 +1,6 @@
 SessionView = require './SessionView'
 Song = require './Song'
+$ = require 'jquery'
 
 # Control the patterns for tracks.
 class Session
