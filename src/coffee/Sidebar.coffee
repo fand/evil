@@ -1,4 +1,6 @@
-class @Sidebar
+SidebarView = require './SidebarView'
+
+class Sidebar
     constructor: (@ctx, @player, @session, @mixer)->
         @sidebar_pos = x:0, y:1, type: 'master'
         @view = new SidebarView(this)
@@ -33,3 +35,7 @@ class @Sidebar
     setBPM:   (b) -> @view.setBPM(b)
     setKey:   (k) -> @view.setKey(k)
     setScale: (s) -> @view.setScale(s)
+
+
+# Export!
+module.exports = Sidebar

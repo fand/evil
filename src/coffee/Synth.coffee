@@ -1,27 +1,13 @@
-@KEY_LIST =
-    A:  55
-    Bb: 58.27047018976124
-    B:  61.7354126570155
-    C:  32.70319566257483
-    Db: 34.64782887210901
-    D:  36.70809598967594
-    Eb: 38.890872965260115
-    E:  41.20344461410875
-    F:  43.653528929125486
-    Gb: 46.2493028389543
-    G:  48.999429497718666
-    Ab: 51.91308719749314
+MutekiTimer = require './MutekiTimer'
+SynthView = require './SynthView'
+SynthCoreView = require './SynthCoreView'
+Panner = require './Panner'
+CONSTANT = require './Constant'
+$ = require 'jquery'
 
-@SCALE_LIST =
-    Major:      [0,2,4,5,7,9,11]
-    minor:      [0,2,3,5,7,8,10]
-    Pentatonic: [0,3,5,7,10]
-    Dorian:     [0,2,3,5,7,9,10]
-    Phrygian:   [0,1,3,5,7,8,10]
-    Lydian:     [0,2,4,6,7,9,11]
-    Mixolydian: [0,2,4,5,7,9,10]
-    CHROMATIC:  [0,1,2,3,4,5,6,7,8,9,10,11]
-    'Harm-minor': [0,2,3,5,7,8,11]
+
+##
+# CONSTANTS
 
 OSC_TYPE =
     SINE:     'sine'
@@ -29,17 +15,18 @@ OSC_TYPE =
     SAW:      'sawtooth'
     TRIANGLE: 'triangle'
 
-T2 = new MutekiTimer()
-
-
+# Offsets for supersaw / superrect
 TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17]
 FREQ_OFFSET = [0.1, 0.15, 0.25, 0.35, 0.55, 0.65, 0.85]
 
+# Timer only for this module
+T2 = new MutekiTimer()
+
 
 # Noise Oscillator.
-class @Noise
+class Noise
     constructor: (@ctx) ->
-        @node = @ctx.createScriptProcessor(STREAM_LENGTH)
+        @node = @ctx.createScriptProcessor(CONSTANT.STREAM_LENGTH)
         @node.onaudioprocess = (event) =>
             data_L = event.outputBuffer.getChannelData(0);
             data_R = event.outputBuffer.getChannelData(1);
@@ -66,7 +53,7 @@ class @Noise
 
 
 # Oscillators.
-class @VCO
+class VCO
     constructor: (@ctx) ->
         @freq_key = 55
         @octave = 4
@@ -119,7 +106,7 @@ class @VCO
     setFreq: ->
         note_oct = Math.floor(@note / 12)
         note_shift = @note % 12
-        @freq = (Math.pow(2, @octave + note_oct) * Math.pow(SEMITONE, note_shift) * @freq_key) + @fine
+        @freq = (Math.pow(2, @octave + note_oct) * Math.pow(CONSTANT.SEMITONE, note_shift) * @freq_key) + @fine
 
         if @shape == 'SUPERSAW' or @shape == 'SUPERRECT'
             for i in [0...7]
@@ -144,9 +131,8 @@ class @VCO
         @setShape(p.shape)
 
 
-
 # Envelope generator.
-class @EG
+class EG
     constructor: (@target, @min, @max) ->
         @attack  = 0
         @decay   = 0
@@ -182,9 +168,8 @@ class @EG
         @target.cancelScheduledValues(time + @release + 0.002)
 
 
-
 # Manages filter params.
-class @ResFilter
+class ResFilter
     constructor: (@ctx) ->
         @lpf = @ctx.createBiquadFilter()
         @lpf.type = 'lowpass'  # lowpass == 0
@@ -197,9 +182,8 @@ class @ResFilter
     getQ: ()  -> @lpf.Q.value
 
 
-
 # Manages VCO, Noise, ResFilter, EG.
-class @SynthCore
+class SynthCore
     constructor: (@parent, @ctx, @id) ->
         @node = @ctx.createGain()
         @node.gain.value = 0
@@ -292,7 +276,7 @@ class @SynthCore
         @is_on = false
 
     setKey: (key) ->
-        freq_key = KEY_LIST[key]
+        freq_key = CONSTANT.KEY_LIST[key]
         v.setKey(freq_key) for v in @vcos
 
     setScale: (@scale) ->
@@ -324,9 +308,8 @@ class @SynthCore
     demute: -> @is_mute = false
 
 
-
 # Manages SynthCore, SynthView.
-class @Synth
+class Synth
     constructor: (@ctx, @id, @player, @name) ->
         @type = 'REZ'
         @name = 'Synth #' + @id if not @name?
@@ -335,7 +318,7 @@ class @Synth
         @pattern_obj = name: @pattern_name, pattern: @pattern
         @time = 0
         @scale_name = 'Major'
-        @scale = SCALE_LIST[@scale_name]
+        @scale = CONSTANT.SCALE_LIST[@scale_name]
         @view = new SynthView(this, @id)
         @core = new SynthCore(this, @ctx, @id)
 
@@ -368,7 +351,7 @@ class @Synth
     setNote: (note) -> @core.setNote(note)
 
     setScale: (@scale_name) ->
-        @scale = SCALE_LIST[@scale_name]
+        @scale = CONSTANT.SCALE_LIST[@scale_name]
         @core.scale = @scale
         @view.changeScale(@scale)
 
@@ -560,3 +543,7 @@ class @Synth
 
         fx.disconnect()
         @effects.splice(i, 1)
+
+
+# Export!
+module.exports = Synth

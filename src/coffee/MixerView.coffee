@@ -1,4 +1,6 @@
-class @MixerView
+$ = require 'jquery'
+
+class MixerView
     constructor: (@model) ->
         @dom = $('#mixer')
 
@@ -123,3 +125,7 @@ class @MixerView
         @pans = []
         @gains = []
         @pans_label = []
+
+
+# Export!
+module.exports = MixerView

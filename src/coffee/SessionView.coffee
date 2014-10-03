@@ -1,4 +1,6 @@
-class @SessionView
+$ = require 'jquery'
+
+class SessionView
     constructor: (@model, @song) ->
         # DOMs for session view.
         @wrapper_mixer = $('#mixer-tracks')
@@ -643,3 +645,7 @@ class @SessionView
 
 
     getSelectPos: -> @select_pos if @select_pos.x != -1 and @select_pos.y != -1
+
+
+# Export!
+module.exports = SessionView

@@ -1,4 +1,8 @@
-class @Mixer
+MixerView = require './MixerView'
+Limiter = require './FX/Limiter'
+Panner = require './Panner'
+
+class Mixer
     constructor: (@ctx, @player) ->
         @gain_master = 1.0
         @gain_tracks = (s.getGain() for s in @player.synth)
@@ -194,3 +198,7 @@ class @Mixer
             fx.disconnect()
 
         @effects_master.splice(i, 1)
+
+
+# Export!
+module.exports = Mixer

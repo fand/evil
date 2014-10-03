@@ -1,4 +1,6 @@
-class @SidebarView
+$ = require 'jquery'
+
+class SidebarView
     constructor: (@model) ->
         @wrapper = $('#sidebar-wrapper')
         @tracks  = @wrapper.find('#sidebar-tracks')
@@ -110,3 +112,7 @@ class @SidebarView
     setBPM:   (b) -> @master_bpm.val(b)
     setKey:   (k) -> @master_key.val(k)
     setScale: (s) -> @master_scale.val(s)
+
+
+# Exports!
+module.exports = SidebarView

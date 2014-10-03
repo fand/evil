@@ -1,8 +1,8 @@
 # Muteki Timer - A stable timer that run in the background
 'use strict'
 
-setTimeout   = @setTimeout
-clearTimeout = @clearTimeout
+wsetTimeout   = window.setTimeout
+wclearTimeout = window.clearTimeout
 
 SOURCE = '''
 var t = 0;
@@ -29,9 +29,9 @@ class MutekiTimer
         else
             @timer = 0
 
-    setTimeout: (func, interval=100)->
+    setTimeout: (func, interval = 100) ->
         if typeof @timer is 'number'
-            @timer = setTimeout func, interval
+            @timer = wsetTimeout func, interval
         else
             @timer.onmessage = func
             @timer.postMessage interval
@@ -41,7 +41,6 @@ class MutekiTimer
             clearTimeout @timer
         else
             @timer.postMessage 0
-
 
 
 tid  = +new Date()
@@ -63,11 +62,12 @@ MutekiTimer.use = =>
 
 
 MutekiTimer.unuse = =>
-    @setTimeout   = setTimeout
-    @clearTimeout = clearTimeout
+    @setTimeout   = wsetTimeout
+    @clearTimeout = wclearTimeout
 
 
 MutekiTimer.isEnabled = ->
     !!TIMER_PATH
 
-@MutekiTimer = MutekiTimer
+
+module.exports = MutekiTimer
