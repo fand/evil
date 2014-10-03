@@ -1,4 +1,7 @@
-class @PlayerView
+$ = require 'jquery'
+CONSTANT = require './Constant'
+
+class PlayerView
     constructor: (@model) ->
         @dom = $("#control")
 
@@ -74,7 +77,7 @@ class @PlayerView
     setBPM: (bpm) -> @bpm.val(bpm)
     setScale: (scale) -> @scale.val(scale)
     setKey: (key) ->
-        for k, v of KEY_LIST
+        for k, v of CONSTANT.KEY_LIST
             if v = key
                 @key.val(k)
                 break
@@ -168,3 +171,7 @@ class @PlayerView
 
     empty: ->
         @instruments.empty()
+
+
+# Export!
+module.exports = PlayerView

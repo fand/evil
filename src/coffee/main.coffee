@@ -1,14 +1,14 @@
 $ = require 'jquery'
-#MutekiTimer = require './MutekiTimer'
+MutekiTimer = require './MutekiTimer'
 Player = require './Player'
-
+Keyboard = require './Keyboard'
+Song = require './Song'
 
 # ------------------------------------------------------------------------------
 # CONSTANT
 
-@STREAM_LENGTH = 1024
+
 @SAMPLE_RATE = 48000
-@SEMITONE = 1.05946309
 @T = new MutekiTimer()
 
 sorry = ->
@@ -41,7 +41,7 @@ initEvil = ->
     if @song_loaded?
         player.readSong(JSON.parse(@song_loaded.json))
     else
-        player.readSong(SONG_DEFAULT)
+        player.readSong(Song.DEFAULT)
 
 
 # ------------------------------------------------------------------------------

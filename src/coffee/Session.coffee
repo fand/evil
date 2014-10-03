@@ -1,16 +1,8 @@
-_master =
-    name: 'section-0'
-    bpm: 144
-    key: 'A'
-    scale: 'minor'
-
-@SONG_DEFAULT =
-    tracks: []
-    length: 1
-    master: [_master]
+SessionView = require './SessionView'
+Song = require './Song'
 
 # Control the patterns for tracks.
-class @Session
+class Session
     constructor: (@ctx, @player) ->
         @scenes = []
         @scene_pos = 0
@@ -27,7 +19,7 @@ class @Session
 
         @cue_queue = []
 
-        @song = SONG_DEFAULT
+        @song = Song.DEFAULT
 
         @view = new SessionView(this, @song)
 
@@ -341,3 +333,7 @@ class @Session
             # clear bpm, key, scale (except name)
             @song.master[p.y] = name: @song.master[p.y].name
             @view.readSong(@song, @current_cells)
+
+
+# Export!
+module.exports = Session

@@ -1,3 +1,13 @@
+Mixer = require './Mixer'
+Session = require './Session'
+Sidebar = require './Sidebar'
+Synth = require './Synth'
+Sampler = require './Sampler'
+PlayerView = require './PlayerView'
+MutekiTimer = require './MutekiTimer'
+
+T = new MutekiTimer()
+
 class Player
     constructor: ->
         @bpm = 120

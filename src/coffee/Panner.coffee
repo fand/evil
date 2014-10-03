@@ -1,4 +1,4 @@
-class @Panner
+class Panner
     constructor: (@ctx) ->
         @in = @ctx.createChannelSplitter(2)
         @out = @ctx.createChannelMerger(2)
@@ -15,3 +15,7 @@ class @Panner
     setPosition: (@pos) ->
         @l.gain.value = @pos
         @r.gain.value = 1.0 - @pos
+
+
+# Export!
+module.exports = Panner

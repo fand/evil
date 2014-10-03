@@ -1,4 +1,6 @@
-@KEYCODE_TO_NOTE =
+$ = require 'jquery'
+
+KEYCODE_TO_NOTE =
     90:   1
     88:   2
     67:   3
@@ -40,8 +42,7 @@
     57:  30
     48:  31
 
-
-@KEYCODE_TO_NUM =
+KEYCODE_TO_NUM =
     49:  1
     50:  2
     51:  3
@@ -54,7 +55,7 @@
     48:  0
 
 
-class @Keyboard
+class Keyboard
     constructor: (@player) ->
         @mode = 'SYNTH'
         @is_writing = false
@@ -128,3 +129,7 @@ class @Keyboard
         if num? and num < 10
             @solos = @solos.filter((n) -> n != num)
             @player.solo(@solos)
+
+
+# Export!
+module.exports = Keyboard
