@@ -1,4 +1,5 @@
 FX = require './FX'
+ReverbView = require './ReverbView'
 
 class Reverb extends FX
     @IR_LOADED = {}

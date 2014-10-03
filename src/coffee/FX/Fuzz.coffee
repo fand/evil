@@ -1,6 +1,8 @@
 FX = require './FX'
+FuzzView = require './FuzzView'
 
-class @Fuzz extends @FX
+
+class Fuzz extends FX
     constructor: (@ctx) ->
         super(@ctx)
         @fuzz = @ctx.createWaveShaper()

@@ -1,6 +1,11 @@
 MixerView = require './MixerView'
-Limiter = require './FX/Limiter'
 Panner = require './Panner'
+Limiter = require './FX/Limiter'
+Fuzz = require './FX/Fuzz'
+Delay = require './FX/Delay'
+Double = require './FX/Double'
+Reverb = require './FX/Reverb'
+Compressor = require './FX/Compressor'
 
 class Mixer
     constructor: (@ctx, @player) ->

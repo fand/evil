@@ -1,3 +1,5 @@
+$ = require 'jquery'
+
 class FX
     constructor: (@ctx) ->
         @in = @ctx.createGain()
