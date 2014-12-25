@@ -41,7 +41,7 @@ cafe = (c, callback) ->
             .pipe gulp.dest c.dst
             .pipe gulpif watching, reload stream: true
 
-    if watching?
+    if watching
         bundler.on 'update', rebundle
     else
         rebundle()
