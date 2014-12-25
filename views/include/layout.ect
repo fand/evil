@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title><% @title || 'evil' %></title>
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <meta http-equiv="Content-Script-Type" content="text/javascript" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta name="description" content="Play Music for Google Chrome, with Web Audio API" />
+    <meta property="og:site_name" content="evil" />
+    <meta property="og:title" content="evil">
+    <meta property="og:url" content="http://evil.gmork.in/" />
+    <meta property="og:description" content="Play Music for Google Chrome, with Web Audio API" />
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="http://evil.gmork.in/static/img/evil_300.png">
+
+    <!-- Stylesheets -->
+    <% if @ie : %>
+      <link href="/static/css/ie.css" rel="stylesheet" type="text/css" media="screen" />
+    <% else if @mobile : %>
+      <link href="/static/css/phone.css" rel="stylesheet" type="text/css" media="screen" />
+    <% else : %>
+      <link href="/static/css/main.css" rel="stylesheet" type="text/css" media="screen" />
+      <link href="/static/css/riff.css" rel="stylesheet" type="text/css" media="screen" />
+      <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" media="screen" />
+    <% end %>
+  </head>
+  <body>
+
+    <% content %>
+
+    <!-- Scripts -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-41787635-9', 'gmork.in');
+      ga('send', 'pageview');
+    </script>
+
+    <% if @mobile : %>
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+      <script src="/static/js/phone.js"></script>
+    <% else : %>
+      <script src="/js/evil.js"></script>
+      <% if @test : %>
+        <script src="/js/test/test_lib.js"></script>
+        <script src="/js/test/test_control.js"></script>
+        <script src="/js/test/test_initial.js"></script>
+        <script src="/js/test/test_synth.js"></script>
+        <script src="/js/test/test_sampler.js"></script>
+        <script src="/js/test/test_main.js"></script>
+      <% end %>
+    <% end %>
+
+  </body>
+</html>
