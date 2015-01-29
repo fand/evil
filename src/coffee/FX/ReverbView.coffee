@@ -16,7 +16,6 @@ class ReverbView extends FXView
     initEvent: ->
         super()
         @name.on('change', () =>
-            @name_synth.val(@name.val())
             @model.setIR(@name.val())
         )
         @wet.on('change', () =>

@@ -1,4 +1,5 @@
 FX = require './FX'
+CompressorView = require './CompressorView'
 
 class Compressor extends FX
     constructor: (@ctx) ->
