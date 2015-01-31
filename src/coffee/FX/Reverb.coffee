@@ -1,9 +1,9 @@
 FX = require './FX'
 ReverbView = require './ReverbView'
 
-class Reverb extends FX
-    @IR_LOADED = {}
+IR_LOADED = {}
 
+class Reverb extends FX
     constructor: (@ctx) ->
         super(@ctx)
         @reverb = @ctx.createConvolver()
@@ -17,11 +17,11 @@ class Reverb extends FX
         @view = new ReverbView(this)
 
     setIR: (@name) ->
-        if @IR_LOADED[name]?
-            @reverb.buffer = @IR_LOADED[name]
+        if IR_LOADED[@name]?
+            @reverb.buffer = IR_LOADED[@name]
             return
 
-        url = IR_URL[name]
+        url = IR_URL[@name]
         return if not url?
 
         req = new XMLHttpRequest()
@@ -32,7 +32,7 @@ class Reverb extends FX
                 req.response,
                 ((buffer) =>
                     @reverb.buffer = buffer
-                    @IR_LOADED[name] = buffer
+                    IR_LOADED[@name] = buffer
                 ),
                 (err) => console.log('ajax error'); console.log(err)
             )

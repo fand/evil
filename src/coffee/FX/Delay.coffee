@@ -1,4 +1,5 @@
 FX = require './FX'
+DelayView = require './DelayView'
 
 class Delay extends FX
     constructor: (@ctx) ->

@@ -15,6 +15,6 @@ module.exports =
         name: 'test.js'
     }],
     watch:
-        server: BASE 'server/**/*',
-        coffee: BASE 'src/coffee',
-        scss: BASE 'src/scss'
+        server: BASE('server/**/*'),
+        coffee: BASE('src/coffee/**/*'),
+        scss: BASE('src/scss')
