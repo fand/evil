@@ -31,6 +31,8 @@ cafe = (c, callback) ->
         cache: {}, packageCache: {}, fullPaths: true
 
     bundler.transform 'coffeeify'
+    bundler.transform 'reactify'
+    bundler.transform '6to5ify'
 
     console.log '#### browserify: rebuild'
 

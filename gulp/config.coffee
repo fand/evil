@@ -6,7 +6,7 @@ BASE = (p) -> path.join(BASE_DIR, p)
 
 module.exports =
     browserify: [{
-        src: [BASE 'src/coffee/main.coffee'],
+        src: [BASE 'src/client/main.js'],
         dst: BASE('build/js'),
         name: 'evil.js'
     }, {
@@ -17,4 +17,5 @@ module.exports =
     watch:
         server: BASE('server/**/*'),
         coffee: BASE('src/coffee/**/*'),
+        client: BASE('src/client/**/*'),
         scss: BASE('src/scss')
