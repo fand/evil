@@ -32,7 +32,7 @@ var EvilApp = React.createClass({
       <div>
         <Header />
         <SessionView song={this.state.song}/>
-        <ArrangementView song={this.state.song}/>        
+        <ArrangementView song={this.state.song}/>
       </div>
     );
   }

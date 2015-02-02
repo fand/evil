@@ -3,7 +3,7 @@
 
 var React = require('react');
 
-/**   
+/**
  * Header
  */
 var Header = React.createClass({
