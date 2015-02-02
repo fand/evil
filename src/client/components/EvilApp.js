@@ -2,11 +2,22 @@
 'use strict';
 
 var React = require('react');
+
+// Components
+var Header = require('./Header');
 var SessionView = require('./SessionView');
 var ArrangementView = require('./ArrangementView');
-var Header = require('./Header');
-// var Song = require('../Models/Song');
-// var SongStore = require('../Stores/SongStore');
+var ClipView = require('./ClipView');
+var DeviceView = require('./DeviceView');
+
+// Models, Stores
+var Song = require('../models/Song');
+var SongStore = require('../stores/SongStore');
+var Clip = require('../models/Clip');
+var SongStore = require('../stores/SongStore');
+var Device = require('../models/Device');
+var DeviceStore = require('../stores/DeviceStore');
+
 
 /**
  * Entire app
@@ -14,17 +25,9 @@ var Header = require('./Header');
 var EvilApp = React.createClass({
   getInitialState: function() {
     return {
-      //song: SongStore.getSong()
-      song: {
-        name: 'dummysong',
-        tracks: [{
-          id: 0,
-          name: 'track-0'
-        }, {
-          id: 1,
-          name: 'track-1'
-        }]
-      }
+      song: SongStore.getSong()
+      //device: DeviceStore.getDevice(),
+      //clip: ClipStore.getClip()
     };
   },
   render: function() {
@@ -33,6 +36,8 @@ var EvilApp = React.createClass({
         <Header />
         <SessionView song={this.state.song}/>
         <ArrangementView song={this.state.song}/>
+        <ClipView clip={this.state.clip}/>
+        <DeviceView device={this.state.device}/>
       </div>
     );
   }
