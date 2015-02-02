@@ -1,7 +1,7 @@
 'use strict';
 
 var Model = require('./Model');
-// var Scene = require('./Scene');
+var Scene = require('./Scene');
 
 /**
  * Song Model.
@@ -11,17 +11,18 @@ var Model = require('./Model');
  */
 
 class Song extends Model {
-  initialize (opts) {
+  initialize (attrs) {
+    // Validate & fallback to default values.
     this.attrs.title   = this.attrs.title || '';
     this.attrs.user_id = this.attrs.user_id || 0;
     this.attrs.scenes  = this.attrs.scenes || [];
-    // this.scenes = this.attrs.scenes.map((s) => new Scene(s));
+    this.scenes = this.attrs.scenes.map((s) => new Scene(s));
     // this.tracks = this.attrs.tracks.map((t) => new Track(t));
   }
 
   toJSON () {
     var json = super.toJSON.apply(this);
-    //json.scenes = this.scenes.map((s) => s.toJSON());
+    json.scenes = this.scenes.map((s) => s.toJSON());
     return json;
   }
 }
