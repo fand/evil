@@ -13,10 +13,10 @@ var DeviceView = require('./DeviceView');
 // Models, Stores
 var Song = require('../models/Song');
 var SongStore = require('../stores/SongStore');
-var Clip = require('../models/Clip');
-var SongStore = require('../stores/SongStore');
-var Device = require('../models/Device');
-var DeviceStore = require('../stores/DeviceStore');
+// var Clip = require('../models/Clip');
+// var ClipStore = require('../stores/SongStore');
+// var Device = require('../models/Device');
+// var DeviceStore = require('../stores/DeviceStore');
 
 
 /**

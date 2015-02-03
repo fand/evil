@@ -10,14 +10,16 @@ var React = require('react');
 var DeviceView = React.createClass({
   getInitialState: function() {
     return {
-      
+
     };
   },
   render: function() {
-    var effects =this.props.device.fx.map(f => f.render());
+    //var effects = this.props.device.fx.map(f => f.render());
+    var effects = '';
+//Name: {this.props.device.name}
     return (
       <div>
-        Name: {this.props.device.name}
+
         deviceconfig
         {effects}
       </div>

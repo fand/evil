@@ -54,9 +54,7 @@ class Model {
 
   isValid (attrs) {
     if (! _.isPlainObject(attrs)) { return false; }
-    _.keys(attrs).forEach((key) => {
-
-    });
+    return true;
   }
 
   validate (attrs) {
@@ -66,6 +64,10 @@ class Model {
     else {
       this.getDefaultAttrs();
     }
+  }
+
+  getDefaultAttrs () {
+    return {};
   }
 
   toJSON () {

@@ -12,6 +12,7 @@ var SessionView = React.createClass({
     };
   },
   render: function() {
+console.log(this.props.song);
     var tracks = this.props.song.tracks.map((track) => {
       return (<li key={track.id}>{track.id}</li>);
     });

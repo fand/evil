@@ -3,8 +3,13 @@
 
 var Song = require('../models/Song');
 
+var defaultSong = new Song({
+  title: 'default song'
+});
+
+
 var SongStore = {
-  currentSong: new Song(),
+  currentSong: defaultSong,
   getSong: function () {
     return this.currentSong;
   }

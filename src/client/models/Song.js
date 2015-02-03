@@ -2,6 +2,7 @@
 
 var Model = require('./Model');
 var Scene = require('./Scene');
+var Track = require('./Track');
 
 /**
  * Song Model.
@@ -16,8 +17,18 @@ class Song extends Model {
     this.attrs.title   = this.attrs.title || '';
     this.attrs.user_id = this.attrs.user_id || 0;
     this.attrs.scenes  = this.attrs.scenes || [];
+    this.attrs.tracks  = this.attrs.tracks || [];
     this.scenes = this.attrs.scenes.map((s) => new Scene(s));
-    // this.tracks = this.attrs.tracks.map((t) => new Track(t));
+    this.tracks = this.attrs.tracks.map((t) => new Track(t));
+  }
+
+  getDefaultAttrs () {
+    return {
+      title: '',
+      user_id: 0,
+      scenes: [],
+      tracks: []
+    };
   }
 
   toJSON () {
