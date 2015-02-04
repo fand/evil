@@ -3,18 +3,16 @@
 
 var React = require('react');
 
-const colorMain = 'rgb(80, 180, 255)';
-const colorSub  = 'rgb(220, 220, 220)';
+const kColorMain = 'rgb(80, 180, 255)';
+const kColorSub  = 'rgb(220, 220, 220)';
 
-
-
-const DEGREE = (Math.PI / 180.0);
-const STARTANGLE = -225 * DEGREE;
-const ENDANGLE = 45 * DEGREE;
-const RATIO = (1.0 / 1000.0) * 270.0 * DEGREE;
+const kDegree = (Math.PI / 180.0);
+const kStartAngle = -225 * kDegree;
+const kEndAngle = 45 * kDegree;
+const kRatio = (1.0 / 1000.0) * 270.0 * kDegree;
 
 var getCurrentAngle = function (value) {
-  return value * RATIO + STARTANGLE;
+  return value * kRatio + kStartAngle;
 };
 
 /**
@@ -24,7 +22,7 @@ var Knob = React.createClass({
   data: {},
   getInitialState: function() {
     return {
-      value: 1000
+      value: 500
     };
   },
   componentDidMount: function () {
@@ -46,32 +44,62 @@ var Knob = React.createClass({
       var currentAngle = getCurrentAngle(this.state.value);
       this.data.ctx.lineWidth = this.data.lineWidth;
 
-      this.data.ctx.strokeStyle = colorSub;
+      this.data.ctx.strokeStyle = kColorSub;
       this.data.ctx.beginPath();
-      this.data.ctx.arc(this.data.mid, this.data.mid, this.data.radius, STARTANGLE, ENDANGLE, false);
+      this.data.ctx.arc(this.data.mid, this.data.mid, this.data.radius, kStartAngle, kEndAngle, false);
       this.data.ctx.stroke();
 
-      this.data.ctx.strokeStyle = colorMain;
+      this.data.ctx.strokeStyle = kColorMain;
       this.data.ctx.beginPath();
-      this.data.ctx.arc(this.data.mid, this.data.mid, this.data.radius, STARTANGLE, currentAngle, false);
+      this.data.ctx.arc(this.data.mid, this.data.mid, this.data.radius, kStartAngle, currentAngle, false);
       this.data.ctx.stroke();
 
     }
-
+    this.data.size = this.data.size || this.props.size || 100;
+    var valueStr = this.getValueStr();
     return (
       <div>
         name: {this.props.name}
-        <canvas key={this.props.name} ref="canvas" width={this.data.size} height={this.data.size}></canvas>
-        <div>
-          <input type="range" value={this.state.value} min="0" max="1000" onChange={this.onChange} />
-        </div>
-        value: {this.state.value / 1000.0 * (this.props.max - this.props.min)}
+        <canvas ref="canvas"
+          width={this.data.size} height={this.data.size}
+          onMouseDown={this.onDragStart}
+          ></canvas>
+        value: {valueStr}
       </div>
     );
   },
-  onChange: function (e) {
-    this.setState({value: e.target.value});
+
+  getValueStr: function () {
+    var val = (this.state.value / 1000.0 * (this.props.max - this.props.min)).toString();
+    return val.slice(0, 4);
+  },
+
+  onDragStart: function (e) {
+    this.data.dragStart = e.clientY - e.clientX;
+    this.data.dragStartValue = this.state.value;
+    window.addEventListener('mousemove', this.onDrag);
+    window.addEventListener('mouseup', this.onDragEnd);
+    e.stopPropagation();
+    e.preventDefault();
+  },
+  onDrag: function (e) {
+    if (typeof this.data.dragStart === 'undefined') { return; }
+    var currentPos = e.clientY - e.clientX;
+    var diff = this.data.dragStart - currentPos;
+    var newValue = this.data.dragStartValue + (diff * 10.0);
+    newValue = Math.min(Math.max(0, newValue), 1000);
+    this.setState({value: newValue});
+    e.stopPropagation();
+    e.preventDefault();
+  },
+  onDragEnd: function (e) {
+    this.data.dragStart = null;
+    window.removeEventListener('mousemove', this.onDrag);
+    window.removeEventListener('mouseup', this.onDragEnd);
+    e.stopPropagation();
+    e.preventDefault();
   }
+
 });
 
 
