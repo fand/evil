@@ -27,29 +27,26 @@ var EvilApp = React.createClass({
   getInitialState: function() {
     var song = SongStore.getSong();
 
-    var scene = SceneStore.getCurrentScene();
-    var track = TrackStore.getCurrentTrack();
-    var clip  = ClipStore.getCurrentClip();
-
-    console.log('cliiiiiiip');
-    console.log(clip);
-    console.log(ClipStore.getClips());
-
     return {
-      song   : song,
-      scene  : scene,
-      device : DeviceStore.getCurrentDevice(),
-      clip   : clip
+      song         : song,
+      currentTrack : 0,
+      currentScene : 0,
+      currentClip  : 0
     };
   },
   render: function() {
+    var track = TrackStore.getTrack(this.state.currentTrack);
+    if (track) {
+      var clip = track.clips[this.state.currentClip];
+      var device = track.device;
+    }
     return (
       <div>
         <Header />
         <SessionView song={this.state.song}/>
         <ArrangementView song={this.state.song}/>
-        <ClipView clip={this.state.clip}/>
-        <DeviceView device={this.state.device}/>
+        <ClipView clip={clip}/>
+        <DeviceView device={device}/>
       </div>
     );
   }

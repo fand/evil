@@ -3,8 +3,7 @@
 var Track = require('../models/Track');
 
 var data = {
-  tracks: [],
-  currentTrack: 0
+  tracks: []
 };
 
 var TrackStore = {
@@ -13,6 +12,9 @@ var TrackStore = {
   },
   getTracks: function () {
     return data.tracks;
+  },
+  getTrack: function (idx) {
+    return data.tracks[idx];
   },
   getCurrentTrack: function () {
     console.log(data.tracks);
