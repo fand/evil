@@ -1,17 +1,32 @@
-/** @jsx React.DOM */
 'use strict';
 
 var Song = require('../models/Song');
 
-var defaultSong = new Song({
-  title: 'default song'
+const defaultSong = new Song({
+  title: 'default song',
+  tracks: [{
+    name: 'Bass',
+    device: {
+      name: 'Buzzsaw',
+    },
+    clips: [{
+      name: 'Intro',
+      length: 4
+    }]
+  }]
 });
 
+var data = {
+  currentSong: 0,
+  songs: []
+};
 
 var SongStore = {
-  currentSong: defaultSong,
   getSong: function () {
-    return this.currentSong;
+    if (data.songs.length === 0) {
+      data.songs.push(defaultSong);
+    }
+    return data.songs[data.currentSong];
   }
 };
 

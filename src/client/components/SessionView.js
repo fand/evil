@@ -3,6 +3,10 @@
 
 var React = require('react');
 
+var SessionTrackView = require('./SessionTrackView');
+
+
+
 /**
  * Session View
  */
@@ -12,9 +16,8 @@ var SessionView = React.createClass({
     };
   },
   render: function() {
-console.log(this.props.song);
     var tracks = this.props.song.tracks.map((track) => {
-      return (<li key={track.id}>{track.id}</li>);
+      return (<SessionTrackView track={track} key={track.id} />);
     });
 
     return (

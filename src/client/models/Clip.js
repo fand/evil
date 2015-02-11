@@ -1,21 +1,24 @@
 'use strict';
 
 var Model = require('./Model');
-var Clip = require('./Clip');
-
-var _ = require('lodash');
 
 /**
  * Clip - a set of phrase, parameter automation.
  *
  * @attr name String - Clip name.
- * @attr pattern Pattern
+ * @attr length number - length
  *
  */
 class Clip extends Model {
   initialize (attrs) {
-    this.attrs.name = this.attrs.name || '';
     //this.pattern = this.attrs.pattern.map(p => );
   }
 
+  validate (attrs) {
+    attrs.name = attrs.name || '';
+    attrs.length = attrs.length || 1;
+    return attrs;
+  }
 }
+
+module.exports = Clip;

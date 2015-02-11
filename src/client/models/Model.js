@@ -5,7 +5,13 @@ var _ = require('lodash');
 class Model {
   constructor (attrs) {
     this.attrs = this.validate(attrs);
+    this.listeners = {};
+    this.id = _.uniqueId();
+
+    // Init/validation for each sub classes.
     this.initialize.apply(this, arguments);
+
+    Object.observe(this.attrs, changes => this.observe(changes));
   }
 
   get (key) {
@@ -25,6 +31,7 @@ class Model {
     }
 
     if (!this.isValid(attrs)) { return false; }
+
     return this;
   }
 
@@ -52,22 +59,40 @@ class Model {
     return this.get(key) != null;
   }
 
-  isValid (attrs) {
-    if (! _.isPlainObject(attrs)) { return false; }
-    return true;
-  }
-
+  // if not valid, set `this.isValid` to false and return normalized value
   validate (attrs) {
-    if (this.isValid(attrs)) {
-      return attrs;
+    if (! _.isPlainObject(attrs)) {
+      return {};
     }
-    else {
-      this.getDefaultAttrs();
-    }
+    return attrs;
   }
 
   getDefaultAttrs () {
     return {};
+  }
+
+  watch (key, listener) {
+    if (key == null || listener == null) {
+      return console.log('>> Model#watch: Wrong arguments.');
+    }
+    this.listeners[key] = listener;
+    return this;
+  }
+
+  unwatch (key, listener) {
+    if (key == null || listener == null) {
+      return console.log('>> Model#unwatch: Wrong arguments.');
+    }
+    delete this.listeners.key;
+    return this;
+  }
+
+  observe (changes) {
+    changes.forEach(c => {
+      if (this.listners[c.name]) {
+        this.listeners[c.name](c.object[c.name], c.oldValue);
+      }
+    });
   }
 
   toJSON () {

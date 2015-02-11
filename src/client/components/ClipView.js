@@ -21,7 +21,9 @@ var ClipView = React.createClass({
     };
   },
   render: function() {
-    //Name: {this.props.clip.name}
+    if (this.props.clip === null) {
+      return <div />;
+    }
         // <PatternConfig clip={this.props.clip}/>
         // <EnvelopeConfig clip={this.props.clip}/>
         // <PatternEditor clip={this.props.clip}/>
@@ -30,8 +32,7 @@ var ClipView = React.createClass({
     return (
       <div>
         <Knob name="knob test" min="0" max="100" size="100"/>
-
-
+        Name: {this.props.clip.get('name')}
       </div>
     );
   }
