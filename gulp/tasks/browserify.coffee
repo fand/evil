@@ -37,7 +37,7 @@ cafe = (c, callback) ->
     console.log '#### browserify: rebuild'
 
     bundler.bundle()
-        .on 'error', notify.error('Compile Error')
+        .on 'error', (e) -> console.log(e);notify.error('Compile Error')
         .pipe source c.name
         .pipe gulp.dest c.dst
         .pipe gulpif is_watching, reload stream: true
