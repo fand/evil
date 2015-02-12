@@ -16,6 +16,7 @@ var SceneStore  = require('../stores/SceneStore');
 var ClipStore   = require('../stores/ClipStore');
 var DeviceStore = require('../stores/DeviceStore');
 var TrackStore  = require('../stores/TrackStore');
+var ViewAction  = require('../actions/ViewAction');
 
 // var Sequencer = require('../services/Sequencer');
 // var Player    = require('../services/Player');
@@ -24,6 +25,11 @@ var TrackStore  = require('../stores/TrackStore');
  * Entire app
  */
 var EvilApp = React.createClass({
+  componentDidMount: function () {
+    ViewAction.on('SELECT_TRACK', this.selectTrack);
+    ViewAction.on('SELECT_CLIP', this.selectClip);
+    ViewAction.on('SELECT_SCENE', this.selectScene);
+  },
   getInitialState: function() {
     var song = SongStore.getSong();
 
@@ -43,12 +49,21 @@ var EvilApp = React.createClass({
     return (
       <div>
         <Header />
-        <SessionView song={this.state.song}/>
-        <ArrangementView song={this.state.song}/>
+        <SessionView song={this.state.song} />
+        <ArrangementView song={this.state.song} />
         <ClipView clip={clip}/>
         <DeviceView device={device}/>
       </div>
     );
+  },
+  selectTrack: function (index) {
+    this.setState({currentTrack: index});
+  },
+  selectClip: function (index) {
+    this.setState({currentClip: index});
+  },
+  selectScene: function (index) {
+    this.setState({currentScene: index});
   }
 });
 

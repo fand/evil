@@ -16,8 +16,9 @@ var SessionView = React.createClass({
     };
   },
   render: function() {
-    var tracks = this.props.song.tracks.map((track) => {
-      return (<SessionTrackView track={track} key={track.id} />);
+    var tracks = this.props.song.tracks.map((track, i) => {
+      console.log(track);
+      return (<SessionTrackView track={track} index={i} key={track.id} delegates={this.props.delegates}/>);
     });
 
     return (
