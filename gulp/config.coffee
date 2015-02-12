@@ -14,8 +14,11 @@ module.exports =
         dst: BASE('build/test'),
         name: 'test.js'
     }],
+    sass:
+        src: BASE 'src/scss/'
+        dst: BASE 'build/css'
     watch:
         server: BASE('server/**/*'),
         coffee: BASE('src/coffee/**/*'),
         client: BASE('src/client/**/*'),
-        scss: BASE('src/scss')
+        sass: BASE('src/scss')
