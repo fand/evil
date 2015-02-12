@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react/addons');
+var cx = React.addons.classSet;
 
 /**
  * Arrangement View
@@ -12,9 +13,15 @@ var ArrangementView = React.createClass({
     };
   },
   render: function() {
-    var tracks = this.props.song.tracks;
+    //var tracks = this.props.song.tracks;
+
+    var classes = cx({
+      'ArrangementView': true,
+      'visible': this.props.isVisible
+    });
+
     return (
-      <div>
+      <div className={classes}>
         ArrangementView!!!!!!!
       </div>
     );

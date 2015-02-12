@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react/addons');
+var cx = React.addons.classSet;
 
 var SessionTrackView = require('./SessionTrackView');
 
@@ -21,8 +22,13 @@ var SessionView = React.createClass({
       return (<SessionTrackView track={track} index={i} key={track.id} delegates={this.props.delegates}/>);
     });
 
+    var classes = cx({
+      'SessionView': true,
+      'visible': this.props.isVisible
+    });
+
     return (
-      <div>
+      <div className={classes}>
         SessionView!!!!!!!!!!!!!!!!!!!!!!!!!!!
         <ul>
           {tracks}

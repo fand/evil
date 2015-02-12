@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react/addons');
+var cx = React.addons.classSet;
 
 /**
  * Device View
@@ -16,10 +17,13 @@ var DeviceView = React.createClass({
   render: function() {
     //var effects = this.props.device.fx.map(f => f.render());
     var effects = '';
-//Name: {this.props.device.name}
-    return (
-      <div>
 
+    var classes = cx({
+      'DeviceView': true,
+      'visible': this.props.isVisible
+    });
+    return (
+      <div className={classes}>
         deviceconfig
         {effects}
       </div>

@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react/addons');
+var cx = React.addons.classSet;
 
 // var PatternConfig = require('./PatternConfig');
 // var EnvelopeConfig = require('./EnvelopeConfig');
@@ -24,13 +25,19 @@ var ClipView = React.createClass({
     if (this.props.clip === null) {
       return <div />;
     }
-        // <PatternConfig clip={this.props.clip}/>
-        // <EnvelopeConfig clip={this.props.clip}/>
-        // <PatternEditor clip={this.props.clip}/>
-        // <EnvelopeEditor clip={this.props.clip}/>
-//        <Knob name="pan" min="-128" max="127" center="C" size="80"/>
+    // <PatternConfig clip={this.props.clip}/>
+    // <EnvelopeConfig clip={this.props.clip}/>
+    // <PatternEditor clip={this.props.clip}/>
+    // <EnvelopeEditor clip={this.props.clip}/>
+    //        <Knob name="pan" min="-128" max="127" center="C" size="80"/>
+
+    var classes = cx({
+      'ClipView': true,
+      'visible': this.props.isVisible
+    });
+
     return (
-      <div>
+      <div className={classes}>
         <Knob name="knob test" min="0" max="100" size="100"/>
         Name: {this.props.clip.get('name')}
       </div>
