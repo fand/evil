@@ -63,3 +63,23 @@
     }
 
 }
+
+.SessionView {
+    .SessionTrackViewWrapper {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: calc(100% - 30px);
+
+        .SessionTrackView {
+            width: 200px;
+            height: 100%;
+            border: 1px solid #333;
+        }
+    }
+
+
+    .SessionClipView {
+
+    }
+}

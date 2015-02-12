@@ -21,4 +21,4 @@ module.exports =
         server: BASE('server/**/*'),
         coffee: BASE('src/coffee/**/*'),
         client: BASE('src/client/**/*'),
-        sass: BASE('src/scss')
+        sass  : BASE('src/scss/**/*')

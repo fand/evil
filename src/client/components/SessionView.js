@@ -19,7 +19,7 @@ var SessionView = React.createClass({
   render: function() {
     var tracks = this.props.song.tracks.map((track, i) => {
       console.log(track);
-      return (<SessionTrackView track={track} index={i} key={track.id} delegates={this.props.delegates}/>);
+      return (<SessionTrackView track={track} index={i} key={track.id} />);
     });
 
     var classes = cx({
@@ -30,9 +30,9 @@ var SessionView = React.createClass({
     return (
       <div className={classes}>
         SessionView!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        <ul>
+        <div className="SessionTrackViewWrapper">
           {tracks}
-        </ul>
+        </div>
       </div>
     );
   }
