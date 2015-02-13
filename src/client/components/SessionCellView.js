@@ -19,11 +19,17 @@ var SessionCellView = React.createClass({
       'selectedCell': this.props.selection.currentCell === this.props.key,
       'selectedScene': this.props.selectionTable.scene[this.props.index]
     });
-
+    console.log(this.props);
     return (
       <div className={classes}
+        onClick={this.onClick}
         onDoubleClick={this.onDoubleClick} />
     );
+  },
+
+  onClick: function () {
+    ViewAction.selectClip(this.props.key);
+    ViewAction.selectScene(this.props.index);
   },
 
   onDoubleClick: function () {

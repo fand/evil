@@ -16,7 +16,8 @@ var SessionClipView = React.createClass({
   render: function() {
     var classes = cx({
       'SessionClipView': true,
-      'selected': this.props.selected
+      'selectedCell': this.props.selection.currentCell === this.props.key,
+      'selectedScene': this.props.selectionTable.scene[this.props.index]
     });
 
     return (
@@ -37,7 +38,8 @@ var SessionClipView = React.createClass({
   },
 
   onClickClip: function () {
-    ViewAction.selectClip([this.props.trackIndex, this.props.index]);
+    ViewAction.selectClip(this.props.key);
+    ViewAction.selectScene(this.props.index);
   },
 
   onDoubleClick: function () {

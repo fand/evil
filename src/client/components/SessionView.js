@@ -33,7 +33,6 @@ var SessionView = React.createClass({
 
     return (
       <div className={classes}>
-        SessionView!!!!!!!!!!!!!!!!!!!!!!!!!!!
         <div className="SessionTrackViewWrapper">
           {tracks}
         </div>

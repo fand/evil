@@ -8,6 +8,10 @@ var SessionClipView = require('./SessionClipView');
 var SessionCellView = require('./SessionCellView');
 var ViewAction = require('../actions/ViewAction');
 
+// Caches for empty cells
+var _id = 0;
+var _emptyCellIds = {};
+
 /**
  * Session View
  */
@@ -17,19 +21,28 @@ var SessionTrackView = React.createClass({
     return {
     };
   },
-  render: function() {
-    var isTrackSelected = this.props.selectionTable[this.props.index];
+  componentDidUnmount: function () {
+    delete _emptyCellIds[this.props.key];
+  },
+  render: function() { console.log('rend');
+    var isTrackSelected = this.props.selectionTable.track[this.props.index];
 
     var cells = [];
-    for (let i = 0; i <this.props.song.scenes.length; i++) {
+    for (let i = 0; i < this.props.song.scenes.length; i++) {
       if (this.props.track.clips[i]) {
         var clip = this.props.track.clips[i];
         cells.push(<SessionClipView clip={clip} trackIndex={this.props.index} index={i} key={clip.id}
           selection={this.props.selection} selectionTable={this.props.selectionTable}/>);
       }
       else {
-        cells.push(<SessionCellView trackIndex={this.props.index} index={i} key={_id++}
-          selection={this.props.selection} selectionTable={this.props.selectionTable}/>);
+        _emptyCellIds[this.props.key] = _emptyCellIds[this.props.key] || [];
+        _emptyCellIds[this.props.key][i] = _emptyCellIds[this.props.key][i] || _id++;
+        var id = _emptyCellIds[this.props.key][i];
+
+        cells.push(
+          <SessionCellView trackIndex={this.props.index} index={i} key={id}
+            selection={this.props.selection} selectionTable={this.props.selectionTable}/>
+        );
       }
     }
 

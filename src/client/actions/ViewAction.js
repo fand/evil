@@ -10,12 +10,12 @@ class ViewAction extends EventEmitter {
     this.emit(ViewConstants.SELECT_TRACK, index);
   }
 
-  selectClip (index) {
-    this.emit(ViewConstants.SELECT_CLIP, index);
-  }
-
   selectScene (index) {
     this.emit(ViewConstants.SELECT_SCENE, index);
+  }
+
+  selectClip (id) {
+    this.emit(ViewConstants.SELECT_CLIP, id);
   }
 }
 

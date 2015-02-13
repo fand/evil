@@ -29,8 +29,8 @@ var ViewAction  = require('../actions/ViewAction');
 var EvilApp = React.createClass({
   componentDidMount: function () {
     ViewAction.on('SELECT_TRACK', this.selectTrack);
-    ViewAction.on('SELECT_CLIP', this.selectClip);
     ViewAction.on('SELECT_SCENE', this.selectScene);
+    ViewAction.on('SELECT_CLIP', this.selectClip);
 
     ViewAction.on('SHOW_ARRANGEMENT', this.showArrangement);
     ViewAction.on('SHOW_SESSION', this.showSession);
