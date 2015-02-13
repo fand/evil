@@ -15,20 +15,22 @@ var SessionCellView = React.createClass({
   },
   render: function() {
     var classes = cx({
-      'SessionCellView': true,
-      'selectedCell': this.props.selection.currentCell === this.props.key,
-      'selectedScene': this.props.selectionTable.scene[this.props.index]
+      'SessionCellView' : true,
+      'cell'            : true,
+      'selectedCell'    : this.props.selection.currentCell === this.props._key,
+      'selectedScene'   : this.props.selectionTable.scene[this.props.index]
     });
-    console.log(this.props);
+
     return (
       <div className={classes}
         onClick={this.onClick}
-        onDoubleClick={this.onDoubleClick} />
+        onDoubleClick={this.onDoubleClick} >
+      </div>
     );
   },
 
   onClick: function () {
-    ViewAction.selectClip(this.props.key);
+    ViewAction.selectCell(this.props._key);
     ViewAction.selectScene(this.props.index);
   },
 

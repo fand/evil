@@ -76,6 +76,7 @@ body {
 
 .SessionView {
     padding: 12px;
+    user-select: none;
 
     .SessionTrackViewWrapper {
         display: flex;
@@ -94,25 +95,20 @@ body {
         background-color: #00CCFF;
         margin: 0 0 5px;
     }
-    .SessionClipView {
-        background-color: #AAAAAA;
-    }
-    .SessionCellView {
-        background-color: #999999;
-    }
-    .SessionClipView, .SessionCellView {
+
+    .cell {
         height: 24px;
         margin: 1px;
+        background-color: #999999;
     }
-    .selectedTrack {
-        .SessionClipView, .SessionCellView {
-            background-color: #DDDDDD;
-        }
+
+    .selectedTrack .cell {
+        background-color: #DDDDDD;
     }
     .selectedScene {
         background-color: #DDDDDD;
     }
-    .selectedCell {
+    * .cell.selectedCell {
         background-color: #FF0000;
     }
 }

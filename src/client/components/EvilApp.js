@@ -30,7 +30,7 @@ var EvilApp = React.createClass({
   componentDidMount: function () {
     ViewAction.on('SELECT_TRACK', this.selectTrack);
     ViewAction.on('SELECT_SCENE', this.selectScene);
-    ViewAction.on('SELECT_CLIP', this.selectClip);
+    ViewAction.on('SELECT_CELL', this.selectCell);
 
     ViewAction.on('SHOW_ARRANGEMENT', this.showArrangement);
     ViewAction.on('SHOW_SESSION', this.showSession);
@@ -88,6 +88,7 @@ var EvilApp = React.createClass({
     this.setState({currentScene: index});
   },
   selectCell: function (id) {
+    console.log('selectCell: ' + id);
     this.setState({currentCell: id});
   },
 

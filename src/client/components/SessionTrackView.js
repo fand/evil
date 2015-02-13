@@ -9,13 +9,12 @@ var SessionCellView = require('./SessionCellView');
 var ViewAction = require('../actions/ViewAction');
 
 // Caches for empty cells
-var _id = 0;
+var _id = 1;
 var _emptyCellIds = {};
 
 /**
  * Session View
  */
-var _id = 0;
 var SessionTrackView = React.createClass({
   getInitialState: function() {
     return {
@@ -31,16 +30,16 @@ var SessionTrackView = React.createClass({
     for (let i = 0; i < this.props.song.scenes.length; i++) {
       if (this.props.track.clips[i]) {
         var clip = this.props.track.clips[i];
-        cells.push(<SessionClipView clip={clip} trackIndex={this.props.index} index={i} key={clip.id}
+        cells.push(<SessionClipView clip={clip} trackIndex={this.props.index} index={i} key={clip.id} _key={clip.id}
           selection={this.props.selection} selectionTable={this.props.selectionTable}/>);
       }
       else {
-        _emptyCellIds[this.props.key] = _emptyCellIds[this.props.key] || [];
-        _emptyCellIds[this.props.key][i] = _emptyCellIds[this.props.key][i] || _id++;
-        var id = _emptyCellIds[this.props.key][i];
+        _emptyCellIds[this.props._key] = _emptyCellIds[this.props._key] || [];
+        _emptyCellIds[this.props._key][i] = _emptyCellIds[this.props._key][i] || _id++;
+        var id = _emptyCellIds[this.props._key][i];
 
         cells.push(
-          <SessionCellView trackIndex={this.props.index} index={i} key={id}
+          <SessionCellView trackIndex={this.props.index} index={i} key={id} _key={id}
             selection={this.props.selection} selectionTable={this.props.selectionTable}/>
         );
       }

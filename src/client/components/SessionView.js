@@ -21,7 +21,7 @@ var SessionView = React.createClass({
       return (
         <SessionTrackView
           song={this.props.song} track={track}
-          index={i} key={track.id}
+          index={i} key={track.id} _key={track.id}
           selection={this.props.selection} selectionTable={selectionTable} />
       );
     });
