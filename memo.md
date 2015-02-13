@@ -88,3 +88,14 @@
   - Service
     - シーケンサーやプレイヤーなど、DOMと結びつかないけど裏でなんか動いてるやつ
       - AngularのServiceに近い
+    - クリップボードもどき
+    - キーバインド
+
+
+
+# View
+## SessionView
+- curerntClip, currentScene, currentTrackは別々に管理する
+- SessionView
+  - setTrack, setClip, setScene は別々のイベントで
+  - あとで複雑になったり重かったら検討する
