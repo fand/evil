@@ -22,6 +22,7 @@ var DeviceView = React.createClass({
       'DeviceView': true,
       'visible': this.props.isVisible
     });
+
     return (
       <div className={classes}>
         deviceconfig

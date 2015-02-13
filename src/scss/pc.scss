@@ -16,8 +16,9 @@
 
 .EvilApp {
     position: fixed;
-    width: 100%;
-    height: 100%;
+    margin: 10px 20px 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 30px);
     top: 0; left: 0;
 }
 
@@ -37,12 +38,12 @@
 
     .SessionView {
         @extend .fill;
-        background-color: #FFDDDD;
+        background-color: #FF9999;
     }
 
     .ArrangementView {
         @extend .fill;
-        background-color: #FFFFDD;
+        background-color: #FFFF99;
     }
 }
 
@@ -54,17 +55,25 @@
 
     .ClipView {
         @extend .fill;
-        background-color: #DDFFDD;
+        background-color: #99FF99;
     }
 
     .DeviceView {
         @extend .fill;
-        background-color: #DDDDFF;
+        background-color: #9999FF;
     }
 
 }
 
 .SessionView {
+
+    .selectedTrack, .selectedScene {
+        border: 1px solid #FF0000;
+    }
+    .selectedCell, {
+        background-color: #FF0000;
+    }
+
     .SessionTrackViewWrapper {
         display: flex;
         flex-direction: row;
@@ -72,9 +81,18 @@
         height: calc(100% - 30px);
 
         .SessionTrackView {
-            width: 200px;
+            width: 136px;
             height: 100%;
-            border: 1px solid #333;
+            margin: 2px;
+            border: 1px solid #333333;
+
+            .SessionTrackHeader {
+                background-color: #00DDFF;
+                margin: 0 0 5px;
+            }
+            .SessionClipView {
+                background-color: rgba(0, 0, 0, 0.4);
+            }
         }
     }
 

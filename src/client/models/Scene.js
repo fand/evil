@@ -16,8 +16,6 @@ var _ = require('lodash');
 class Scene extends Model {
   initialize (attrs) {
     this.attrs.name   = this.attrs.name || getSceneName();
-    this.attrs.clips  = this.attrs.scenes || [];
-    this.clips = this.attrs.scenes.map((s) => new Clip(s));
   }
 
   toJSON () {

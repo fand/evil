@@ -22,7 +22,7 @@ var ClipView = React.createClass({
     };
   },
   render: function() {
-    if (this.props.clip === null) {
+    if (this.props.clip == null) {
       return <div />;
     }
     // <PatternConfig clip={this.props.clip}/>

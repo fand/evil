@@ -44,7 +44,7 @@ var EvilApp = React.createClass({
       song         : song,
       currentTrack : 0,
       currentScene : 0,
-      currentClip  : 0,
+      currentCell  : null,
 
       showArrangement : false,
       showSession     : true,
@@ -58,12 +58,19 @@ var EvilApp = React.createClass({
       var clip = track.clips[this.state.currentClip];
       var device = track.device;
     }
+
+    var selection = {
+      currentTrack : this.state.currentTrack,
+      currentScene : this.state.currentScene,
+      currentCell  : this.state.currentCell
+    };
+
     return (
       <div className="EvilApp">
         <Header />
         <div className="TopView">
-          <SessionView song={this.state.song} isVisible={this.state.showSession} />
-          <ArrangementView song={this.state.song} isVisible={this.state.showArrangement} />
+          <SessionView song={this.state.song} isVisible={this.state.showSession} selection={selection}/>
+          <ArrangementView song={this.state.song} isVisible={this.state.showArrangement} selection={selection}/>
         </div>
         <div className="BottomView">
           <ClipView clip={clip} isVisible={this.state.showClip} />
@@ -72,15 +79,19 @@ var EvilApp = React.createClass({
       </div>
     );
   },
+
+  // Set states.
   selectTrack: function (index) {
     this.setState({currentTrack: index});
-  },
-  selectClip: function (index) {
-    this.setState({currentClip: index});
   },
   selectScene: function (index) {
     this.setState({currentScene: index});
   },
+  selectCell: function (id) {
+    this.setState({currentCell: id});
+  },
+
+  // Control Visibility for each View.
   showSession: function () {
     this.setState({
       showSession: true,

@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react/addons');
+var cx = React.addons.classSet;
 var ViewAction = require('../actions/ViewAction');
 
 /**
@@ -13,12 +14,17 @@ var SessionClipView = React.createClass({
     };
   },
   render: function() {
+    var classes = cx({
+      'SessionClipView': true,
+      'selected': this.props.selected
+    });
+
     return (
-        <div className="SessionClipView">
+        <div className={classes} draggable>
           <div className="SessionClipView-play"
             onClick={this.onClickPlay}></div>
           <div className="SessionClipView-name"
-            onClick={this.onClick}
+            onClick={this.onClickClip}
             onDoubleClick={this.onDoubleClick}>
             {this.props.clip.get('name')}
           </div>
@@ -31,7 +37,7 @@ var SessionClipView = React.createClass({
   },
 
   onClickClip: function () {
-    ViewAction.selectClip(this.props.index);
+    ViewAction.selectClip([this.props.trackIndex, this.props.index]);
   },
 
   onDoubleClick: function () {
