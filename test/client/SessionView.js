@@ -84,27 +84,71 @@ describe('SessionView', function () {
 
     var $view = $$(<SessionView song={song} isVisible={true} selection={selection}/>);
 
-    var tracks = $view.find('.SessionTrackView');
-    assert(tracks.length === song.tracks.length, '# of tracks ok');
+    var $tracks = $view.find('.SessionTrackView');
+    assert($tracks.length === song.tracks.length, '# of tracks ok');
 
-    tracks.each((i, _track) => {
-      var track = $(_track);
-      console.log(track);
-      var trackHeader = track.find('.SessionTrackHeader');
+    $tracks.each((i, _track) => {
+      var $track = $(_track);
+      var trackHeader = $track.find('.SessionTrackHeader');
       assert(trackHeader.text().match(song.tracks[i].get('name')), 'track[' + i + '] name ok');
 
-      var cells = track.find('.cell');
-      assert(cells.length === song.scenes.length, '# of scenes ok');
+      var $cells = $track.find('.cell');
+      assert($cells.length === song.scenes.length, '# of scenes ok');
 
-      cells.each((j, _cell) => {
-        var cell = $(_cell);
+      $cells.each((j, _cell) => {
+        var $cell = $(_cell);
         if (song.tracks[i].clips[j] != null) {
-          assert(cell.text().match(song.tracks[i].clips[j].name), 'clip [' + i + '][' + j + '] name ok');
+          assert($cell.text().match(song.tracks[i].clips[j].name), 'clip [' + i + '][' + j + '] name ok');
         }
         else {
-          assert(cell.text() === '', 'empty cell ok');
+          assert($cell.text() === '', 'empty cell ok');
         }
       })
     });
   });
+
+  it('highlights selected row / column', function () {
+    song = testSong;
+
+    it('works with testSelection', function () {
+      var selection = testSelection;
+      var view = <SessionView song={song} isVisible={true} selection={selection}/>;
+      var $view = $$(view);
+
+      var $tracks = $view.find('.SessionTrackView');
+      assert( $tracks.eq(0).hasClass('selectedTrack'), '0th track selected');
+      assert(!$tracks.eq(1).hasClass('selectedTrack'), '1st track not selected');
+      $tracks.each((i, _track) => {
+        var $cells = $(_track).find('.cell');
+        assert( $cells.eq(0).hasClass('selectedScene'), '0th scene selected');
+        assert(!$cells.eq(1).hasClass('selectedScene'), '1st scene not selected');
+        assert(!$cells.eq(2).hasClass('selectedScene'), '2nd scene not selected');
+      });
+
+      assert($view.find('.selected').length === 0, 'no cell selected');
+    });
+
+    it('works with other selection', function () {
+      var selection = {
+        currentTrack: 1,
+        currentScene: 1,
+        currentCell: song.tracks[1].clips[1].id
+      };
+      var view = <SessionView song={song} isVisible={true} selection={selection}/>;
+      var $view = $$(view);
+
+      var $tracks = $view.find('.SessionTrackView');
+      assert(!$tracks.eq(0).hasClass('selectedTrack'), '0th track not selected');
+      assert( $tracks.eq(1).hasClass('selectedTrack'), '1st track selected');
+      $tracks.each((i, _track) => {
+        var $cells = $(_track).find('.cell');
+        assert(!$cells.eq(0).hasClass('selectedScene'), '0th scene not selected');
+        assert( $cells.eq(1).hasClass('selectedScene'), '1st scene selected');
+        assert(!$cells.eq(2).hasClass('selectedScene'), '2nd scene not selected');
+      });
+
+      assert($tracks.eq(1).find('.cell').eq(1).hasClass('.selected'), '1-1 cell selected');
+    });
+  });
+
 });
