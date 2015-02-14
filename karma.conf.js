@@ -62,7 +62,7 @@ module.exports = function(config) {
       }
     },
 
-    browsers: ['Chrome_NS', 'Firefox'],
+    browsers: ['Chrome_NS'],
 
 
     // Continuous Integration mode
