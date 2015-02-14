@@ -1,8 +1,10 @@
 {
   "name": "evil",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
-    "start": "node_modules/.bin/gulp serve"
+    "start": "node_modules/.bin/gulp pro",
+    "build": "node_modules/.bin/gulp build",
+    "test": "node_modules/karma/bin/karma start --single-run"
   },
   "dependencies": {
     "body-parser": "^1.9.0",
@@ -38,6 +40,7 @@
     "nodemon": "^1.2.0",
     "passport": "^0.2.0",
     "react": "^0.12.2",
+    "react-tools": "^0.12.2",
     "static-favicon": "~1.0.0",
     "vinyl-source-stream": "^1.0.0",
     "worker-timer": "git://github.com/fand/worker-timer"
@@ -46,10 +49,19 @@
     "6to5ify": "^4.0.0",
     "browser-sync": "^1.5.2",
     "browserify": "^8.1.1",
+    "chai": "^2.0.0",
     "coffeeify": "^1.0.0",
     "gulp-if": "^1.2.4",
     "gulp-notify": "^2.1.0",
     "gulp-sourcemaps": "^1.1.5",
+    "karma": "^0.12.31",
+    "karma-browserify": "^3.0.1",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^0.1.7",
+    "karma-firefox-launcher": "^0.1.4",
+    "karma-mocha": "^0.1.10",
+    "mocha": "^2.1.0",
+    "react-tools": "^0.12.2",
     "reactify": "^1.0.0",
     "require-directory": "^2.0.0",
     "watchify": "^2.2.1"
