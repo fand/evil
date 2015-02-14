@@ -23,7 +23,7 @@ var SessionTrackView = React.createClass({
   componentDidUnmount: function () {
     delete _emptyCellIds[this.props.key];
   },
-  render: function() { console.log('rend');
+  render: function() {
     var isTrackSelected = this.props.selectionTable.track[this.props.index];
 
     var cells = [];
