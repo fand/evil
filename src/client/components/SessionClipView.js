@@ -17,6 +17,7 @@ var SessionClipView = React.createClass({
     var classes = cx({
       'SessionClipView' : true,
       'cell'            : true,
+      'bodyCell'        : true,
       'selectedCell'    : this.props.selection.currentCell === this.props._key,
       'selectedScene'   : this.props.selectionTable.scene[this.props.index]
     });

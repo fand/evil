@@ -4,11 +4,10 @@
 var React = require('react');
 
 // Components
-var Header          = require('./Header');
-var SessionView     = require('./SessionView');
-var ArrangementView = require('./ArrangementView');
-var ClipView        = require('./ClipView');
-var DeviceView      = require('./DeviceView');
+var Header     = require('./Header');
+var Footer     = require('./Footer');
+var TopView    = require('./TopView');
+var BottomView = require('./BottomView');
 
 // Stores
 var SongStore   = require('../stores/SongStore');
@@ -31,11 +30,6 @@ var EvilApp = React.createClass({
     ViewAction.on('SELECT_TRACK', this.selectTrack);
     ViewAction.on('SELECT_SCENE', this.selectScene);
     ViewAction.on('SELECT_CELL', this.selectCell);
-
-    ViewAction.on('SHOW_ARRANGEMENT', this.showArrangement);
-    ViewAction.on('SHOW_SESSION', this.showSession);
-    ViewAction.on('SHOW_DEVICE', this.showDevice);
-    ViewAction.on('SHOW_CLIP', this.showClip);
   },
   getInitialState: function() {
     var song = SongStore.getSong();
@@ -45,11 +39,6 @@ var EvilApp = React.createClass({
       currentTrack : 0,
       currentScene : 0,
       currentCell  : null,
-
-      showArrangement : false,
-      showSession     : true,
-      showDevice      : false,
-      showClip        : false
     };
   },
   render: function() {
@@ -68,14 +57,9 @@ var EvilApp = React.createClass({
     return (
       <div className="EvilApp">
         <Header />
-        <div className="TopView">
-          <SessionView song={this.state.song} isVisible={this.state.showSession} selection={selection}/>
-          <ArrangementView song={this.state.song} isVisible={this.state.showArrangement} selection={selection}/>
-        </div>
-        <div className="BottomView">
-          <ClipView clip={clip} isVisible={this.state.showClip} />
-          <DeviceView device={device} isVisible={this.state.showDevice} />
-        </div>
+        <TopView    song={this.state.song} selection={selection} />
+        <BottomView song={this.state.song} selection={selection} />
+        <Footer song={this.state.song} />
       </div>
     );
   },
@@ -91,32 +75,6 @@ var EvilApp = React.createClass({
     console.log('selectCell: ' + id);
     this.setState({currentCell: id});
   },
-
-  // Control Visibility for each View.
-  showSession: function () {
-    this.setState({
-      showSession: true,
-      showArrangement: false
-    });
-  },
-  showArrangement: function () {
-    this.setState({
-      showSession: false,
-      showArrangement: true
-    });
-  },
-  showDevice: function () {
-    this.setState({
-      showDevice: true,
-      showClip: false
-    });
-  },
-  showClip: function () {
-    this.setState({
-      showDevice: false,
-      showClip: true
-    });
-  }
 });
 
 module.exports = EvilApp;

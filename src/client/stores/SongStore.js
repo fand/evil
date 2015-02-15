@@ -4,6 +4,8 @@ var Song = require('../models/Song');
 
 const defaultSong = new Song({
   title: 'default song',
+  artist: 'anonymous',
+  artist_id: null,
   tracks: [{
     name: 'Bass',
     device: {

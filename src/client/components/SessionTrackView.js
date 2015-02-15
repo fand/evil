@@ -46,13 +46,13 @@ var SessionTrackView = React.createClass({
     }
 
     var classes = cx({
-      'SessionTrackView': true,
-      'selectedTrack': isTrackSelected
+      'SessionTrackView' : true,
+      'selectedTrack'    : isTrackSelected
     });
 
     return (
       <div className={classes} onClick={this.onClick} >
-        <div className="SessionTrackHeader" >
+        <div className="SessionTrackHeader cell headerCell" >
           {this.props.track.get('name')}
         </div>
         {cells}
