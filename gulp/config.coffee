@@ -9,10 +9,6 @@ module.exports =
         src: [BASE 'src/client/main.js'],
         dst: BASE('build/js'),
         name: 'evil.js'
-    }, {
-        src: [BASE 'src/test/test_main.coffee'],
-        dst: BASE('build/test'),
-        name: 'test.js'
     }],
     sass:
         src: BASE 'src/scss/'
