@@ -92,7 +92,7 @@ describe('SessionView', function () {
       var trackHeader = $track.find('.SessionTrackHeader');
       assert(trackHeader.text().match(song.tracks[i].get('name')), 'track[' + i + '] name ok');
 
-      var $cells = $track.find('.cell');
+      var $cells = $track.find('.bodyCell');
       assert($cells.length === song.scenes.length, '# of scenes ok');
 
       $cells.each((j, _cell) => {
@@ -119,7 +119,7 @@ describe('SessionView', function () {
       assert( $tracks.eq(0).hasClass('selectedTrack'), '0th track selected');
       assert(!$tracks.eq(1).hasClass('selectedTrack'), '1st track not selected');
       $tracks.each((i, _track) => {
-        var $cells = $(_track).find('.cell');
+        var $cells = $(_track).find('.bodyCell');
         assert( $cells.eq(0).hasClass('selectedScene'), '0th scene selected');
         assert(!$cells.eq(1).hasClass('selectedScene'), '1st scene not selected');
         assert(!$cells.eq(2).hasClass('selectedScene'), '2nd scene not selected');
@@ -141,13 +141,13 @@ describe('SessionView', function () {
       assert(!$tracks.eq(0).hasClass('selectedTrack'), '0th track not selected');
       assert( $tracks.eq(1).hasClass('selectedTrack'), '1st track selected');
       $tracks.each((i, _track) => {
-        var $cells = $(_track).find('.cell');
+        var $cells = $(_track).find('.bodyCell');
         assert(!$cells.eq(0).hasClass('selectedScene'), '0th scene not selected');
         assert( $cells.eq(1).hasClass('selectedScene'), '1st scene selected');
         assert(!$cells.eq(2).hasClass('selectedScene'), '2nd scene not selected');
       });
 
-      assert($tracks.eq(1).find('.cell').eq(1).hasClass('.selected'), '1-1 cell selected');
+      assert($tracks.eq(1).find('.bodyCell').eq(1).hasClass('.selected'), '1-1 cell selected');
     });
   });
 
