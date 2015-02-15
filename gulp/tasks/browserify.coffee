@@ -31,11 +31,13 @@ cafe = (c, callback) ->
         cache: {}, packageCache: {}, fullPaths: true
 
     bundler.transform 'coffeeify'
+    bundler.transform 'reactify'
+    bundler.transform '6to5ify'
 
     console.log '#### browserify: rebuild'
 
     bundler.bundle()
-        .on 'error', notify.error('Compile Error')
+        .on 'error', (e) -> console.log(e);notify.error('Compile Error')
         .pipe source c.name
         .pipe gulp.dest c.dst
         .pipe gulpif is_watching, reload stream: true
@@ -54,5 +56,3 @@ gulp.task 'browserify', (cb) ->
 gulp.task 'browserify-watch', ->
     is_watching = true
     gulp.start 'browserify'
-
-gulp.task 'build', ['browserify']

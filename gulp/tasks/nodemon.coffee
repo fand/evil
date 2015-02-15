@@ -6,7 +6,7 @@ nodemon = null
 gulp.task 'nodemon', ->
     nodemon.kill() if nodemon?
     nodemon = spawn('./node_modules/.bin/nodemon',
-                    ['./server.js'],
+                    ['--watch', './server', './server.js'],
                     { env: process.env, stdio: 'inherit' })
         .on 'close', ->
             console.log 'nodemon: process killed!'

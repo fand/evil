@@ -6,7 +6,7 @@ module.exports = {
    *  Protect routes on your api from unauthenticated access
    */
   auth: function auth(req, res, next) {
-    if (req.isAuthenticated()) return next();
+    if (req.isAuthenticated()) { return next(); }
     res.send(401);
   },
 
@@ -22,7 +22,9 @@ module.exports = {
 
   redirector: function(req, res, next){
     var ua = req.headers['user-agent'];
-
+    if (ua == null) {
+      return next();
+    }
     if (ua.match(/msie/ig)) {
       req.is_ie = true;
     }
