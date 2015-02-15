@@ -1,0 +1,177 @@
+// Styles for PC
+
+.fill {
+    &.visible { display:block; }
+    display: none;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #ffffff;
+}
+
+.EvilApp {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0; left: 0;
+}
+
+.Header {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 32px;
+    border-radius: 0px;
+    background: #ffffff;
+    box-shadow: 0px 0px 2px #ddd;
+}
+
+.TopView {
+    position: absolute;
+    top: 32px;
+    left: 0;
+    margin: 10px 16px 10px;
+    width: calc(100% - 32px - 2px);
+    height: calc(50% - 32px - 20px - 2px);
+    //border: 1px solid #FF66FF;
+    box-shadow: 0px 0px 2px #999 inset;
+    border-radius: 4px;
+
+    .SessionView {
+        @extend .fill;
+        border-radius: 10px;
+    }
+
+    .ArrangementView {
+        @extend .fill;
+        border-radius: 10px;
+    }
+}
+
+.BottomView {
+    position: absolute;
+    bottom: 90px; left: 0;
+    margin: 0px 16px;
+    width: calc(100% - 32px - 2px);
+    height: calc(50% - 90px - 2px);
+    //border: 1px solid #FF66FF;
+    box-shadow: 0px 0px 2px #999 inset;
+    border-radius: 4px;
+
+    .ClipView {
+        @extend .fill;
+        background-color: #99FF99;
+    }
+
+    .DeviceView {
+        @extend .fill;
+        background-color: #9999FF;
+    }
+
+}
+
+.Footer {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    height: 90px;
+    border-radius: 0px;
+    background: #FFFFFF;
+    box-shadow: 0px 0px 2px #dddddd;
+}
+
+.SessionView {
+    user-select: none;
+    font-size: 14px;
+    line-height: 24px;
+    font-weight: bold;
+    color: #999;
+
+    .SessionTrackViewWrapper {
+        display: flex;
+        flex-direction: row;
+        padding: 12px;
+        width: calc(100% - 24px);
+        height: calc(100% - 30px);
+
+        .SessionTrackView {
+            width: 136px;
+            height: 100%;
+            margin: 2px;
+            background-color: #ffffff;
+        }
+    }
+
+    .cell {
+        height: 24px;
+        border: 1px solid #bbb;
+        border-top: none;
+        border-left: none;
+        margin-bottom: 1px;
+        &.headerCell {
+            border-bottom: 2px solid #bbb;
+            margin-bottom: 2px;
+        }
+    }
+
+    .selectedTrack .cell {
+        background-color: #eee;
+    }
+    .selectedScene {
+        background-color: #eee;
+    }
+    * .cell.selectedCell {
+        background-color: #9ef;
+    }
+}
+
+.Footer {
+    color: #abc;
+
+    .SongInfo {
+        position: absolute;
+        margin: 14px 16px;;
+        top: 0px; right: 0px;
+        width: 200px;
+        height: calc(100% - 20px);
+        line-height: 24px;
+    }
+    .Player {
+        display: flex;
+        flex-direction: row;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -200px;
+        margin-top: -50px;
+        width: 360px;
+        height: 100%;
+        font-size: 48px;
+
+        .fa {
+            margin: 20px auto;
+            &:hover {
+                cursor: pointer;
+                color: #0df;
+            }
+        }
+        .fa-backward { order: 1; }
+        .fa-play     { order: 2; }
+        .fa-forward  { order: 3; }
+        .fa-repeat {
+            position: absolute;
+            top: 0; right: -70px;
+            margin: 28px 0px;
+            font-size: 36px;
+        }
+    }
+}

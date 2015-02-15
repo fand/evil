@@ -13,7 +13,7 @@ notify = require '../utils/notify'
 # ______________________________________
 
 is_dev = true
-watching = false
+is_watching = false
 
 # Call cb after called num times.
 counter = (num, callback) ->
@@ -30,24 +30,19 @@ cafe = (c, callback) ->
         debug: is_dev,
         cache: {}, packageCache: {}, fullPaths: true
 
-    bundler = watchify(bundler) if watching
     bundler.transform 'coffeeify'
+    bundler.transform 'reactify'
+    bundler.transform '6to5ify'
 
-    rebundle = ->
-        console.log '#### browserify: rebuild'
-        bundler.bundle()
-            .on 'error', notify.error('Compile Error')
-            .pipe source c.name
-            .pipe gulp.dest c.dst
-            .pipe gulpif watching, reload stream: true
+    console.log '#### browserify: rebuild'
 
-    if watching?
-        bundler.on 'update', rebundle
-    else
-        rebundle()
+    bundler.bundle()
+        .on 'error', (e) -> console.log(e);notify.error('Compile Error')
+        .pipe source c.name
+        .pipe gulp.dest c.dst
+        .pipe gulpif is_watching, reload stream: true
 
     callback()
-
 
 ##
 # Tasks
@@ -58,8 +53,6 @@ gulp.task 'browserify', (cb) ->
     count = counter(config.length, cb)
     cafe(c, count) for c in config
 
-gulp.task 'browserify-watch', ['browserSync'], ->
-    watching = true
+gulp.task 'browserify-watch', ->
+    is_watching = true
     gulp.start 'browserify'
-
-gulp.task 'build', ['browserify']

@@ -1,4 +1,6 @@
 FX = require './FX'
+DoubleView = require './DoubleView'
+Panner = require '../Panner'
 
 class Double extends FX
     constructor: (@ctx) ->
