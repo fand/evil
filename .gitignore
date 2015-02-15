@@ -1,6 +1,7 @@
 build/
 static/IR/
 static/wav/
+static/fonts/
 
 *.bak
 *.old

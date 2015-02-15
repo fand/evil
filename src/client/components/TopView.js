@@ -28,8 +28,8 @@ var TopView = React.createClass({
   render: function() {
     return (
       <div className="TopView">
-        <i className="fa fa-bars btn-arrangement" onClick={this.showArrangement}></i>
-        <i className="fa fa-bars btn-session"     onClick={this.showSession}    ></i>
+        <i className="fa fa-bars btn btn-arrangement" onClick={this.showArrangement}></i>
+        <i className="fa fa-bars btn btn-session"     onClick={this.showSession}    ></i>
         <SessionView song={this.props.song} isVisible={this.state.showSession} selection={this.props.selection}/>
         <ArrangementView song={this.props.song} isVisible={this.state.showArrangement} selection={this.props.selection}/>
       </div>

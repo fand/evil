@@ -42,7 +42,7 @@ var EvilApp = React.createClass({
     };
   },
   render: function() {
-    var track = TrackStore.getTrack(this.state.currentTrack);
+    var track = TrackStore.getTrack(this.state.currentTrack);  // TrackStore要らない……？？？
     if (track) {
       var clip = track.clips[this.state.currentClip];
       var device = track.device;
@@ -58,7 +58,7 @@ var EvilApp = React.createClass({
       <div className="EvilApp">
         <Header />
         <TopView    song={this.state.song} selection={selection} />
-        <BottomView song={this.state.song} selection={selection} />
+        <BottomView song={this.state.song} selection={selection} clip={clip} device={device} />
         <Footer song={this.state.song} />
       </div>
     );

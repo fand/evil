@@ -17,10 +17,10 @@ var Player = React.createClass({
   render: function() {
     return (
       <div className="Player">
-        <i className="fa fa-play"></i>
-        <i className="fa fa-forward"></i>
-        <i className="fa fa-backward"></i>
-        <i className="fa fa-repeat"></i>
+        <i className="fa fa-play     btn"></i>
+        <i className="fa fa-forward  btn"></i>
+        <i className="fa fa-backward btn"></i>
+        <i className="fa fa-repeat   btn"></i>
       </div>
     );
   }

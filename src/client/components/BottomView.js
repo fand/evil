@@ -28,8 +28,8 @@ var BottomView = React.createClass({
   render: function() {
     return (
       <div className="BottomView">
-        <i className="fa fa-bars btn-device" onClick={this.showDevice}></i>
-        <i className="fa fa-bars btn-clip"   onClick={this.showClip}  ></i>
+        <i className="fa fa-sliders btn btn-device" onClick={this.showDevice}></i>
+        <i className="fa fa-music   btn btn-clip"   onClick={this.showClip}  ></i>
         <DeviceView song={this.props.song} isVisible={this.state.showDevice} selection={this.props.selection}/>
         <ClipView   song={this.props.song} isVisible={this.state.showClip}   selection={this.props.selection}/>
       </div>
