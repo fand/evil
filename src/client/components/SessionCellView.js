@@ -18,7 +18,7 @@ var SessionCellView = React.createClass({
       'SessionCellView' : true,
       'cell'            : true,
       'bodyCell'        : true,
-      'selectedCell'    : this.props.selection.currentCell === this.props._key,
+      'selectedCell'    : this.props.selection.currentCellId === this.props._key,
       'selectedScene'   : this.props.selectionTable.scene[this.props.index]
     });
 
@@ -31,7 +31,7 @@ var SessionCellView = React.createClass({
   },
 
   onClick: function () {
-    ViewAction.selectCell(this.props._key);
+    ViewAction.selectCell(this.props.index, this.props._key);
     ViewAction.selectScene(this.props.index);
   },
 
@@ -39,7 +39,7 @@ var SessionCellView = React.createClass({
     console.log('doubleclickkkkk');
     // ClipsAction.addClip();
     // ClipsAction.editClip();
-    ViewAction.selectClip(this.props.index);
+    ViewAction.selectCell(this.props.index, this.props._key);
   }
 });
 

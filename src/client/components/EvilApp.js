@@ -35,23 +35,25 @@ var EvilApp = React.createClass({
     var song = SongStore.getSong();
 
     return {
-      song         : song,
-      currentTrack : 0,
-      currentScene : 0,
-      currentCell  : null,
+      song          : song,
+      currentTrack  : 0,
+      currentScene  : 0,
+      currentCell   : null,
+      currentCellId : null
     };
   },
   render: function() {
     var track = TrackStore.getTrack(this.state.currentTrack);  // TrackStore要らない……？？？
     if (track) {
-      var clip = track.clips[this.state.currentClip];
+      var clip = track.clips[this.state.currentCell];
       var device = track.device;
     }
 
     var selection = {
-      currentTrack : this.state.currentTrack,
-      currentScene : this.state.currentScene,
-      currentCell  : this.state.currentCell
+      currentTrack  : this.state.currentTrack,
+      currentScene  : this.state.currentScene,
+      currentCell   : this.state.currentCell,
+      currentCellId : this.state.currentCellId
     };
 
     return (
@@ -71,9 +73,11 @@ var EvilApp = React.createClass({
   selectScene: function (index) {
     this.setState({currentScene: index});
   },
-  selectCell: function (id) {
-    console.log('selectCell: ' + id);
-    this.setState({currentCell: id});
+  selectCell: function (index, id) {
+    this.setState({
+      currentCell   : index,
+      currentCellId : id
+    });
   },
 });
 

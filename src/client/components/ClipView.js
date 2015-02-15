@@ -38,8 +38,8 @@ var ClipView = React.createClass({
 
     return (
       <div className={classes}>
-        <Knob name="knob test" min="0" max="100" size="100"/>
         Name: {this.props.clip.get('name')}
+        <Knob name="knob test" min="0" max="100" size="100"/>
       </div>
     );
   }

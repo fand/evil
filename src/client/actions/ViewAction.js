@@ -14,8 +14,8 @@ class ViewAction extends EventEmitter {
     this.emit(ViewConstants.SELECT_SCENE, index);
   }
 
-  selectCell (id) {
-    this.emit(ViewConstants.SELECT_CELL, id);
+  selectCell (index, id) {
+    this.emit(ViewConstants.SELECT_CELL, index, id);
   }
 }
 
