@@ -33,6 +33,7 @@ T2 = new MutekiTimer()
 
 
 TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17]
+FREQ_OFFSET = [-3, 7, -11, 17, -23, 29, -31]
 
 
 # Noise Oscillator.
@@ -81,6 +82,7 @@ class @VCO
 
         @oscs = [@ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator(),
                  @ctx.createOscillator(), @ctx.createOscillator(), @ctx.createOscillator()]
+        @oscs[i].detune.setValueAtTime(@fine + FREQ_OFFSET[i], 0) for i in [1...7]
 
         @setFreq()
         @osc.start(0)
@@ -94,7 +96,7 @@ class @VCO
 
     setFine: (@fine) ->
         @osc.detune.value = @fine
-        o.detune.value = @fine for o in @oscs
+        @oscs[i].detune.value = @fine + FREQ_OFFSET[i] for i in [1...7]
 
     setShape: (@shape) ->
         if @shape == 'SUPERSAW'
@@ -122,7 +124,7 @@ class @VCO
 
         if @shape == 'SUPERSAW' or @shape == 'SUPERRECT'
             for i in [0...7]
-                @oscs[i].frequency.setValueAtTime(@freq + FREQ_OFFSET[i], 0)
+                @oscs[i].frequency.setValueAtTime(@freq, 0)
         else
             @osc.frequency.setValueAtTime(@freq, 0)
 

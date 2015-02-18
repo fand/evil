@@ -5526,6 +5526,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17];
 
+  FREQ_OFFSET = [-3, 7, -11, 17, -23, 29, -31];
 
   this.Noise = (function() {
     function Noise(ctx) {
@@ -5592,7 +5593,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
 
   this.VCO = (function() {
     function VCO(ctx) {
-      var i, _i;
+      var i, _i, _j;
       this.ctx = ctx;
       this.freq_key = 55;
       this.octave = 4;
@@ -5605,9 +5606,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       this.osc = this.ctx.createOscillator();
       this.osc.type = 0;
       this.oscs = [this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator()];
+      for (i = _i = 1; _i < 7; i = ++_i) {
+        this.oscs[i].detune.setValueAtTime(this.fine + FREQ_OFFSET[i], 0);
+      }
       this.setFreq();
       this.osc.start(0);
-      for (i = _i = 0; _i < 7; i = ++_i) {
+      for (i = _j = 0; _j < 7; i = ++_j) {
         this.oscs[i].start(TIME_OFFSET[i]);
       }
     }
@@ -5629,14 +5633,12 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
     };
 
     VCO.prototype.setFine = function(fine) {
-      var o, _i, _len, _ref, _results;
+      var i, _i, _results;
       this.fine = fine;
       this.osc.detune.value = this.fine;
-      _ref = this.oscs;
       _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        o = _ref[_i];
-        _results.push(o.detune.value = this.fine);
+      for (i = _i = 1; _i < 7; i = ++_i) {
+        _results.push(this.oscs[i].detune.value = this.fine + FREQ_OFFSET[i]);
       }
       return _results;
     };
@@ -5682,7 +5684,7 @@ f=decodeURIComponent(f),b='<a href="http://pinterest.com/pin/create/button/?'+p(
       if (this.shape === 'SUPERSAW' || this.shape === 'SUPERRECT') {
         _results = [];
         for (i = _i = 0; _i < 7; i = ++_i) {
-          _results.push(this.oscs[i].frequency.setValueAtTime(this.freq + FREQ_OFFSET[i], 0));
+          _results.push(this.oscs[i].frequency.setValueAtTime(this.freq, 0));
         }
         return _results;
       } else {
