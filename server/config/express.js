@@ -12,7 +12,7 @@ var express = require('express'),
     path = require('path'),
     config = require('./config'),
     passport = require('passport'),
-    mongoStore = require('connect-mongo')(session),
+    MongoStore = require('connect-mongo'),
     middleware = require('../middleware');
 
 var secret = require('../../secret.js');
@@ -75,11 +75,9 @@ module.exports = function(app) {
     secret: secret.session,
     resave: true,
     saveUninitialized: true,
-    store: new mongoStore({
-      url: config.mongo.uri,
-      collection: 'sessions'
-    }, function () {
-      console.log('db connection open');
+    store: MongoStore.create({
+      mongoUrl: config.mongo.uri,
+      collectionName: 'sessions'
     })
   }));
 
