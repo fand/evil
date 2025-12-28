@@ -2,7 +2,7 @@
   "name": "evil",
   "version": "0.1.0",
   "scripts": {
-    "start": "node_modules/.bin/gulp serve"
+    "start": "node_modules/.bin/gulp"
   },
   "dependencies": {
     "body-parser": "^1.9.0",
@@ -43,5 +43,8 @@
     "gulp-sourcemaps": "^1.1.5",
     "require-directory": "^2.0.0",
     "watchify": "^2.2.1"
+  },
+  "overrides": {
+    "graceful-fs": "^4.2.11"
   }
 }
