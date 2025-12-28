@@ -1,7 +1,5 @@
-'use strict';
-
-var FluxDispatcher = require('flux').Dispatcher;
-var PayloadSources = require('./Constants').PayloadSources;
+import { Dispatcher as FluxDispatcher } from 'flux';
+import { PayloadSources } from './Constants';
 
 class Dispatcher extends FluxDispatcher {
 
@@ -10,7 +8,7 @@ class Dispatcher extends FluxDispatcher {
    * type and additional data coming from the server.
    */
   handleServerAction (action) {
-    var payload = {
+    const payload = {
       source: PayloadSources.SERVER_ACTION,
       action: action
     };
@@ -22,7 +20,7 @@ class Dispatcher extends FluxDispatcher {
    * type and additional data coming from the view.
    */
   handleViewAction (action) {
-    var payload = {
+    const payload = {
       source: PayloadSources.VIEW_ACTION,
       action: action
     };
@@ -31,4 +29,4 @@ class Dispatcher extends FluxDispatcher {
 
 }
 
-module.exports = new Dispatcher();
+export default new Dispatcher();

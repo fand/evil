@@ -1,6 +1,4 @@
-'use strict';
-
-var Timer = require('worker-timer');
+import Timer from 'worker-timer';
 
 const interval = 200;  // 100msec
 const offset = 100;
@@ -26,4 +24,4 @@ class Sequencer {
     }
 }
 
-module.exports = Sequencer;
+export default Sequencer;

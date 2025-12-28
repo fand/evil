@@ -1,21 +1,20 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react/addons');
-var cx = React.addons.classSet;
+import React from 'react';
+import classNames from 'classnames';
 
 /**
  * Arrangement View
  */
-var ArrangementView = React.createClass({
-  getInitialState: function() {
-    return {
+class ArrangementView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
     };
-  },
-  render: function() {
-    //var tracks = this.props.song.tracks;
+  }
 
-    var classes = cx({
+  render() {
+    //const tracks = this.props.song.tracks;
+
+    const classes = classNames({
       'ArrangementView': true,
       'visible': this.props.isVisible
     });
@@ -26,6 +25,6 @@ var ArrangementView = React.createClass({
       </div>
     );
   }
-});
+}
 
-module.exports = ArrangementView;
+export default ArrangementView;

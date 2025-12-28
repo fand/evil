@@ -1,20 +1,23 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react/addons');
-var cx = React.addons.classSet;
-var ViewAction = require('../actions/ViewAction');
+import React from 'react';
+import classNames from 'classnames';
+import ViewAction from '../actions/ViewAction';
 
 /**
  * Clip View in Session View
  */
-var SessionClipView = React.createClass({
-  getInitialState: function() {
-    return {
+class SessionClipView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
     };
-  },
-  render: function() {
-    var classes = cx({
+
+    this.onClickPlay = this.onClickPlay.bind(this);
+    this.onClickClip = this.onClickClip.bind(this);
+    this.onDoubleClick = this.onDoubleClick.bind(this);
+  }
+
+  render() {
+    const classes = classNames({
       'SessionClipView' : true,
       'cell'            : true,
       'bodyCell'        : true,
@@ -33,20 +36,20 @@ var SessionClipView = React.createClass({
           </div>
         </div>
     );
-  },
+  }
 
-  onClickPlay: function () {
+  onClickPlay() {
     console.log('yoyaku: ' + this.props.trackIndex + ' - ' + this.props.index);
-  },
+  }
 
-  onClickClip: function () {
+  onClickClip() {
     ViewAction.selectCell(this.props.index, this.props._key);
     ViewAction.selectScene(this.props.index);
-  },
+  }
 
-  onDoubleClick: function () {
+  onDoubleClick() {
     console.log('doubleclickkkkk');
   }
-});
+}
 
-module.exports = SessionClipView;
+export default SessionClipView;

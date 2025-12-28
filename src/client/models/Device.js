@@ -1,8 +1,5 @@
-'use strict';
-
-var Model = require('./Model');
-
-var ContextStore = require('../stores/ContextStore');
+import Model from './Model';
+import ContextStore from '../stores/ContextStore';
 
 
 /**
@@ -43,4 +40,4 @@ class Device extends Model {
   }
 }
 
-module.exports = Device;
+export default Device;

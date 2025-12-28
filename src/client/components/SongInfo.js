@@ -1,21 +1,17 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react');
-
-var Player   = require('./Player');
-var SongInfo = require('./SongInfo');
+import React from 'react';
 
 /**
  * Footer
  * - Show Player
  * - Show song title / playlist name / artist name.
  */
-var SongInfo = React.createClass({
-  getInitialState: function() {
-    return {};
-  },
-  render: function() {
+class SongInfo extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
     return (
       <div className="SongInfo">
         <ul>
@@ -25,6 +21,6 @@ var SongInfo = React.createClass({
       </div>
     );
   }
-});
+}
 
-module.exports = SongInfo;
+export default SongInfo;

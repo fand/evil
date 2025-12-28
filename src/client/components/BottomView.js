@@ -1,31 +1,30 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react');
-
-// Components
-var ClipView   = require('./ClipView');
-var DeviceView = require('./DeviceView');
-
-// Action
-var ViewAction  = require('../actions/ViewAction');
+import React from 'react';
+import ClipView from './ClipView';
+import DeviceView from './DeviceView';
+import ViewAction from '../actions/ViewAction';
 
 /**
 * BottomView
 * Manages switching ClipView / DeviceView.
 */
-var BottomView = React.createClass({
-  componentDidMount: function () {
-    ViewAction.on('SHOW_DEVICE', this.showDevice);
-    ViewAction.on('SHOW_CLIP', this.showClip);
-  },
-  getInitialState: function() {
-    return {
+class BottomView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
       showArrangement : false,
       showSession     : true
     };
-  },
-  render: function() {
+
+    this.showDevice = this.showDevice.bind(this);
+    this.showClip = this.showClip.bind(this);
+  }
+
+  componentDidMount() {
+    ViewAction.on('SHOW_DEVICE', this.showDevice);
+    ViewAction.on('SHOW_CLIP', this.showClip);
+  }
+
+  render() {
     return (
       <div className="BottomView">
         <i className="fa fa-sliders btn btn-device" onClick={this.showDevice}></i>
@@ -36,21 +35,22 @@ var BottomView = React.createClass({
           clip={this.props.clip} />
       </div>
     );
-  },
+  }
 
   // Control Visibility for each View.
-  showDevice: function () {
+  showDevice() {
     this.setState({
       showDevice: true,
       showClip: false
     });
-  },
-  showClip: function () {
+  }
+
+  showClip() {
     this.setState({
       showDevice: false,
       showClip: true
     });
   }
-});
+}
 
-module.exports = BottomView;
+export default BottomView;

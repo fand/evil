@@ -1,8 +1,6 @@
-'use strict';
-
-var Model = require('./Model');
-var SceneStore = require('../stores/SceneStore.js');
-var TrackStore = require('../stores/TrackStore.js');
+import Model from './Model';
+import SceneStore from '../stores/SceneStore.js';
+import TrackStore from '../stores/TrackStore.js';
 
 /**
  * Song Model.
@@ -42,4 +40,4 @@ class Song extends Model {
   }
 }
 
-module.exports = Song;
+export default Song;

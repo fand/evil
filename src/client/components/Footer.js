@@ -1,21 +1,19 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react');
-
-var Player   = require('./Player');
-var SongInfo = require('./SongInfo');
+import React from 'react';
+import Player from './Player';
+import SongInfo from './SongInfo';
 
 /**
  * Footer
  * - Show Player
  * - Show song title / playlist name / artist name.
  */
-var Footer = React.createClass({
-  getInitialState: function() {
-    return {};
-  },
-  render: function() {
+class Footer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
     return (
       <div className="Footer">
         <Player />
@@ -23,6 +21,6 @@ var Footer = React.createClass({
       </div>
     );
   }
-});
+}
 
-module.exports = Footer;
+export default Footer;

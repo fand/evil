@@ -1,27 +1,25 @@
-/** @jsx React.DOM */
-'use strict';
+import React from 'react';
+import classNames from 'classnames';
+import Knob from './Knob';
 
-var React = require('react/addons');
-var cx = React.addons.classSet;
-
-// var PatternConfig = require('./PatternConfig');
-// var EnvelopeConfig = require('./EnvelopeConfig');
-// var PatternEditor = require('./PatternEditor');
-// var EnvelopeEditor = require('./EnvelopeEditor');
-
-var Knob = require('./Knob');
+// import PatternConfig from './PatternConfig';
+// import EnvelopeConfig from './EnvelopeConfig';
+// import PatternEditor from './PatternEditor';
+// import EnvelopeEditor from './EnvelopeEditor';
 
 /**
  * CLip View
  * Show clip pattern editer and configs.
  */
-var ClipView = React.createClass({
-  getInitialState: function() {
-    return {
+class ClipView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
       mode: 'PATTERN'
     };
-  },
-  render: function() {
+  }
+
+  render() {
     if (this.props.clip == null) {
       return <div />;
     }
@@ -31,7 +29,7 @@ var ClipView = React.createClass({
     // <EnvelopeEditor clip={this.props.clip}/>
     //        <Knob name="pan" min="-128" max="127" center="C" size="80"/>
 
-    var classes = cx({
+    const classes = classNames({
       'ClipView': true,
       'visible': this.props.isVisible
     });
@@ -43,7 +41,6 @@ var ClipView = React.createClass({
       </div>
     );
   }
-});
+}
 
-
-module.exports = ClipView;
+export default ClipView;

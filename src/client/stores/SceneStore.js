@@ -1,13 +1,11 @@
-'use strict';
+import Scene from '../models/Scene';
 
-var Scene = require('../models/Scene');
-
-var data = {
+const data = {
   scenes: [],
   currentScene: 0
 };
 
-var SceneStore = {
+const SceneStore = {
   initScenes: function (scenes) {
     data.scenes = scenes.map(s => new Scene(s));
   },
@@ -15,10 +13,10 @@ var SceneStore = {
     return data.scenes[data.currentScene];
   },
   addScenes: function (scenes) {
-    var newScenes = scenes.map(s => new Scene(s));
+    const newScenes = scenes.map(s => new Scene(s));
     data.scenes = data.scenes.concat(newScenes);
     return newScenes;
   }
 };
 
-module.exports = SceneStore;
+export default SceneStore;

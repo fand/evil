@@ -1,13 +1,11 @@
-'use strict';
+import Device from '../models/Device';
 
-var Device = require('../models/Device');
-
-var data = {
+const data = {
   devices: [],
   currentDevice: 0
 };
 
-var DeviceStore = {
+const DeviceStore = {
   getDevices: function () {
     return data.devices;
   },
@@ -15,10 +13,10 @@ var DeviceStore = {
     return data.devices[data.currentDevice];
   },
   addDevice: function (attr) {
-    var newDevice = new Device(attr);
+    const newDevice = new Device(attr);
     data.devices.push(newDevice);
     return newDevice;
   }
 };
 
-module.exports = DeviceStore;
+export default DeviceStore;

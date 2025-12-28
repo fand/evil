@@ -1,22 +1,21 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react');
+import React from 'react';
 
 /**
  * Header
  */
-var Header = React.createClass({
-  getInitialState: function() {
-    return {};
-  },
-  render: function() {
+class Header extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
     return (
       <div className="Header">
         Header..
       </div>
     );
   }
-});
+}
 
-module.exports = Header;
+export default Header;

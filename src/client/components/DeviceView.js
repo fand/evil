@@ -1,24 +1,23 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react/addons');
-var cx = React.addons.classSet;
+import React from 'react';
+import classNames from 'classnames';
 
 /**
  * Device View
  * Edit Device (Synth, Instruments) parameters.
  */
-var DeviceView = React.createClass({
-  getInitialState: function() {
-    return {
+class DeviceView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
 
     };
-  },
-  render: function() {
-    //var effects = this.props.device.fx.map(f => f.render());
-    var effects = '';
+  }
 
-    var classes = cx({
+  render() {
+    //const effects = this.props.device.fx.map(f => f.render());
+    const effects = '';
+
+    const classes = classNames({
       'DeviceView': true,
       'visible': this.props.isVisible
     });
@@ -30,7 +29,6 @@ var DeviceView = React.createClass({
       </div>
     );
   }
-});
+}
 
-
-module.exports = DeviceView;
+export default DeviceView;

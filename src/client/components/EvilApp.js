@@ -1,55 +1,60 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react');
+import React from 'react';
 
 // Components
-var Header     = require('./Header');
-var Footer     = require('./Footer');
-var TopView    = require('./TopView');
-var BottomView = require('./BottomView');
+import Header from './Header';
+import Footer from './Footer';
+import TopView from './TopView';
+import BottomView from './BottomView';
 
 // Stores
-var SongStore   = require('../stores/SongStore');
-// var SceneStore  = require('../stores/SceneStore');
-// var ClipStore   = require('../stores/ClipStore');
-// var DeviceStore = require('../stores/DeviceStore');
-var TrackStore  = require('../stores/TrackStore');
-var ViewAction  = require('../actions/ViewAction');
+import SongStore from '../stores/SongStore';
+// import SceneStore from '../stores/SceneStore';
+// import ClipStore from '../stores/ClipStore';
+// import DeviceStore from '../stores/DeviceStore';
+import TrackStore from '../stores/TrackStore';
+import ViewAction from '../actions/ViewAction';
 
-// var Sequencer = require('../services/Sequencer');
-// var Player    = require('../services/Player');
+// import Sequencer from '../services/Sequencer';
+// import Player from '../services/Player';
 
 /**
  * Entire app View
  * - Init the song
  * - Manages View modes
  */
-var EvilApp = React.createClass({
-  componentDidMount: function () {
-    ViewAction.on('SELECT_TRACK', this.selectTrack);
-    ViewAction.on('SELECT_SCENE', this.selectScene);
-    ViewAction.on('SELECT_CELL', this.selectCell);
-  },
-  getInitialState: function() {
-    var song = SongStore.getSong();
+class EvilApp extends React.Component {
+  constructor(props) {
+    super(props);
 
-    return {
+    const song = SongStore.getSong();
+    this.state = {
       song          : song,
       currentTrack  : 0,
       currentScene  : 0,
       currentCell   : null,
       currentCellId : null
     };
-  },
-  render: function() {
-    var track = TrackStore.getTrack(this.state.currentTrack);  // TrackStore要らない……？？？
+
+    this.selectTrack = this.selectTrack.bind(this);
+    this.selectScene = this.selectScene.bind(this);
+    this.selectCell = this.selectCell.bind(this);
+  }
+
+  componentDidMount() {
+    ViewAction.on('SELECT_TRACK', this.selectTrack);
+    ViewAction.on('SELECT_SCENE', this.selectScene);
+    ViewAction.on('SELECT_CELL', this.selectCell);
+  }
+
+  render() {
+    const track = TrackStore.getTrack(this.state.currentTrack);  // TrackStore要らない……？？？
+    let clip, device;
     if (track) {
-      var clip = track.clips[this.state.currentCell];
-      var device = track.device;
+      clip = track.clips[this.state.currentCell];
+      device = track.device;
     }
 
-    var selection = {
+    const selection = {
       currentTrack  : this.state.currentTrack,
       currentScene  : this.state.currentScene,
       currentCell   : this.state.currentCell,
@@ -64,21 +69,23 @@ var EvilApp = React.createClass({
         <Footer song={this.state.song} />
       </div>
     );
-  },
+  }
 
   // Set states.
-  selectTrack: function (index) {
+  selectTrack(index) {
     this.setState({currentTrack: index});
-  },
-  selectScene: function (index) {
+  }
+
+  selectScene(index) {
     this.setState({currentScene: index});
-  },
-  selectCell: function (index, id) {
+  }
+
+  selectCell(index, id) {
     this.setState({
       currentCell   : index,
       currentCellId : id
     });
-  },
-});
+  }
+}
 
-module.exports = EvilApp;
+export default EvilApp;

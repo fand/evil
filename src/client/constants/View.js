@@ -1,8 +1,6 @@
-'use strict';
+import mirror from './mirror';
 
-var mirror = require('./mirror');
-
-module.exports = mirror([
+export default mirror([
   'SELECT_TRACK',
   'SELECT_SCENE',
   'SELECT_CELL'

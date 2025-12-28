@@ -1,23 +1,21 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react/addons');
-var cx = React.addons.classSet;
-
-var SessionTrackView = require('./SessionTrackView');
+import React from 'react';
+import classNames from 'classnames';
+import SessionTrackView from './SessionTrackView';
 
 /**
  * Session View
  */
-var SessionView = React.createClass({
-  getInitialState: function() {
-    return {
+class SessionView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
     };
-  },
-  render: function() {
-    var selectionTable = this._getSelectionTable();
+  }
 
-    var tracks = this.props.song.tracks.map((track, i) => {
+  render() {
+    const selectionTable = this._getSelectionTable();
+
+    const tracks = this.props.song.tracks.map((track, i) => {
       return (
         <SessionTrackView
           song={this.props.song} track={track}
@@ -26,7 +24,7 @@ var SessionView = React.createClass({
       );
     });
 
-    var classes = cx({
+    const classes = classNames({
       'SessionView': true,
       'visible': this.props.isVisible
     });
@@ -38,15 +36,15 @@ var SessionView = React.createClass({
         </div>
       </div>
     );
-  },
+  }
 
-  _getSelectionTable: function () {
-    var track = [];
-    for (var x = 0; x < this.props.song.tracks.length; x++) {
+  _getSelectionTable() {
+    const track = [];
+    for (let x = 0; x < this.props.song.tracks.length; x++) {
       track.push(this.props.selection.currentTrack === x);
     }
-    var scene = [];
-    for (var y = 0; y < this.props.song.scenes.length; y++) {
+    const scene = [];
+    for (let y = 0; y < this.props.song.scenes.length; y++) {
       scene.push(this.props.selection.currentScene === y);
     }
     return {
@@ -54,6 +52,6 @@ var SessionView = React.createClass({
       scene: scene
     };
   }
-});
+}
 
-module.exports = SessionView;
+export default SessionView;

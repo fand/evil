@@ -1,20 +1,22 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react/addons');
-var cx = React.addons.classSet;
-var ViewAction = require('../actions/ViewAction');
+import React from 'react';
+import classNames from 'classnames';
+import ViewAction from '../actions/ViewAction';
 
 /**
  * Empty Cell View in Session View
  */
-var SessionCellView = React.createClass({
-  getInitialState: function() {
-    return {
+class SessionCellView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
     };
-  },
-  render: function() {
-    var classes = cx({
+
+    this.onClick = this.onClick.bind(this);
+    this.onDoubleClick = this.onDoubleClick.bind(this);
+  }
+
+  render() {
+    const classes = classNames({
       'SessionCellView' : true,
       'cell'            : true,
       'bodyCell'        : true,
@@ -28,19 +30,19 @@ var SessionCellView = React.createClass({
         onDoubleClick={this.onDoubleClick} >
       </div>
     );
-  },
+  }
 
-  onClick: function () {
+  onClick() {
     ViewAction.selectCell(this.props.index, this.props._key);
     ViewAction.selectScene(this.props.index);
-  },
+  }
 
-  onDoubleClick: function () {
+  onDoubleClick() {
     console.log('doubleclickkkkk');
     // ClipsAction.addClip();
     // ClipsAction.editClip();
     ViewAction.selectCell(this.props.index, this.props._key);
   }
-});
+}
 
-module.exports = SessionCellView;
+export default SessionCellView;

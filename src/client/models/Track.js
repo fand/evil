@@ -1,8 +1,6 @@
-'use strict';
-
-var Model       = require('./Model');
-var DeviceStore = require('../stores/DeviceStore');
-var ClipStore   = require('../stores/ClipStore');
+import Model from './Model';
+import DeviceStore from '../stores/DeviceStore';
+import ClipStore from '../stores/ClipStore';
 
 class Track extends Model {
   initialize () {
@@ -22,4 +20,4 @@ class Track extends Model {
   }
 }
 
-module.exports = Track;
+export default Track;

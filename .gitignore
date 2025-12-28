@@ -1,4 +1,5 @@
 build/
+dist/
 static/IR/
 static/wav/
 static/fonts/
@@ -9,3 +10,4 @@ node_modules/
 bower_components/
 
 secret.js
+convert-to-esm.js

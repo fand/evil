@@ -1,9 +1,7 @@
-'use strict';
-
-var mirror = (array) => {
-  var obj = {};
+const mirror = (array) => {
+  const obj = {};
   array.forEach(e => obj[e] = e);
   return obj;
 };
 
-module.exports = mirror;
+export default mirror;

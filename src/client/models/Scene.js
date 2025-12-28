@@ -1,9 +1,6 @@
-'use strict';
-
-var Model = require('./Model');
-var Clip = require('./Clip');
-
-var _ = require('lodash');
+import Model from './Model';
+import Clip from './Clip';
+import _ from 'lodash';
 
 /**
  * Scene - a row in SessionView.
@@ -32,4 +29,4 @@ var getSceneName = function () {
   };
 }();
 
-module.exports = Scene;
+export default Scene;

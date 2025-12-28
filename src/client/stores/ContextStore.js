@@ -1,8 +1,6 @@
-'use strict';
+const ctx = new AudioContext();
 
-var ctx = new AudioContext();
-
-module.exports = {
+export default {
   ctx: ctx,
   getContext: () => ctx
 };

@@ -1,6 +1,4 @@
-'use strict';
-
-var _ = require('lodash');
+import _ from 'lodash';
 
 class Model {
   constructor (attrs) {
@@ -100,4 +98,4 @@ class Model {
   }
 }
 
-module.exports = Model;
+export default Model;

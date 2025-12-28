@@ -1,8 +1,6 @@
-/** @jsx React.DOM */
-'use strict';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import EvilApp from './components/EvilApp';
 
-var React = require('react');
-var actions = {};
-var EvilApp = require('./components/EvilApp');
-
-React.render(<EvilApp />, document.getElementById('app'));
+const root = createRoot(document.getElementById('app'));
+root.render(<EvilApp />);

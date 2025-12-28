@@ -1,6 +1,4 @@
-'use strict';
-
-var Model = require('./Model');
+import Model from './Model';
 
 /**
  * Clip - a set of phrase, parameter automation.
@@ -21,4 +19,4 @@ class Clip extends Model {
   }
 }
 
-module.exports = Clip;
+export default Clip;

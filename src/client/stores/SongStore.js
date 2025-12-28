@@ -1,6 +1,4 @@
-'use strict';
-
-var Song = require('../models/Song');
+import Song from '../models/Song';
 
 const defaultSong = new Song({
   title: 'default song',
@@ -43,12 +41,12 @@ const defaultSong = new Song({
   }]
 });
 
-var data = {
+const data = {
   currentSong: 0,
   songs: []
 };
 
-var SongStore = {
+const SongStore = {
   getSong: function () {
     if (data.songs.length === 0) {
       data.songs.push(defaultSong);
@@ -57,4 +55,4 @@ var SongStore = {
   }
 };
 
-module.exports = SongStore;
+export default SongStore;

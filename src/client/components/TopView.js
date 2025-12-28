@@ -1,31 +1,30 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react');
-
-// Components
-var SessionView     = require('./SessionView');
-var ArrangementView = require('./ArrangementView');
-
-// Action
-var ViewAction  = require('../actions/ViewAction');
+import React from 'react';
+import SessionView from './SessionView';
+import ArrangementView from './ArrangementView';
+import ViewAction from '../actions/ViewAction';
 
 /**
 * TopView
 * Manages switching SessionView / ArrangementView.
 */
-var TopView = React.createClass({
-  componentDidMount: function () {
-    ViewAction.on('SHOW_ARRANGEMENT', this.showArrangement);
-    ViewAction.on('SHOW_SESSION', this.showSession);
-  },
-  getInitialState: function() {
-    return {
+class TopView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
       showArrangement : false,
       showSession     : true
     };
-  },
-  render: function() {
+
+    this.showSession = this.showSession.bind(this);
+    this.showArrangement = this.showArrangement.bind(this);
+  }
+
+  componentDidMount() {
+    ViewAction.on('SHOW_ARRANGEMENT', this.showArrangement);
+    ViewAction.on('SHOW_SESSION', this.showSession);
+  }
+
+  render() {
     return (
       <div className="TopView">
         <i className="fa fa-bars btn btn-arrangement" onClick={this.showArrangement}></i>
@@ -34,20 +33,21 @@ var TopView = React.createClass({
         <ArrangementView song={this.props.song} isVisible={this.state.showArrangement} selection={this.props.selection}/>
       </div>
     );
-  },
+  }
 
-  showSession: function () {
+  showSession() {
     this.setState({
       showSession: true,
       showArrangement: false
     });
-  },
-  showArrangement: function () {
+  }
+
+  showArrangement() {
     this.setState({
       showSession: false,
       showArrangement: true
     });
   }
-});
+}
 
-module.exports = TopView;
+export default TopView;

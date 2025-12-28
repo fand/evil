@@ -1,20 +1,16 @@
-/** @jsx React.DOM */
-'use strict';
-
-var React = require('react');
-
-var Player   = require('./Player');
-var SongInfo = require('./SongInfo');
+import React from 'react';
 
 /**
  * Player
  * - Emits events about playing.
  */
-var Player = React.createClass({
-  getInitialState: function() {
-    return {};
-  },
-  render: function() {
+class Player extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
     return (
       <div className="Player">
         <i className="fa fa-play     btn"></i>
@@ -24,6 +20,6 @@ var Player = React.createClass({
       </div>
     );
   }
-});
+}
 
-module.exports = Player;
+export default Player;

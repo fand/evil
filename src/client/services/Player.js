@@ -1,6 +1,3 @@
-'use strict';
-
-
 class Player {
     constructor () {
 
@@ -8,4 +5,4 @@ class Player {
     }
 }
 
-module.exports = Player;
+export default Player;
