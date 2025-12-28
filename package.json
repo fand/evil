@@ -2,8 +2,8 @@
   "name": "evil",
   "version": "0.1.0",
   "scripts": {
-    "build": "esbuild src/ts/main.ts --bundle --outfile=build/js/evil.js",
-    "build:watch": "esbuild src/ts/main.ts --bundle --outfile=build/js/evil.js --watch",
+    "build": "vite build",
+    "build:watch": "vite build --watch",
     "typecheck": "tsc --noEmit",
     "start": "node server.js",
     "dev": "npm run build && node server.js",
@@ -20,11 +20,6 @@
     "errorhandler": "^1.1.1",
     "express": "^4.9.5",
     "express-session": "^1.5.2",
-    "gulp": "^3.8.5",
-    "gulp-changed": "^1.0.0",
-    "gulp-plumber": "^0.6.3",
-    "gulp-uglify": "^1.0.1",
-    "gulp-util": "^3.0.1",
     "jade": "^1.7.0",
     "jquery": "^2.1.3",
     "lodash": "^3.0.0",
@@ -34,21 +29,14 @@
     "nodemon": "^1.2.0",
     "passport": "^0.2.0",
     "shortid": "^2.2.16",
-    "static-favicon": "~1.0.0",
-    "vinyl-source-stream": "^1.0.0"
+    "static-favicon": "~1.0.0"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.33",
     "@types/lodash": "^4.17.21",
-    "browser-sync": "^1.5.2",
-    "browserify": "^8.1.1",
-    "esbuild": "^0.27.2",
-    "gulp-if": "^1.2.4",
-    "gulp-notify": "^2.1.0",
-    "gulp-sourcemaps": "^1.1.5",
-    "require-directory": "^2.0.0",
+    "@vitejs/plugin-legacy": "^7.2.1",
     "typescript": "^5.9.3",
-    "watchify": "^2.2.1"
+    "vite": "^7.3.0"
   },
   "overrides": {
     "graceful-fs": "^4.2.11"
