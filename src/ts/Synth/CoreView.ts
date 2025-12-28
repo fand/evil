@@ -1,0 +1,186 @@
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS202: Simplify dynamic range loops
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
+ */
+import $ from 'jquery';
+
+class SynthCoreView {
+    constructor(model, id, dom) {
+
+        this.model = model;
+        this.id = id;
+        this.dom = dom;
+        this.vcos = $(this.dom.find('.RS_VCO'));
+
+        this.EG_inputs     = this.dom.find('.RS_EG input');
+        this.FEG_inputs    = this.dom.find('.RS_FEG input');
+        this.filter_inputs = this.dom.find(".RS_filter input");
+        this.gain_inputs   = this.dom.find('.RS_mixer input');
+
+        this.canvasEG   = this.dom.find(".RS_EG .canvasEG").get()[0];
+        this.canvasFEG  = this.dom.find(".RS_FEG .canvasFEG").get()[0];
+        this.contextEG  = this.canvasEG.getContext('2d');
+        this.contextFEG = this.canvasFEG.getContext('2d');
+
+        this.initEvent();
+    }
+
+    initEvent() {
+        this.vcos.on("change",          () => this.fetchVCOParam());
+        this.gain_inputs.on("change",   () => this.fetchGains());
+        this.filter_inputs.on("change", () => this.fetchFilterParam());
+        this.EG_inputs.on("change",     () => this.fetchEGParam());
+        this.FEG_inputs.on("change",    () => this.fetchFEGParam());
+        return this.fetchParam();
+    }
+
+    updateCanvas(name) {
+        let canvas  = null;
+        let context = null;
+        let adsr    = null;
+        if (name === "EG") {
+            canvas  = this.canvasEG;
+            context = this.contextEG;
+            adsr    = this.model.eg.getADSR();
+        } else {
+            canvas  = this.canvasFEG;
+            context = this.contextFEG;
+            adsr    = this.model.feg.getADSR();
+        }
+
+        const w = (canvas.width = 180);
+        const h = (canvas.height = 50);
+        const w4 = w/4;
+        context.clearRect(0,0,w,h);
+        context.beginPath();
+        context.moveTo(w4 * (1.0 - adsr[0]), h);
+        context.lineTo(w / 4,0);                                  // attack
+        context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));  // decay
+        context.lineTo(w4 * 3, h * (1.0 - adsr[2]));              // sustain
+        context.lineTo(w4 * (adsr[3] + 3), h);                    // release
+        context.strokeStyle = 'rgb(0, 220, 255)';
+        return context.stroke();
+    }
+
+    fetchParam() {
+        this.fetchVCOParam();
+        this.fetchEGParam();
+        this.fetchFEGParam();
+        this.fetchFilterParam();
+        return this.fetchGains();
+    }
+
+    fetchVCOParam() {
+        const harmony = this.vcos.eq(0).find('.harmony').val();
+        return (() => {
+            const result = [];
+            for (let i = 0, end = this.vcos.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+                var vco = this.vcos.eq(i);
+                result.push(this.model.setVCOParam(
+                    i,
+                    vco.find('.shape').val(),
+                    parseInt(vco.find('.octave').val()),
+                    parseInt(vco.find('.interval').val()),
+                    parseInt(vco.find('.fine').val()),
+                    harmony
+                ));
+            }
+            return result;
+        })();
+    }
+
+    setVCOParam(p) {
+        return (() => {
+            const result = [];
+            for (let i = 0, end = this.vcos.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+                var vco = this.vcos.eq(i);
+                vco.find('.shape').val(p[i].shape);
+                vco.find('.octave').val(p[i].octave);
+                vco.find('.interval').val(p[i].interval);
+                result.push(vco.find('.fine').val(p[i].fine));
+            }
+            return result;
+        })();
+    }
+
+    fetchEGParam() {
+        this.model.setEGParam(
+            parseFloat(this.EG_inputs.eq(0).val()),
+            parseFloat(this.EG_inputs.eq(1).val()),
+            parseFloat(this.EG_inputs.eq(2).val()),
+            parseFloat(this.EG_inputs.eq(3).val())
+        );
+        return this.updateCanvas("EG");
+    }
+
+    setEGParam(p) {
+        this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
+        this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
+        this.EG_inputs.eq(2).val(p.adsr[2] * 100);
+        return this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
+    }
+
+    fetchFEGParam() {
+        this.model.setFEGParam(
+            parseFloat(this.FEG_inputs.eq(0).val()),
+            parseFloat(this.FEG_inputs.eq(1).val()),
+            parseFloat(this.FEG_inputs.eq(2).val()),
+            parseFloat(this.FEG_inputs.eq(3).val())
+        );
+        return this.updateCanvas("FEG");
+    }
+
+    setFEGParam(p) {
+        return __range__(0, p.length, false).map((i) =>
+            this.FEG_inputs.eq(i).val(p.adsr[i]));
+    }
+
+    fetchFilterParam() {
+        return this.model.setFilterParam(
+            parseFloat(this.filter_inputs.eq(0).val()),
+            parseFloat(this.filter_inputs.eq(1).val())
+        );
+    }
+
+    setFilterParam(p) {
+        this.filter_inputs.eq(0).val(p[0]);
+        return this.filter_inputs.eq(1).val(p[1]);
+    }
+
+    fetchGains() {
+        return __range__(0, this.gain_inputs.length, false).map((i) =>
+            this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
+    }
+
+    setParam(p) {
+        if (p.vcos != null) {
+            this.setVCOParam(p.vcos);
+        }
+        if (p.gains != null) {
+            for (let i = 0, end = p.gains.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+                this.gain_inputs.eq(i).val((p.gains[i] / 0.3) * 100);
+            }
+        }
+        if (p.eg != null) { this.setEGParam(p.eg); }
+        if (p.feg != null) { this.setFEGParam(p.feg); }
+        if (p.filter != null) { return this.setFilterParam(p.filter); }
+    }
+}
+
+
+// Export!
+export default SynthCoreView;
+
+function __range__(left, right, inclusive) {
+  let range = [];
+  let ascending = left < right;
+  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
+  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
+    range.push(i);
+  }
+  return range;
+}
