@@ -7,7 +7,10 @@
 - [x] user.js `new Buffer()` → `Buffer.from()`
 - [x] middleware.js nullチェック追加
 - [x] Express非推奨パターン修正 (`res.send(404)` → `res.status(404).send()`)
-- [ ] npm audit fix (セキュリティ脆弱性対応)
+- [x] npm audit fix (セキュリティ脆弱性対応)
+  - 78件の脆弱性の大半はdev deps (gulp, browserify等) 由来
+  - Vite移行で解消予定
+  - passport等の本番用はPhase 3で対応
 
 ## Phase 2: 大規模改修 (既知)
 
