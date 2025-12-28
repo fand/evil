@@ -11,7 +11,7 @@ module.exports.create = function (req, res, next) {
   var newUser = new User(req.body);
   newUser.provider = 'local';
   newUser.save(function(err) {
-    if (err) return res.json(400, err);
+    if (err) return res.status(400).json(err);
 
     req.logIn(newUser, function(err) {
       if (err) return next(err);
@@ -29,9 +29,9 @@ module.exports.show = function (req, res, next) {
 
   User.findById(userId, function (err, user) {
     if (err) return next(err);
-    if (!user) return res.send(404);
+    if (!user) return res.status(404).send();
 
-    res.send({ profile: user.profile });
+    res.json({ profile: user.profile });
   });
 };
 
@@ -44,15 +44,18 @@ module.exports.changePassword = function(req, res, next) {
   var newPass = String(req.body.newPassword);
 
   User.findById(userId, function (err, user) {
+    if (err) return next(err);
+    if (!user) return res.status(404).send();
+
     if(user.authenticate(oldPass)) {
       user.password = newPass;
       user.save(function(err) {
-        if (err) return res.send(400);
+        if (err) return res.status(400).send();
 
-        res.send(200);
+        res.status(200).send();
       });
     } else {
-      res.send(403);
+      res.status(403).send();
     }
   });
 };

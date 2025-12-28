@@ -7,7 +7,7 @@ module.exports = {
    */
   auth: function auth(req, res, next) {
     if (req.isAuthenticated()) return next();
-    res.send(401);
+    res.status(401).send();
   },
 
   /**
@@ -21,7 +21,7 @@ module.exports = {
   },
 
   redirector: function(req, res, next){
-    var ua = req.headers['user-agent'];
+    var ua = req.headers['user-agent'] || '';
 
     if (ua.match(/msie/ig)) {
       req.is_ie = true;
@@ -34,7 +34,7 @@ module.exports = {
   },
 
   csrf: function (req, res, next) {
-    if (!req.xhr) { return res.send(401); }
+    if (!req.xhr) { return res.status(401).send(); }
     return next();
   }
 };
