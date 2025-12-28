@@ -3,15 +3,13 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId,
-    ShortId = require('mongoose-shortid');
+    shortid = require('shortid');
 
 
 var SongSchema = new Schema({
   _id: {
-    type: ShortId,
-    len: 7,
-    base: 64,
-    retries: 4
+    type: String,
+    default: shortid.generate
   },
   title:    { type: String, default: 'Untitled' },
   creator: { type: String, default: 'Anonymous' },
