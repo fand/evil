@@ -1,7 +1,6 @@
 'use strict';
 
 module.exports = {
-
   /**
    *  Protect routes on your api from unauthenticated access
    */
@@ -13,20 +12,20 @@ module.exports = {
   /**
    * Set a cookie for angular so it knows we have an http session
    */
-  setUserCookie: function(req, res, next) {
-    if(req.user) {
+  setUserCookie: function (req, res, next) {
+    if (req.user) {
       res.cookie('user', JSON.stringify(req.user.userInfo));
     }
     return next();
   },
 
-  redirector: function(req, res, next){
+  redirector: function (req, res, next) {
     var ua = req.headers['user-agent'] || '';
 
-    if (ua.match(/msie/ig)) {
+    if (ua.match(/msie/gi)) {
       req.is_ie = true;
     }
-    if (ua.match(/iPhone|iPod|Android/ig)) {
+    if (ua.match(/iPhone|iPod|Android/gi)) {
       req.is_mobile = true;
     }
 
@@ -34,7 +33,9 @@ module.exports = {
   },
 
   csrf: function (req, res, next) {
-    if (!req.xhr) { return res.status(401).send(); }
+    if (!req.xhr) {
+      return res.status(401).send();
+    }
     return next();
-  }
+  },
 };

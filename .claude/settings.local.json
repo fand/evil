@@ -1,9 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(mise exec:*)",
-      "Bash(npm audit:*)",
-      "Bash(npx tsc:*)"
-    ]
+    "allow": ["Bash(mise exec:*)", "Bash(npm audit:*)", "Bash(npx tsc:*)"]
   }
 }

@@ -9,180 +9,205 @@
 import $ from 'jquery';
 
 class SynthCoreView {
-    model: any;
-    id: any;
-    dom: JQuery;
-    vcos: JQuery;
-    EG_inputs: JQuery;
-    FEG_inputs: JQuery;
-    filter_inputs: JQuery;
-    gain_inputs: JQuery;
-    canvasEG: HTMLCanvasElement;
-    canvasFEG: HTMLCanvasElement;
-    contextEG: CanvasRenderingContext2D;
-    contextFEG: CanvasRenderingContext2D;
+  model: any;
+  id: any;
+  dom: JQuery;
+  vcos: JQuery;
+  EG_inputs: JQuery;
+  FEG_inputs: JQuery;
+  filter_inputs: JQuery;
+  gain_inputs: JQuery;
+  canvasEG: HTMLCanvasElement;
+  canvasFEG: HTMLCanvasElement;
+  contextEG: CanvasRenderingContext2D;
+  contextFEG: CanvasRenderingContext2D;
 
-    constructor(model: any, id: any, dom: JQuery) {
-        this.model = model;
-        this.id = id;
-        this.dom = dom;
-        this.vcos = $(this.dom.find('.RS_VCO'));
+  constructor(model: any, id: any, dom: JQuery) {
+    this.model = model;
+    this.id = id;
+    this.dom = dom;
+    this.vcos = $(this.dom.find('.RS_VCO'));
 
-        this.EG_inputs     = this.dom.find('.RS_EG input');
-        this.FEG_inputs    = this.dom.find('.RS_FEG input');
-        this.filter_inputs = this.dom.find(".RS_filter input");
-        this.gain_inputs   = this.dom.find('.RS_mixer input');
+    this.EG_inputs = this.dom.find('.RS_EG input');
+    this.FEG_inputs = this.dom.find('.RS_FEG input');
+    this.filter_inputs = this.dom.find('.RS_filter input');
+    this.gain_inputs = this.dom.find('.RS_mixer input');
 
-        this.canvasEG   = this.dom.find(".RS_EG .canvasEG").get()[0] as HTMLCanvasElement;
-        this.canvasFEG  = this.dom.find(".RS_FEG .canvasFEG").get()[0] as HTMLCanvasElement;
-        this.contextEG  = this.canvasEG.getContext('2d')!;
-        this.contextFEG = this.canvasFEG.getContext('2d')!;
+    this.canvasEG = this.dom
+      .find('.RS_EG .canvasEG')
+      .get()[0] as HTMLCanvasElement;
+    this.canvasFEG = this.dom
+      .find('.RS_FEG .canvasFEG')
+      .get()[0] as HTMLCanvasElement;
+    this.contextEG = this.canvasEG.getContext('2d')!;
+    this.contextFEG = this.canvasFEG.getContext('2d')!;
 
-        this.initEvent();
+    this.initEvent();
+  }
+
+  initEvent() {
+    this.vcos.on('change', () => this.fetchVCOParam());
+    this.gain_inputs.on('change', () => this.fetchGains());
+    this.filter_inputs.on('change', () => this.fetchFilterParam());
+    this.EG_inputs.on('change', () => this.fetchEGParam());
+    this.FEG_inputs.on('change', () => this.fetchFEGParam());
+    return this.fetchParam();
+  }
+
+  updateCanvas(name) {
+    let canvas = null;
+    let context = null;
+    let adsr = null;
+    if (name === 'EG') {
+      canvas = this.canvasEG;
+      context = this.contextEG;
+      adsr = this.model.eg.getADSR();
+    } else {
+      canvas = this.canvasFEG;
+      context = this.contextFEG;
+      adsr = this.model.feg.getADSR();
     }
 
-    initEvent() {
-        this.vcos.on("change",          () => this.fetchVCOParam());
-        this.gain_inputs.on("change",   () => this.fetchGains());
-        this.filter_inputs.on("change", () => this.fetchFilterParam());
-        this.EG_inputs.on("change",     () => this.fetchEGParam());
-        this.FEG_inputs.on("change",    () => this.fetchFEGParam());
-        return this.fetchParam();
-    }
+    const w = (canvas.width = 180);
+    const h = (canvas.height = 50);
+    const w4 = w / 4;
+    context.clearRect(0, 0, w, h);
+    context.beginPath();
+    context.moveTo(w4 * (1.0 - adsr[0]), h);
+    context.lineTo(w / 4, 0); // attack
+    context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2])); // decay
+    context.lineTo(w4 * 3, h * (1.0 - adsr[2])); // sustain
+    context.lineTo(w4 * (adsr[3] + 3), h); // release
+    context.strokeStyle = 'rgb(0, 220, 255)';
+    return context.stroke();
+  }
 
-    updateCanvas(name) {
-        let canvas  = null;
-        let context = null;
-        let adsr    = null;
-        if (name === "EG") {
-            canvas  = this.canvasEG;
-            context = this.contextEG;
-            adsr    = this.model.eg.getADSR();
-        } else {
-            canvas  = this.canvasFEG;
-            context = this.contextFEG;
-            adsr    = this.model.feg.getADSR();
-        }
+  fetchParam() {
+    this.fetchVCOParam();
+    this.fetchEGParam();
+    this.fetchFEGParam();
+    this.fetchFilterParam();
+    return this.fetchGains();
+  }
 
-        const w = (canvas.width = 180);
-        const h = (canvas.height = 50);
-        const w4 = w/4;
-        context.clearRect(0,0,w,h);
-        context.beginPath();
-        context.moveTo(w4 * (1.0 - adsr[0]), h);
-        context.lineTo(w / 4,0);                                  // attack
-        context.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2]));  // decay
-        context.lineTo(w4 * 3, h * (1.0 - adsr[2]));              // sustain
-        context.lineTo(w4 * (adsr[3] + 3), h);                    // release
-        context.strokeStyle = 'rgb(0, 220, 255)';
-        return context.stroke();
-    }
-
-    fetchParam() {
-        this.fetchVCOParam();
-        this.fetchEGParam();
-        this.fetchFEGParam();
-        this.fetchFilterParam();
-        return this.fetchGains();
-    }
-
-    fetchVCOParam() {
-        const harmony = this.vcos.eq(0).find('.harmony').val();
-        return (() => {
-            const result = [];
-            for (let i = 0, end = this.vcos.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
-                var vco = this.vcos.eq(i);
-                result.push(this.model.setVCOParam(
-                    i,
-                    vco.find('.shape').val() as string,
-                    parseInt(vco.find('.octave').val() as string),
-                    parseInt(vco.find('.interval').val() as string),
-                    parseInt(vco.find('.fine').val() as string),
-                    harmony
-                ));
-            }
-            return result;
-        })();
-    }
-
-    setVCOParam(p) {
-        return (() => {
-            const result = [];
-            for (let i = 0, end = this.vcos.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
-                var vco = this.vcos.eq(i);
-                vco.find('.shape').val(p[i].shape);
-                vco.find('.octave').val(p[i].octave);
-                vco.find('.interval').val(p[i].interval);
-                result.push(vco.find('.fine').val(p[i].fine));
-            }
-            return result;
-        })();
-    }
-
-    fetchEGParam() {
-        this.model.setEGParam(
-            parseFloat(this.EG_inputs.eq(0).val() as string),
-            parseFloat(this.EG_inputs.eq(1).val() as string),
-            parseFloat(this.EG_inputs.eq(2).val() as string),
-            parseFloat(this.EG_inputs.eq(3).val() as string)
+  fetchVCOParam() {
+    const harmony = this.vcos.eq(0).find('.harmony').val();
+    return (() => {
+      const result = [];
+      for (
+        let i = 0, end = this.vcos.length, asc = 0 <= end;
+        asc ? i < end : i > end;
+        asc ? i++ : i--
+      ) {
+        var vco = this.vcos.eq(i);
+        result.push(
+          this.model.setVCOParam(
+            i,
+            vco.find('.shape').val() as string,
+            parseInt(vco.find('.octave').val() as string),
+            parseInt(vco.find('.interval').val() as string),
+            parseInt(vco.find('.fine').val() as string),
+            harmony
+          )
         );
-        return this.updateCanvas("EG");
-    }
+      }
+      return result;
+    })();
+  }
 
-    setEGParam(p) {
-        this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
-        this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
-        this.EG_inputs.eq(2).val(p.adsr[2] * 100);
-        return this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
-    }
+  setVCOParam(p) {
+    return (() => {
+      const result = [];
+      for (
+        let i = 0, end = this.vcos.length, asc = 0 <= end;
+        asc ? i < end : i > end;
+        asc ? i++ : i--
+      ) {
+        var vco = this.vcos.eq(i);
+        vco.find('.shape').val(p[i].shape);
+        vco.find('.octave').val(p[i].octave);
+        vco.find('.interval').val(p[i].interval);
+        result.push(vco.find('.fine').val(p[i].fine));
+      }
+      return result;
+    })();
+  }
 
-    fetchFEGParam() {
-        this.model.setFEGParam(
-            parseFloat(this.FEG_inputs.eq(0).val() as string),
-            parseFloat(this.FEG_inputs.eq(1).val() as string),
-            parseFloat(this.FEG_inputs.eq(2).val() as string),
-            parseFloat(this.FEG_inputs.eq(3).val() as string)
-        );
-        return this.updateCanvas("FEG");
-    }
+  fetchEGParam() {
+    this.model.setEGParam(
+      parseFloat(this.EG_inputs.eq(0).val() as string),
+      parseFloat(this.EG_inputs.eq(1).val() as string),
+      parseFloat(this.EG_inputs.eq(2).val() as string),
+      parseFloat(this.EG_inputs.eq(3).val() as string)
+    );
+    return this.updateCanvas('EG');
+  }
 
-    setFEGParam(p) {
-        return __range__(0, p.length, false).map((i) =>
-            this.FEG_inputs.eq(i).val(p.adsr[i]));
-    }
+  setEGParam(p) {
+    this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
+    this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
+    this.EG_inputs.eq(2).val(p.adsr[2] * 100);
+    return this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
+  }
 
-    fetchFilterParam() {
-        return this.model.setFilterParam(
-            parseFloat(this.filter_inputs.eq(0).val() as string),
-            parseFloat(this.filter_inputs.eq(1).val() as string)
-        );
-    }
+  fetchFEGParam() {
+    this.model.setFEGParam(
+      parseFloat(this.FEG_inputs.eq(0).val() as string),
+      parseFloat(this.FEG_inputs.eq(1).val() as string),
+      parseFloat(this.FEG_inputs.eq(2).val() as string),
+      parseFloat(this.FEG_inputs.eq(3).val() as string)
+    );
+    return this.updateCanvas('FEG');
+  }
 
-    setFilterParam(p) {
-        this.filter_inputs.eq(0).val(p[0]);
-        return this.filter_inputs.eq(1).val(p[1]);
-    }
+  setFEGParam(p) {
+    return __range__(0, p.length, false).map((i) =>
+      this.FEG_inputs.eq(i).val(p.adsr[i])
+    );
+  }
 
-    fetchGains() {
-        return __range__(0, this.gain_inputs.length, false).map((i) =>
-            this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val() as string)));
-    }
+  fetchFilterParam() {
+    return this.model.setFilterParam(
+      parseFloat(this.filter_inputs.eq(0).val() as string),
+      parseFloat(this.filter_inputs.eq(1).val() as string)
+    );
+  }
 
-    setParam(p) {
-        if (p.vcos != null) {
-            this.setVCOParam(p.vcos);
-        }
-        if (p.gains != null) {
-            for (let i = 0, end = p.gains.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
-                this.gain_inputs.eq(i).val((p.gains[i] / 0.3) * 100);
-            }
-        }
-        if (p.eg != null) { this.setEGParam(p.eg); }
-        if (p.feg != null) { this.setFEGParam(p.feg); }
-        if (p.filter != null) { return this.setFilterParam(p.filter); }
+  setFilterParam(p) {
+    this.filter_inputs.eq(0).val(p[0]);
+    return this.filter_inputs.eq(1).val(p[1]);
+  }
+
+  fetchGains() {
+    return __range__(0, this.gain_inputs.length, false).map((i) =>
+      this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val() as string))
+    );
+  }
+
+  setParam(p) {
+    if (p.vcos != null) {
+      this.setVCOParam(p.vcos);
     }
+    if (p.gains != null) {
+      for (
+        let i = 0, end = p.gains.length, asc = 0 <= end;
+        asc ? i < end : i > end;
+        asc ? i++ : i--
+      ) {
+        this.gain_inputs.eq(i).val((p.gains[i] / 0.3) * 100);
+      }
+    }
+    if (p.eg != null) {
+      this.setEGParam(p.eg);
+    }
+    if (p.feg != null) {
+      this.setFEGParam(p.feg);
+    }
+    if (p.filter != null) {
+      return this.setFilterParam(p.filter);
+    }
+  }
 }
-
 
 // Export!
 export default SynthCoreView;

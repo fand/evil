@@ -7,7 +7,9 @@
     "typecheck": "tsc --noEmit",
     "start": "node server.js",
     "dev": "npm run build && node server.js",
-    "postinstall": "mkdir -p node_modules/mongodb/node_modules && ln -sf ../../bson node_modules/mongodb/node_modules/bson"
+    "postinstall": "mkdir -p node_modules/mongodb/node_modules && ln -sf ../../bson node_modules/mongodb/node_modules/bson",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "body-parser": "^1.9.0",
@@ -35,6 +37,7 @@
     "@types/jquery": "^3.5.33",
     "@types/lodash": "^4.17.21",
     "@vitejs/plugin-legacy": "^7.2.1",
+    "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "vite": "^7.3.0"
   },

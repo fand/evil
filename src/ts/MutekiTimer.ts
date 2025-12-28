@@ -7,7 +7,7 @@
  * DS208: Avoid top-level this
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-const wsetTimeout   = window.setTimeout;
+const wsetTimeout = window.setTimeout;
 const wclearTimeout = window.clearTimeout;
 
 const SOURCE = `\
@@ -23,76 +23,84 @@ onmessage = function(e) {
     }
 };\
 `;
-const TIMER_PATH = __guard__((window.URL != null ? window.URL : (window as any).webkitURL), x => x.createObjectURL((() => {
-    try { return new Blob([SOURCE], {type:'text/javascript'}); } catch (e) { return null; }
- })()));
-
+const TIMER_PATH = __guard__(
+  window.URL != null ? window.URL : (window as any).webkitURL,
+  (x) =>
+    x.createObjectURL(
+      (() => {
+        try {
+          return new Blob([SOURCE], { type: 'text/javascript' });
+        } catch (e) {
+          return null;
+        }
+      })()
+    )
+);
 
 class MutekiTimer {
-    timer: Worker | number;
+  timer: Worker | number;
 
-    constructor() {
-        if (TIMER_PATH) {
-            this.timer = new Worker(TIMER_PATH);
-        } else {
-            this.timer = 0;
-        }
+  constructor() {
+    if (TIMER_PATH) {
+      this.timer = new Worker(TIMER_PATH);
+    } else {
+      this.timer = 0;
     }
+  }
 
-    setTimeout(func, interval) {
-        if (interval == null) { interval = 100; }
-        if (typeof this.timer === 'number') {
-            return this.timer = wsetTimeout(func, interval);
-        } else {
-            this.timer.onmessage = func;
-            return this.timer.postMessage(interval);
-        }
+  setTimeout(func, interval) {
+    if (interval == null) {
+      interval = 100;
     }
+    if (typeof this.timer === 'number') {
+      return (this.timer = wsetTimeout(func, interval));
+    } else {
+      this.timer.onmessage = func;
+      return this.timer.postMessage(interval);
+    }
+  }
 
-    clearTimeout() {
-        if (typeof this.timer === 'number') {
-            return clearTimeout(this.timer);
-        } else {
-            return this.timer.postMessage(0);
-        }
+  clearTimeout() {
+    if (typeof this.timer === 'number') {
+      return clearTimeout(this.timer);
+    } else {
+      return this.timer.postMessage(0);
     }
+  }
 }
 
-
-let tid  = +new Date();
+let tid = +new Date();
 const pool = {};
-const _setTimeout = function(func, interval){
-    const t = new MutekiTimer();
-    t.setTimeout(func, interval);
-    pool[++tid] = t;
-    return tid;
+const _setTimeout = function (func, interval) {
+  const t = new MutekiTimer();
+  t.setTimeout(func, interval);
+  pool[++tid] = t;
+  return tid;
 };
 
-const _clearTimeout = function(id){
-    if (pool[id] != null) {
-        pool[id].clearTimeout();
-    }
-    return undefined;
+const _clearTimeout = function (id) {
+  if (pool[id] != null) {
+    pool[id].clearTimeout();
+  }
+  return undefined;
 };
-
 
 (MutekiTimer as any).use = () => {
-    (window as any).setTimeout   = _setTimeout;
-    return (window as any).clearTimeout = _clearTimeout;
+  (window as any).setTimeout = _setTimeout;
+  return ((window as any).clearTimeout = _clearTimeout);
 };
-
 
 (MutekiTimer as any).unuse = () => {
-    (window as any).setTimeout   = wsetTimeout;
-    return (window as any).clearTimeout = wclearTimeout;
+  (window as any).setTimeout = wsetTimeout;
+  return ((window as any).clearTimeout = wclearTimeout);
 };
 
-
 (MutekiTimer as any).isEnabled = () => !!TIMER_PATH;
-
 
 export default MutekiTimer;
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return typeof value !== 'undefined' && value !== null
+    ? transform(value)
+    : undefined;
 }

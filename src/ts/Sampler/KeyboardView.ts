@@ -1,5 +1,5 @@
-import Sampler from "../Sampler";
-import SamplerView from "./View";
+import Sampler from '../Sampler';
+import SamplerView from './View';
 
 /*
  * decaffeinate suggestions:
@@ -32,22 +32,22 @@ class SamplerKeyboardView {
   constructor(sequencer: SamplerView) {
     // Keyboard
     this.sequencer = sequencer;
-    this.on_dom = this.sequencer.dom.find(".keyboard-off");
-    this.off_dom = this.sequencer.dom.find(".keyboard-on");
+    this.on_dom = this.sequencer.dom.find('.keyboard-off');
+    this.off_dom = this.sequencer.dom.find('.keyboard-on');
     this.canvas_on = this.on_dom[0] as HTMLCanvasElement;
     this.canvas_off = this.off_dom[0] as HTMLCanvasElement;
-    this.ctx_on = this.canvas_on.getContext("2d");
-    this.ctx_off = this.canvas_off.getContext("2d");
+    this.ctx_on = this.canvas_on.getContext('2d');
+    this.ctx_off = this.canvas_off.getContext('2d');
 
     this.w = 64;
     this.h = 26;
     this.cells_y = 10;
     this.color = [
-      "rgba(230, 230, 230, 1.0)",
-      "rgba(  250, 50, 230, 0.7)",
-      "rgba(255, 100, 230, 0.7)",
-      "rgba(200, 200, 200, 1.0)",
-      "rgba(255, 255, 255, 1.0)",
+      'rgba(230, 230, 230, 1.0)',
+      'rgba(  250, 50, 230, 0.7)',
+      'rgba(255, 100, 230, 0.7)',
+      'rgba(200, 200, 200, 1.0)',
+      'rgba(255, 255, 255, 1.0)',
     ];
     this.is_clicked = false;
 
@@ -86,7 +86,7 @@ class SamplerKeyboardView {
 
   initEvent() {
     return this.off_dom
-      .on("mousemove", (e) => {
+      .on('mousemove', (e) => {
         const pos = this.getPos(e);
 
         if (pos !== this.hover_pos) {
@@ -103,7 +103,7 @@ class SamplerKeyboardView {
           this.click_pos = pos;
         }
       })
-      .on("mousedown", (e) => {
+      .on('mousedown', (e) => {
         this.is_clicked = true;
         const pos = this.getPos(e);
         const note = this.cells_y - pos;
@@ -112,14 +112,14 @@ class SamplerKeyboardView {
         this.sequencer.model.noteOn(note);
         this.click_pos = pos;
       })
-      .on("mouseup", (e) => {
+      .on('mouseup', (e) => {
         this.is_clicked = false;
         this.clearActive(this.click_pos);
         this.sequencer.model.noteOff();
 
         this.click_pos = -1;
       })
-      .on("mouseout", (e) => {
+      .on('mouseout', (e) => {
         this.clearActive(this.hover_pos);
         this.sequencer.model.noteOff();
         this.hover_pos = -1;
@@ -133,9 +133,9 @@ class SamplerKeyboardView {
     this.ctx_off.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
     this.ctx_off.fillStyle = this.color[3];
     return this.ctx_off.fillText(
-      ((this.cells_y - i - 1) % 7) + 1 + "th",
+      ((this.cells_y - i - 1) % 7) + 1 + 'th',
       10,
-      (i + 1) * this.h - 10,
+      (i + 1) * this.h - 10
     );
   }
 
@@ -143,9 +143,9 @@ class SamplerKeyboardView {
     this.ctx_off.fillStyle = this.color[1];
     this.ctx_off.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
     return this.ctx_off.fillText(
-      ((this.cells_y - i - 1) % 7) + 1 + "th",
+      ((this.cells_y - i - 1) % 7) + 1 + 'th',
       10,
-      (i + 1) * this.h - 10,
+      (i + 1) * this.h - 10
     );
   }
 
@@ -155,9 +155,9 @@ class SamplerKeyboardView {
     this.ctx_off.fillRect(0, i * this.h, this.w, this.h);
     this.ctx_off.fillStyle = this.color[4];
     return this.ctx_off.fillText(
-      ((this.cells_y - i - 1) % 7) + 1 + "th",
+      ((this.cells_y - i - 1) % 7) + 1 + 'th',
       10,
-      (i + 1) * this.h - 10,
+      (i + 1) * this.h - 10
     );
   }
 
@@ -174,9 +174,9 @@ class SamplerKeyboardView {
   drawText(i: number) {
     this.ctx_off.fillStyle = this.color[3];
     return this.ctx_off.fillText(
-      ((this.cells_y - i - 1) % 7) + 1 + "th",
+      ((this.cells_y - i - 1) % 7) + 1 + 'th',
       10,
-      (i + 1) * this.h - 10,
+      (i + 1) * this.h - 10
     );
   }
 
@@ -185,14 +185,14 @@ class SamplerKeyboardView {
       0,
       (this.cells_y - this.sample_last - 1) * this.h,
       this.w,
-      this.h,
+      this.h
     );
-    this.ctx_on.fillStyle = "rgba(255, 200, 230, 0.3)";
+    this.ctx_on.fillStyle = 'rgba(255, 200, 230, 0.3)';
     this.ctx_on.fillRect(
       0,
       (this.cells_y - sample_now - 1) * this.h,
       this.w,
-      this.h,
+      this.h
     );
     return (this.sample_last = sample_now);
   }

@@ -3,6 +3,6 @@
 module.exports = {
   env: 'test',
   mongo: {
-    uri: 'mongodb://localhost/evil-test'
-  }
+    uri: 'mongodb://localhost/evil-test',
+  },
 };

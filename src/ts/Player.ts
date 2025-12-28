@@ -7,13 +7,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import Mixer from "./Mixer";
-import Session from "./Session";
-import Sidebar from "./Sidebar";
-import Synth from "./Synth";
-import Sampler from "./Sampler";
-import PlayerView from "./PlayerView";
-import MutekiTimer from "./MutekiTimer";
+import Mixer from './Mixer';
+import Session from './Session';
+import Sidebar from './Sidebar';
+import Synth from './Synth';
+import Sampler from './Sampler';
+import PlayerView from './PlayerView';
+import MutekiTimer from './MutekiTimer';
 
 declare const CONTEXT: AudioContext;
 declare global {
@@ -47,8 +47,8 @@ class Player {
   constructor(ctx: AudioContext) {
     this.bpm = 120;
     this.duration = 500; // msec
-    this.key = "A";
-    this.scale = "Major";
+    this.key = 'A';
+    this.scale = 'Major';
     this.is_playing = false;
     this.time = 0;
     this.scene = { bpm: this.bpm, key: this.key, scale: this.scale };
@@ -212,11 +212,11 @@ class Player {
     let s_new;
     const s_old = this.synth[id];
 
-    if (type === "REZ") {
+    if (type === 'REZ') {
       s_new = new Synth(this.context, id, this, s_old.name);
       s_new.setScale(this.scene.scale);
       s_new.setKey(this.scene.key);
-    } else if (type === "SAMPLER") {
+    } else if (type === 'SAMPLER') {
       s_new = new Sampler(this.context, id, this, s_old.name);
     }
 
@@ -241,7 +241,7 @@ class Player {
     this.synth_now = this.synth[next_idx];
     this.synth_now.activate(next_idx);
     this.synth_pos++;
-    return window.keyboard.setMode("SYNTH");
+    return window.keyboard.setMode('SYNTH');
   }
 
   moveLeft(next_idx) {
@@ -249,15 +249,15 @@ class Player {
     this.synth_now = this.synth[next_idx];
     this.synth_now.activate(next_idx);
     this.synth_pos--;
-    return window.keyboard.setMode("SYNTH");
+    return window.keyboard.setMode('SYNTH');
   }
 
   moveTop() {
-    return window.keyboard.setMode("MIXER");
+    return window.keyboard.setMode('MIXER');
   }
 
   moveBottom() {
-    return window.keyboard.setMode("SYNTH");
+    return window.keyboard.setMode('SYNTH');
   }
 
   moveTo(synth_num) {
@@ -320,11 +320,11 @@ class Player {
     ) {
       if (
         this.song.tracks[i].type == null ||
-        this.song.tracks[i].type === "REZ"
+        this.song.tracks[i].type === 'REZ'
       ) {
         this.addSynth(0, this.song.tracks[i].name);
       }
-      if (this.song.tracks[i].type === "SAMPLER") {
+      if (this.song.tracks[i].type === 'SAMPLER') {
         this.addSampler(0, this.song.tracks[i].name);
       }
     }
@@ -381,13 +381,12 @@ class Player {
   resetSceneLength(_l?: number) {
     this.scene_length = 0;
     return Array.from(this.synth).map(
-      (s) =>
-        (this.scene_length = Math.max(this.scene_length, s.pattern.length)),
+      (s) => (this.scene_length = Math.max(this.scene_length, s.pattern.length))
     );
   }
 
   showSuccess(url) {
-    console.log("success!");
+    console.log('success!');
     return console.log(url);
   }
 

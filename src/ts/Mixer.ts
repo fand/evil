@@ -6,15 +6,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import MixerView from "./MixerView";
-import Panner from "./Panner";
-import Limiter from "./FX/Limiter";
-import Fuzz from "./FX/Fuzz";
-import Delay from "./FX/Delay";
-import Double from "./FX/Double";
-import Reverb from "./FX/Reverb";
-import Compressor from "./FX/Compressor";
-import FX from "./FX/FX";
+import MixerView from './MixerView';
+import Panner from './Panner';
+import Limiter from './FX/Limiter';
+import Fuzz from './FX/Fuzz';
+import Delay from './FX/Delay';
+import Double from './FX/Double';
+import Reverb from './FX/Reverb';
+import Compressor from './FX/Compressor';
+import FX from './FX/FX';
 
 class Mixer {
   ctx: AudioContext;
@@ -39,7 +39,9 @@ class Mixer {
     this.ctx = ctx;
     this.player = player;
     this.gain_master = 1.0;
-    this.gain_tracks = Array.from(this.player.synth).map((s: any) => s.getGain());
+    this.gain_tracks = Array.from(this.player.synth).map((s: any) =>
+      s.getGain()
+    );
 
     this.out = this.ctx.createGain();
     this.out.gain.value = this.gain_master;
@@ -148,7 +150,7 @@ class Mixer {
     this.pan_tracks = pan_tracks;
     this.pan_master = pan_master;
     return __range__(0, this.pan_tracks.length, false).map((i) =>
-      this.panners[i].setPosition(this.pan_tracks[i]),
+      this.panners[i].setPosition(this.pan_tracks[i])
     );
   }
 
@@ -213,15 +215,15 @@ class Mixer {
 
   addMasterEffect(name) {
     let fx: FX;
-    if (name === "Fuzz") {
+    if (name === 'Fuzz') {
       fx = new Fuzz(this.ctx);
-    } else if (name === "Delay") {
+    } else if (name === 'Delay') {
       fx = new Delay(this.ctx);
-    } else if (name === "Reverb") {
+    } else if (name === 'Reverb') {
       fx = new Reverb(this.ctx);
-    } else if (name === "Comp") {
+    } else if (name === 'Comp') {
       fx = new Compressor(this.ctx);
-    } else if (name === "Double") {
+    } else if (name === 'Double') {
       fx = new Double(this.ctx);
     }
 
@@ -243,15 +245,15 @@ class Mixer {
 
   addTracksEffect(x, name) {
     let fx;
-    if (name === "Fuzz") {
+    if (name === 'Fuzz') {
       fx = new Fuzz(this.ctx);
-    } else if (name === "Delay") {
+    } else if (name === 'Delay') {
       fx = new Delay(this.ctx);
-    } else if (name === "Reverb") {
+    } else if (name === 'Reverb') {
       fx = new Reverb(this.ctx);
-    } else if (name === "Comp") {
+    } else if (name === 'Comp') {
       fx = new Compressor(this.ctx);
-    } else if (name === "Double") {
+    } else if (name === 'Double') {
       fx = new Double(this.ctx);
     }
 
