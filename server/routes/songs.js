@@ -8,7 +8,7 @@ var get = function (req, res, next) {
   var song_id = req.params.song_id;
   Song.findById(song_id, function (err, song) {
     if (err) return next(err);
-    if (!song) return res.send(404);
+    if (!song) return res.status(404).send();
     res.json({ song: song });
   });
 };
@@ -20,7 +20,7 @@ var create = function (req, res, next) {
   song.json     = req.body.json;
 
   song.save(function(err) {
-    if (err) return res.json(400, err);
+    if (err) return res.status(400).json(err);
     res.send(song.id);
   });
 };
@@ -30,7 +30,7 @@ var update = function(req, res, next) {
 
   Song.findById(song_id, function (err, song) {
     if (err) return next(err);
-    if (!song) return res.send(404);
+    if (!song) return res.status(404).send();
 
     song.title    = req.body.title;
     song.creator = req.body.creator;
@@ -38,9 +38,9 @@ var update = function(req, res, next) {
 
     song.validate(function (err) {
       if (err) return next(err);
-      song.save(function () {
-        if (err) return res.send(400);
-        res.send(200);
+      song.save(function (err) {
+        if (err) return res.status(400).send();
+        res.status(200).send();
       });
     });
   });
