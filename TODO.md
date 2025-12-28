@@ -18,7 +18,6 @@
 - [ ] Vite移行 (Gulp + Browserify + Watchify廃止)
 - [ ] React移行
 
-
 ## Phase 3: 追加改修
 
 - [ ] Passport v0.2 → v0.7 更新

@@ -6,7 +6,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import $ from "jquery";
+import $ from 'jquery';
 
 class SamplerCoreView {
   model: any;
@@ -40,18 +40,18 @@ class SamplerCoreView {
     this.model = model;
     this.id = id;
     this.dom = dom;
-    this.sample = this.dom.find(".Sampler_sample");
-    this.canvas_waveform_dom = this.dom.find(".waveform");
+    this.sample = this.dom.find('.Sampler_sample');
+    this.canvas_waveform_dom = this.dom.find('.waveform');
     this.canvas_waveform = this.canvas_waveform_dom[0] as HTMLCanvasElement;
-    this.ctx_waveform = this.canvas_waveform.getContext("2d")!;
-    this.canvas_EQ_dom = this.dom.find(".canvasEQ");
+    this.ctx_waveform = this.canvas_waveform.getContext('2d')!;
+    this.canvas_EQ_dom = this.dom.find('.canvasEQ');
     this.canvas_EQ = this.canvas_EQ_dom[0] as HTMLCanvasElement;
-    this.ctx_EQ = this.canvas_EQ.getContext("2d")!;
-    this.eq = this.dom.find(".Sampler_EQ");
+    this.ctx_EQ = this.canvas_EQ.getContext('2d')!;
+    this.eq = this.dom.find('.Sampler_EQ');
 
-    this.output = this.dom.find(".Sampler_output");
-    this.panner = this.output.find(".pan-slider");
-    this.gain = this.output.find(".gain-slider");
+    this.output = this.dom.find('.Sampler_output');
+    this.panner = this.output.find('.pan-slider');
+    this.gain = this.output.find('.gain-slider');
 
     this.sample_now = 0;
 
@@ -66,12 +66,12 @@ class SamplerCoreView {
       both: [this.tail_wave, this.head_wave],
     };
 
-    this.sample_name = this.sample.find(".sample-name");
-    this.sample_list = $("#tmpl-sample-list").clone();
-    this.sample_list.removeAttr("id");
-    this.sample.find(".file-select").append(this.sample_list);
+    this.sample_name = this.sample.find('.sample-name');
+    this.sample_list = $('#tmpl-sample-list').clone();
+    this.sample_list.removeAttr('id');
+    this.sample.find('.file-select').append(this.sample_list);
     this.sample_list_wrapper = $('<div class="sample-list-wrapper"></div>');
-    this.sample.find(".file-select").append(this.sample_list_wrapper);
+    this.sample.find('.file-select').append(this.sample_list_wrapper);
 
     this.initEvent();
 
@@ -85,39 +85,39 @@ class SamplerCoreView {
   }
 
   initEvent() {
-    this.sample.find("input").on("change", () => {
+    this.sample.find('input').on('change', () => {
       this.fetchSampleTimeParam();
       return this.updateWaveformCanvas(this.sample_now);
     });
     this.canvas_waveform_dom
-      .on("mousedown", (e) => {
+      .on('mousedown', (e) => {
         const pos = this.getWaveformPos(e);
         this.clicked_wave = pos;
         if (Math.abs(pos - this.head_wave) < 3) {
-          return (this.target_wave = "head");
+          return (this.target_wave = 'head');
         } else if (Math.abs(pos - this.tail_wave) < 3) {
-          return (this.target_wave = "tail");
+          return (this.target_wave = 'tail');
         } else if (this.head_wave < pos && pos < this.tail_wave) {
-          return (this.target_wave = "both");
+          return (this.target_wave = 'both');
         } else {
           return (this.target_wave = undefined);
         }
       })
-      .on("mousemove", (e) => {
+      .on('mousemove', (e) => {
         if (this.target_wave != null) {
           const pos = this.getWaveformPos(e);
           let d = pos - this.clicked_wave;
 
-          if (this.target_wave === "head") {
+          if (this.target_wave === 'head') {
             d = Math.max(d, -this.head_wave);
             this.head_wave += d;
-          } else if (this.target_wave === "tail") {
+          } else if (this.target_wave === 'tail') {
             d = Math.min(d, this.w_wave - this.tail_wave);
             this.tail_wave += d;
           } else {
             d = Math.max(
               Math.min(d, this.w_wave - this.tail_wave),
-              -this.head_wave,
+              -this.head_wave
             );
             this.head_wave += d;
             this.tail_wave += d;
@@ -129,35 +129,35 @@ class SamplerCoreView {
           return (this.clicked_wave = pos);
         }
       })
-      .on("mouseup mouseout", () => {
+      .on('mouseup mouseout', () => {
         this.target_wave = undefined;
         return this.updateWaveformCanvas(this.sample_now);
       });
 
-    this.sample_name.on("click", () => {
+    this.sample_name.on('click', () => {
       return this.showSampleList();
     });
     const self = this;
-    this.sample_list.find("div").on("click", function () {
+    this.sample_list.find('div').on('click', function () {
       self.setSample($(this).html());
       return self.hideSampleList();
     });
-    this.sample_list_wrapper.on("click", () => {
+    this.sample_list_wrapper.on('click', () => {
       return this.hideSampleList();
     });
 
-    this.eq.on("change", () => {
+    this.eq.on('change', () => {
       this.fetchSampleEQParam();
       return this.updateEQCanvas();
     });
-    return this.output.on("change", () => {
+    return this.output.on('change', () => {
       return this.fetchSampleOutputParam();
     });
   }
 
   bindSample(sample_now, param) {
     this.sample_now = sample_now;
-    this.sample_name.find("span").text(param.wave);
+    this.sample_name.find('span').text(param.wave);
     this.updateWaveformCanvas(this.sample_now);
     return this.updateEQCanvas();
   }
@@ -165,8 +165,8 @@ class SamplerCoreView {
   showSampleList() {
     const position = this.sample_name.position();
     this.sample_list.show().css({
-      top: position.top + 20 + "px",
-      left: position.left + "px",
+      top: position.top + 20 + 'px',
+      left: position.left + 'px',
     });
     return this.sample_list_wrapper.show();
   }
@@ -207,7 +207,7 @@ class SamplerCoreView {
       }
 
       ctx.closePath();
-      ctx.strokeStyle = "rgb(255, 0, 220)";
+      ctx.strokeStyle = 'rgb(255, 0, 220)';
       ctx.stroke();
       ctx.translate(0, -h / 2);
     }
@@ -217,9 +217,9 @@ class SamplerCoreView {
     const right = hts[1] * w;
     if (left < right) {
       if (this.target_wave != null) {
-        ctx.fillStyle = "rgba(255, 0, 160, 0.1)";
+        ctx.fillStyle = 'rgba(255, 0, 160, 0.1)';
       } else {
-        ctx.fillStyle = "rgba(255, 0, 160, 0.2)";
+        ctx.fillStyle = 'rgba(255, 0, 160, 0.2)';
       }
       ctx.fillRect(left, 0, right - left, h);
     }
@@ -253,7 +253,7 @@ class SamplerCoreView {
     ctx.lineTo(w / 3, -(eq[1] / 100.0) * (h / 2));
     ctx.lineTo((w / 3) * 2, -(eq[1] / 100.0) * (h / 2));
     ctx.lineTo(w, -(eq[2] / 100.0) * (h / 2));
-    ctx.strokeStyle = "rgb(255, 0, 220)";
+    ctx.strokeStyle = 'rgb(255, 0, 220)';
     ctx.stroke();
     ctx.closePath();
     return ctx.translate(0, -h / 2);
@@ -261,7 +261,7 @@ class SamplerCoreView {
 
   setSample(name) {
     this.model.setSample(this.sample_now, name);
-    return this.sample_name.find("span").text(name);
+    return this.sample_name.find('span').text(name);
   }
 
   fetchSampleTimeParam() {
@@ -271,17 +271,17 @@ class SamplerCoreView {
       this.tail_wave / 300.0,
       Math.pow(
         10,
-        parseFloat(this.sample.find(".speed").val() as string) / 100.0 - 1.0,
-      ),
+        parseFloat(this.sample.find('.speed').val() as string) / 100.0 - 1.0
+      )
     );
   }
 
   fetchSampleEQParam() {
     return this.model.setSampleEQParam(
       this.sample_now,
-      parseFloat(this.eq.find(".EQ_lo").val() as string) - 100.0,
-      parseFloat(this.eq.find(".EQ_mid").val() as string) - 100.0,
-      parseFloat(this.eq.find(".EQ_hi").val() as string) - 100.0,
+      parseFloat(this.eq.find('.EQ_lo').val() as string) - 100.0,
+      parseFloat(this.eq.find('.EQ_mid').val() as string) - 100.0,
+      parseFloat(this.eq.find('.EQ_hi').val() as string) - 100.0
     );
   }
 
@@ -289,7 +289,7 @@ class SamplerCoreView {
     return this.model.setSampleOutputParam(
       this.sample_now,
       1.0 - parseFloat(this.panner.val() as string) / 200.0,
-      parseFloat(this.gain.val() as string) / 100.0,
+      parseFloat(this.gain.val() as string) / 100.0
     );
   }
 
@@ -297,13 +297,13 @@ class SamplerCoreView {
     this.head_wave = p[0] * 300.0;
     this.tail_wave = p[1] * 300.0;
     const ratio = Math.log(p[2]) / Math.LN10 + 1.0;
-    return this.sample.find(".speed").val(ratio * 100);
+    return this.sample.find('.speed').val(ratio * 100);
   }
 
   setSampleEQParam(p) {
-    this.eq.find(".EQ_lo").val(p[0] + 100.0);
-    this.eq.find(".EQ_mid").val(p[1] + 100.0);
-    return this.eq.find(".EQ_hi").val(p[2] + 100.0);
+    this.eq.find('.EQ_lo').val(p[0] + 100.0);
+    this.eq.find('.EQ_mid').val(p[1] + 100.0);
+    return this.eq.find('.EQ_hi').val(p[2] + 100.0);
   }
 
   setSampleOutputParam(p: [pan: number, gain: number]) {
@@ -316,8 +316,8 @@ class SamplerCoreView {
     return __range__(0, this.gain_inputs.length, false).map((i) =>
       this.model.setNodeGain(
         i,
-        parseInt(this.gain_inputs.eq(i).val() as string),
-      ),
+        parseInt(this.gain_inputs.eq(i).val() as string)
+      )
     );
   }
 }

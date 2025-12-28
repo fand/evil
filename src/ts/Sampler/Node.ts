@@ -6,9 +6,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import Panner from "../Panner";
-import SAMPLE from "./Constant";
-import CONSTANT from "../Constant";
+import Panner from '../Panner';
+import SAMPLE from './Constant';
+import CONSTANT from '../Constant';
 
 class SampleNode {
   ctx: AudioContext;
@@ -59,15 +59,15 @@ class SampleNode {
       this.ctx.createBiquadFilter(),
     ]);
     [eq1.type, eq2.type, eq3.type] = Array.from([
-      "lowshelf",
-      "peaking",
-      "highshelf",
+      'lowshelf',
+      'peaking',
+      'highshelf',
     ]);
     [eq1.Q.value, eq2.Q.value, eq3.Q.value] = Array.from([0.6, 0.6, 0.6]);
     [eq1.frequency.value, eq2.frequency.value, eq3.frequency.value] =
       Array.from([350, 2000, 4000]);
     [eq1.gain.value, eq2.gain.value, eq3.gain.value] = Array.from(
-      this.eq_gains,
+      this.eq_gains
     );
     this.eq_nodes = [eq1, eq2, eq3];
 
@@ -92,8 +92,8 @@ class SampleNode {
       return (this.buffer = sample.data);
     } else {
       const req = new XMLHttpRequest();
-      req.open("GET", sample.url, true);
-      req.responseType = "arraybuffer";
+      req.open('GET', sample.url, true);
+      req.responseType = 'arraybuffer';
       req.onload = () => {
         this.ctx.decodeAudioData(
           req.response,
@@ -103,9 +103,9 @@ class SampleNode {
             return this.parent.sampleLoaded(this.id);
           },
           (err) => {
-            console.log("Failed to fetch " + sample.url);
+            console.log('Failed to fetch ' + sample.url);
             return console.log(err);
-          },
+          }
         );
         return (sample.data = this.buffer);
       };

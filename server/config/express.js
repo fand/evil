@@ -1,30 +1,33 @@
 'use strict';
 
 var express = require('express'),
-    favicon = require('static-favicon'),
-    logger = require('morgan'),
-    compression = require('compression'),
-    bodyParser = require('body-parser'),
-    methodOverride = require('method-override'),
-    cookieParser = require('cookie-parser'),
-    session = require('express-session'),
-    errorHandler = require('errorhandler'),
-    path = require('path'),
-    config = require('./config'),
-    passport = require('passport'),
-    MongoStore = require('connect-mongo'),
-    middleware = require('../middleware');
+  favicon = require('static-favicon'),
+  logger = require('morgan'),
+  compression = require('compression'),
+  bodyParser = require('body-parser'),
+  methodOverride = require('method-override'),
+  cookieParser = require('cookie-parser'),
+  session = require('express-session'),
+  errorHandler = require('errorhandler'),
+  path = require('path'),
+  config = require('./config'),
+  passport = require('passport'),
+  MongoStore = require('connect-mongo'),
+  middleware = require('../middleware');
 
 var secret = require('../../secret.js');
 
 var ECT = require('ect');
-var ectRenderer = ECT({ watch: true, root: config.root + '/views', ext : '.ect' });
-
+var ectRenderer = ECT({
+  watch: true,
+  root: config.root + '/views',
+  ext: '.ect',
+});
 
 /**
  * Express configuration
  */
-module.exports = function(app) {
+module.exports = function (app) {
   var env = app.get('env');
 
   if ('development' === env) {
@@ -41,7 +44,10 @@ module.exports = function(app) {
     });
 
     app.use(express.static(path.join(config.root, '.tmp')));
-    app.use('/js/test', express.static(path.join(config.root, 'build/js/test')));
+    app.use(
+      '/js/test',
+      express.static(path.join(config.root, 'build/js/test'))
+    );
   }
 
   if ('production' === env) {
@@ -50,7 +56,10 @@ module.exports = function(app) {
   }
 
   app.use('/js', express.static(path.join(config.root, 'build/js')));
-  app.use('/js/lib', express.static(path.join(config.root, 'bower_components')));
+  app.use(
+    '/js/lib',
+    express.static(path.join(config.root, 'bower_components'))
+  );
   app.use('/css', express.static(path.join(config.root, 'build/css')));
   app.use('/static', express.static(path.join(config.root, 'static')));
   // app.engine('html', require('ejs').renderFile);
@@ -61,9 +70,11 @@ module.exports = function(app) {
   app.use(logger('dev'));
 
   app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({
-    extended: true
-  }));
+  app.use(
+    bodyParser.urlencoded({
+      extended: true,
+    })
+  );
 
   app.use(methodOverride());
   app.use(cookieParser());
@@ -71,15 +82,17 @@ module.exports = function(app) {
   app.use(middleware.redirector);
 
   // Persist sessions with mongoStore
-  app.use(session({
-    secret: secret.session,
-    resave: true,
-    saveUninitialized: true,
-    store: MongoStore.create({
-      mongoUrl: config.mongo.uri,
-      collectionName: 'sessions'
+  app.use(
+    session({
+      secret: secret.session,
+      resave: true,
+      saveUninitialized: true,
+      store: MongoStore.create({
+        mongoUrl: config.mongo.uri,
+        collectionName: 'sessions',
+      }),
     })
-  }));
+  );
 
   // Use passport session
   app.use(passport.initialize());

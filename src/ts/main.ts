@@ -5,11 +5,11 @@
  * DS208: Avoid top-level this
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import $ from "jquery";
-import MutekiTimer from "./MutekiTimer";
-import Player from "./Player";
-import Keyboard from "./Keyboard";
-import Song from "./Song";
+import $ from 'jquery';
+import MutekiTimer from './MutekiTimer';
+import Player from './Player';
+import Keyboard from './Keyboard';
+import Song from './Song';
 
 // ------------------------------------------------------------------------------
 // CONSTANT
@@ -18,23 +18,23 @@ const SAMPLE_RATE = 48000;
 const T = new MutekiTimer();
 
 const sorry = function () {
-  $("#top-sorry").show();
-  return $("#top-logo-wrapper").addClass("logo-sorry");
+  $('#top-sorry').show();
+  return $('#top-logo-wrapper').addClass('logo-sorry');
 };
 
 const initEvil = function () {
   // Don't use MutekiTimer here!!
   // (it causes freeze)
   setTimeout(() => {
-    $("#top")
+    $('#top')
       .css({
-        opacity: "0",
+        opacity: '0',
       })
       .delay(500)
-      .css("z-index", "-1");
-    return $("#top-logo").css({
-      "-webkit-transform": "translate3d(0px, -100px, 0px)",
-      opacity: "0",
+      .css('z-index', '-1');
+    return $('#top-logo').css({
+      '-webkit-transform': 'translate3d(0px, -100px, 0px)',
+      opacity: '0',
     });
   }, 1500);
 
@@ -43,7 +43,7 @@ const initEvil = function () {
   const keyboard = new Keyboard(player);
 
   const footer_size = $(window).height() / 2 - 300;
-  $("footer").css("height", footer_size + "px");
+  $('footer').css('height', footer_size + 'px');
 
   // Read song
   if (this.song_loaded != null) {
@@ -57,7 +57,7 @@ const initEvil = function () {
 // Main
 
 (function () {
-  console.log("Welcome to evil!");
+  console.log('Welcome to evil!');
 
   const ua = window.navigator.userAgent.toLowerCase();
   if (ua.match(/chrome/g)) {

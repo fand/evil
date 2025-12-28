@@ -1,5 +1,5 @@
-import type FX from "./FX";
-import $ from "jquery";
+import type FX from './FX';
+import $ from 'jquery';
 
 export default class FXView {
   model: FX;
@@ -11,11 +11,11 @@ export default class FXView {
     this.model = model;
     this.dom = dom_side;
     this.dom_side = dom_side;
-    this.minus_side = this.dom_side.find(".sidebar-effect-minus");
+    this.minus_side = this.dom_side.find('.sidebar-effect-minus');
   }
 
   initEvent() {
-    return this.minus_side.on("click", () => {
+    return this.minus_side.on('click', () => {
       this.model.remove();
       return $(this.dom_side).remove();
     });

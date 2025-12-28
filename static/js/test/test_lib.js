@@ -1,14 +1,14 @@
-(function() {
-  this.Tester = (function() {
+(function () {
+  this.Tester = (function () {
     function Tester() {
       this.subtests = {};
     }
 
-    Tester.prototype.subtest = function(s, t) {
-      return this.subtests[s] = t;
+    Tester.prototype.subtest = function (s, t) {
+      return (this.subtests[s] = t);
     };
 
-    Tester.prototype.runAll = function() {
+    Tester.prototype.runAll = function () {
       var s, t, _ref, _results;
       _ref = this.subtests;
       _results = [];
@@ -21,7 +21,7 @@
       return _results;
     };
 
-    Tester.prototype.assert = function(v, s) {
+    Tester.prototype.assert = function (v, s) {
       if (v) {
         return console.log('%c OK ... ' + s, 'color: #0d0;');
       } else {
@@ -29,7 +29,7 @@
       }
     };
 
-    Tester.prototype.assertEq = function(v1, v2, s) {
+    Tester.prototype.assertEq = function (v1, v2, s) {
       if (v1 === v2) {
         console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
         console.log('v1: ' + v1 + ', v2:' + v2);
@@ -40,7 +40,7 @@
       return console.groupEnd();
     };
 
-    Tester.prototype.assertNotEq = function(v1, v2, s) {
+    Tester.prototype.assertNotEq = function (v1, v2, s) {
       if (v1 !== v2) {
         console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
         console.log('v1: ' + v1 + ', v2:' + v2);
@@ -51,7 +51,7 @@
       return console.groupEnd();
     };
 
-    Tester.prototype.assertMatch = function(v1, v2, s) {
+    Tester.prototype.assertMatch = function (v1, v2, s) {
       if (v1.match(v2)) {
         console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
         console.log('v1: ' + v1 + ', v2:' + v2);
@@ -62,7 +62,7 @@
       return console.groupEnd();
     };
 
-    Tester.prototype.assertNotMatch = function(v1, v2, s) {
+    Tester.prototype.assertNotMatch = function (v1, v2, s) {
       if (!v1.match(v2)) {
         console.groupCollapsed('%c OK ... ' + s, 'color: #4f4;');
         console.log('v1: ' + v1 + ', v2:' + v2);
@@ -73,14 +73,22 @@
       return console.groupEnd();
     };
 
-    Tester.prototype.assertArrayEq = function(v1, v2, s) {
+    Tester.prototype.assertArrayEq = function (v1, v2, s) {
       var i, res, _i, _ref;
       res = true;
       if (v1.length !== v2.length) {
         res = false;
       }
-      for (i = _i = 0, _ref = v1.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        if (v1[i] !== +v2[i] && v1[i] !== v2[i] + '' && v1[i] - +v2[i] > 0.00001) {
+      for (
+        i = _i = 0, _ref = v1.length;
+        0 <= _ref ? _i < _ref : _i > _ref;
+        i = 0 <= _ref ? ++_i : --_i
+      ) {
+        if (
+          v1[i] !== +v2[i] &&
+          v1[i] !== v2[i] + '' &&
+          v1[i] - +v2[i] > 0.00001
+        ) {
           res = false;
         }
       }
@@ -96,13 +104,17 @@
       return console.groupEnd();
     };
 
-    Tester.prototype.assertArrayNotEq = function(v1, v2, s) {
+    Tester.prototype.assertArrayNotEq = function (v1, v2, s) {
       var i, res, _i, _ref;
       res = true;
       if (v1.length !== v2.length) {
         res = false;
       }
-      for (i = _i = 0, _ref = v1.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (
+        i = _i = 0, _ref = v1.length;
+        0 <= _ref ? _i < _ref : _i > _ref;
+        i = 0 <= _ref ? ++_i : --_i
+      ) {
         if (v1[i] !== +v2[i] && v1[i] !== v2[i] + '') {
           res = false;
         }
@@ -117,7 +129,7 @@
       return console.groupEnd();
     };
 
-    Tester.prototype.mousedown = function(target, x, y) {
+    Tester.prototype.mousedown = function (target, x, y) {
       var e, offset;
       offset = target.offset();
       e = new $.Event('mousedown');
@@ -126,11 +138,11 @@
       return target.trigger(e);
     };
 
-    Tester.prototype.mouseup = function(target) {
+    Tester.prototype.mouseup = function (target) {
       return target.trigger('mouseup');
     };
 
-    Tester.prototype.mousedrag = function(target, pos) {
+    Tester.prototype.mousedrag = function (target, pos) {
       var e, offset, p, _i, _len;
       offset = target.offset();
       e = new $.Event('mousedown');
@@ -148,13 +160,11 @@
     };
 
     return Tester;
-
   })();
 
   this.t = new this.Tester();
 
-  this.subtest = function(s, t) {
+  this.subtest = function (s, t) {
     return this.t.subtest(s, t);
   };
-
 }).call(this);

@@ -5,8 +5,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import $ from "jquery";
-import Player from "./Player";
+import $ from 'jquery';
+import Player from './Player';
 
 const KEYCODE_TO_NOTE = {
   90: 1,
@@ -74,7 +74,7 @@ class Keyboard {
 
   constructor(player: Player) {
     this.player = player;
-    this.mode = "SYNTH";
+    this.mode = 'SYNTH';
     this.is_writing = false;
     this.is_pressed = false;
 
@@ -137,10 +137,10 @@ class Keyboard {
         this.player.view.viewPlay();
         break;
       default:
-        if (this.mode === "SYNTH") {
+        if (this.mode === 'SYNTH') {
           this.onPlayer(e);
         }
-        if (this.mode === "MIXER") {
+        if (this.mode === 'MIXER') {
           this.onMixer(e);
         }
     }
@@ -175,10 +175,10 @@ class Keyboard {
   }
 
   off(e) {
-    if (this.mode === "SYNTH") {
+    if (this.mode === 'SYNTH') {
       this.offPlayer(e);
     }
-    if (this.mode === "MIXER") {
+    if (this.mode === 'MIXER') {
       this.offMixer(e);
     }
     return (this.last_key = 0);
