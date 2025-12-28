@@ -9,7 +9,26 @@
 import $ from 'jquery';
 
 class MixerView {
-    constructor(model) {
+    model: any;
+    dom: JQuery;
+    tracks: JQuery;
+    master: JQuery;
+    console_tracks: JQuery;
+    console_master: JQuery;
+    gains: JQuery[];
+    gain_master: JQuery;
+    pans_label: JQuery[];
+    pans: JQuery[];
+    pan_master: JQuery;
+    canvas_tracks_dom: JQuery[];
+    canvas_tracks: HTMLCanvasElement[];
+    ctx_tracks: CanvasRenderingContext2D[];
+    canvas_master_dom: JQuery;
+    canvas_master: HTMLCanvasElement;
+    ctx_master: CanvasRenderingContext2D;
+    track_dom: JQuery;
+
+    constructor(model: any) {
         let c;
         this.model = model;
         this.dom = $('#mixer');
@@ -19,15 +38,15 @@ class MixerView {
         this.console_tracks = this.tracks.find('#console-tracks');
         this.console_master= this.master.find('#console-master');
 
-        this.gains = this.tracks.find('.console-track > .gain-slider');
+        this.gains = Array.from(this.tracks.find('.console-track > .gain-slider')) as unknown as JQuery[];
         this.gain_master = this.master.find('.console-track > .gain-slider');
 
-        this.pans_label = this.tracks.find('.console-track > .pan-label');
-        this.pans = this.tracks.find('.console-track > .pan-slider');
+        this.pans_label = Array.from(this.tracks.find('.console-track > .pan-label')) as unknown as JQuery[];
+        this.pans = Array.from(this.tracks.find('.console-track > .pan-slider')) as unknown as JQuery[];
         this.pan_master = this.master.find('.console-track > .pan-slider');
 
-        this.canvas_tracks_dom = this.tracks.find('.vu-meter');
-        this.canvas_tracks = (Array.from(this.canvas_tracks_dom).map((d) => d[0]));
+        this.canvas_tracks_dom = Array.from(this.tracks.find('.vu-meter')) as unknown as JQuery[];
+        this.canvas_tracks = (Array.from(this.canvas_tracks_dom).map((d) => (d as any)[0] as HTMLCanvasElement));
         this.ctx_tracks = ((() => {
             const result = [];
             for (c of Array.from(this.canvas_tracks)) {                 result.push(c.getContext('2d'));
@@ -39,8 +58,8 @@ class MixerView {
         }
 
         this.canvas_master_dom = this.master.find('.vu-meter');
-        this.canvas_master = this.canvas_master_dom[0];
-        this.ctx_master = this.canvas_master.getContext('2d');
+        this.canvas_master = this.canvas_master_dom[0] as HTMLCanvasElement;
+        this.ctx_master = this.canvas_master.getContext('2d')!;
         this.canvas_master.width  = 70;
         this.canvas_master.height = 130;
         this.ctx_master.fillStyle = '#fff';
@@ -86,10 +105,11 @@ class MixerView {
         this.pans_label.push(dom.find('.pan-label'));
 
         const d = dom.find('.vu-meter');
-        this.canvas_tracks_dom.push(d);
-        this.canvas_tracks.push(d[0]);
-        this.ctx_tracks.push(d[0].getContext('2d'));
-        [d[0].width, d[0].height] = Array.from([10, 100]);
+        this.canvas_tracks_dom.push(d as any);
+        const canvas = d[0] as HTMLCanvasElement;
+        this.canvas_tracks.push(canvas);
+        this.ctx_tracks.push(canvas.getContext('2d')!);
+        [canvas.width, canvas.height] = Array.from([10, 100]);
 
         this.console_tracks.css({width: ((this.gains.length * 80) + 2) + 'px'});
         this.console_tracks.on('change', () => this.setGains());
@@ -98,20 +118,20 @@ class MixerView {
     }
 
     setGains() {
-        const g = (Array.from(this.gains).map((_g) => parseFloat(_g.val()) / 100.0));
-        const g_master = parseFloat(this.gain_master.val() / 100.0);
+        const g = (Array.from(this.gains).map((_g) => parseFloat((_g as any).val() as string) / 100.0));
+        const g_master = parseFloat(this.gain_master.val() as string) / 100.0;
         return this.model.setGains(g, g_master);
     }
 
     setPans() {
-        const p = (Array.from(this.pans).map((_p) => 1.0 - (parseFloat(_p.val()) / 200.0)));
-        const p_master = 1.0 - (parseFloat(this.pan_master.val()) / 200.0);
+        const p = (Array.from(this.pans).map((_p) => 1.0 - (parseFloat((_p as any).val() as string) / 200.0)));
+        const p_master = 1.0 - (parseFloat(this.pan_master.val() as string) / 200.0);
         this.model.setPans(p, p_master);
 
         return (() => {
             const result = [];
             for (let i = 0, end = this.pans.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
-                var l = parseInt(this.pans[i].val()) - 100;
+                var l = parseInt((this.pans[i] as any).val() as string) - 100;
                 var t = l === 0 ? 'C' : (l < 0 ? (-l) + '% L' : l + '% R');
                 result.push(this.pans_label[i].text(t));
             }

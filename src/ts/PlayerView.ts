@@ -8,8 +8,36 @@
 import $ from 'jquery';
 import CONSTANT from './Constant';
 
+declare global {
+    interface Window {
+        keyboard: any;
+    }
+}
+
 class PlayerView {
-    constructor(model) {
+    model: any;
+    dom: JQuery;
+    bpm: JQuery;
+    key: JQuery;
+    scale: JQuery;
+    footer: JQuery;
+    play: JQuery;
+    stop: JQuery;
+    forward: JQuery;
+    backward: JQuery;
+    loop: JQuery;
+    wrapper: JQuery;
+    instruments: JQuery;
+    mixer: JQuery;
+    is_mixer: boolean;
+    btn_left: JQuery;
+    btn_right: JQuery;
+    btn_top: JQuery;
+    btn_bottom: JQuery;
+    synth_now: number;
+    synth_total: number;
+
+    constructor(model: any) {
         this.model = model;
         this.dom = $("#control");
 
@@ -43,7 +71,7 @@ class PlayerView {
 
     initEvent() {
         this.dom.on("change", () => {
-            this.model.setBPM(parseInt(this.bpm.val()));
+            this.model.setBPM(parseInt(this.bpm.val() as string));
             this.model.setKey(this.key.val());
             return this.model.setScale(this.scale.val());
         });
@@ -83,7 +111,7 @@ class PlayerView {
         }
     }
 
-    viewStop(receiver) {
+    viewStop(receiver?: any) {
         if (receiver != null) { receiver.stop(); }
         return this.play.removeClass("fa-pause").addClass("fa-play");
     }
@@ -197,7 +225,7 @@ class PlayerView {
     }
 
 
-    changeSynth() {
+    changeSynth(_id?: number, _type?: string) {
         if (this.synth_now === 0) {
             this.btn_left.hide();
         }

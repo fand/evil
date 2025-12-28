@@ -13,7 +13,16 @@ import SAMPLES from './Constant';
 
 
 class SamplerCore {
-    constructor(parent, ctx, id) {
+    parent: any;
+    ctx: AudioContext;
+    id: any;
+    node: GainNode;
+    gain: number;
+    is_mute: boolean;
+    samples: SamplerNode[];
+    view: SamplerCoreView;
+
+    constructor(parent: any, ctx: AudioContext, id: any) {
         let i;
         this.parent = parent;
         this.ctx = ctx;

@@ -9,9 +9,10 @@ import FX from './FX';
 import CompressorView from './CompressorView';
 
 class Compressor extends FX {
-    constructor(ctx) {
-        this.ctx = ctx;
-        super(this.ctx);
+    comp: DynamicsCompressorNode;
+
+    constructor(ctx: AudioContext) {
+        super(ctx);
         this.comp = this.ctx.createDynamicsCompressor();
         this.in.connect(this.comp);
         this.comp.connect(this.out);
@@ -38,7 +39,7 @@ class Compressor extends FX {
         return this.view.setParam(p);
     }
 
-    getParam(p) {
+    getParam() {
         return {
             effect: 'Compressor',
             attack:  this.comp.attack.value,

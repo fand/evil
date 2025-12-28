@@ -10,10 +10,13 @@ import DoubleView from './DoubleView';
 import Panner from '../Panner';
 
 class Double extends FX {
-    constructor(ctx) {
-        this.ctx = ctx;
-        super(this.ctx);
+    delay: DelayNode;
+    pan_l: Panner;
+    pan_r: Panner;
+    pos: number;
 
+    constructor(ctx: AudioContext) {
+        super(ctx);
         this.delay = this.ctx.createDelay();
         this.delay.delayTime.value = 0.03;
 
@@ -45,7 +48,7 @@ class Double extends FX {
         return this.view.setParam(p);
     }
 
-    getParam(p) {
+    getParam() {
         return {
             effect: 'Double',
             delay: this.delay.delayTime.value,

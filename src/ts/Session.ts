@@ -13,7 +13,24 @@ import $ from 'jquery';
 
 // Control the patterns for tracks.
 class Session {
-    constructor(ctx, player) {
+    ctx: AudioContext;
+    player: any;
+    scenes: any[];
+    scene_pos: number;
+    scene: any;
+    scene_length: number;
+    current_cells: any[];
+    next_pattern_pos: any[];
+    next_scene_pos: number | undefined;
+    is_loop: boolean;
+    is_waiting_next_pattern: boolean;
+    is_waiting_next_scene: boolean;
+    cue_queue: any[];
+    song: any;
+    view: SessionView;
+    synth: any[];
+
+    constructor(ctx: AudioContext, player: any) {
         this.ctx = ctx;
         this.player = player;
         this.scenes = [];
@@ -39,7 +56,7 @@ class Session {
     toggleLoop() { return this.is_loop = !this.is_loop; }
 
     // Read patterns for the next measure.
-    nextMeasure(synth, time) {
+    nextMeasure(synth: any, _time?: number) {
         this.synth = synth;
         if (this.is_loop) {
             if (this.is_waiting_next_scene) {
@@ -68,7 +85,7 @@ class Session {
     }
 
     // Read patterns for the next scene.
-    nextScene(pos) {
+    nextScene(pos?: number) {
         this.savePatterns();
 
         this.is_waiting_next_scene = false;
@@ -284,7 +301,7 @@ class Session {
     }
 
     saveMasters() {
-        if (this.song.master === []) {
+        if (this.song.master.length === 0) {
             return this.song.master.push(this.player.getScene());
         }
     }
@@ -304,7 +321,7 @@ class Session {
 
         // Save the song via ajax.
         return $.ajax({
-            urpl: '/api/songs/',
+            url: '/api/songs/',
             type: 'POST',
             dataType: 'text',
             data: {

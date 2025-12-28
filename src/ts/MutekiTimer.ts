@@ -29,6 +29,8 @@ const TIMER_PATH = __guard__((window.URL != null ? window.URL : (window as any).
 
 
 class MutekiTimer {
+    timer: Worker | number;
+
     constructor() {
         if (TIMER_PATH) {
             this.timer = new Worker(TIMER_PATH);

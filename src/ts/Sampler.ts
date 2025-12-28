@@ -15,7 +15,24 @@ import $ from 'jquery';
 
 
 class Sampler {
-    constructor(ctx, id, player, name) {
+    ctx: AudioContext;
+    id: number;
+    player: any;
+    name: string;
+    type: string;
+    pattern_name: string;
+    pattern: any[];
+    pattern_obj: { name: string; pattern: any[] };
+    time: number;
+    view: SamplerView;
+    core: SamplerCore;
+    is_sustaining: boolean;
+    session: any;
+    send: GainNode;
+    return: GainNode;
+    effects: any[];
+
+    constructor(ctx: AudioContext, id: number, player: any, name: string) {
         this.ctx = ctx;
         this.id = id;
         this.player = player;
@@ -59,7 +76,7 @@ class Sampler {
     setDuration() {}
     setKey() {}
     setScale() {}
-    setNote(note) { return this.core.setNote(note); }
+    setNote(note: number) { return (this.core as any).setNote(note); }
 
     setGain(gain) { return this.core.setGain(gain); }
     getGain()     { return this.core.gain; }
@@ -150,7 +167,7 @@ class Sampler {
     }
 
     activate(i) { return this.view.activate(i); }
-    inactivate(i) { return this.view.inactivate(i); }
+    inactivate(_i?: number) { return this.view.inactivate(); }
 
     redraw(time) {
         this.time = time;
@@ -181,12 +198,12 @@ class Sampler {
     changeSynth(type) {
         var s_new = this.player.changeSynth(this.id, type, s_new);
         this.view.dom.replaceWith(s_new.view.dom);
-        this.noteOff(true);
+        this.noteOff();
         return this.disconnect();
     }
 
     getParam() {
-        const p = this.core.getParam();
+        const p: any = this.core.getParam();
         p.name = this.name;
         p.effects = this.getEffectsParam();
         return p;

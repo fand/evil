@@ -9,8 +9,70 @@
  */
 import $ from 'jquery';
 
+declare global {
+    interface Window {
+        keyboard: any;
+    }
+}
+
 class SessionView {
-    constructor(model, song) {
+    model: any;
+    song: any;
+    wrapper_mixer: JQuery;
+    wrapper_master: JQuery;
+    wrapper_tracks: JQuery;
+    wrapper_tracks_sub: JQuery;
+    canvas_tracks_dom: JQuery;
+    canvas_master_dom: JQuery;
+    canvas_tracks_on_dom: JQuery;
+    canvas_master_on_dom: JQuery;
+    canvas_tracks_hover_dom: JQuery;
+    canvas_master_hover_dom: JQuery;
+    canvas_tracks: HTMLCanvasElement;
+    canvas_master: HTMLCanvasElement;
+    canvas_tracks_on: HTMLCanvasElement;
+    canvas_master_on: HTMLCanvasElement;
+    canvas_tracks_hover: HTMLCanvasElement;
+    canvas_master_hover: HTMLCanvasElement;
+    ctx_tracks: CanvasRenderingContext2D;
+    ctx_master: CanvasRenderingContext2D;
+    ctx_tracks_on: CanvasRenderingContext2D;
+    ctx_master_on: CanvasRenderingContext2D;
+    ctx_tracks_hover: CanvasRenderingContext2D;
+    ctx_master_hover: CanvasRenderingContext2D;
+    w: number;
+    h: number;
+    w_master: number;
+    color: string[];
+    color_schemes: { [key: string]: string[] };
+    track_color: string[][];
+    img_play: HTMLImageElement;
+    last_active: number[];
+    current_cells: any[];
+    hover_pos: { x: number; y: number; type?: string };
+    click_pos: { x: number; y: number; type?: string };
+    select_pos: { x: number; y: number; type: string };
+    last_clicked: number;
+    dialog: JQuery;
+    dialog_wrapper: JQuery;
+    dialog_close: JQuery;
+    btn_save: JQuery;
+    btn_clear: JQuery;
+    song_info: JQuery;
+    song_title: JQuery;
+    song_creator: JQuery;
+    social_twitter: JQuery;
+    social_facebook: JQuery;
+    social_hatena: JQuery;
+    offset_y: number;
+    font_size: number;
+    rect_tracks: DOMRect;
+    rect_master: DOMRect;
+    offset_translate: number;
+    is_clicked: boolean;
+    scene_pos: number;
+
+    constructor(model: any, song: any) {
         // DOMs for session view.
         this.model = model;
         this.song = song;
@@ -26,19 +88,19 @@ class SessionView {
         this.canvas_tracks_hover_dom = $('#session-tracks-hover');
         this.canvas_master_hover_dom = $('#session-master-hover');
 
-        this.canvas_tracks = this.canvas_tracks_dom[0];
-        this.canvas_master = this.canvas_master_dom[0];
-        this.canvas_tracks_on = this.canvas_tracks_on_dom[0];
-        this.canvas_master_on = this.canvas_master_on_dom[0];
-        this.canvas_tracks_hover = this.canvas_tracks_hover_dom[0];
-        this.canvas_master_hover = this.canvas_master_hover_dom[0];
+        this.canvas_tracks = this.canvas_tracks_dom[0] as HTMLCanvasElement;
+        this.canvas_master = this.canvas_master_dom[0] as HTMLCanvasElement;
+        this.canvas_tracks_on = this.canvas_tracks_on_dom[0] as HTMLCanvasElement;
+        this.canvas_master_on = this.canvas_master_on_dom[0] as HTMLCanvasElement;
+        this.canvas_tracks_hover = this.canvas_tracks_hover_dom[0] as HTMLCanvasElement;
+        this.canvas_master_hover = this.canvas_master_hover_dom[0] as HTMLCanvasElement;
 
-        this.ctx_tracks = this.canvas_tracks.getContext('2d');
-        this.ctx_master = this.canvas_master.getContext('2d');
-        this.ctx_tracks_on = this.canvas_tracks_on.getContext('2d');
-        this.ctx_master_on = this.canvas_master_on.getContext('2d');
-        this.ctx_tracks_hover = this.canvas_tracks_hover.getContext('2d');
-        this.ctx_master_hover = this.canvas_master_hover.getContext('2d');
+        this.ctx_tracks = this.canvas_tracks.getContext('2d')!;
+        this.ctx_master = this.canvas_master.getContext('2d')!;
+        this.ctx_tracks_on = this.canvas_tracks_on.getContext('2d')!;
+        this.ctx_master_on = this.canvas_master_on.getContext('2d')!;
+        this.ctx_tracks_hover = this.canvas_tracks_hover.getContext('2d')!;
+        this.ctx_master_hover = this.canvas_master_hover.getContext('2d')!;
 
         // dimensions for cells in canvas
         this.w = 70;
@@ -389,7 +451,7 @@ class SessionView {
     }
 
 
-    drawTrackName(x, name, type) {
+    drawTrackName(x: number, name: string, type?: string) {
         if (type != null) {
             this.track_color[x] = this.color_schemes[type];
         }
@@ -583,7 +645,7 @@ class SessionView {
         return this.drawCellTracks(pat[2], pat[0], pat[1]);
     }
 
-    addSynth(song) {
+    addSynth(song: any, _pos?: any) {
         this.song = song;
         return this.readSong(this.song, this.current_cells);
     }

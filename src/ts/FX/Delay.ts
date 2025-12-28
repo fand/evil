@@ -9,10 +9,12 @@ import FX from './FX';
 import DelayView from './DelayView';
 
 class Delay extends FX {
-    constructor(ctx) {
-        this.ctx = ctx;
-        super(this.ctx);
+    delay: DelayNode;
+    lofi: BiquadFilterNode;
+    feedback: GainNode;
 
+    constructor(ctx: AudioContext) {
+        super(ctx);
         this.delay = this.ctx.createDelay();
         this.delay.delayTime.value = 0.23;
 
@@ -49,7 +51,7 @@ class Delay extends FX {
         return this.view.setParam(p);
     }
 
-    getParam(p) {
+    getParam() {
         return {
             effect: 'Delay',
             delay: this.delay.delayTime.value,

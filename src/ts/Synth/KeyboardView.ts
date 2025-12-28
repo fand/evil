@@ -4,12 +4,27 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 class KeyboardView {
-    constructor(sequencer) {
+    sequencer: any;
+    dom: JQuery;
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    w: number;
+    h: number;
+    num: number;
+    color: string[];
+    is_clicked: boolean;
+    hover_pos: { x: number; y: number } | number;
+    click_pos: { x: number; y: number } | number;
+    scale: number[];
+    rect: DOMRect;
+    offset: { x: number; y: number };
+
+    constructor(sequencer: any) {
         // Keyboard
         this.sequencer = sequencer;
         this.dom = this.sequencer.dom.find('.keyboard');
-        this.canvas = this.dom[0];
-        this.ctx = this.canvas.getContext('2d');
+        this.canvas = this.dom[0] as HTMLCanvasElement;
+        this.ctx = this.canvas.getContext('2d')!;
 
         this.w = 48;
         this.h = 26;

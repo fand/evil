@@ -14,9 +14,10 @@
 
 ## Phase 2: 大規模改修 (既知)
 
-- [ ] CoffeeScript → TypeScript移行
+- [x] CoffeeScript → TypeScript移行
 - [ ] Vite移行 (Gulp + Browserify + Watchify廃止)
-- [ ] MongoDB廃止
+- [ ] React移行
+
 
 ## Phase 3: 追加改修
 
@@ -30,3 +31,4 @@
 
 - [ ] ドキュメント整備
 - [ ] CI/CD導入
+- [ ] MongoDB廃止

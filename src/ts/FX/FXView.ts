@@ -1,22 +1,23 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
-class FXView {
-    constructor(model, dom_side) {
-        this.model = model;
-        this.dom_side = dom_side;
-        this.minus_side = this.dom_side.find('.sidebar-effect-minus');
-    }
+import type FX from "./FX";
+import $ from "jquery";
 
-    initEvent() {
-        return this.minus_side.on('click', ()=> {
-            this.model.remove();
-            return $(this.dom_side).remove();
-        });
-    }
+export default class FXView {
+  model: FX;
+  dom: JQuery;
+  dom_side: JQuery;
+  minus_side: JQuery;
+
+  constructor(model: FX, dom_side: JQuery) {
+    this.model = model;
+    this.dom = dom_side;
+    this.dom_side = dom_side;
+    this.minus_side = this.dom_side.find(".sidebar-effect-minus");
+  }
+
+  initEvent() {
+    return this.minus_side.on("click", () => {
+      this.model.remove();
+      return $(this.dom_side).remove();
+    });
+  }
 }
-
-
-export default FXView;

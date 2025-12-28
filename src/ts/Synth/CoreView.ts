@@ -9,8 +9,20 @@
 import $ from 'jquery';
 
 class SynthCoreView {
-    constructor(model, id, dom) {
+    model: any;
+    id: any;
+    dom: JQuery;
+    vcos: JQuery;
+    EG_inputs: JQuery;
+    FEG_inputs: JQuery;
+    filter_inputs: JQuery;
+    gain_inputs: JQuery;
+    canvasEG: HTMLCanvasElement;
+    canvasFEG: HTMLCanvasElement;
+    contextEG: CanvasRenderingContext2D;
+    contextFEG: CanvasRenderingContext2D;
 
+    constructor(model: any, id: any, dom: JQuery) {
         this.model = model;
         this.id = id;
         this.dom = dom;
@@ -21,10 +33,10 @@ class SynthCoreView {
         this.filter_inputs = this.dom.find(".RS_filter input");
         this.gain_inputs   = this.dom.find('.RS_mixer input');
 
-        this.canvasEG   = this.dom.find(".RS_EG .canvasEG").get()[0];
-        this.canvasFEG  = this.dom.find(".RS_FEG .canvasFEG").get()[0];
-        this.contextEG  = this.canvasEG.getContext('2d');
-        this.contextFEG = this.canvasFEG.getContext('2d');
+        this.canvasEG   = this.dom.find(".RS_EG .canvasEG").get()[0] as HTMLCanvasElement;
+        this.canvasFEG  = this.dom.find(".RS_FEG .canvasFEG").get()[0] as HTMLCanvasElement;
+        this.contextEG  = this.canvasEG.getContext('2d')!;
+        this.contextFEG = this.canvasFEG.getContext('2d')!;
 
         this.initEvent();
     }
@@ -82,10 +94,10 @@ class SynthCoreView {
                 var vco = this.vcos.eq(i);
                 result.push(this.model.setVCOParam(
                     i,
-                    vco.find('.shape').val(),
-                    parseInt(vco.find('.octave').val()),
-                    parseInt(vco.find('.interval').val()),
-                    parseInt(vco.find('.fine').val()),
+                    vco.find('.shape').val() as string,
+                    parseInt(vco.find('.octave').val() as string),
+                    parseInt(vco.find('.interval').val() as string),
+                    parseInt(vco.find('.fine').val() as string),
                     harmony
                 ));
             }
@@ -109,10 +121,10 @@ class SynthCoreView {
 
     fetchEGParam() {
         this.model.setEGParam(
-            parseFloat(this.EG_inputs.eq(0).val()),
-            parseFloat(this.EG_inputs.eq(1).val()),
-            parseFloat(this.EG_inputs.eq(2).val()),
-            parseFloat(this.EG_inputs.eq(3).val())
+            parseFloat(this.EG_inputs.eq(0).val() as string),
+            parseFloat(this.EG_inputs.eq(1).val() as string),
+            parseFloat(this.EG_inputs.eq(2).val() as string),
+            parseFloat(this.EG_inputs.eq(3).val() as string)
         );
         return this.updateCanvas("EG");
     }
@@ -126,10 +138,10 @@ class SynthCoreView {
 
     fetchFEGParam() {
         this.model.setFEGParam(
-            parseFloat(this.FEG_inputs.eq(0).val()),
-            parseFloat(this.FEG_inputs.eq(1).val()),
-            parseFloat(this.FEG_inputs.eq(2).val()),
-            parseFloat(this.FEG_inputs.eq(3).val())
+            parseFloat(this.FEG_inputs.eq(0).val() as string),
+            parseFloat(this.FEG_inputs.eq(1).val() as string),
+            parseFloat(this.FEG_inputs.eq(2).val() as string),
+            parseFloat(this.FEG_inputs.eq(3).val() as string)
         );
         return this.updateCanvas("FEG");
     }
@@ -141,8 +153,8 @@ class SynthCoreView {
 
     fetchFilterParam() {
         return this.model.setFilterParam(
-            parseFloat(this.filter_inputs.eq(0).val()),
-            parseFloat(this.filter_inputs.eq(1).val())
+            parseFloat(this.filter_inputs.eq(0).val() as string),
+            parseFloat(this.filter_inputs.eq(1).val() as string)
         );
     }
 
@@ -153,7 +165,7 @@ class SynthCoreView {
 
     fetchGains() {
         return __range__(0, this.gain_inputs.length, false).map((i) =>
-            this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val())));
+            this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val() as string)));
     }
 
     setParam(p) {

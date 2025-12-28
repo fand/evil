@@ -29,11 +29,13 @@ const SCALE_LIST = {
 
 const STREAM_LENGTH = 1024;
 const SEMITONE = 1.05946309;
+const SAMPLE_RATE = 44100;
 
 
 export default {
     KEY_LIST,
     SCALE_LIST,
     STREAM_LENGTH,
-    SEMITONE
+    SEMITONE,
+    SAMPLE_RATE
 };

@@ -18,11 +18,8 @@ const SONG_DEFAULT = {
 
 
 class Song {
-    static initClass() {
-        this.DEFAULT = SONG_DEFAULT;
-    }
+    static DEFAULT = SONG_DEFAULT;
 }
-Song.initClass();
 
 
 // Export!

@@ -9,11 +9,13 @@ import FXView from './FXView';
 import $ from 'jquery';
 
 class DoubleView extends FXView {
-    constructor(model) {
-        this.model = model;
-        this.dom = $('#tmpl_fx_double').clone();
-        this.dom.removeAttr('id');
-        super(this.model, this.dom);
+    delay: JQuery;
+    width: JQuery;
+
+    constructor(model: any) {
+        const dom = $('#tmpl_fx_double').clone();
+        dom.removeAttr('id');
+        super(model, dom);
 
         this.delay  = this.dom.find('[name=delay]');
         this.width  = this.dom.find('[name=width]');
@@ -24,10 +26,10 @@ class DoubleView extends FXView {
     initEvent() {
         super.initEvent();
         this.delay.on('change', () => {
-            return this.model.setParam({delay: parseFloat(this.delay.val()) / 1000.0});
+            return this.model.setParam({delay: parseFloat(this.delay.val() as string) / 1000.0});
         });
         return this.width.on('change', () => {
-            return this.model.setParam({width: (parseFloat(this.width.val()) / 200.0) + 0.5});  // [0.5, 1.0]
+            return this.model.setParam({width: (parseFloat(this.width.val() as string) / 200.0) + 0.5});  // [0.5, 1.0]
         });
     }
 

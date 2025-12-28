@@ -31,7 +31,15 @@ const T2 = new MutekiTimer();
 
 // Noise Oscillator.
 class Noise {
-    constructor(ctx) {
+    ctx: AudioContext;
+    node: ScriptProcessorNode;
+    octae: number;
+    fine: number;
+    interval: number;
+    shape: string;
+    octave: number;
+
+    constructor(ctx: AudioContext) {
         this.ctx = ctx;
         this.node = this.ctx.createScriptProcessor(CONSTANT.STREAM_LENGTH);
         this.node.onaudioprocess = event => {
@@ -74,7 +82,20 @@ class Noise {
 
 // Oscillators.
 class VCO {
-    constructor(ctx) {
+    ctx: AudioContext;
+    freq_key: number;
+    octave: number;
+    interval: number;
+    fine: number;
+    note: number;
+    freq: number;
+    node: GainNode;
+    osc: OscillatorNode;
+    oscs: OscillatorNode[];
+    shape: string;
+    dst: AudioNode;
+
+    constructor(ctx: AudioContext) {
         this.ctx = ctx;
         this.freq_key = 55;
         this.octave = 4;
@@ -86,7 +107,7 @@ class VCO {
         this.node = this.ctx.createGain();
         this.node.gain.value = 1.0;
         this.osc = this.ctx.createOscillator();
-        this.osc.type = 0;
+        this.osc.type = 'sine';
 
         this.oscs = [this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator(),
                  this.ctx.createOscillator(), this.ctx.createOscillator(), this.ctx.createOscillator()];
@@ -178,7 +199,15 @@ class VCO {
 
 // Envelope generator.
 class EG {
-    constructor(target, min, max) {
+    target: AudioParam;
+    min: number;
+    max: number;
+    attack: number;
+    decay: number;
+    sustain: number;
+    release: number;
+
+    constructor(target: AudioParam, min: number, max: number) {
         this.target = target;
         this.min = min;
         this.max = max;
@@ -227,7 +256,10 @@ class EG {
 
 // Manages filter params.
 class ResFilter {
-    constructor(ctx) {
+    ctx: AudioContext;
+    lpf: BiquadFilterNode;
+
+    constructor(ctx: AudioContext) {
         this.ctx = ctx;
         this.lpf = this.ctx.createBiquadFilter();
         this.lpf.type = 'lowpass';  // lowpass == 0
@@ -244,7 +276,25 @@ class ResFilter {
 
 // Manages VCO, Noise, ResFilter, EG.
 class SynthCore {
-    constructor(parent, ctx, id) {
+    parent: any;
+    ctx: AudioContext;
+    id: any;
+    node: GainNode;
+    gain: number;
+    is_mute: boolean;
+    is_on: boolean;
+    is_harmony: boolean;
+    scale: number[];
+    vcos: (VCO | Noise)[];
+    gains: GainNode[];
+    filter: ResFilter;
+    eg: EG;
+    feg: EG;
+    gain_res: GainNode;
+    view: SynthCoreView;
+    note: number;
+
+    constructor(parent: any, ctx: AudioContext, id: any) {
         this.parent = parent;
         this.ctx = ctx;
         this.id = id;

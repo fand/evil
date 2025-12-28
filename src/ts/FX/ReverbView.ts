@@ -9,12 +9,13 @@ import FXView from './FXView';
 import $ from 'jquery';
 
 class ReverbView extends FXView {
-    constructor(model) {
-        this.model = model;
-        this.dom = $('#tmpl_fx_reverb').clone();
-        this.dom.removeAttr('id');
+    name: JQuery;
+    wet: JQuery;
 
-        super(this.model, this.dom);
+    constructor(model: any) {
+        const dom = $('#tmpl_fx_reverb').clone();
+        dom.removeAttr('id');
+        super(model, dom);
 
         this.name   = this.dom.find('[name=name]');
         this.wet  = this.dom.find('[name=wet]');
@@ -25,10 +26,10 @@ class ReverbView extends FXView {
     initEvent() {
         super.initEvent();
         this.name.on('change', () => {
-            return this.model.setIR(this.name.val());
+            return (this.model as any).setIR(this.name.val() as string);
         });
         return this.wet.on('change', () => {
-            return this.model.setParam({wet: parseFloat(this.wet.val()) / 100.0});
+            return this.model.setParam({wet: parseFloat(this.wet.val() as string) / 100.0});
         });
     }
 

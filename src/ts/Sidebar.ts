@@ -6,7 +6,16 @@
 import SidebarView from './SidebarView';
 
 class Sidebar {
-    constructor(ctx, player, session, mixer){
+    ctx: AudioContext;
+    player: any;
+    session: any;
+    mixer: any;
+    sidebar_pos: { x: number; y: number; type: string };
+    view: SidebarView;
+    song: any;
+    select_pos: { x: number; y: number; type: string };
+
+    constructor(ctx: AudioContext, player: any, session: any, mixer: any) {
         this.addMasterEffect = this.addMasterEffect.bind(this);
         this.addTracksEffect = this.addTracksEffect.bind(this);
         this.ctx = ctx;
@@ -37,7 +46,7 @@ class Sidebar {
         return this.session.saveMaster(this.sidebar_pos.y, obj);
     }
 
-    saveTracksEffect() {
+    saveTracksEffect(_pos?: any) {
         if (this.sidebar_pos.type === 'master') { return; }  // TODO: make sure this is impossible / delete this line
         //obj = @view.saveTracksEffect()
         //@session.saveTracksEffect(@sidebar_pos, obj)

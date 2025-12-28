@@ -4,7 +4,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 class Panner {
-    constructor(ctx) {
+    ctx: AudioContext;
+    in: ChannelSplitterNode;
+    out: ChannelMergerNode;
+    l: GainNode;
+    r: GainNode;
+    pos: number;
+
+    constructor(ctx: AudioContext) {
         this.ctx = ctx;
         this.in = this.ctx.createChannelSplitter(2);
         this.out = this.ctx.createChannelMerger(2);

@@ -13,13 +13,41 @@ import SynthCore from './Synth/Core';
 import Panner from './Panner';
 import CONSTANT from './Constant';
 import $ from 'jquery';
+import Fuzz from './FX/Fuzz';
+import Delay from './FX/Delay';
+import Reverb from './FX/Reverb';
+import Compressor from './FX/Compressor';
+import Double from './FX/Double';
 
 const T2 = new MutekiTimer();
 
 
 // Manages SynthCore, SynthView.
 class Synth {
-    constructor(ctx, id, player, name) {
+    ctx: AudioContext;
+    id: number;
+    player: any;
+    name: string;
+    type: string;
+    pattern_name: string;
+    pattern: any[];
+    pattern_obj: { name: string; pattern: any[] };
+    time: number;
+    scale_name: string;
+    scale: number[];
+    view: SynthView;
+    core: SynthCore;
+    is_on: boolean;
+    is_sustaining: boolean;
+    is_performing: boolean;
+    session: any;
+    send: GainNode;
+    return: GainNode;
+    effects: any[];
+    T: MutekiTimer;
+    duration: number;
+
+    constructor(ctx: AudioContext, id: number, player: any, name: string) {
         this.ctx = ctx;
         this.id = id;
         this.player = player;
@@ -191,7 +219,7 @@ class Synth {
     }
 
     activate(i) { return this.view.activate(i); }
-    inactivate(i) { return this.view.inactivate(i); }
+    inactivate(_i?: number) { return this.view.inactivate(); }
 
     redraw(time) {
         this.time = time;
@@ -226,7 +254,7 @@ class Synth {
 
     // Get params as object.
     getParam() {
-        const p = this.core.getParam();
+        const p: any = this.core.getParam();
         p.name = this.name;
         p.scale_name = this.scale_name;
         p.effects = this.getEffectsParam();

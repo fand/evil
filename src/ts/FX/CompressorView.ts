@@ -10,11 +10,18 @@ import $ from 'jquery';
 
 
 class CompressorView extends FXView {
-    constructor(model) {
-        this.model = model;
-        this.dom = $('#tmpl_fx_compressor').clone();
-        this.dom.removeAttr('id');
-        super(this.model, this.dom);
+    attack: JQuery;
+    release: JQuery;
+    threshold: JQuery;
+    ratio: JQuery;
+    knee: JQuery;
+    input: JQuery;
+    output: JQuery;
+
+    constructor(model: any) {
+        const dom = $('#tmpl_fx_compressor').clone();
+        dom.removeAttr('id');
+        super(model, dom);
 
         this.attack    = this.dom.find('[name=attack]');
         this.release   = this.dom.find('[name=release]');
@@ -30,25 +37,25 @@ class CompressorView extends FXView {
     initEvent() {
         super.initEvent();
         this.input.on('change', () => {
-            return this.model.setParam({input: parseFloat(this.input.val()) / 100.0});
+            return this.model.setParam({input: parseFloat(this.input.val() as string) / 100.0});
         });
         this.output.on('change', () => {
-            return this.model.setParam({output: parseFloat(this.output.val()) / 100.0});
+            return this.model.setParam({output: parseFloat(this.output.val() as string) / 100.0});
         });
         this.attack.on('change', () => {
-            return this.model.setParam({attack: parseFloat(this.attack.val()) / 1000.0});
+            return this.model.setParam({attack: parseFloat(this.attack.val() as string) / 1000.0});
         });
         this.release.on('change', () => {
-            return this.model.setParam({release: parseFloat(this.release.val()) / 1000.0});
+            return this.model.setParam({release: parseFloat(this.release.val() as string) / 1000.0});
         });
         this.threshold.on('change', () => {
-            return this.model.setParam({threshold: (parseFloat(this.threshold.val()) / -10.0)});   // [0, 100]
+            return this.model.setParam({threshold: (parseFloat(this.threshold.val() as string) / -10.0)});   // [0, 100]
         });
         this.ratio.on('change', () => {
-            return this.model.setParam({ratio: parseInt(this.ratio.val())});
+            return this.model.setParam({ratio: parseInt(this.ratio.val() as string)});
         });
         return this.knee.on('change', () => {
-            return this.model.setParam({knee: parseFloat(this.knee.val()) / 1000.0});
+            return this.model.setParam({knee: parseFloat(this.knee.val() as string) / 1000.0});
         });
     }
 

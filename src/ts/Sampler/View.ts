@@ -10,10 +10,61 @@
 import $ from 'jquery';
 import SamplerKeyboardView from './KeyboardView';
 
+declare global {
+    interface Window {
+        keyboard: any;
+    }
+}
 
 class SamplerView {
-    constructor(model, id) {
+    model: any;
+    id: any;
+    dom: JQuery;
+    synth_name: JQuery;
+    pattern_name: JQuery;
+    synth_type: JQuery;
+    header: JQuery;
+    markers: JQuery;
+    pos_markers: JQuery;
+    marker_prev: JQuery;
+    marker_next: JQuery;
+    plus: JQuery;
+    minus: JQuery;
+    nosync: JQuery;
+    is_nosync: boolean;
+    table_wrapper: JQuery;
+    canvas_hover_dom: JQuery;
+    canvas_on_dom: JQuery;
+    canvas_off_dom: JQuery;
+    canvas_hover: HTMLCanvasElement;
+    canvas_on: HTMLCanvasElement;
+    canvas_off: HTMLCanvasElement;
+    ctx_hover: CanvasRenderingContext2D;
+    ctx_on: CanvasRenderingContext2D;
+    ctx_off: CanvasRenderingContext2D;
+    cell: HTMLImageElement;
+    cells_x: number;
+    cells_y: number;
+    core: JQuery;
+    keyboard: SamplerKeyboardView;
+    pattern: any[];
+    pattern_obj: { name: any; pattern: any[] };
+    page: number;
+    page_total: number;
+    last_time: number;
+    last_page: number;
+    is_clicked: boolean;
+    hover_pos: { x: number; y: number };
+    click_pos: { x: number; y: number };
+    rect: DOMRect;
+    offset: { x: number; y: number };
+    time: number;
+    is_adding: boolean;
+    is_removing: boolean;
+    is_active: boolean;
+    sample_now: number;
 
+    constructor(model: any, id: any) {
         this.model = model;
         this.id = id;
         this.dom = $('#tmpl_sampler').clone();
@@ -45,13 +96,13 @@ class SamplerView {
         this.canvas_on_dom    = this.dom.find('.table-on');
         this.canvas_off_dom   = this.dom.find('.table-off');
 
-        this.canvas_hover = this.canvas_hover_dom[0];
-        this.canvas_on    = this.canvas_on_dom[0];
-        this.canvas_off   = this.canvas_off_dom[0];
+        this.canvas_hover = this.canvas_hover_dom[0] as HTMLCanvasElement;
+        this.canvas_on    = this.canvas_on_dom[0] as HTMLCanvasElement;
+        this.canvas_off   = this.canvas_off_dom[0] as HTMLCanvasElement;
 
-        this.ctx_hover = this.canvas_hover.getContext('2d');
-        this.ctx_on    = this.canvas_on.getContext('2d');
-        this.ctx_off   = this.canvas_off.getContext('2d');
+        this.ctx_hover = this.canvas_hover.getContext('2d')!;
+        this.ctx_on    = this.canvas_on.getContext('2d')!;
+        this.ctx_off   = this.canvas_off.getContext('2d')!;
 
         this.cell = new Image();
         this.cell.src = 'static/img/sequencer_cell.png';
@@ -261,7 +312,7 @@ class SamplerView {
         return this.setPatternName(this.pattern_obj.name);
     }
 
-    drawPattern(time) {
+    drawPattern(time?: number) {
         if (time != null) { this.time = time; }
         this.page = Math.floor(this.time / this.cells_x);
         this.ctx_on.clearRect(0, 0, 832, 260);
@@ -309,8 +360,8 @@ class SamplerView {
         this.pos_markers.removeClass('marker-now').eq(this.page).addClass('marker-now');
         this.markers.find('.marker-pos').text(this.page + 1);
         this.markers.find('.marker-total').text(this.page_total);
-        return this.pos_markers.filter(i => i  < this.page_total).each(i => {
-            return this.pos_markers.eq(i).on('mousedown', () => {
+        return this.pos_markers.filter((i: number) => i  < this.page_total).each((i: number) => {
+            this.pos_markers.eq(i).on('mousedown', () => {
                 if (this.page < i) {
                     while (this.page !== i) {
                         this.model.player.forward();

@@ -7,8 +7,34 @@
  */
 import $ from 'jquery';
 
+declare global {
+    interface Window {
+        keyboard: any;
+    }
+}
+
 class SidebarView {
-    constructor(model) {
+    model: any;
+    wrapper: JQuery;
+    tracks: JQuery;
+    master: JQuery;
+    master_display: JQuery;
+    master_control: JQuery;
+    master_display_label: JQuery;
+    master_edit: JQuery;
+    master_name: JQuery;
+    master_bpm: JQuery;
+    master_key: JQuery;
+    master_scale: JQuery;
+    master_save: JQuery;
+    master_effects: JQuery;
+    add_master: JQuery;
+    add_master_btn: JQuery;
+    tracks_effects: JQuery;
+    add_tracks: JQuery;
+    add_tracks_btn: JQuery;
+
+    constructor(model: any) {
         this.model = model;
         this.wrapper = $('#sidebar-wrapper');
         this.tracks  = this.wrapper.find('#sidebar-tracks');
@@ -49,10 +75,10 @@ class SidebarView {
         this.master_save.on('click', ( () => { this.saveMaster(); return this.hideMasterControl(); }));
         this.master_edit.on('click', ( () => this.showMasterControl()));
 
-        this.tracks.find('.sidebar-effect').each(i=> {
-            return $(this).on('change', () => {
+        this.tracks.find('.sidebar-effect').each((i: number, el: HTMLElement) => {
+            $(el).on('change', () => {
                 // change i-th effect
-                return this.model.readTracksEffect(i);
+                this.model.readTracksEffect(i);
             });
         });
 
@@ -87,12 +113,12 @@ class SidebarView {
     }
 
     saveTracksEffect() {
-        return (Array.from(this.tracks_effects).map((f) => f.getParam()));
+        return (Array.from(this.tracks_effects).map((f: any) => f.getParam()));
     }
 
-    showTracks(track) {
+    showTracks(track: any) {
         this.tracks_effects.find('.sidebar-effect').remove();
-        for (var f of Array.from(track.effects)) { f.appendTo(this.tracks_effects); }
+        for (var f of Array.from(track.effects) as any[]) { f.appendTo(this.tracks_effects); }
         return this.wrapper.css('left', '0px');
     }
 

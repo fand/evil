@@ -1,5 +1,9 @@
 class Limiter {  // DON'T NEED to extend FX
-    constructor(ctx) {
+    ctx: AudioContext;
+    in: DynamicsCompressorNode;
+    out: DynamicsCompressorNode;
+
+    constructor(ctx: AudioContext) {
         this.ctx = ctx;
         this.in = this.ctx.createDynamicsCompressor();
         this.out = this.ctx.createDynamicsCompressor();

@@ -10,17 +10,44 @@ import $ from 'jquery';
 
 
 class SamplerCoreView {
-    constructor(model, id, dom) {
+    model: any;
+    id: any;
+    dom: JQuery;
+    sample: JQuery;
+    canvas_waveform_dom: JQuery;
+    canvas_waveform: HTMLCanvasElement;
+    ctx_waveform: CanvasRenderingContext2D;
+    canvas_EQ_dom: JQuery;
+    canvas_EQ: HTMLCanvasElement;
+    ctx_EQ: CanvasRenderingContext2D;
+    eq: JQuery;
+    output: JQuery;
+    panner: JQuery;
+    gain: JQuery;
+    sample_now: number;
+    w_wave: number;
+    h_wave: number;
+    head_wave: number;
+    tail_wave: number;
+    clicked_wave: number;
+    target: { head: number; tail: number; both: number[] };
+    target_wave: string | undefined;
+    sample_name: JQuery;
+    sample_list: JQuery;
+    sample_list_wrapper: JQuery;
+    gain_inputs: JQuery;
+
+    constructor(model: any, id: any, dom: JQuery) {
         this.model = model;
         this.id = id;
         this.dom = dom;
         this.sample = this.dom.find('.Sampler_sample');
         this.canvas_waveform_dom = this.dom.find('.waveform');
-        this.canvas_waveform = this.canvas_waveform_dom[0];
-        this.ctx_waveform = this.canvas_waveform.getContext('2d');
+        this.canvas_waveform = this.canvas_waveform_dom[0] as HTMLCanvasElement;
+        this.ctx_waveform = this.canvas_waveform.getContext('2d')!;
         this.canvas_EQ_dom = this.dom.find('.canvasEQ');
-        this.canvas_EQ = this.canvas_EQ_dom[0];
-        this.ctx_EQ = this.canvas_EQ.getContext('2d');
+        this.canvas_EQ = this.canvas_EQ_dom[0] as HTMLCanvasElement;
+        this.ctx_EQ = this.canvas_EQ.getContext('2d')!;
         this.eq = this.dom.find('.Sampler_EQ');
 
         this.output = this.dom.find('.Sampler_output');
@@ -233,24 +260,24 @@ class SamplerCoreView {
             this.sample_now,
             this.head_wave  / 300.0,
             this.tail_wave  / 300.0,
-            Math.pow(10, (parseFloat(this.sample.find('.speed').val()) / 100.0) - 1.0)
+            Math.pow(10, (parseFloat(this.sample.find('.speed').val() as string) / 100.0) - 1.0)
         );
     }
 
     fetchSampleEQParam() {
         return this.model.setSampleEQParam(
             this.sample_now,
-            parseFloat(this.eq.find('.EQ_lo').val())  - 100.0,
-            parseFloat(this.eq.find('.EQ_mid').val()) - 100.0,
-            parseFloat(this.eq.find('.EQ_hi').val())  - 100.0
+            parseFloat(this.eq.find('.EQ_lo').val() as string)  - 100.0,
+            parseFloat(this.eq.find('.EQ_mid').val() as string) - 100.0,
+            parseFloat(this.eq.find('.EQ_hi').val() as string)  - 100.0
         );
     }
 
     fetchSampleOutputParam() {
         return this.model.setSampleOutputParam(
             this.sample_now,
-            (1.0 - (parseFloat(this.panner.val())/200.0)),
-            parseFloat(this.gain.val()) / 100.0
+            (1.0 - (parseFloat(this.panner.val() as string)/200.0)),
+            parseFloat(this.gain.val() as string) / 100.0
         );
     }
 
@@ -267,15 +294,15 @@ class SamplerCoreView {
         return this.eq.find('.EQ_hi' ).val(p[2] + 100.0);
     }
 
-    setSampleOutputParam(p) {
-        const [pan, g] = Array.from(p);
+    setSampleOutputParam(p: [number, number]) {
+        const [pan, g] = p;
         this.panner.val((1.0 - pan) * 200.0);
         return this.gain.val(g * 100.0);
     }
 
     fetchGains() {
         return __range__(0, this.gain_inputs.length, false).map((i) =>
-            this.model.setNodeGain(i, parseInt(this.gain_inputs.eq(i).val())));
+            this.model.setNodeGain(i, parseInt(this.gain_inputs.eq(i).val() as string)));
     }
 }
 

@@ -12,9 +12,13 @@ import FuzzView from './FuzzView';
 
 
 class Fuzz extends FX {
-    constructor(ctx) {
-        this.ctx = ctx;
-        super(this.ctx);
+    fuzz: WaveShaperNode;
+    type: string;
+    samples: number;
+    gain: number;
+
+    constructor(ctx: AudioContext) {
+        super(ctx);
         this.fuzz = this.ctx.createWaveShaper();
         this.in.connect(this.fuzz);
         this.fuzz.connect(this.out);
@@ -66,7 +70,7 @@ class Fuzz extends FX {
         return this.view.setParam(p);
     }
 
-    getParam(p) {
+    getParam() {
         return {
             effect: 'Fuzz',
             type: this.type,
