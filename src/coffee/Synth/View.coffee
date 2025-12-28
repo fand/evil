@@ -5,7 +5,7 @@ class SynthView
     constructor: (@model, @id) ->
 
         @dom = $('#tmpl_synth').clone()
-        @dom.attr('id', 'synth' + id)
+        @dom.attr('id', 'synth' + @id)
         $("#instruments").append(@dom)
 
         @synth_name = @dom.find('.synth-name')
@@ -347,9 +347,9 @@ class SynthView
             )
             @ctx_off.drawImage(@cell,
                 78, 0, 26, 26,
-                (time % @cells_x) * 26, i * 26, 26, 26
+                (@time % @cells_x) * 26, i * 26, 26, 26
             )
-        @last_time = time
+        @last_time = @time
 
     setPattern: (@pattern_obj) ->
         @pattern = @pattern_obj.pattern

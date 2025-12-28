@@ -15,7 +15,7 @@ class SamplerCore
         for i in [0...10]
             @samples[i].connect(@node)
 
-        @view = new SamplerCoreView(this, id, @parent.view.dom.find('.sampler-core'))
+        @view = new SamplerCoreView(this, @id, @parent.view.dom.find('.sampler-core'))
 
     noteOn: (notes) ->
         return if @is_mute

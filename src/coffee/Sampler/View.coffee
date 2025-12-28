@@ -6,7 +6,7 @@ class SamplerView
     constructor: (@model, @id) ->
 
         @dom = $('#tmpl_sampler').clone()
-        @dom.attr('id', 'sampler' + id)
+        @dom.attr('id', 'sampler' + @id)
         $("#instruments").append(@dom)
 
         @synth_name = @dom.find('.synth-name')
@@ -209,9 +209,9 @@ class SamplerView
             )
             @ctx_off.drawImage(@cell,
                 78, 26, 26, 26,
-                (time % @cells_x) * 26, i * 26, 26, 26
+                (@time % @cells_x) * 26, i * 26, 26, 26
             )
-        @last_time = time
+        @last_time = @time
 
     setPattern: (@pattern_obj) ->
         @pattern = @pattern_obj.pattern

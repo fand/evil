@@ -29,7 +29,7 @@ initEvil = ->
         )
     ), 1500)
 
-    window.CONTEXT = new webkitAudioContext()
+    window.CONTEXT = new (window.AudioContext || window.webkitAudioContext)()
     window.player = new Player()
     window.keyboard = new Keyboard(window.player)
 

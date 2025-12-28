@@ -56,7 +56,7 @@ class SampleNode
                         @buffer_duration = (@buffer.length / CONSTANT.SAMPLE_RATE)
                         @parent.sampleLoaded(@id)
                     ),
-                    (err) => console.log('ajax error'); console.log(err)
+                    (err) => console.log('Failed to fetch ' + sample.url); console.log(err)
                 )
                 sample.data = @buffer
             req.send()

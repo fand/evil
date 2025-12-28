@@ -95,7 +95,7 @@ class VCO
             @node.gain.value = 0.9
         else
             o.disconnect() for o in @oscs
-            @osc.type = OSC_TYPE[shape]
+            @osc.type = OSC_TYPE[@shape]
             @osc.connect(@node)
             @node.gain.value = 1.0
 
@@ -207,7 +207,7 @@ class SynthCore
         @vcos[2].connect(@gain_res)
         @gain_res.connect(@node)
 
-        @view = new SynthCoreView(this, id, @parent.view.dom.find('.synth-core'))
+        @view = new SynthCoreView(this, @id, @parent.view.dom.find('.synth-core'))
 
     getParam: ->
         type: 'REZ'
