@@ -3,11 +3,11 @@
 #
 
 DEFAULT = [
-    'bd_909dwsd', 'bd_sub808',
-    'snr_drm909kit1', 'snr_mpc',
-    'clp_raw', 'clp_basics',
-    'hat_lilcloser', 'hat_nice909open',
-    'shaker_bot', 'tam_lifein2d'
+    'kick1', 'kick2',
+    'snare1', 'snare2',
+    'clap', 'clap',
+    'hat_closed', 'hat_open',
+    'ride', 'ride'
 ]
 
 DATA =
