@@ -9,20 +9,19 @@
  */
 import { SampleNode as SamplerNode } from './Node';
 import { SamplerCoreView } from './CoreView';
-import { SAMPLES } from './Constant';
+import type { Sampler } from '../Sampler';
 
-class SamplerCore {
-  parent: any;
+export class SamplerCore {
+  parent: Sampler;
   ctx: AudioContext;
-  id: any;
+  id: number;
   node: GainNode;
   gain: number;
   is_mute: boolean;
   samples: SamplerNode[];
   view: SamplerCoreView;
 
-  constructor(parent: any, ctx: AudioContext, id: any) {
-    let i;
+  constructor(parent: Sampler, ctx: AudioContext, id: number) {
     this.parent = parent;
     this.ctx = ctx;
     this.id = id;
@@ -31,16 +30,12 @@ class SamplerCore {
     this.gain = 1.0;
     this.is_mute = false;
 
-    this.samples = (() => {
-      const result = [];
-      for (i = 0; i < 10; i++) {
-        result.push(new SamplerNode(this.ctx, i, this));
-      }
-      return result;
-    })();
+    this.samples = [];
 
-    for (i = 0; i < 10; i++) {
-      this.samples[i].connect(this.node);
+    for (let i = 0; i < 10; i++) {
+      const sample = new SamplerNode(this.ctx, i, this);
+      sample.connect(this.node);
+      this.samples.push(sample);
     }
 
     this.view = new SamplerCoreView(
@@ -50,72 +45,79 @@ class SamplerCore {
     );
   }
 
-  noteOn(notes) {
+  noteOn(notes: [number, number][] | number) {
     if (this.is_mute) {
       return;
     }
+
     const time = this.ctx.currentTime;
     if (Array.isArray(notes)) {
-      // return if notes.length == 0
+      if (notes.length == 0) {
+        return;
+      }
       return Array.from(notes).map((n) =>
         this.samples[n[0] - 1].noteOn(n[1], time)
       );
+    } else {
+      this.samples[notes - 1].noteOn(1, time);
     }
   }
-  // else
-  //     @samples[notes - 1].noteOn(1, time)
 
   noteOff() {
     let t0;
-    return (t0 = this.ctx.currentTime);
+    return (t0 = this.ctx.currentTime); // TODO: ???
   }
 
-  connect(dst) {
+  connect(dst: AudioNode) {
     return this.node.connect(dst);
   }
 
-  setSample(i, name) {
+  setSample(i: number, name: string) {
     return this.samples[i].setSample(name);
   }
 
-  setSampleTimeParam(i, head, tail, speed) {
+  setSampleTimeParam(i: number, head: number, tail: number, speed: number) {
     return this.samples[i].setTimeParam(head, tail, speed);
   }
 
-  setSampleEQParam(i, lo, mid, hi) {
+  setSampleEQParam(i: number, lo: number, mid: number, hi: number) {
     return this.samples[i].setEQParam([lo, mid, hi]);
   }
 
-  setSampleOutputParam(i, pan, gain) {
+  setSampleOutputParam(i: number, pan: number, gain: number) {
     return this.samples[i].setOutputParam(pan, gain);
   }
 
-  setGain(gain) {
+  setGain(gain: number) {
     this.gain = gain;
-    return (this.node.gain.value = this.gain);
+    this.node.gain.value = this.gain;
   }
 
-  getSampleTimeParam(i) {
+  setSampleGain(i: number, gain: number) {
+    return this.samples[i].setParam({ gain });
+  }
+
+  getSampleTimeParam(i: number) {
     return this.samples[i].getTimeParam();
   }
 
-  getSampleData(i) {
+  getSampleData(i: number) {
     return this.samples[i].getData();
   }
 
-  getSampleEQParam(i) {
+  getSampleEQParam(i: number) {
     return this.samples[i].getEQParam();
   }
 
-  getSampleOutputParam(i) {
+  getSampleOutputParam(i: number) {
     return this.samples[i].getOutputParam();
   }
 
-  sampleLoaded(id) {
+  sampleLoaded(id: number) {
     return this.view.updateWaveformCanvas(id);
   }
 
-  bindSample(sample_now) {
+  bindSample(sample_now: number) {
     this.view.bindSample(sample_now, this.samples[sample_now].getParam());
     this.view.setSampleTimeParam(this.getSampleTimeParam(sample_now));
     this.view.setSampleEQParam(this.getSampleEQParam(sample_now));
@@ -145,11 +147,10 @@ class SamplerCore {
   }
 
   mute() {
-    return (this.is_mute = true);
+    this.is_mute = true;
   }
+
   demute() {
-    return (this.is_mute = false);
+    this.is_mute = false;
   }
 }
-
-export { SamplerCore };

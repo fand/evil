@@ -1,6 +1,4 @@
-//#
 // Samples data
-//
 
 const DEFAULT = [
   'kick1',
@@ -266,8 +264,7 @@ const DATA = {
   ride_mpc60: { url: 'static/wav/deep_house/ride_cymbal/ride_mpc60.wav' },
 };
 
-const SAMPLES = {
+export const SAMPLES = {
   DATA,
   DEFAULT,
 };
-export { SAMPLES };

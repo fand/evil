@@ -7,10 +7,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
+import type { SamplerCore } from './Core';
 
-class SamplerCoreView {
-  model: any;
-  id: any;
+export class SamplerCoreView {
+  model: SamplerCore;
+  id: number;
   dom: JQuery;
   sample: JQuery;
   canvas_waveform_dom: JQuery;
@@ -36,7 +37,7 @@ class SamplerCoreView {
   sample_list_wrapper: JQuery;
   gain_inputs: JQuery;
 
-  constructor(model: any, id: any, dom: JQuery) {
+  constructor(model: SamplerCore, id: number, dom: JQuery) {
     this.model = model;
     this.id = id;
     this.dom = dom;
@@ -155,7 +156,7 @@ class SamplerCoreView {
     });
   }
 
-  bindSample(sample_now, param) {
+  bindSample(sample_now: number, param) {
     this.sample_now = sample_now;
     this.sample_name.find('span').text(param.wave);
     this.updateWaveformCanvas(this.sample_now);
@@ -176,7 +177,7 @@ class SamplerCoreView {
     return this.sample_list_wrapper.hide();
   }
 
-  updateWaveformCanvas(sample_now) {
+  updateWaveformCanvas(sample_now: number) {
     this.sample_now = sample_now;
     const canvas = this.canvas_waveform;
     const ctx = this.ctx_waveform;
@@ -259,13 +260,13 @@ class SamplerCoreView {
     return ctx.translate(0, -h / 2);
   }
 
-  setSample(name) {
+  setSample(name: string) {
     this.model.setSample(this.sample_now, name);
-    return this.sample_name.find('span').text(name);
+    this.sample_name.find('span').text(name);
   }
 
   fetchSampleTimeParam() {
-    return this.model.setSampleTimeParam(
+    this.model.setSampleTimeParam(
       this.sample_now,
       this.head_wave / 300.0,
       this.tail_wave / 300.0,
@@ -277,7 +278,7 @@ class SamplerCoreView {
   }
 
   fetchSampleEQParam() {
-    return this.model.setSampleEQParam(
+    this.model.setSampleEQParam(
       this.sample_now,
       parseFloat(this.eq.find('.EQ_lo').val() as string) - 100.0,
       parseFloat(this.eq.find('.EQ_mid').val() as string) - 100.0,
@@ -286,21 +287,21 @@ class SamplerCoreView {
   }
 
   fetchSampleOutputParam() {
-    return this.model.setSampleOutputParam(
+    this.model.setSampleOutputParam(
       this.sample_now,
       1.0 - parseFloat(this.panner.val() as string) / 200.0,
       parseFloat(this.gain.val() as string) / 100.0
     );
   }
 
-  setSampleTimeParam(p) {
+  setSampleTimeParam(p: [head: number, tail: number, speed: number]) {
     this.head_wave = p[0] * 300.0;
     this.tail_wave = p[1] * 300.0;
     const ratio = Math.log(p[2]) / Math.LN10 + 1.0;
     return this.sample.find('.speed').val(ratio * 100);
   }
 
-  setSampleEQParam(p) {
+  setSampleEQParam(p: [lo: number, mid: number, hi: number]) {
     this.eq.find('.EQ_lo').val(p[0] + 100.0);
     this.eq.find('.EQ_mid').val(p[1] + 100.0);
     return this.eq.find('.EQ_hi').val(p[2] + 100.0);
@@ -313,23 +314,11 @@ class SamplerCoreView {
   }
 
   fetchGains() {
-    return __range__(0, this.gain_inputs.length, false).map((i) =>
-      this.model.setNodeGain(
+    for (let i = 0; i < this.gain_inputs.length; i++) {
+      this.model.setSampleGain(
         i,
         parseInt(this.gain_inputs.eq(i).val() as string)
-      )
-    );
+      );
+    }
   }
-}
-
-export { SamplerCoreView };
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
 }

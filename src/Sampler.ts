@@ -114,14 +114,15 @@ class Sampler {
     return (this.core as any).setNote(note);
   }
 
-  setGain(gain) {
-    return this.core.setGain(gain);
+  setGain(gain: number) {
+    this.core.setGain(gain);
   }
+
   getGain() {
     return this.core.gain;
   }
 
-  noteOn(note) {
+  noteOn(note: number) {
     return this.core.noteOn([[note, 1.0]]);
   }
 

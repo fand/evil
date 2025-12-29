@@ -9,6 +9,7 @@
  */
 import $ from 'jquery';
 import { SamplerKeyboardView } from './KeyboardView';
+import type { Sampler } from '../Sampler';
 
 declare global {
   interface Window {
@@ -16,9 +17,56 @@ declare global {
   }
 }
 
-class SamplerView {
-  model: any;
-  id: any;
+type SamplerPattern = [note: number, velocity: number][][];
+
+const DEFAULT_PATTERN: SamplerPattern = [
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+];
+
+type SamplerPatternObject = { name: string; pattern: SamplerPattern };
+
+type SamplerPos = {
+  x: number;
+  y: number;
+  x_abs: number;
+  y_abs: number;
+  note: number;
+};
+
+export class SamplerView {
+  model: Sampler;
+  id: number;
   dom: JQuery;
   synth_name: JQuery;
   pattern_name: JQuery;
@@ -47,8 +95,8 @@ class SamplerView {
   cells_y: number;
   core: JQuery;
   keyboard: SamplerKeyboardView;
-  pattern: any[];
-  pattern_obj: { name: any; pattern: any[] };
+  pattern: SamplerPattern = DEFAULT_PATTERN;
+  pattern_obj: SamplerPatternObject;
   page: number;
   page_total: number;
   last_time: number;
@@ -64,9 +112,10 @@ class SamplerView {
   is_active: boolean;
   sample_now: number;
 
-  constructor(model: any, id: any) {
+  constructor(model: Sampler, id: number) {
     this.model = model;
     this.id = id;
+
     this.dom = $('#tmpl_sampler').clone();
     this.dom.attr('id', 'sampler' + this.id);
     $('#instruments').append(this.dom);
@@ -115,42 +164,11 @@ class SamplerView {
 
     this.keyboard = new SamplerKeyboardView(this);
 
-    // Flags / Params
-    this.pattern = [
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ];
-    this.pattern_obj = { name: this.pattern_name.val(), pattern: this.pattern };
+    // Flags / Params;
+    this.pattern_obj = {
+      name: this.pattern_name.text(),
+      pattern: this.pattern,
+    };
     this.page = 0;
     this.page_total = 1;
 
@@ -203,7 +221,7 @@ class SamplerView {
     return this.setPattern(this.pattern_obj);
   }
 
-  getPos(e) {
+  getPos(e: JQuery.MouseMoveEvent | JQuery.MouseDownEvent): SamplerPos {
     this.rect = this.canvas_off.getBoundingClientRect();
     const _x = Math.floor((e.clientX - this.rect.left) / 26);
     let _y = Math.floor((e.clientY - this.rect.top) / 26);
@@ -313,13 +331,14 @@ class SamplerView {
     });
   }
 
-  addNote(pos, gain) {
-    if (this.pattern[pos.x_abs] === 0) {
-      this.pattern[pos.x_abs] = [];
-    }
-    if (!Array.isArray(this.pattern[pos.x_abs])) {
-      this.pattern[pos.x_abs] = [[this.pattern[pos.x_abs], 1.0]];
-    }
+  addNote(pos: SamplerPos, gain: number) {
+    // if (this.pattern[pos.x_abs] === 0) {
+    //   this.pattern[pos.x_abs] = [];
+    // }
+
+    // if (!Array.isArray(this.pattern[pos.x_abs])) {
+    //   this.pattern[pos.x_abs] = [[this.pattern[pos.x_abs], 1.0]];
+    // }
 
     for (
       let i = 0, end = this.pattern[pos.x_abs].length, asc = 0 <= end;
@@ -346,7 +365,7 @@ class SamplerView {
     );
   }
 
-  removeNote(pos) {
+  removeNote(pos: SamplerPos) {
     for (
       let i = 0, end = this.pattern[pos.x_abs].length, asc = 0 <= end;
       asc ? i < end : i > end;
@@ -361,7 +380,7 @@ class SamplerView {
     return this.model.removeNote(pos);
   }
 
-  playAt(time) {
+  playAt(time: number) {
     this.time = time;
     if (this.is_nosync) {
       return;
@@ -401,7 +420,7 @@ class SamplerView {
     return (this.last_time = this.time);
   }
 
-  setPattern(pattern_obj) {
+  setPattern(pattern_obj: SamplerPatternObject) {
     this.pattern_obj = pattern_obj;
     this.pattern = this.pattern_obj.pattern;
     this.page = 0;
@@ -445,40 +464,7 @@ class SamplerView {
     if (this.page_total === 8) {
       return;
     }
-    this.pattern = this.pattern.concat([
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ]);
+    this.pattern = this.pattern.concat(DEFAULT_PATTERN);
     this.page_total++;
     this.model.plusPattern();
     this.drawPattern();
@@ -515,7 +501,8 @@ class SamplerView {
       .addClass('marker-now');
     this.markers.find('.marker-pos').text(this.page + 1);
     this.markers.find('.marker-total').text(this.page_total);
-    return this.pos_markers
+
+    this.pos_markers
       .filter((i: number) => i < this.page_total)
       .each((i: number) => {
         this.pos_markers.eq(i).on('mousedown', () => {
@@ -538,6 +525,7 @@ class SamplerView {
   }
 
   play() {}
+
   stop() {
     return __range__(0, this.cells_y, false).map((i) =>
       this.ctx_off.drawImage(
@@ -556,18 +544,19 @@ class SamplerView {
 
   activate(i) {
     this.is_active = true;
-    return this.initCanvas();
+    this.initCanvas();
   }
 
   inactivate() {
-    return (this.is_active = false);
+    this.is_active = false;
   }
 
-  setSynthName(name) {
-    return this.synth_name.val(name);
+  setSynthName(name: string) {
+    this.synth_name.val(name);
   }
-  setPatternName(name) {
-    return this.pattern_name.val(name);
+
+  setPatternName(name: string) {
+    this.pattern_name.val(name);
   }
 
   toggleNoSync() {
@@ -594,14 +583,12 @@ class SamplerView {
     }
   }
 
-  selectSample(sample_now) {
+  selectSample(sample_now: number) {
     this.sample_now = sample_now;
     this.keyboard.selectSample(this.sample_now);
     return this.model.selectSample(this.sample_now);
   }
 }
-
-export { SamplerView };
 
 function __range__(left, right, inclusive) {
   let range = [];

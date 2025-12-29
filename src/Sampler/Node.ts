@@ -9,11 +9,12 @@
 import { SAMPLE_RATE } from '../Constant';
 import { Panner } from '../Panner';
 import { SAMPLES as SAMPLE } from './Constant';
+import type { SamplerCore } from './Core';
 
-class SampleNode {
+export class SampleNode {
   ctx: AudioContext;
   id: number;
-  parent: any;
+  parent: SamplerCore;
   out: GainNode;
   name: string;
   head: number;
@@ -21,17 +22,17 @@ class SampleNode {
   speed: number;
   merger: ChannelMergerNode;
   node_buf: GainNode;
-  eq_gains: number[];
+  eq_gains: [lo: number, mid: number, hi: number];
   eq_nodes: BiquadFilterNode[];
   panner: Panner;
   pan_value: number;
-  sample: any;
+  sample: { url: string };
   buffer: AudioBuffer;
   buffer_duration: number;
   dst: AudioNode;
   source_old: AudioBufferSourceNode;
 
-  constructor(ctx: AudioContext, id: number, parent: any) {
+  constructor(ctx: AudioContext, id: number, parent: SamplerCore) {
     this.ctx = ctx;
     this.id = id;
     this.parent = parent;
@@ -81,12 +82,14 @@ class SampleNode {
     this.panner.connect(this.out);
   }
 
-  setSample(name) {
+  setSample(name: string) {
     this.name = name;
+
     const sample = SAMPLE.DATA[this.name];
     if (sample == null) {
       return;
     }
+
     this.sample = sample;
     if (sample.data != null) {
       return (this.buffer = sample.data);
@@ -113,12 +116,12 @@ class SampleNode {
     }
   }
 
-  connect(dst) {
+  connect(dst: AudioNode) {
     this.dst = dst;
-    return this.out.connect(this.dst);
+    this.out.connect(this.dst);
   }
 
-  noteOn(gain, time) {
+  noteOn(gain: number, time: number) {
     if (this.buffer == null) {
       return;
     }
@@ -141,12 +144,13 @@ class SampleNode {
     return (this.source_old = source);
   }
 
-  setTimeParam(head, tail, speed) {
+  setTimeParam(head: number, tail: number, speed: number) {
     this.head = head;
     this.tail = tail;
     this.speed = speed;
   }
-  getTimeParam() {
+
+  getTimeParam(): [head: number, tail: number, speed: number] {
     return [this.head, this.tail, this.speed];
   }
 
@@ -167,7 +171,7 @@ class SampleNode {
     return this.eq_gains;
   }
 
-  setOutputParam(pan_value, gain) {
+  setOutputParam(pan_value: number, gain: number) {
     this.pan_value = pan_value;
     this.panner.setPosition(this.pan_value);
     return (this.out.gain.value = gain);
@@ -205,5 +209,3 @@ class SampleNode {
     }
   }
 }
-
-export { SampleNode };

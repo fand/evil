@@ -8,7 +8,7 @@ import { SamplerView } from './View';
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-class SamplerKeyboardView {
+export class SamplerKeyboardView {
   sequencer: SamplerView;
   on_dom: JQuery;
   off_dom: JQuery;
@@ -26,7 +26,7 @@ class SamplerKeyboardView {
   click_pos: number;
   sample_last: number | undefined;
 
-  rect: any;
+  rect: DOMRect;
   offset: { x: number; y: number } | undefined;
 
   constructor(sequencer: SamplerView) {
@@ -79,7 +79,7 @@ class SamplerKeyboardView {
     })();
   }
 
-  getPos(e) {
+  getPos(e: JQuery.MouseMoveEvent | JQuery.MouseDownEvent) {
     this.rect = this.canvas_off.getBoundingClientRect();
     return Math.floor((e.clientY - this.rect.top) / this.h);
   }
@@ -149,7 +149,7 @@ class SamplerKeyboardView {
     );
   }
 
-  drawActive(i) {
+  drawActive(i: number) {
     this.clearNormal(i);
     this.ctx_off.fillStyle = this.color[2];
     this.ctx_off.fillRect(0, i * this.h, this.w, this.h);
@@ -161,7 +161,7 @@ class SamplerKeyboardView {
     );
   }
 
-  clearNormal(i) {
+  clearNormal(i: number) {
     return this.ctx_off.clearRect(0, i * this.h, this.w, this.h);
   }
 
@@ -197,5 +197,3 @@ class SamplerKeyboardView {
     return (this.sample_last = sample_now);
   }
 }
-
-export { SamplerKeyboardView };
