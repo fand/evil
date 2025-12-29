@@ -21,7 +21,7 @@ var index = function (req, res) {
 };
 
 // Show a song.
-var song = function (req, res) {
+var song = async function (req, res) {
   if (req.is_ie) {
     return res.render('ie', { ie: true });
   }
@@ -34,15 +34,16 @@ var song = function (req, res) {
   // Get the song data.
   var song_id = req.params.song_id;
 
-  Song.findById(song_id, function (err, song) {
-    if (err || !song) {
-      console.error(JSON.stringify(err));
-
-      // return res.render('index', { debug: is_dev });
+  try {
+    var song = await Song.findById(song_id);
+    if (!song) {
       return res.redirect('/');
     }
     return res.render('index', { song: song, debug: is_dev });
-  });
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    return res.redirect('/');
+  }
 };
 
 module.exports = {
