@@ -69,7 +69,7 @@ class Player {
     this.view = new PlayerView(this);
   }
 
-  setBPM(bpm) {
+  setBPM(bpm: number) {
     this.bpm = bpm;
     this.scene.bpm = this.bpm;
 
@@ -82,7 +82,8 @@ class Player {
     return this.sidebar.setBPM(this.bpm);
   }
 
-  setKey(key) {
+  setKey(key: string) {
+    // TODO: use Key type
     this.key = key;
     this.scene.key = this.key;
     for (var s of Array.from(this.synth)) {
@@ -92,8 +93,8 @@ class Player {
     return this.sidebar.setKey(this.key);
   }
 
-  setScale(scale) {
-    this.scale = scale;
+  setScale(scale: string) {
+    this.scale = scale; // TODO: use Scale type
     this.scene.scale = this.scale;
     for (var s of Array.from(this.synth)) {
       s.setScale(this.scale);
@@ -102,7 +103,7 @@ class Player {
     return this.sidebar.setScale(this.scale);
   }
 
-  isPlaying() {
+  isPlaying(): boolean {
     return this.is_playing;
   }
 
@@ -158,10 +159,10 @@ class Player {
     return this.session.toggleLoop();
   }
 
-  noteOn(note, force) {
+  noteOn(note: number, force: boolean) {
     return this.synth_now.noteOn(note, force);
   }
-  noteOff(force) {
+  noteOff(force: boolean) {
     return this.synth_now.noteOff(force);
   }
 
