@@ -105,7 +105,7 @@ class SamplerView {
     this.ctx_off = this.canvas_off.getContext('2d')!;
 
     this.cell = new Image();
-    this.cell.src = 'static/img/sequencer_cell.png';
+    this.cell.src = '/img/sequencer_cell.png';
     this.cell.onload = () => this.initCanvas();
 
     this.cells_x = 32;

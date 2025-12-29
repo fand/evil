@@ -283,7 +283,7 @@ canvas:active {
 }
 #hatena {
   width: 18px;
-  background-image: url('/static/img/hatebu_18.png');
+  background-image: url('/img/hatebu_18.png');
   background-position: left;
 }
 #hatena:hover {
