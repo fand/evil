@@ -42,10 +42,10 @@ class Player {
   synth_now: any;
   synth_pos: number = 0;
   scene_length: number = 32;
-  view: PlayerView;
+  view: PlayerView | null;
   song: any;
 
-  constructor(ctx: AudioContext) {
+  constructor(ctx: AudioContext, createView: boolean = true) {
     this.scene = { bpm: this.bpm, key: this.key, scale: this.scale };
 
     this.context = ctx;
@@ -57,7 +57,8 @@ class Player {
     this.addSynth(0);
     this.synth_now = this.synth[0];
 
-    this.view = new PlayerView(this);
+    // Allow skipping view creation for React migration
+    this.view = createView ? new PlayerView(this) : null;
   }
 
   setBPM(bpm: number) {

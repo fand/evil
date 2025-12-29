@@ -1,43 +1,61 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppStore } from './store';
-import { LegacyJQueryComponent } from './components/LegacyJQueryComponent';
 import Player from '../ts/Player';
-import PlayerView from '../ts/PlayerView';
-import MixerView from '../ts/MixerView';
-import SessionView from '../ts/SessionView';
+import Song from '../ts/Song';
+import Keyboard from '../ts/Keyboard';
+import { PlayerControls } from './components/PlayerControls';
 
 /**
  * Main App component that wraps the entire application.
- * Currently mounts jQuery-based views using LegacyJQueryComponent.
- * These will be gradually replaced with native React components.
+ * Gradually converting jQuery views to React components.
  */
 export function App() {
   const player = useAppStore((state) => state.player);
   const setPlayer = useAppStore((state) => state.setPlayer);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     // Initialize AudioContext and Player on mount
     const ctx = new AudioContext();
-    const playerInstance = new Player(ctx);
+    // Pass false to skip creating PlayerView (we're using React PlayerControls instead)
+    const playerInstance = new Player(ctx, false);
+    const keyboard = new Keyboard(playerInstance);
+    (window as any).keyboard = keyboard;
+
     setPlayer(playerInstance);
 
     // Load song data if available (injected from server)
     const songData = (window as any).song_loaded;
     if (songData) {
       playerInstance.readSong(JSON.parse(songData.json));
+    } else {
+      playerInstance.readSong(Song.DEFAULT);
     }
+
+    setIsInitialized(true);
   }, [setPlayer]);
 
-  if (!player) {
+  if (!player || !isInitialized) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="evil-app">
-      {/* Temporarily mount jQuery views - will be replaced with React components */}
-      <LegacyJQueryComponent ViewClass={PlayerView} model={player} />
-      <LegacyJQueryComponent ViewClass={SessionView} model={player.session} />
-      <LegacyJQueryComponent ViewClass={MixerView} model={player.mixer} />
-    </div>
+    <>
+      {/* Footer with React PlayerControls */}
+      <footer>
+        <PlayerControls />
+
+        <div id="song-info">
+          <div>
+            <label>title: </label>
+            <input type="text" id="song-title" />
+          </div>
+          <div>
+            <label>by: </label>
+            <input type="text" id="song-creator" />
+          </div>
+        </div>
+      </footer>
+    </>
   );
 }

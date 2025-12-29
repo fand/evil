@@ -205,46 +205,8 @@
       </div>
     </div>
 
-    <footer>
-      <div id="control">
-        key: <select name="key">
-          <option selected="selected">A</option>
-          <option>D</option>
-          <option>G</option>
-          <option>C</option>
-          <option>F</option>
-          <option>Bb</option>
-          <option>Eb</option>
-          <option>Ab</option>
-          <option>Db</option>
-          <option>Gb</option>
-          <option>B</option>
-          <option>E</option>
-        </select>
-        scale: <select name="mode">
-          <option selected="selected">Major</option>
-          <option>minor</option>
-          <option>Pentatonic</option>
-          <option>Harm-minor</option>
-          <option>Dorian</option>
-          <option>Phrygian</option>
-          <option>Lydian</option>
-          <option>Mixolydian</option>
-          <option>CHROMATIC</option>
-        </select>
-        bpm: <input name="bpm" min="60" max="1000" value="120" type="number">
-      </div>
-
-      <i id="control-play"      class="fa fa-play"></i>
-      <i id="control-forward"   class="fa fa-forward"></i>
-      <i id="control-backward"  class="fa fa-backward"></i>
-      <i id="control-loop"      class="fa fa-repeat control-on"></i>
-
-      <div id="song-info">
-        <div><label>title: </label><input type="text" id="song-title" /></div>
-        <div><label>by:    </label><input type="text" id="song-creator" /></div>
-      </div>
-    </footer>
+    <!-- Footer content is now rendered by React -->
+    <footer></footer>
 
     <i id="btn-left"   class="btn fa fa-angle-left"  data-line1="prev" data-line2="synth"></i>
     <i id="btn-right"  class="btn fa fa-angle-right" data-line1="new"  data-line2="synth"></i>
