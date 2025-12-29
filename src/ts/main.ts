@@ -41,6 +41,7 @@ const initEvil = function () {
   const ctx = new AudioContext();
   const player = new Player(ctx);
   const keyboard = new Keyboard(player);
+  (window as any).keyboard = keyboard;
 
   const footer_size = $(window).height() / 2 - 300;
   $('footer').css('height', footer_size + 'px');
