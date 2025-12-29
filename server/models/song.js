@@ -1,14 +1,14 @@
 'use strict';
 
+var crypto = require('crypto');
 var mongoose = require('mongoose'),
   Schema = mongoose.Schema,
-  ObjectId = Schema.ObjectId,
-  shortid = require('shortid');
+  ObjectId = Schema.ObjectId;
 
 var SongSchema = new Schema({
   _id: {
     type: String,
-    default: shortid.generate,
+    default: () => crypto.randomUUID(),
   },
   title: { type: String, default: 'Untitled' },
   creator: { type: String, default: 'Anonymous' },

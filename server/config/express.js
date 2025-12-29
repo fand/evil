@@ -1,10 +1,9 @@
 'use strict';
 
 var express = require('express'),
-  favicon = require('static-favicon'),
+  favicon = require('serve-favicon'),
   logger = require('morgan'),
   compression = require('compression'),
-  bodyParser = require('body-parser'),
   methodOverride = require('method-override'),
   cookieParser = require('cookie-parser'),
   session = require('express-session'),
@@ -69,9 +68,9 @@ module.exports = function (app) {
   app.set('views', config.root + '/views');
   app.use(logger('dev'));
 
-  app.use(bodyParser.json());
+  app.use(express.json());
   app.use(
-    bodyParser.urlencoded({
+    express.urlencoded({
       extended: true,
     })
   );
