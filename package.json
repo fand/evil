@@ -2,11 +2,11 @@
   "name": "evil",
   "version": "0.1.0",
   "scripts": {
+    "dev": "vite",
     "build": "vite build",
-    "build:watch": "vite build --watch",
+    "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "start": "node server.js",
-    "dev": "npm run build && node server.js",
+    "start:server": "node server.js",
     "postinstall": "mkdir -p node_modules/mongodb/node_modules && ln -sf ../../bson node_modules/mongodb/node_modules/bson",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
