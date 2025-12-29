@@ -1,20 +1,17 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  plugins: [react()],
   build: {
-    outDir: 'build/js',
+    outDir: 'build',
     emptyOutDir: true,
-    lib: {
-      entry: path.resolve(__dirname, 'src/ts/main.ts'),
-      name: 'Evil',
-      fileName: () => 'evil.js',
-      formats: ['iife'],
-    },
     rollupOptions: {
       output: {
-        // Ensure jQuery is bundled
-        inlineDynamicImports: true,
+        entryFileNames: 'js/[name].js',
+        chunkFileNames: 'js/[name].js',
+        assetFileNames: 'assets/[name].[ext]',
       },
     },
   },

@@ -24,11 +24,17 @@
     "mongoose": "^8.20.4",
     "morgan": "^1.10.1",
     "passport": "^0.7.0",
-    "serve-favicon": "^2.5.1"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "serve-favicon": "^2.5.1",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.33",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-legacy": "^7.2.1",
+    "@vitejs/plugin-react": "^5.1.2",
     "nodemon": "^3.1.11",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
