@@ -9,11 +9,18 @@ import { FX } from './FX';
 import { DoubleView } from './DoubleView';
 import { Panner } from '../Panner';
 
-class Double extends FX {
+export type DoubleParams = {
+  delay: number;
+  width: number;
+};
+
+export class Double extends FX {
   delay: DelayNode;
   pan_l: Panner;
   pan_r: Panner;
   pos: number;
+
+  view: DoubleView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -22,7 +29,7 @@ class Double extends FX {
 
     this.pan_l = new Panner(this.ctx);
     this.pan_r = new Panner(this.ctx);
-    this.setWidth([0, 0, -1]);
+    this.setWidth(1);
 
     this.in.connect(this.pan_l.in);
     this.in.connect(this.delay);
@@ -35,16 +42,17 @@ class Double extends FX {
     this.view = new DoubleView(this);
   }
 
-  setDelay(d) {
+  setDelay(d: number) {
     return (this.delay.delayTime.value = d);
   }
-  setWidth(pos) {
+
+  setWidth(pos: number) {
     this.pos = pos;
     this.pan_l.setPosition(this.pos);
     return this.pan_r.setPosition(-this.pos);
   }
 
-  setParam(p) {
+  setParam(p: Partial<DoubleParams>) {
     if (p.delay != null) {
       this.setDelay(p.delay);
     }
@@ -62,5 +70,3 @@ class Double extends FX {
     };
   }
 }
-
-export { Double };

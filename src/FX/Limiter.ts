@@ -1,4 +1,4 @@
-class Limiter {
+export class Limiter {
   // DON'T NEED to extend FX
   ctx: AudioContext;
   in: DynamicsCompressorNode;
@@ -16,9 +16,7 @@ class Limiter {
     this.out.ratio.value = 20;
   }
 
-  connect(dst) {
+  connect(dst: AudioNode) {
     return this.out.connect(dst);
   }
 }
-
-export { Limiter };

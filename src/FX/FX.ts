@@ -4,9 +4,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
+import type { FXView } from './FXView';
 
-class FX {
-  view: any;
+export class FX {
+  view: FXView;
   protected ctx: AudioContext;
   in: GainNode;
   protected dry: GainNode;
@@ -36,12 +37,15 @@ class FX {
   setInput(d: number) {
     return (this.in.gain.value = d);
   }
+
   setOutput(d: number) {
     return (this.out.gain.value = d);
   }
+
   setDry(d: number) {
     return (this.dry.gain.value = d);
   }
+
   setWet(d: number) {
     return (this.wet.gain.value = d);
   }
@@ -68,5 +72,3 @@ class FX {
     return {};
   }
 }
-
-export { FX };

@@ -7,8 +7,9 @@
  */
 import { FXView } from './FXView';
 import $ from 'jquery';
+import type { Compressor, CompressorParams } from './Compressor';
 
-class CompressorView extends FXView {
+export class CompressorView extends FXView {
   attack: JQuery;
   release: JQuery;
   threshold: JQuery;
@@ -17,7 +18,7 @@ class CompressorView extends FXView {
   input: JQuery;
   output: JQuery;
 
-  constructor(model: any) {
+  constructor(model: Compressor) {
     const dom = $('#tmpl_fx_compressor').clone();
     dom.removeAttr('id');
     super(model, dom);
@@ -35,51 +36,52 @@ class CompressorView extends FXView {
 
   initEvent() {
     super.initEvent();
+
     this.input.on('change', () => {
-      return this.model.setParam({
+      this.model.setParam({
         input: parseFloat(this.input.val() as string) / 100.0,
       });
     });
     this.output.on('change', () => {
-      return this.model.setParam({
+      this.model.setParam({
         output: parseFloat(this.output.val() as string) / 100.0,
       });
     });
     this.attack.on('change', () => {
-      return this.model.setParam({
+      this.model.setParam({
         attack: parseFloat(this.attack.val() as string) / 1000.0,
       });
     });
     this.release.on('change', () => {
-      return this.model.setParam({
+      this.model.setParam({
         release: parseFloat(this.release.val() as string) / 1000.0,
       });
     });
     this.threshold.on('change', () => {
-      return this.model.setParam({
+      this.model.setParam({
         threshold: parseFloat(this.threshold.val() as string) / -10.0,
       }); // [0, 100]
     });
     this.ratio.on('change', () => {
-      return this.model.setParam({
+      this.model.setParam({
         ratio: parseInt(this.ratio.val() as string),
       });
     });
-    return this.knee.on('change', () => {
-      return this.model.setParam({
+    this.knee.on('change', () => {
+      this.model.setParam({
         knee: parseFloat(this.knee.val() as string) / 1000.0,
       });
     });
   }
 
-  setParam(p) {
+  setParam(p: Partial<CompressorParams>) {
     if (p.input != null) {
       this.input.val(p.input * 100);
     }
     if (p.output != null) {
       this.output.val(p.output * 100);
     }
-    if (p.attacks != null) {
+    if (p.attack != null) {
       this.attack.val(p.attack * 1000);
     }
     if (p.release != null) {
@@ -96,5 +98,3 @@ class CompressorView extends FXView {
     }
   }
 }
-
-export { CompressorView };

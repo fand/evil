@@ -8,8 +8,19 @@
 import { FX } from './FX';
 import { CompressorView } from './CompressorView';
 
-class Compressor extends FX {
+export type CompressorParams = {
+  input: number;
+  output: number;
+  attack: number;
+  release: number;
+  threshold: number;
+  ratio: number;
+  knee: number;
+};
+
+export class Compressor extends FX {
   comp: DynamicsCompressorNode;
+  view: CompressorView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -22,23 +33,27 @@ class Compressor extends FX {
     this.view = new CompressorView(this);
   }
 
-  setAttack(d) {
-    return (this.comp.attack.value = d);
-  }
-  setRelease(d) {
-    return (this.comp.release.value = d);
-  }
-  setThreshold(d) {
-    return (this.comp.threshold.value = d);
-  }
-  setRatio(d) {
-    return (this.comp.ratio.value = d);
-  }
-  setKnee(d) {
-    return (this.comp.knee.value = d);
+  setAttack(d: number) {
+    this.comp.attack.value = d;
   }
 
-  setParam(p) {
+  setRelease(d: number) {
+    this.comp.release.value = d;
+  }
+
+  setThreshold(d: number) {
+    this.comp.threshold.value = d;
+  }
+
+  setRatio(d: number) {
+    this.comp.ratio.value = d;
+  }
+
+  setKnee(d: number) {
+    this.comp.knee.value = d;
+  }
+
+  setParam(p: Partial<CompressorParams>) {
     if (p.attack != null) {
       this.setAttack(p.attack);
     }
@@ -76,5 +91,3 @@ class Compressor extends FX {
     };
   }
 }
-
-export { Compressor };

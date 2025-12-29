@@ -5,16 +5,17 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
+import type { Fuzz, FuzzParams } from './Fuzz';
 import { FXView } from './FXView';
 import $ from 'jquery';
 
-class FuzzView extends FXView {
+export class FuzzView extends FXView {
   type: JQuery;
   gain: JQuery;
   input: JQuery;
   output: JQuery;
 
-  constructor(model: any) {
+  constructor(model: Fuzz) {
     const dom = $('#tmpl_fx_fuzz').clone();
     dom.removeAttr('id');
     super(model, dom);
@@ -49,7 +50,7 @@ class FuzzView extends FXView {
     });
   }
 
-  setParam(p) {
+  setParam(p: Partial<FuzzParams>) {
     if (p.input != null) {
       this.input.val(p.input * 100);
     }
@@ -60,9 +61,7 @@ class FuzzView extends FXView {
       this.type.val(p.type);
     }
     if (p.gain != null) {
-      return this.gain.val(p.gain * 100);
+      this.gain.val(p.gain * 100);
     }
   }
 }
-
-export { FuzzView };

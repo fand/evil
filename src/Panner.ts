@@ -1,9 +1,4 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
-class Panner {
+export class Panner {
   ctx: AudioContext;
   in: ChannelSplitterNode;
   out: ChannelMergerNode;
@@ -24,15 +19,13 @@ class Panner {
     this.setPosition(0.5);
   }
 
-  connect(dst) {
+  connect(dst: AudioNode) {
     return this.out.connect(dst);
   }
 
-  setPosition(pos) {
+  setPosition(pos: number) {
     this.pos = pos;
     this.l.gain.value = this.pos;
-    return (this.r.gain.value = 1.0 - this.pos);
+    this.r.gain.value = 1.0 - this.pos;
   }
 }
-
-export { Panner };

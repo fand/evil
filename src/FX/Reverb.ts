@@ -10,9 +10,16 @@ import { ReverbView } from './ReverbView';
 
 const IR_LOADED: Record<string, AudioBuffer> = {};
 
-class Reverb extends FX {
+export type ReverbParams = {
+  name: string;
+  wet: number;
+};
+
+export class Reverb extends FX {
   reverb: ConvolverNode;
   name: string;
+
+  view: ReverbView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -27,8 +34,9 @@ class Reverb extends FX {
     this.view = new ReverbView(this);
   }
 
-  setIR(name) {
+  setIR(name: string) {
     this.name = name;
+
     if (IR_LOADED[this.name] != null) {
       this.reverb.buffer = IR_LOADED[this.name];
       return;
@@ -58,7 +66,7 @@ class Reverb extends FX {
     return req.send();
   }
 
-  setParam(p) {
+  setParam(p: Partial<ReverbParams>) {
     if (p.name != null) {
       this.setIR(p.name);
     }
@@ -194,5 +202,3 @@ const IR_URL: Record<string, string> = {
   AIR_SHAMIR: 'static/IR/H3000/991_AIR_SHAMIR.wav',
   'SMALL_&_LIVE_VERB': 'static/IR/H3000/995_SMALL_&_LIVE_VERB.wav',
 };
-
-export { Reverb };

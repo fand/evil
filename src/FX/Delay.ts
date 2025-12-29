@@ -8,10 +8,19 @@
 import { FX } from './FX';
 import { DelayView } from './DelayView';
 
-class Delay extends FX {
+export type DelayParams = {
+  delay: number;
+  feedback: number;
+  lofi: number;
+  wet: number;
+};
+
+export class Delay extends FX {
   delay: DelayNode;
   lofi: BiquadFilterNode;
   feedback: GainNode;
+
+  view: DelayView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -39,17 +48,19 @@ class Delay extends FX {
     this.view = new DelayView(this);
   }
 
-  setDelay(d) {
-    return (this.delay.delayTime.value = d);
-  }
-  setFeedback(d) {
-    return (this.feedback.gain.value = d);
-  }
-  setLofi(d) {
-    return (this.lofi.Q.value = d);
+  setDelay(d: number) {
+    this.delay.delayTime.value = d;
   }
 
-  setParam(p) {
+  setFeedback(d: number) {
+    this.feedback.gain.value = d;
+  }
+
+  setLofi(d: number) {
+    this.lofi.Q.value = d;
+  }
+
+  setParam(p: Partial<DelayParams>) {
     if (p.delay != null) {
       this.setDelay(p.delay);
     }
@@ -65,7 +76,7 @@ class Delay extends FX {
     return this.view.setParam(p);
   }
 
-  getParam() {
+  getParam(): { effect: 'Delay' } & DelayParams {
     return {
       effect: 'Delay',
       delay: this.delay.delayTime.value,
@@ -75,5 +86,3 @@ class Delay extends FX {
     };
   }
 }
-
-export { Delay };

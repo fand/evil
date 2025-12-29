@@ -8,13 +8,15 @@
 import { FXView } from './FXView';
 import $ from 'jquery';
 
-class DelayView extends FXView {
+import type { Delay, DelayParams } from './Delay';
+
+export class DelayView extends FXView {
   delay: JQuery;
   feedback: JQuery;
   lofi: JQuery;
   wet: JQuery;
 
-  constructor(model: any) {
+  constructor(model: Delay) {
     const dom = $('#tmpl_fx_delay').clone();
     dom.removeAttr('id');
     super(model, dom);
@@ -51,8 +53,8 @@ class DelayView extends FXView {
     });
   }
 
-  setParam(p) {
-    if (p.delays != null) {
+  setParam(p: Partial<DelayParams>) {
+    if (p.delay != null) {
       this.delay.val(p.delay * 1000);
     }
     if (p.feedback != null) {
@@ -62,9 +64,7 @@ class DelayView extends FXView {
       this.lofi.val(p.lofi * 20);
     }
     if (p.wet != null) {
-      return this.wet.val(p.wet * 100);
+      this.wet.val(p.wet * 100);
     }
   }
 }
-
-export { DelayView };

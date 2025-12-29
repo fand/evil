@@ -10,11 +10,22 @@
 import { FX } from './FX';
 import { FuzzView } from './FuzzView';
 
-class Fuzz extends FX {
+type FuzzType = 'Sigmoid' | 'Octavia';
+
+export type FuzzParams = {
+  type: FuzzType;
+  gain: number;
+  input: number;
+  output: number;
+};
+
+export class Fuzz extends FX {
   fuzz: WaveShaperNode;
   type: string;
   samples: number;
   gain: number;
+
+  view: FuzzView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -31,13 +42,16 @@ class Fuzz extends FX {
     this.view = new FuzzView(this);
   }
 
-  setType(type) {
+  setType(type: FuzzType) {
     this.type = type;
   }
-  setGain(gain) {
+
+  setGain(gain: number) {
     this.gain = gain;
+
     const sigmax = 2.0 / (1 + Math.exp(-this.gain * 1.0)) - 1.0;
     const ratio = 1.0 / sigmax;
+
     if (this.type === 'Sigmoid') {
       return (() => {
         const result = [];
@@ -73,7 +87,7 @@ class Fuzz extends FX {
     }
   }
 
-  setParam(p) {
+  setParam(p: Partial<FuzzParams>) {
     if (p.type != null) {
       this.setType(p.type);
     }
@@ -86,7 +100,7 @@ class Fuzz extends FX {
     if (p.output != null) {
       this.setOutput(p.output);
     }
-    return this.view.setParam(p);
+    this.view.setParam(p);
   }
 
   getParam() {
@@ -99,5 +113,3 @@ class Fuzz extends FX {
     };
   }
 }
-
-export { Fuzz };

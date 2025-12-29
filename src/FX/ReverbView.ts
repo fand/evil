@@ -8,11 +8,13 @@
 import { FXView } from './FXView';
 import $ from 'jquery';
 
-class ReverbView extends FXView {
+import type { Reverb, ReverbParams } from './Reverb';
+
+export class ReverbView extends FXView {
   name: JQuery;
   wet: JQuery;
 
-  constructor(model: any) {
+  constructor(model: Reverb) {
     const dom = $('#tmpl_fx_reverb').clone();
     dom.removeAttr('id');
     super(model, dom);
@@ -35,7 +37,7 @@ class ReverbView extends FXView {
     });
   }
 
-  setParam(p) {
+  setParam(p: Partial<ReverbParams>) {
     if (p.name != null) {
       this.name.val(p.name);
     }
@@ -44,5 +46,3 @@ class ReverbView extends FXView {
     }
   }
 }
-
-export { ReverbView };

@@ -8,11 +8,13 @@
 import { FXView } from './FXView';
 import $ from 'jquery';
 
-class DoubleView extends FXView {
+import type { Double, DoubleParams } from './Double';
+
+export class DoubleView extends FXView {
   delay: JQuery;
   width: JQuery;
 
-  constructor(model: any) {
+  constructor(model: Double) {
     const dom = $('#tmpl_fx_double').clone();
     dom.removeAttr('id');
     super(model, dom);
@@ -30,21 +32,19 @@ class DoubleView extends FXView {
         delay: parseFloat(this.delay.val() as string) / 1000.0,
       });
     });
-    return this.width.on('change', () => {
-      return this.model.setParam({
+    this.width.on('change', () => {
+      this.model.setParam({
         width: parseFloat(this.width.val() as string) / 200.0 + 0.5,
       }); // [0.5, 1.0]
     });
   }
 
-  setParam(p) {
+  setParam(p: Partial<DoubleParams>) {
     if (p.delay != null) {
       this.delay.val(p.delay * 1000);
     }
     if (p.width != null) {
-      return this.width.val((p.width - 0.5) * 200);
+      this.width.val((p.width - 0.5) * 200);
     }
   }
 }
-
-export { DoubleView };
