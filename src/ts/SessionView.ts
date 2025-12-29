@@ -138,7 +138,7 @@ class SessionView {
     this.track_color = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => this.color);
 
     this.img_play = new Image();
-    this.img_play.src = 'static/img/play.png';
+    this.img_play.src = '/img/play.png';
     this.img_play.onload = () => this.initCanvas();
 
     this.last_active = [];

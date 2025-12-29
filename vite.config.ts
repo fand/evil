@@ -2,21 +2,14 @@ import { defineConfig } from 'vite';
 import path from 'path';
 
 export default defineConfig({
+  publicDir: 'static',
+  server: {
+    port: 9000,
+    open: true,
+  },
   build: {
-    outDir: 'build/js',
+    outDir: 'dist',
     emptyOutDir: true,
-    lib: {
-      entry: path.resolve(__dirname, 'src/ts/main.ts'),
-      name: 'Evil',
-      fileName: () => 'evil.js',
-      formats: ['iife'],
-    },
-    rollupOptions: {
-      output: {
-        // Ensure jQuery is bundled
-        inlineDynamicImports: true,
-      },
-    },
   },
   resolve: {
     alias: {
