@@ -30,12 +30,14 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@types/jquery": "^3.5.33",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-legacy": "^7.2.1",
     "@vitejs/plugin-react": "^5.1.2",
     "nodemon": "^3.1.11",
+    "playwright": "^1.57.0",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "vite": "^7.3.0"
