@@ -9,7 +9,7 @@
  */
 import SynthCoreView from './CoreView';
 import MutekiTimer from '../MutekiTimer';
-import CONSTANT from '../Constant';
+import { KEY_LIST, NoteKey, SEMITONE, STREAM_LENGTH } from '../Constant';
 
 //#
 // CONSTANTS
@@ -40,7 +40,7 @@ class Noise {
 
   constructor(ctx: AudioContext) {
     this.ctx = ctx;
-    this.node = this.ctx.createScriptProcessor(CONSTANT.STREAM_LENGTH);
+    this.node = this.ctx.createScriptProcessor(STREAM_LENGTH);
     this.node.onaudioprocess = (event) => {
       const data_L = event.outputBuffer.getChannelData(0);
       const data_R = event.outputBuffer.getChannelData(1);
@@ -183,7 +183,7 @@ class VCO {
     const note_shift = this.note % 12;
     this.freq =
       Math.pow(2, this.octave + note_oct) *
-        Math.pow(CONSTANT.SEMITONE, note_shift) *
+        Math.pow(SEMITONE, note_shift) *
         this.freq_key +
       this.fine;
 
@@ -488,12 +488,12 @@ class SynthCore {
     return (this.is_on = false);
   }
 
-  setKey(key) {
-    const freq_key = CONSTANT.KEY_LIST[key];
+  setKey(key: NoteKey) {
+    const freq_key = KEY_LIST[key];
     return Array.from(this.vcos).map((v) => v.setKey(freq_key));
   }
 
-  setScale(scale) {
+  setScale(scale: number[]) {
     this.scale = scale;
   }
 

@@ -6,9 +6,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
+import { SAMPLE_RATE } from '../Constant';
 import Panner from '../Panner';
 import SAMPLE from './Constant';
-import CONSTANT from '../Constant';
 
 class SampleNode {
   ctx: AudioContext;
@@ -99,7 +99,7 @@ class SampleNode {
           req.response,
           (buffer) => {
             this.buffer = buffer;
-            this.buffer_duration = this.buffer.length / CONSTANT.SAMPLE_RATE;
+            this.buffer_duration = this.buffer.length / SAMPLE_RATE;
             return this.parent.sampleLoaded(this.id);
           },
           (err) => {

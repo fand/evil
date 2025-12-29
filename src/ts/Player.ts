@@ -14,6 +14,7 @@ import Synth from './Synth';
 import Sampler from './Sampler';
 import PlayerView from './PlayerView';
 import MutekiTimer from './MutekiTimer';
+import type { NoteKey, NoteScale } from './Constant';
 
 declare const CONTEXT: AudioContext;
 declare global {
@@ -25,37 +26,29 @@ declare global {
 const T = new MutekiTimer();
 
 class Player {
-  bpm: number;
-  duration: number;
-  key: string;
-  scale: string;
-  is_playing: boolean;
-  time: number;
+  bpm: number = 120;
+  duration: number = 500; // msec
+  key: NoteKey = 'A';
+  scale: NoteScale = 'Major';
+  is_playing: boolean = false;
+  time: number = 0;
   scene: { bpm: number; key: string; scale: string };
-  num_id: number;
+  num_id: number = 0;
   context: AudioContext;
-  synth: any[];
+  synth: any[] = []; // TODO: add type
   mixer: Mixer;
   session: Session;
   sidebar: Sidebar;
   synth_now: any;
-  synth_pos: number;
-  scene_length: number;
+  synth_pos: number = 0;
+  scene_length: number = 32;
   view: PlayerView;
   song: any;
 
   constructor(ctx: AudioContext) {
-    this.bpm = 120;
-    this.duration = 500; // msec
-    this.key = 'A';
-    this.scale = 'Major';
-    this.is_playing = false;
-    this.time = 0;
     this.scene = { bpm: this.bpm, key: this.key, scale: this.scale };
 
-    this.num_id = 0;
     this.context = ctx;
-    this.synth = [];
 
     this.mixer = new Mixer(this.context, this);
     this.session = new Session(this.context, this);
@@ -63,8 +56,6 @@ class Player {
 
     this.addSynth(0);
     this.synth_now = this.synth[0];
-    this.synth_pos = 0;
-    this.scene_length = 32;
 
     this.view = new PlayerView(this);
   }
@@ -82,8 +73,7 @@ class Player {
     return this.sidebar.setBPM(this.bpm);
   }
 
-  setKey(key: string) {
-    // TODO: use Key type
+  setKey(key: NoteKey) {
     this.key = key;
     this.scene.key = this.key;
     for (var s of Array.from(this.synth)) {
@@ -93,8 +83,8 @@ class Player {
     return this.sidebar.setKey(this.key);
   }
 
-  setScale(scale: string) {
-    this.scale = scale; // TODO: use Scale type
+  setScale(scale: NoteScale) {
+    this.scale = scale;
     this.scene.scale = this.scale;
     for (var s of Array.from(this.synth)) {
       s.setScale(this.scale);
