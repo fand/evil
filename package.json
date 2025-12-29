@@ -12,7 +12,6 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "body-parser": "^2.2.1",
     "compression": "^1.8.1",
     "connect-mongo": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -25,8 +24,7 @@
     "mongoose": "^8.20.4",
     "morgan": "^1.10.1",
     "passport": "^0.7.0",
-    "shortid": "^2.2.16",
-    "static-favicon": "~1.0.0"
+    "serve-favicon": "^2.5.1"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.33",
