@@ -5,8 +5,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import FX from './FX';
-import ReverbView from './ReverbView';
+import { FX } from './FX';
+import { ReverbView } from './ReverbView';
 
 const IR_LOADED: Record<string, AudioBuffer> = {};
 
@@ -195,5 +195,4 @@ const IR_URL: Record<string, string> = {
   'SMALL_&_LIVE_VERB': 'static/IR/H3000/995_SMALL_&_LIVE_VERB.wav',
 };
 
-// Export!
-export default Reverb;
+export { Reverb };

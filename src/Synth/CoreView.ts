@@ -209,8 +209,7 @@ class SynthCoreView {
   }
 }
 
-// Export!
-export default SynthCoreView;
+export { SynthCoreView };
 
 function __range__(left, right, inclusive) {
   let range = [];

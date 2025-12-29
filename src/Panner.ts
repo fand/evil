@@ -35,5 +35,4 @@ class Panner {
   }
 }
 
-// Export!
-export default Panner;
+export { Panner };

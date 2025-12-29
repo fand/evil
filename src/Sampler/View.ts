@@ -8,7 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
-import SamplerKeyboardView from './KeyboardView';
+import { SamplerKeyboardView } from './KeyboardView';
 
 declare global {
   interface Window {
@@ -601,8 +601,7 @@ class SamplerView {
   }
 }
 
-// Export!
-export default SamplerView;
+export { SamplerView };
 
 function __range__(left, right, inclusive) {
   let range = [];

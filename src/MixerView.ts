@@ -213,5 +213,4 @@ class MixerView {
   }
 }
 
-// Export!
-export default MixerView;
+export { MixerView };

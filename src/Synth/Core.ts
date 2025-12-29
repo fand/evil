@@ -7,8 +7,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import SynthCoreView from './CoreView';
-import MutekiTimer from '../MutekiTimer';
+import { SynthCoreView } from './CoreView';
+import { MutekiTimer } from '../MutekiTimer';
 import { KEY_LIST, NoteKey, SEMITONE, STREAM_LENGTH } from '../Constant';
 
 //#
@@ -549,7 +549,7 @@ class SynthCore {
   }
 }
 
-export default SynthCore;
+export { SynthCore };
 
 function __range__(left, right, inclusive) {
   let range = [];

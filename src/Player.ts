@@ -7,13 +7,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import Mixer from './Mixer';
-import Session from './Session';
-import Sidebar from './Sidebar';
-import Synth from './Synth';
-import Sampler from './Sampler';
-import PlayerView from './PlayerView';
-import MutekiTimer from './MutekiTimer';
+import { Mixer } from './Mixer';
+import { Session } from './Session';
+import { Sidebar } from './Sidebar';
+import { Synth } from './Synth';
+import { Sampler } from './Sampler';
+import { PlayerView } from './PlayerView';
+import { MutekiTimer } from './MutekiTimer';
 import type { NoteKey, NoteScale } from './Constant';
 
 declare const CONTEXT: AudioContext;
@@ -386,4 +386,4 @@ class Player {
   }
 }
 
-export default Player;
+export { Player };

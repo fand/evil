@@ -322,7 +322,7 @@ class SamplerCoreView {
   }
 }
 
-export default SamplerCoreView;
+export { SamplerCoreView };
 
 function __range__(left, right, inclusive) {
   let range = [];

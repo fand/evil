@@ -6,10 +6,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
-import MutekiTimer from './MutekiTimer';
-import Player from './Player';
-import Keyboard from './Keyboard';
-import Song from './Song';
+import { MutekiTimer } from './MutekiTimer';
+import { Player } from './Player';
+import { Keyboard } from './Keyboard';
+import { Song } from './Song';
 
 // ------------------------------------------------------------------------------
 // CONSTANT

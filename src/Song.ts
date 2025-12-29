@@ -20,5 +20,4 @@ class Song {
   static DEFAULT = SONG_DEFAULT;
 }
 
-// Export!
-export default Song;
+export { Song };

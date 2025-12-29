@@ -5,7 +5,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import FXView from './FXView';
+import { FXView } from './FXView';
 import $ from 'jquery';
 
 class CompressorView extends FXView {
@@ -97,4 +97,4 @@ class CompressorView extends FXView {
   }
 }
 
-export default CompressorView;
+export { CompressorView };

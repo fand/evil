@@ -1,5 +1,5 @@
-import Sampler from '../Sampler';
-import SamplerView from './View';
+import { Sampler } from '../Sampler';
+import { SamplerView } from './View';
 
 /*
  * decaffeinate suggestions:
@@ -198,4 +198,4 @@ class SamplerKeyboardView {
   }
 }
 
-export default SamplerKeyboardView;
+export { SamplerKeyboardView };

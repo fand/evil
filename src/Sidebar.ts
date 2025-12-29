@@ -3,7 +3,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import SidebarView from './SidebarView';
+import { SidebarView } from './SidebarView';
 
 class Sidebar {
   ctx: AudioContext;
@@ -88,5 +88,4 @@ class Sidebar {
   }
 }
 
-// Export!
-export default Sidebar;
+export { Sidebar };

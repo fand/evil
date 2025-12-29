@@ -7,10 +7,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import Panner from './Panner';
-import SamplerCore from './Sampler/Core';
-import SamplerView from './Sampler/View';
-import SAMPLES from './Sampler/Constant';
+import { Panner } from './Panner';
+import { SamplerCore } from './Sampler/Core';
+import { SamplerView } from './Sampler/View';
+import { SAMPLES } from './Sampler/Constant';
 import $ from 'jquery';
 
 class Sampler {
@@ -385,5 +385,4 @@ class Sampler {
   }
 }
 
-// Export!
-export default Sampler;
+export { Sampler };

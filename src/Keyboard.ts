@@ -6,7 +6,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
-import Player from './Player';
+import { Player } from './Player';
 
 const KEYCODE_TO_NOTE = {
   90: 1,
@@ -195,5 +195,4 @@ class Keyboard {
   }
 }
 
-// Export!
-export default Keyboard;
+export { Keyboard };

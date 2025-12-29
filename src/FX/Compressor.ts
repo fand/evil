@@ -5,8 +5,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import FX from './FX';
-import CompressorView from './CompressorView';
+import { FX } from './FX';
+import { CompressorView } from './CompressorView';
 
 class Compressor extends FX {
   comp: DynamicsCompressorNode;
@@ -77,5 +77,4 @@ class Compressor extends FX {
   }
 }
 
-// Export!
-export default Compressor;
+export { Compressor };

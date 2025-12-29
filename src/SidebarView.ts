@@ -183,5 +183,4 @@ class SidebarView {
   }
 }
 
-// Exports!
-export default SidebarView;
+export { SidebarView };

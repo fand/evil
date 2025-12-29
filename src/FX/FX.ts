@@ -69,5 +69,4 @@ class FX {
   }
 }
 
-// Export!
-export default FX;
+export { FX };

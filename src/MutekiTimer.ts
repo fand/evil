@@ -97,7 +97,7 @@ const _clearTimeout = function (id) {
 
 (MutekiTimer as any).isEnabled = () => !!TIMER_PATH;
 
-export default MutekiTimer;
+export { MutekiTimer };
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

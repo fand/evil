@@ -1,7 +1,7 @@
-import type FX from './FX';
+import type { FX } from './FX';
 import $ from 'jquery';
 
-export default class FXView {
+class FXView {
   model: FX;
   dom: JQuery;
   dom_side: JQuery;
@@ -21,3 +21,5 @@ export default class FXView {
     });
   }
 }
+
+export { FXView };

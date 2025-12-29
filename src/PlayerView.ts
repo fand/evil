@@ -261,5 +261,4 @@ class PlayerView {
   }
 }
 
-// Export!
-export default PlayerView;
+export { PlayerView };

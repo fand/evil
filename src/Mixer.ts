@@ -6,15 +6,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import MixerView from './MixerView';
-import Panner from './Panner';
-import Limiter from './FX/Limiter';
-import Fuzz from './FX/Fuzz';
-import Delay from './FX/Delay';
-import Double from './FX/Double';
-import Reverb from './FX/Reverb';
-import Compressor from './FX/Compressor';
-import FX from './FX/FX';
+import { MixerView } from './MixerView';
+import { Panner } from './Panner';
+import { Limiter } from './FX/Limiter';
+import { Fuzz } from './FX/Fuzz';
+import { Delay } from './FX/Delay';
+import { Double } from './FX/Double';
+import { Reverb } from './FX/Reverb';
+import { Compressor } from './FX/Compressor';
+import { FX } from './FX/FX';
 
 class Mixer {
   ctx: AudioContext;
@@ -287,8 +287,7 @@ class Mixer {
   }
 }
 
-// Export!
-export default Mixer;
+export { Mixer };
 
 function __range__(left, right, inclusive) {
   let range = [];

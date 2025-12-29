@@ -7,7 +7,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
-import KeyboardView from './KeyboardView';
+import { KeyboardView } from './KeyboardView';
 
 declare global {
   interface Window {
@@ -828,8 +828,7 @@ class SynthView {
   }
 }
 
-// Export!
-export default SynthView;
+export { SynthView };
 
 function __range__(left, right, inclusive) {
   let range = [];

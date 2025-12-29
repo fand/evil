@@ -5,9 +5,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import FX from './FX';
-import DoubleView from './DoubleView';
-import Panner from '../Panner';
+import { FX } from './FX';
+import { DoubleView } from './DoubleView';
+import { Panner } from '../Panner';
 
 class Double extends FX {
   delay: DelayNode;
@@ -63,5 +63,4 @@ class Double extends FX {
   }
 }
 
-// Export!
-export default Double;
+export { Double };

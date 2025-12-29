@@ -21,5 +21,4 @@ class Limiter {
   }
 }
 
-// Export!
-export default Limiter;
+export { Limiter };

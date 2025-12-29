@@ -1,1 +1,2 @@
-export default 1;
+const SYNTH_CONSTANT = 1;
+export { SYNTH_CONSTANT };

@@ -7,8 +7,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import SessionView from './SessionView';
-import Song from './Song';
+import { SessionView } from './SessionView';
+import { Song } from './Song';
 import $ from 'jquery';
 
 // Control the patterns for tracks.
@@ -490,8 +490,7 @@ class Session {
   }
 }
 
-// Export!
-export default Session;
+export { Session };
 
 function __range__(left, right, inclusive) {
   let range = [];

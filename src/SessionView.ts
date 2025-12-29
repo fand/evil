@@ -1238,5 +1238,4 @@ class SessionView {
   }
 }
 
-// Export!
-export default SessionView;
+export { SessionView };

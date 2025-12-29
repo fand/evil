@@ -7,8 +7,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import { SAMPLE_RATE } from '../Constant';
-import Panner from '../Panner';
-import SAMPLE from './Constant';
+import { Panner } from '../Panner';
+import { SAMPLES as SAMPLE } from './Constant';
 
 class SampleNode {
   ctx: AudioContext;
@@ -206,5 +206,4 @@ class SampleNode {
   }
 }
 
-// Export!
-export default SampleNode;
+export { SampleNode };

@@ -152,8 +152,7 @@ class KeyboardView {
   }
 }
 
-// Export!
-export default KeyboardView;
+export { KeyboardView };
 
 function __range__(left, right, inclusive) {
   let range = [];

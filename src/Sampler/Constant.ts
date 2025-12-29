@@ -266,7 +266,8 @@ const DATA = {
   ride_mpc60: { url: 'static/wav/deep_house/ride_cymbal/ride_mpc60.wav' },
 };
 
-export default {
+const SAMPLES = {
   DATA,
   DEFAULT,
 };
+export { SAMPLES };

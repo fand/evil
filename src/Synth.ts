@@ -7,16 +7,16 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import MutekiTimer from './MutekiTimer';
-import SynthView from './Synth/View';
-import SynthCore from './Synth/Core';
-import Panner from './Panner';
+import { MutekiTimer } from './MutekiTimer';
+import { SynthView } from './Synth/View';
+import { SynthCore } from './Synth/Core';
+import { Panner } from './Panner';
 import $ from 'jquery';
-import Fuzz from './FX/Fuzz';
-import Delay from './FX/Delay';
-import Reverb from './FX/Reverb';
-import Compressor from './FX/Compressor';
-import Double from './FX/Double';
+import { Fuzz } from './FX/Fuzz';
+import { Delay } from './FX/Delay';
+import { Reverb } from './FX/Reverb';
+import { Compressor } from './FX/Compressor';
+import { Double } from './FX/Double';
 import { SCALE_LIST } from './Constant';
 
 const T2 = new MutekiTimer();
@@ -384,5 +384,4 @@ class Synth {
   }
 }
 
-// Export!
-export default Synth;
+export { Synth };
