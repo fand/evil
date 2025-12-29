@@ -11,7 +11,7 @@ var express = require('express'),
   path = require('path'),
   config = require('./config'),
   passport = require('passport'),
-  MongoStore = require('connect-mongo'),
+  { MongoStore } = require('connect-mongo'),
   middleware = require('../middleware');
 
 var secret = require('../../secret.js');
