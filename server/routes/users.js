@@ -7,57 +7,57 @@ var mongoose = require('mongoose'),
 /**
  * Create user
  */
-module.exports.create = function (req, res, next) {
+module.exports.create = async function (req, res, next) {
   var newUser = new User(req.body);
   newUser.provider = 'local';
-  newUser.save(function (err) {
-    if (err) return res.status(400).json(err);
-
+  try {
+    await newUser.save();
     req.logIn(newUser, function (err) {
       if (err) return next(err);
-
       return res.json(req.user.userInfo);
     });
-  });
+  } catch (err) {
+    return res.status(400).json(err);
+  }
 };
 
 /**
  *  Get profile of specified user
  */
-module.exports.show = function (req, res, next) {
+module.exports.show = async function (req, res, next) {
   var userId = req.params.id;
 
-  User.findById(userId, function (err, user) {
-    if (err) return next(err);
+  try {
+    var user = await User.findById(userId);
     if (!user) return res.status(404).send();
-
     res.json({ profile: user.profile });
-  });
+  } catch (err) {
+    return next(err);
+  }
 };
 
 /**
  * Change password
  */
-module.exports.changePassword = function (req, res, next) {
+module.exports.changePassword = async function (req, res, next) {
   var userId = req.user._id;
   var oldPass = String(req.body.oldPassword);
   var newPass = String(req.body.newPassword);
 
-  User.findById(userId, function (err, user) {
-    if (err) return next(err);
+  try {
+    var user = await User.findById(userId);
     if (!user) return res.status(404).send();
 
     if (user.authenticate(oldPass)) {
       user.password = newPass;
-      user.save(function (err) {
-        if (err) return res.status(400).send();
-
-        res.status(200).send();
-      });
+      await user.save();
+      res.status(200).send();
     } else {
       res.status(403).send();
     }
-  });
+  } catch (err) {
+    return next(err);
+  }
 };
 
 /**

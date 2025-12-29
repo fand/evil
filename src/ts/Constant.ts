@@ -1,6 +1,6 @@
 // A module for constants used by multiple modules.
 
-const KEY_LIST = {
+export const KEY_LIST = {
   A: 55,
   Bb: 58.27047018976124,
   B: 61.7354126570155,
@@ -13,9 +13,11 @@ const KEY_LIST = {
   Gb: 46.2493028389543,
   G: 48.999429497718666,
   Ab: 51.91308719749314,
-};
+} as const;
 
-const SCALE_LIST = {
+export type NoteKey = keyof typeof KEY_LIST;
+
+export const SCALE_LIST = {
   Major: [0, 2, 4, 5, 7, 9, 11],
   minor: [0, 2, 3, 5, 7, 8, 10],
   Pentatonic: [0, 3, 5, 7, 10],
@@ -27,14 +29,8 @@ const SCALE_LIST = {
   'Harm-minor': [0, 2, 3, 5, 7, 8, 11],
 };
 
-const STREAM_LENGTH = 1024;
-const SEMITONE = 1.05946309;
-const SAMPLE_RATE = 44100;
+export type NoteScale = keyof typeof SCALE_LIST;
 
-export default {
-  KEY_LIST,
-  SCALE_LIST,
-  STREAM_LENGTH,
-  SEMITONE,
-  SAMPLE_RATE,
-};
+export const STREAM_LENGTH = 1024;
+export const SEMITONE = 1.05946309;
+export const SAMPLE_RATE = 44100;

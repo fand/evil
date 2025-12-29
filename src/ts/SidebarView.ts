@@ -170,14 +170,16 @@ class SidebarView {
     return fx.appendTo(this.tracks_effects);
   }
 
-  setBPM(b) {
-    return this.master_bpm.val(b);
+  setBPM(bpm: number) {
+    this.master_bpm.val(bpm);
   }
-  setKey(k) {
-    return this.master_key.val(k);
+
+  setKey(key) {
+    this.master_key.val(key);
   }
-  setScale(s) {
-    return this.master_scale.val(s);
+
+  setScale(scale) {
+    this.master_scale.val(scale);
   }
 }
 

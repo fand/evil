@@ -6,7 +6,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
-import CONSTANT from './Constant';
+import { KEY_LIST } from './Constant';
 
 declare global {
   interface Window {
@@ -132,8 +132,8 @@ class PlayerView {
   setKey(key) {
     return (() => {
       const result = [];
-      for (var k in CONSTANT.KEY_LIST) {
-        var v = CONSTANT.KEY_LIST[k];
+      for (var k in KEY_LIST) {
+        var v = KEY_LIST[k];
         if ((v = key)) {
           this.key.val(k);
           break;

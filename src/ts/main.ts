@@ -41,13 +41,14 @@ const initEvil = function () {
   const ctx = new AudioContext();
   const player = new Player(ctx);
   const keyboard = new Keyboard(player);
+  (window as any).keyboard = keyboard;
 
   const footer_size = $(window).height() / 2 - 300;
   $('footer').css('height', footer_size + 'px');
 
   // Read song
-  if (this.song_loaded != null) {
-    return player.readSong(JSON.parse(this.song_loaded.json));
+  if ((window as any).song_loaded != null) {
+    return player.readSong(JSON.parse((window as any).song_loaded.json));
   } else {
     return player.readSong(Song.DEFAULT);
   }

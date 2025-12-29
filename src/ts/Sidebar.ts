@@ -75,14 +75,16 @@ class Sidebar {
     return this.mixer.addTracksEffect(this.sidebar_pos.x, name);
   }
 
-  setBPM(b) {
-    return this.view.setBPM(b);
+  setBPM(bpm: number) {
+    return this.view.setBPM(bpm);
   }
-  setKey(k) {
-    return this.view.setKey(k);
+
+  setKey(key) {
+    return this.view.setKey(key);
   }
-  setScale(s) {
-    return this.view.setScale(s);
+
+  setScale(scale) {
+    return this.view.setScale(scale);
   }
 }
 

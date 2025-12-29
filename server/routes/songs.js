@@ -3,46 +3,48 @@
 var mongoose = require('mongoose');
 var Song = mongoose.model('Song');
 
-var get = function (req, res, next) {
+var get = async function (req, res, next) {
   var song_id = req.params.song_id;
-  Song.findById(song_id, function (err, song) {
-    if (err) return next(err);
+  try {
+    var song = await Song.findById(song_id);
     if (!song) return res.status(404).send();
     res.json({ song: song });
-  });
+  } catch (err) {
+    return next(err);
+  }
 };
 
-var create = function (req, res, next) {
+var create = async function (req, res, next) {
   var song = new Song();
   song.title = req.body.title;
   song.creator = req.body.creator;
   song.json = req.body.json;
 
-  song.save(function (err) {
-    if (err) return res.status(400).json(err);
+  try {
+    await song.save();
     res.send(song.id);
-  });
+  } catch (err) {
+    return res.status(400).json(err);
+  }
 };
 
-var update = function (req, res, next) {
+var update = async function (req, res, next) {
   var song_id = req.params.song_id;
 
-  Song.findById(song_id, function (err, song) {
-    if (err) return next(err);
+  try {
+    var song = await Song.findById(song_id);
     if (!song) return res.status(404).send();
 
     song.title = req.body.title;
     song.creator = req.body.creator;
     song.json = req.body.json;
 
-    song.validate(function (err) {
-      if (err) return next(err);
-      song.save(function (err) {
-        if (err) return res.status(400).send();
-        res.status(200).send();
-      });
-    });
-  });
+    await song.validate();
+    await song.save();
+    res.status(200).send();
+  } catch (err) {
+    return next(err);
+  }
 };
 
 var list = function (req, res, next) {

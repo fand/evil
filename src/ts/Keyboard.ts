@@ -86,18 +86,16 @@ class Keyboard {
   }
 
   initEvent() {
-    $(window).keydown((e) => {
+    window.addEventListener('keydown', (e) => {
       if (this.is_writing) {
         return;
       }
-      if (this.is_pressed === false) {
-        this.is_pressed = true;
-      }
-      return this.on(e);
+      this.is_pressed = true;
+      this.noteOn(e.keyCode); // TODO: use e.code
     });
-    return $(window).keyup((e) => {
+    window.addEventListener('keyup', (e) => {
       this.is_pressed = false;
-      return this.off(e);
+      return this.noteOff(e.keyCode);
     });
   }
 
@@ -108,16 +106,16 @@ class Keyboard {
     return (this.is_writing = false);
   }
 
-  setMode(mode) {
+  setMode(mode: string) {
     this.mode = mode;
   }
 
-  on(e) {
-    if (e.keyCode === this.last_key) {
+  noteOn(keyCode: number) {
+    if (keyCode === this.last_key) {
       return;
     }
 
-    switch (e.keyCode) {
+    switch (keyCode) {
       case 37:
         this.player.view.moveLeft();
         break;
@@ -138,21 +136,21 @@ class Keyboard {
         break;
       default:
         if (this.mode === 'SYNTH') {
-          this.onPlayer(e);
+          this.onPlayer(keyCode);
         }
         if (this.mode === 'MIXER') {
-          this.onMixer(e);
+          this.onMixer(keyCode);
         }
     }
 
-    return (this.last_key = e.keyCode);
+    return (this.last_key = keyCode);
   }
 
-  onPlayer(e) {
+  onPlayer(keyCode: number) {
     if (this.player.isPlaying()) {
       this.player.noteOff(true);
     }
-    const n = KEYCODE_TO_NOTE[e.keyCode];
+    const n = KEYCODE_TO_NOTE[keyCode];
     if (n != null) {
       return this.player.noteOn(n, true);
     }
@@ -174,22 +172,22 @@ class Keyboard {
     }
   }
 
-  off(e) {
+  noteOff(keyCode: number) {
     if (this.mode === 'SYNTH') {
-      this.offPlayer(e);
+      this.offPlayer();
     }
     if (this.mode === 'MIXER') {
-      this.offMixer(e);
+      this.offMixer(keyCode);
     }
-    return (this.last_key = 0);
+    this.last_key = 0;
   }
 
-  offPlayer(e) {
+  offPlayer() {
     return this.player.noteOff(true);
   }
 
-  offMixer(e) {
-    const num = KEYCODE_TO_NUM[e.keyCode];
+  offMixer(keyCode: number) {
+    const num = KEYCODE_TO_NUM[keyCode];
     if (num != null && num < 10) {
       this.solos = this.solos.filter((n) => n !== num);
       return this.player.solo(this.solos);
