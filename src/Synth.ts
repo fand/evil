@@ -29,8 +29,6 @@ class Synth implements Instrument {
   player: Player;
   name: string;
   type: InstrumentType;
-  pattern_name: string;
-  pattern: SynthPattern;
   pattern_obj: SynthPatternObject;
   time: number;
   scale_name: string;
@@ -46,6 +44,23 @@ class Synth implements Instrument {
   effects: FX[];
   duration: number = 0;
 
+  // pattern_obj is the single source of truth
+  get pattern(): SynthPattern {
+    return this.pattern_obj.pattern;
+  }
+
+  set pattern(value: SynthPattern) {
+    this.pattern_obj.pattern = value;
+  }
+
+  get pattern_name(): string {
+    return this.pattern_obj.name;
+  }
+
+  set pattern_name(value: string) {
+    this.pattern_obj.name = value;
+  }
+
   constructor(ctx: AudioContext, id: number, player: Player, name?: string) {
     this.ctx = ctx;
     this.id = id;
@@ -54,12 +69,14 @@ class Synth implements Instrument {
     this.name = name ?? `Synth #${id}`;
     this.type = 'REZ';
 
-    this.pattern_name = 'pattern 0';
-    this.pattern = [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0,
-    ];
-    this.pattern_obj = { name: this.pattern_name, pattern: this.pattern };
+    // Initialize pattern_obj first (single source of truth)
+    this.pattern_obj = {
+      name: 'pattern 0',
+      pattern: [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+      ],
+    };
     this.time = 0;
     this.scale_name = 'Major';
     this.scale = SCALE_LIST[this.scale_name as keyof typeof SCALE_LIST];
@@ -108,7 +125,6 @@ class Synth implements Instrument {
   setScale(scale_name: string) {
     this.scale_name = scale_name;
     this.scale = SCALE_LIST[this.scale_name as keyof typeof SCALE_LIST];
-    this.core.scale = this.scale;
     this.view.changeScale(this.scale);
   }
 
@@ -189,13 +205,10 @@ class Synth implements Instrument {
 
   setPattern(pattern_obj: SynthPatternObject) {
     this.pattern_obj = JSON.parse(JSON.stringify(pattern_obj));
-    this.pattern = this.pattern_obj.pattern;
-    this.pattern_name = this.pattern_obj.name;
     this.view.setPattern(this.pattern_obj);
   }
 
   getPattern(): SynthPatternObject {
-    this.pattern_obj = { name: this.pattern_name, pattern: this.pattern };
     return $.extend(true, {}, this.pattern_obj);
   }
 
@@ -204,7 +217,6 @@ class Synth implements Instrument {
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0,
     ];
-    this.pattern_obj.pattern = this.pattern;
     this.view.setPattern(this.pattern_obj);
   }
 

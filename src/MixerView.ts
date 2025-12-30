@@ -141,14 +141,14 @@ export class MixerView {
     }
   }
 
-  readGains(g: number[], g_master: number) {
+  loadGains(g: number[], g_master: number) {
     for (let i = 0; i < g.length; i++) {
       this.gains[i].val(g[i] * 100.0);
     }
     this.gain_master.val(g_master * 100.0);
   }
 
-  readPans(p: number[], pan_master: number) {
+  loadPans(p: number[], pan_master: number) {
     for (let i = 0, end = p.length; i < end; i++) {
       this.pans[i].val((1.0 - p[i]) * 200);
 

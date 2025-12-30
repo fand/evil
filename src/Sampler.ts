@@ -19,9 +19,23 @@ class Sampler implements Instrument {
   player: Player;
   name: string;
   type: InstrumentType;
-  pattern_name: string;
-  pattern: SamplerPattern;
   pattern_obj: SamplerPatternObject;
+
+  get pattern_name(): string {
+    return this.pattern_obj.name;
+  }
+
+  set pattern_name(value: string) {
+    this.pattern_obj.name = value;
+  }
+
+  get pattern(): SamplerPattern {
+    return this.pattern_obj.pattern;
+  }
+
+  set pattern(value: SamplerPattern) {
+    this.pattern_obj.pattern = value;
+  }
   time: number;
   view: SamplerView;
   core: SamplerCore;
@@ -39,42 +53,43 @@ class Sampler implements Instrument {
     this.name = name ?? `Sampler #${id}`;
     this.type = 'SAMPLER';
 
-    this.pattern_name = 'pattern 0';
-    this.pattern = [
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ];
-    this.pattern_obj = { name: this.pattern_name, pattern: this.pattern };
+    this.pattern_obj = {
+      name: 'pattern 0',
+      pattern: [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+      ],
+    };
 
     this.time = 0;
     this.view = new SamplerView(this, this.id);
@@ -153,13 +168,10 @@ class Sampler implements Instrument {
 
   setPattern(_pattern_obj: SamplerPatternObject) {
     this.pattern_obj = $.extend(true, {}, _pattern_obj);
-    this.pattern = this.pattern_obj.pattern;
-    this.pattern_name = this.pattern_obj.name;
     this.view.setPattern(this.pattern_obj);
   }
 
   getPattern(): SamplerPatternObject {
-    this.pattern_obj = { name: this.pattern_name, pattern: this.pattern };
     return $.extend(true, {}, this.pattern_obj);
   }
 
@@ -198,7 +210,6 @@ class Sampler implements Instrument {
       [],
       [],
     ];
-    this.pattern_obj.pattern = this.pattern;
     this.view.setPattern(this.pattern_obj);
   }
 

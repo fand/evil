@@ -137,18 +137,18 @@ export class Mixer {
     }
   }
 
-  readGains(gain_tracks: number[], gain_master: number) {
+  loadGains(gain_tracks: number[], gain_master: number) {
     this.gain_tracks = gain_tracks;
     this.gain_master = gain_master;
     this.setGains(this.gain_tracks, this.gain_master);
-    return this.view.readGains(this.gain_tracks, this.gain_master);
+    return this.view.loadGains(this.gain_tracks, this.gain_master);
   }
 
-  readPans(pan_tracks: number[], pan_master: number) {
+  loadPans(pan_tracks: number[], pan_master: number) {
     this.pan_tracks = pan_tracks;
     this.pan_master = pan_master;
     this.setPans(this.pan_tracks, this.pan_master);
-    this.view.readPans(this.pan_tracks, this.pan_master);
+    this.view.loadPans(this.pan_tracks, this.pan_master);
   }
 
   getParam() {
@@ -160,7 +160,7 @@ export class Mixer {
     };
   }
 
-  readParam(
+  loadParam(
     p:
       | {
           gain_tracks: number[];
@@ -174,8 +174,8 @@ export class Mixer {
     if (p == null) {
       return;
     }
-    this.readGains(p.gain_tracks, p.gain_master);
-    this.readPans(p.pan_tracks, p.pan_master);
+    this.loadGains(p.gain_tracks, p.gain_master);
+    this.loadPans(p.pan_tracks, p.pan_master);
   }
 
   changeInstrument(idx: number, instrument: Instrument) {

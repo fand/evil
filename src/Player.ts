@@ -23,10 +23,7 @@ declare global {
 const T = new MutekiTimer();
 
 export class Player {
-  bpm: number = 120;
   duration: number = 500; // msec
-  key: NoteKey = 'A';
-  scale: NoteScale = 'Major';
   is_playing: boolean = false;
   time: number = 0;
   scene: Scene;
@@ -39,10 +36,27 @@ export class Player {
   sidebar: Sidebar;
   scene_length: number = 32;
   view: PlayerView;
-  song!: Song;
+
+  // scene is the single source of truth for bpm/key/scale
+  get bpm(): number {
+    return this.scene.bpm;
+  }
+
+  get key(): NoteKey {
+    return this.scene.key as NoteKey;
+  }
+
+  get scale(): NoteScale {
+    return this.scene.scale as NoteScale;
+  }
+
+  get song(): Song {
+    return this.session.song;
+  }
 
   constructor(ctx: AudioContext) {
-    this.scene = { name: '', bpm: this.bpm, key: this.key, scale: this.scale };
+    // Initialize scene first (single source of truth)
+    this.scene = { name: '', bpm: 120, key: 'A', scale: 'Major' };
 
     this.context = ctx;
 
@@ -56,8 +70,7 @@ export class Player {
   }
 
   setBPM(bpm: number) {
-    this.bpm = bpm;
-    this.scene.bpm = this.bpm;
+    this.scene.bpm = bpm;
 
     // @duration = (60000.0 / @bpm) / 8.0
     this.duration = 7500.0 / this.bpm;
@@ -73,8 +86,7 @@ export class Player {
       throw new TypeError(`Invalid Key: ${key}`);
     }
 
-    this.key = key;
-    this.scene.key = this.key;
+    this.scene.key = key;
     for (const s of this.instruments) {
       s.setKey(this.key);
     }
@@ -87,8 +99,7 @@ export class Player {
       throw new TypeError(`Invalid scale: ${scale}`);
     }
 
-    this.scale = scale;
-    this.scene.scale = this.scale;
+    this.scene.scale = scale;
 
     for (const s of this.instruments) {
       s.setScale(this.scale);
@@ -285,15 +296,19 @@ export class Player {
     }
   }
 
-  readSong(song: Song) {
-    this.song = song;
+  loadSong(song: Song) {
     this.instruments = [];
     this.num_id = 0;
     this.mixer.empty();
     this.session.empty();
     this.view.empty();
 
-    for (let i = 0; i < this.song.tracks.length; i++) {
+    // Set song to Session (single source of truth)
+    this.session.song = song;
+
+    // Cache track count to avoid infinite loop (addSynth modifies song.tracks)
+    const trackCount = this.song.tracks.length;
+    for (let i = 0; i < trackCount; i++) {
       if (!this.song.tracks[i].type || this.song.tracks[i].type === 'REZ') {
         this.addSynth(0, this.song.tracks[i].name);
       }
@@ -302,15 +317,15 @@ export class Player {
       }
     }
 
-    this.readScene(this.song.master[0]);
+    this.loadScene(this.song.master[0]);
     this.setSceneLength(this.song.master.length);
     for (let i = 0; i < this.song.tracks.length; i++) {
       this.instruments[i].setParam(this.song.tracks[i]);
     }
 
     this.session.setInstrument(this.instruments);
-    this.session.readSong(this.song);
-    this.mixer.readParam(this.song.mixer);
+    this.session.loadSong();
+    this.mixer.loadParam(this.song.mixer);
 
     this.view.setInstrumentCount(
       this.instruments.length,
@@ -319,7 +334,7 @@ export class Player {
     this.resetSceneLength();
   }
 
-  readScene(scene: any) {
+  loadScene(scene: any) {
     if (scene.bpm) {
       this.setBPM(scene.bpm);
       this.view.setBPM(scene.bpm);
