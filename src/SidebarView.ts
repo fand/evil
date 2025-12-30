@@ -63,7 +63,7 @@ class SidebarView {
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
       .on('change', () => this.saveMaster());
-    for (var m of [this.master_bpm, this.master_key, this.master_scale]) {
+    for (const m of [this.master_bpm, this.master_key, this.master_scale]) {
       m.on('focus', () => window.keyboard.beginInput()).on('blur', () =>
         window.keyboard.endInput()
       );
@@ -117,7 +117,7 @@ class SidebarView {
 
   showTracks(track: any) {
     this.tracks_effects.find('.sidebar-effect').remove();
-    for (var f of Array.from(track.effects) as any[]) {
+    for (const f of Array.from(track.effects) as any[]) {
       f.appendTo(this.tracks_effects);
     }
     return this.wrapper.css('left', '0px');

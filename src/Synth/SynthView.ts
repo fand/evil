@@ -355,7 +355,7 @@ export class SynthView {
           }
         }
       })
-      .on('mouseup', (e) => {
+      .on('mouseup', () => {
         this.is_clicked = false;
         if (!this.is_step) {
           this.is_sustaining = false;
@@ -363,7 +363,7 @@ export class SynthView {
           this.is_adding = false;
         }
       })
-      .on('mouseout', (e) => {
+      .on('mouseout', () => {
         this.clearCellHover(this.hover_pos.x, this.hover_pos.y);
         this.hover_pos = { x: -1, y: -1 };
         this.is_clicked = false;
@@ -578,7 +578,7 @@ export class SynthView {
     this.last_time = this.time;
   }
 
-  setPattern(_pattern_obj: SynthPatternObject) {
+  setPattern() {
     // pattern_obj is now accessed via getter from model
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;

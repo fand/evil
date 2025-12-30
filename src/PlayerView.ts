@@ -234,7 +234,7 @@ export class PlayerView {
     });
   }
 
-  changeInstrument(_id?: number, _type?: string) {
+  changeInstrument() {
     if (this.current_instrument === 0) {
       this.btn_left.hide();
     }

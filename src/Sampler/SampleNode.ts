@@ -126,8 +126,6 @@ export class SampleNode {
     source.connect(this.merger, 0, 1);
     this.merger.connect(this.node_buf);
 
-    const head_time = time + this.buffer_duration * this.head;
-    const tail_time = time + this.buffer_duration * this.tail;
     source.playbackRate.value = this.speed;
     source.start(0);
     this.node_buf.gain.value = gain;

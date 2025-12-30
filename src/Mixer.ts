@@ -54,7 +54,7 @@ export class Mixer {
       this.ctx.createAnalyser(),
     ];
     this.out.connect(this.splitter_master);
-    for (var i of [0, 1]) {
+    for (const i of [0, 1]) {
       this.splitter_master.connect(this.analyser_master[i], i);
       this.analyser_master[i].fftSize = 1024;
       this.analyser_master[i].minDecibels = -100.0;
@@ -83,7 +83,7 @@ export class Mixer {
   drawGains() {
     // Tracks
     for (let i = 0; i < this.analysers.length; i++) {
-      var data = new Uint8Array(this.analysers[i].frequencyBinCount);
+      const data = new Uint8Array(this.analysers[i].frequencyBinCount);
       this.analysers[i].getByteTimeDomainData(data);
       this.view.drawGainTracks(i, data);
     }

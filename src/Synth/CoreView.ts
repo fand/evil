@@ -102,7 +102,7 @@ export class SynthCoreView {
 
   setVCOParam(p: any[]) {
     for (let i = 0; i < this.vcos.length; i++) {
-      var vco = this.vcos.eq(i);
+      const vco = this.vcos.eq(i);
       vco.find('.shape').val(p[i].shape);
       vco.find('.octave').val(p[i].octave);
       vco.find('.interval').val(p[i].interval);

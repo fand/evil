@@ -1,7 +1,7 @@
 import { SampleNode as SamplerNode } from './SampleNode';
 import { SamplerCoreView } from './CoreView';
 import type { Sampler } from '../Sampler';
-import type { SamplerParam, SampleNodeParam } from '../Song';
+import type { SamplerParam } from '../Song';
 
 export class SamplerCore {
   parent: Sampler;

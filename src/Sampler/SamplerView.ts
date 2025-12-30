@@ -10,41 +10,6 @@ declare global {
 
 type SamplerPattern = [note: number, velocity: number][][];
 
-const DEFAULT_PATTERN: SamplerPattern = [
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-];
-
 type SamplerPatternObject = { name: string; pattern: SamplerPattern };
 
 type SamplerPos = {
@@ -277,12 +242,12 @@ export class SamplerView {
           this.addNote(pos, 1.0);
         }
       })
-      .on('mouseup', (e) => {
+      .on('mouseup', () => {
         this.is_clicked = false;
         this.is_adding = false;
         this.is_removing = false;
       })
-      .on('mouseout', (e) => {
+      .on('mouseout', () => {
         this.ctx_hover.clearRect(
           this.hover_pos.x * 26,
           this.hover_pos.y * 26,
@@ -391,7 +356,7 @@ export class SamplerView {
     this.last_time = this.time;
   }
 
-  setPattern(_pattern_obj: SamplerPatternObject) {
+  setPattern() {
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);

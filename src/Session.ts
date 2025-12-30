@@ -64,7 +64,7 @@ class Session {
   }
 
   // Read patterns for the next measure.
-  nextMeasure(insts: Instrument[], _time?: number) {
+  nextMeasure(insts: Instrument[]) {
     this.instruments = insts;
     if (this.is_loop) {
       if (this.is_waiting_next_scene) {
@@ -205,9 +205,7 @@ class Session {
     }
 
     // Add track pattern
-    let dst_x = dst.x;
     if (this.song.tracks.length <= dst.x) {
-      dst_x = this.song.tracks.length;
 
       if (this.song.tracks[src.x].type === 'REZ') {
         this.player.addSynth(dst.y);

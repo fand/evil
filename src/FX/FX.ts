@@ -58,7 +58,7 @@ export abstract class FX {
     this.source = source;
   }
 
-  setParam(p: any) {
+  setParam() {
     // Override in subclasses
   }
 

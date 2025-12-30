@@ -68,7 +68,7 @@ class Sidebar {
     return this.session.saveMaster(this.sidebar_pos.y, obj);
   }
 
-  saveTracksEffect(_pos?: any) {
+  saveTracksEffect() {
     if (this.sidebar_pos.type === 'master') {
       return;
     } // TODO: make sure this is impossible / delete this line
