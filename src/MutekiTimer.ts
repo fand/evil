@@ -7,37 +7,24 @@
  * DS208: Avoid top-level this
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-const wsetTimeout = window.setTimeout;
-const wclearTimeout = window.clearTimeout;
-
 const SOURCE = `\
-var t = 0;
+let t = 0;
 onmessage = function(e) {
-    if (t) {
-        t = clearTimeout(t), 0;
-    }
-    if (typeof e.data === "number" && e.data > 0) {
-        t = setTimeout(function() {
-            postMessage(0);
-        }, e.data);
-    }
+  if (t) {
+    t = clearTimeout(t), 0;
+  }
+  if (typeof e.data === "number" && e.data > 0) {
+    t = setTimeout(function() {
+      postMessage(0);
+    }, e.data);
+  }
 };\
 `;
-const TIMER_PATH = __guard__(
-  window.URL != null ? window.URL : (window as any).webkitURL,
-  (x) =>
-    x.createObjectURL(
-      (() => {
-        try {
-          return new Blob([SOURCE], { type: 'text/javascript' });
-        } catch (e) {
-          return null;
-        }
-      })()
-    )
+const TIMER_PATH = URL.createObjectURL(
+  new Blob([SOURCE], { type: 'text/javascript' })
 );
 
-class MutekiTimer {
+export class MutekiTimer {
   timer: Worker | number;
 
   constructor() {
@@ -48,31 +35,23 @@ class MutekiTimer {
     }
   }
 
-  setTimeout(func, interval) {
+  setTimeout(func: () => void, interval: number) {
     if (interval == null) {
       interval = 100;
     }
     if (typeof this.timer === 'number') {
-      return (this.timer = wsetTimeout(func, interval));
+      this.timer = setTimeout(func, interval);
     } else {
       this.timer.onmessage = func;
-      return this.timer.postMessage(interval);
+      this.timer.postMessage(interval);
     }
   }
 
   clearTimeout() {
     if (typeof this.timer === 'number') {
-      return clearTimeout(this.timer);
+      clearTimeout(this.timer);
     } else {
-      return this.timer.postMessage(0);
+      this.timer.postMessage(0);
     }
   }
-}
-
-export { MutekiTimer };
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined;
 }
