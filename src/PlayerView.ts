@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { KEY_LIST } from './Constant';
 import type { Player } from './Player';
 import type { Keyboard } from './Keyboard';
+import { store, selectIsPlaying, selectBPM, selectKey, selectScale } from './store';
 
 declare global {
   interface Window {
@@ -62,6 +63,42 @@ export class PlayerView {
 
     this.initEvent();
     this.resize();
+    this.subscribeStore();
+  }
+
+  subscribeStore() {
+    // Subscribe to isPlaying changes
+    store.subscribe(
+      selectIsPlaying,
+      (isPlaying) => {
+        if (isPlaying) {
+          this.play.removeClass('fa-play').addClass('fa-pause');
+        } else {
+          this.play.removeClass('fa-pause').addClass('fa-play');
+        }
+      }
+    );
+
+    // Subscribe to BPM changes
+    store.subscribe(selectBPM, (bpm) => {
+      this.bpm.val(bpm);
+    });
+
+    // Subscribe to Key changes
+    store.subscribe(selectKey, (key) => {
+      for (const k in KEY_LIST) {
+        const v = KEY_LIST[k as keyof typeof KEY_LIST];
+        if (v === parseInt(key, 10)) {
+          this.key.val(k);
+          break;
+        }
+      }
+    });
+
+    // Subscribe to Scale changes
+    store.subscribe(selectScale, (scale) => {
+      this.scale.val(scale);
+    });
   }
 
   initEvent() {

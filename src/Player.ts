@@ -14,6 +14,7 @@ import {
 import type { Instrument, InstrumentType } from './Instrument';
 import { Song, Scene } from './Song';
 import type { Keyboard } from './Keyboard';
+import { store } from './store';
 
 declare global {
   interface Window {
@@ -72,6 +73,7 @@ export class Player {
 
   setBPM(bpm: number) {
     this.scene.bpm = bpm;
+    store.getState().setBPM(bpm);
 
     // @duration = (60000.0 / @bpm) / 8.0
     this.duration = 7500.0 / this.bpm;
@@ -88,6 +90,7 @@ export class Player {
     }
 
     this.scene.key = key;
+    store.getState().setKey(key);
     for (const s of this.instruments) {
       s.setKey(this.key);
     }
@@ -101,6 +104,7 @@ export class Player {
     }
 
     this.scene.scale = scale;
+    store.getState().setScale(scale);
 
     for (const s of this.instruments) {
       s.setScale(this.scale);
@@ -115,6 +119,7 @@ export class Player {
 
   play() {
     this.is_playing = true;
+    store.getState().setPlaying(true);
     this.session.play();
 
     T.setTimeout(() => {
@@ -130,6 +135,7 @@ export class Player {
       s.stop();
     }
     this.is_playing = false;
+    store.getState().setPlaying(false);
     this.view.viewStop();
     this.time = 0;
   }
@@ -139,6 +145,7 @@ export class Player {
       s.pause(this.time);
     }
     this.is_playing = false;
+    store.getState().setPlaying(false);
   }
 
   forward() {
@@ -165,7 +172,9 @@ export class Player {
   }
 
   toggleLoop(): boolean {
-    return this.session.toggleLoop();
+    const isLoop = this.session.toggleLoop();
+    store.getState().toggleLoop(); // sync with store
+    return isLoop;
   }
 
   noteOn(note: number, force: boolean) {
@@ -248,6 +257,7 @@ export class Player {
 
     this.instruments[this.current_instrument].deactivate();
     this.current_instrument = next_idx;
+    store.getState().setCurrentInstrument(next_idx);
     this.instruments[this.current_instrument].activate();
     window.keyboard.setMode('SYNTH');
   }
@@ -255,6 +265,7 @@ export class Player {
   moveLeft(next_idx: number) {
     this.instruments[this.current_instrument].deactivate();
     this.current_instrument = next_idx;
+    store.getState().setCurrentInstrument(next_idx);
     this.instruments[this.current_instrument].activate();
     window.keyboard.setMode('SYNTH');
   }
@@ -304,8 +315,9 @@ export class Player {
     this.session.empty();
     this.view.empty();
 
-    // Set song to Session (single source of truth)
+    // Set song to Session and Store
     this.session.song = song;
+    store.getState().setSong(song);
 
     // Cache track count to avoid infinite loop (addSynth modifies song.tracks)
     const trackCount = this.song.tracks.length;
