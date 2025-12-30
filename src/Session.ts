@@ -1,9 +1,14 @@
 import { SessionView } from './SessionView';
-import { Song } from './Song';
+import {
+  DEFAULT_SCENE,
+  DEFAULT_SONG,
+  PatternObject,
+  Song,
+  Track,
+} from './Song';
 import $ from 'jquery';
-import { SynthPatternObject } from './Synth/SynthView';
 import type { Player } from './Player';
-import type { Instrument } from './Instrument';
+import type { Instrument, InstrumentType } from './Instrument';
 
 // Control the patterns for tracks.
 class Session {
@@ -20,7 +25,7 @@ class Session {
   is_waiting_next_pattern: boolean;
   is_waiting_next_scene: boolean;
   cue_queue: any[];
-  song: any;
+  song: Song;
   view: SessionView;
   instruments: Instrument[] = [];
 
@@ -42,7 +47,7 @@ class Session {
 
     this.cue_queue = [];
 
-    this.song = Song.DEFAULT;
+    this.song = DEFAULT_SONG; // TODO: dedupe
 
     this.view = new SessionView(this, this.song);
   }
@@ -72,7 +77,9 @@ class Session {
     this.is_waiting_next_pattern = false;
     for (const q of this.cue_queue) {
       const pat = this.song.tracks[q[0]].patterns[q[1]];
-      this.instruments[q[0]].setPattern(pat);
+      if (pat) {
+        this.instruments[q[0]].setPattern(pat);
+      }
       this.current_cells[q[0]] = q[1];
     }
     this.view.drawScene(this.scene_pos, this.current_cells);
@@ -155,14 +162,13 @@ class Session {
     const name = s.id + '-' + pos;
     s.setPatternName(name);
 
-    const patterns: SynthPatternObject[] = [];
+    const patterns: (PatternObject | undefined)[] = [];
     patterns[pos] = { name: s.pattern_name, pattern: s.pattern };
-    const s_obj = {
+    const s_obj: Track = {
       id: s.id,
       type: s.type,
       name: s.name,
       patterns,
-      params: [],
       gain: 1.0,
       pan: 0.0,
     };
@@ -179,14 +185,14 @@ class Session {
 
   // Read given song, called by Player.
   readTrack(
-    song: any,
+    song: Song,
     src: { x: number; y: number },
     dst: { x: number; y: number }
   ) {
     // add master
     this.song = song;
     if (!this.song.master[dst.y]) {
-      this.song.master[dst.y] = { name: 'section-' + dst.y };
+      this.song.master[dst.y] = { ...DEFAULT_SCENE, name: 'section-' + dst.y };
     }
     if (dst.y + 1 > this.song.length) {
       this.song.length = dst.y + 1;
@@ -210,7 +216,10 @@ class Session {
   readPattern(pat: any, idx: number, pat_num: number) {
     this.song.tracks[idx].patterns[pat_num] = pat;
     if (!this.song.master[pat_num]) {
-      this.song.master[pat_num] = { name: 'section-' + pat_num };
+      this.song.master[pat_num] = {
+        ...DEFAULT_SCENE,
+        name: 'section-' + pat_num,
+      };
     }
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
@@ -227,10 +236,13 @@ class Session {
     }
   }
 
-  editPattern(idx: number, pat_num: number) {
+  editPattern(idx: number, pat_num: number): [number, number, PatternObject] {
     // add master
     if (!this.song.master[pat_num]) {
-      this.song.master[pat_num] = { name: 'section-' + pat_num };
+      this.song.master[pat_num] = {
+        ...DEFAULT_SCENE,
+        name: 'section-' + pat_num,
+      };
     }
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
@@ -248,7 +260,7 @@ class Session {
 
     if (this.song.tracks[track_idx].patterns[pat_num]) {
       this.player.instruments[track_idx].setPattern(
-        this.song.tracks[track_idx].patterns[pat_num]
+        this.song.tracks[track_idx].patterns[pat_num]!
       );
     } else {
       // set new pattern
@@ -264,7 +276,7 @@ class Session {
     this.view.readSong(this.song, this.current_cells);
     this.player.moveTo(track_idx);
 
-    return [track_idx, pat_num, this.song.tracks[track_idx].patterns[pat_num]];
+    return [track_idx, pat_num, this.song.tracks[track_idx].patterns[pat_num]!];
   }
 
   // Save patterns into @song.
@@ -281,11 +293,11 @@ class Session {
   // Save parameters for tracks into @song.
   saveTracks() {
     for (let i = 0; i < this.player.instruments.length; i++) {
-      const param = this.player.instruments[i].getParam();
-      if (this.song.tracks[i].patterns) {
-        param.patterns = this.song.tracks[i].patterns;
-      }
-      this.song.tracks[i] = param;
+      const inst = this.player.instruments[i];
+      const track = this.song.tracks[i];
+      track.params = inst.getParam();
+      track.name = inst.name;
+      track.effects = inst.getEffectsParam();
     }
   }
 
@@ -334,7 +346,11 @@ class Session {
       },
     })
       .done((d) => {
-        return this.view.showSuccess(d, this.song.title, this.song.creator);
+        return this.view.showSuccess(
+          d,
+          this.song.title ?? '',
+          this.song.creator ?? ''
+        );
       })
       .fail((err) => {
         return this.view.showError(err);
@@ -342,7 +358,7 @@ class Session {
   }
 
   // Read the song given by Player.
-  readSong(song: any) {
+  readSong(song: Song) {
     this.song = song;
     this.scene_pos = 0;
     this.scene_length = 0;
@@ -374,32 +390,31 @@ class Session {
     const pat_num = this.current_cells[track_idx];
 
     if (this.song.tracks[track_idx].patterns[pat_num]) {
-      this.song.tracks[track_idx].patterns[pat_num].name = name;
+      this.song.tracks[track_idx].patterns[pat_num]!.name = name;
     } else {
-      this.song.tracks[track_idx].patterns[pat_num] = { name };
+      this.song.tracks[track_idx].patterns[pat_num] = { name, pattern: [] };
     }
 
     this.view.drawPatternName(
       track_idx,
       pat_num,
-      this.song.tracks[track_idx].patterns[pat_num]
+      this.song.tracks[track_idx].patterns[pat_num]!
     );
   }
 
   // called by Player.
-  changeInstrument(id: number, type: string, inst: any) {
+  changeInstrument(id: number, type: InstrumentType, inst: any) {
     const pat_name = id + '-' + this.scene_pos;
     inst.setPatternName(pat_name);
 
-    const patterns: SynthPatternObject[] = [];
+    const patterns: (PatternObject | undefined)[] = [];
     patterns[this.scene_pos] = { name: pat_name, pattern: inst.pattern };
 
-    const s_params = {
+    const s_params: Track = {
       id,
       type,
-      name: 'Synth #' + id,
+      name: type === 'REZ' ? 'Synth #' + id : 'Sampler #' + id,
       patterns,
-      params: [],
       gain: 1.0,
       pan: 0.0,
     };
@@ -435,7 +450,7 @@ class Session {
 
     this.cue_queue = [];
 
-    this.song = { tracks: [], master: [], length: 0, mixer: [] };
+    this.song = { tracks: [], master: [], length: 0, mixer: null };
   }
 
   deleteCell() {
@@ -452,7 +467,10 @@ class Session {
       this.view.readSong(this.song, this.current_cells);
     } else if (p.type === 'master') {
       // clear bpm, key, scale (except name)
-      this.song.master[p.y] = { name: this.song.master[p.y].name };
+      this.song.master[p.y] = {
+        ...DEFAULT_SCENE,
+        name: this.song.master[p.y].name,
+      };
       this.view.readSong(this.song, this.current_cells);
     }
   }

@@ -2,6 +2,7 @@ import { SAMPLE_RATE } from '../Constant';
 import { Panner } from '../Panner';
 import { SAMPLES as SAMPLE } from './Constant';
 import type { SamplerCore } from './SamplerCore';
+import type { SampleNodeParam } from '../Song';
 
 export class SampleNode {
   ctx: AudioContext;
@@ -168,16 +169,16 @@ export class SampleNode {
     return this.buffer;
   }
 
-  getParam() {
+  getParam(): SampleNodeParam {
     return {
       wave: this.name,
-      time: this.getTimeParam(),
+      time: this.getTimeParam() as SampleNodeParam['time'],
       gains: this.eq_gains,
-      output: this.getOutputParam(),
+      output: this.getOutputParam() as SampleNodeParam['output'],
     };
   }
 
-  setParam(p: any) {
+  setParam(p: Partial<SampleNodeParam>) {
     if (p.wave !== undefined) {
       this.setSample(p.wave);
     }

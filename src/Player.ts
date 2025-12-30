@@ -12,14 +12,13 @@ import {
   type NoteScale,
 } from './Constant';
 import type { Instrument, InstrumentType } from './Instrument';
+import { Song, Scene } from './Song';
 
 declare global {
   interface Window {
     keyboard: any;
   }
 }
-
-export type Scene = { bpm: number; key: string; scale: string };
 
 const T = new MutekiTimer();
 
@@ -40,10 +39,10 @@ export class Player {
   sidebar: Sidebar;
   scene_length: number = 32;
   view: PlayerView;
-  song: any;
+  song!: Song;
 
   constructor(ctx: AudioContext) {
-    this.scene = { bpm: this.bpm, key: this.key, scale: this.scale };
+    this.scene = { name: '', bpm: this.bpm, key: this.key, scale: this.scale };
 
     this.context = ctx;
 
@@ -286,7 +285,7 @@ export class Player {
     }
   }
 
-  readSong(song: any) {
+  readSong(song: Song) {
     this.song = song;
     this.instruments = [];
     this.num_id = 0;

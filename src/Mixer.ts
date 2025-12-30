@@ -161,12 +161,15 @@ export class Mixer {
   }
 
   readParam(
-    p: {
-      gain_tracks: number[];
-      gain_master: number;
-      pan_tracks: number[];
-      pan_master: number;
-    } | null
+    p:
+      | {
+          gain_tracks: number[];
+          gain_master: number;
+          pan_tracks: number[];
+          pan_master: number;
+        }
+      | null
+      | undefined
   ) {
     if (p == null) {
       return;
