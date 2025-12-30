@@ -5,7 +5,7 @@
     "moduleResolution": "bundler",
     "strict": false,
     "noImplicitAny": false,
-    "noImplicitThis": false,
+    "noImplicitThis": true,
     "strictNullChecks": false,
     "strictPropertyInitialization": false,
     "esModuleInterop": true,
@@ -15,8 +15,8 @@
     "rootDir": "./src",
     "declaration": false,
     "sourceMap": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"]
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "build"]
+  "exclude": ["node_modules", "build"],
 }
