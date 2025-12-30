@@ -1,4 +1,4 @@
-import { SamplerView } from './View';
+import { SamplerView } from './SamplerView';
 
 /*
  * decaffeinate suggestions:

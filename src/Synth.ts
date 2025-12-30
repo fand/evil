@@ -8,8 +8,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import { MutekiTimer } from './MutekiTimer';
-import { SynthView } from './Synth/View';
-import { SynthCore } from './Synth/Core';
+import { SynthView } from './Synth/SynthView';
+import { SynthCore } from './Synth/SynthCore';
 import { Panner } from './Panner';
 import $ from 'jquery';
 import { Fuzz } from './FX/Fuzz';

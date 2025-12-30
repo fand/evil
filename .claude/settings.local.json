@@ -4,7 +4,8 @@
       "Bash(mise exec:*)",
       "Bash(npm audit:*)",
       "Bash(npx tsc:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(git mv:*)"
     ]
   }
 }

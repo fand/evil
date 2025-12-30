@@ -10,7 +10,7 @@
 import { SessionView } from './SessionView';
 import { Song } from './Song';
 import $ from 'jquery';
-import { SynthPatternObject } from './Synth/View';
+import { SynthPatternObject } from './Synth/SynthView';
 import type { Player } from './Player';
 import type { Synth } from './Synth';
 import type { Sampler } from './Sampler';

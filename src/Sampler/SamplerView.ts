@@ -8,7 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
-import { SamplerKeyboardView } from './KeyboardView';
+import { SamplerKeyboardView } from './SamplerKeyboardView';
 import type { Sampler } from '../Sampler';
 
 declare global {

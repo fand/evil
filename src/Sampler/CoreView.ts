@@ -7,7 +7,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
-import type { SamplerCore } from './Core';
+import type { SamplerCore } from './SamplerCore';
 
 export class SamplerCoreView {
   model: SamplerCore;

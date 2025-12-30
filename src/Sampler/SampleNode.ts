@@ -9,7 +9,7 @@
 import { SAMPLE_RATE } from '../Constant';
 import { Panner } from '../Panner';
 import { SAMPLES as SAMPLE } from './Constant';
-import type { SamplerCore } from './Core';
+import type { SamplerCore } from './SamplerCore';
 
 export class SampleNode {
   ctx: AudioContext;

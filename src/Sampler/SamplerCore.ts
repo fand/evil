@@ -7,7 +7,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-import { SampleNode as SamplerNode } from './Node';
+import { SampleNode as SamplerNode } from './SampleNode';
 import { SamplerCoreView } from './CoreView';
 import type { Sampler } from '../Sampler';
 

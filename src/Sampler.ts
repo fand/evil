@@ -8,8 +8,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import { Panner } from './Panner';
-import { SamplerCore } from './Sampler/Core';
-import { SamplerView } from './Sampler/View';
+import { SamplerCore } from './Sampler/SamplerCore';
+import { SamplerView } from './Sampler/SamplerView';
 import $ from 'jquery';
 import type { Player } from './Player';
 

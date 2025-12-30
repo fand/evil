@@ -7,7 +7,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
-import type { SynthCore } from './Core';
+import type { SynthCore } from './SynthCore';
 
 export class SynthCoreView {
   model: SynthCore;
