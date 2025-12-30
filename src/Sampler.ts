@@ -250,11 +250,7 @@ class Sampler {
       this.pattern[time] = [[this.pattern[time], 1.0]];
     }
 
-    for (
-      let i = 0, end = this.pattern[time].length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.pattern[time].length; i++) {
       if (this.pattern[time][i][0] === note) {
         this.pattern[time].splice(i, 1);
       }

@@ -9,7 +9,7 @@
 import $ from 'jquery';
 import type { SynthCore } from './Core';
 
-class SynthCoreView {
+export class SynthCoreView {
   model: SynthCore;
   id: number;
   dom: JQuery;
@@ -177,11 +177,7 @@ class SynthCoreView {
       this.setVCOParam(p.vcos);
     }
     if (p.gains != null) {
-      for (
-        let i = 0, end = p.gains.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
+      for (let i = 0; i < p.gains.length; i++) {
         this.gain_inputs.eq(i).val((p.gains[i] / 0.3) * 100);
       }
     }
@@ -196,5 +192,3 @@ class SynthCoreView {
     }
   }
 }
-
-export { SynthCoreView };

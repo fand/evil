@@ -199,11 +199,7 @@ export class SamplerCoreView {
       ctx.beginPath();
 
       const d = wave.length / w;
-      for (
-        let x = 0, end = w, asc = 0 <= end;
-        asc ? x < end : x > end;
-        asc ? x++ : x--
-      ) {
+      for (let x = 0; x < w; x++) {
         ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45);
       }
 

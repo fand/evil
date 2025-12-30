@@ -91,11 +91,7 @@ export class Mixer {
 
   drawGains() {
     // Tracks
-    for (
-      let i = 0, end = this.analysers.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.analysers.length; i++) {
       var data = new Uint8Array(this.analysers[i].frequencyBinCount);
       this.analysers[i].getByteTimeDomainData(data);
       this.view.drawGainTracks(i, data);
@@ -127,25 +123,24 @@ export class Mixer {
     synth.connect(a);
     this.analysers.push(a);
 
-    return this.view.addSynth(synth);
+    this.view.addSynth();
   }
 
   setGains(gain_tracks: number[], gain_master: number) {
     this.gain_tracks = gain_tracks;
     this.gain_master = gain_master;
-    for (
-      let i = 0, end = this.gain_tracks.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+
+    for (let i = 0; i < this.gain_tracks.length; i++) {
       this.player.synth[i].setGain(this.gain_tracks[i]);
     }
-    return (this.out.gain.value = this.gain_master);
+
+    this.out.gain.value = this.gain_master;
   }
 
   setPans(pan_tracks: number[], pan_master: number) {
     this.pan_tracks = pan_tracks;
     this.pan_master = pan_master;
+
     for (let i = 0; i < this.pan_tracks.length; i++) {
       this.panners[i].setPosition(this.pan_tracks[i]);
     }

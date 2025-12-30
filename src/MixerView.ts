@@ -7,9 +7,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
+import type { Mixer } from './Mixer';
 
 export class MixerView {
-  model: any;
+  model: Mixer;
   dom: JQuery;
   tracks: JQuery;
   master: JQuery;
@@ -28,8 +29,7 @@ export class MixerView {
   ctx_master: CanvasRenderingContext2D;
   track_dom: JQuery;
 
-  constructor(model: any) {
-    let c;
+  constructor(model: Mixer) {
     this.model = model;
     this.dom = $('#mixer');
 
@@ -107,7 +107,7 @@ export class MixerView {
     return this.ctx_master.fillRect(60, 130 - h_r, 10, h_r);
   }
 
-  addSynth(synth: any) {
+  addSynth() {
     const dom = this.track_dom.clone();
     this.console_tracks.append(dom);
     this.pans.push(dom.find('.pan-slider'));
@@ -150,14 +150,10 @@ export class MixerView {
   }
 
   readGains(g: number[], g_master: number) {
-    for (
-      let i = 0, end = g.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < g.length; i++) {
       this.gains[i].val(g[i] * 100.0);
     }
-    return this.gain_master.val(g_master * 100.0);
+    this.gain_master.val(g_master * 100.0);
   }
 
   readPans(p: number[], pan_master: number) {

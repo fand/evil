@@ -410,22 +410,12 @@ export class SynthCore {
   setParam(p: any) {
     let i;
     if (p.vcos != null) {
-      let asc, end;
-      for (
-        i = 0, end = p.vcos.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
+      for (let i = 0; i < p.vcos.length; i++) {
         this.vcos[i].setParam(p.vcos[i]);
       }
     }
     if (p.gains != null) {
-      let asc1, end1;
-      for (
-        i = 0, end1 = p.gains.length, asc1 = 0 <= end1;
-        asc1 ? i < end1 : i > end1;
-        asc1 ? i++ : i--
-      ) {
+      for (let i = 0; i < p.gains.length; i++) {
         this.gains[i].gain.value = p.gains[i];
       }
     }

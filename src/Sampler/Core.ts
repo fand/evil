@@ -135,11 +135,7 @@ export class SamplerCore {
 
   setParam(p: any) {
     if (p.samples != null) {
-      for (
-        let i = 0, end = p.samples.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
+      for (let i = 0; i < p.samples.length; i++) {
         this.samples[i].setParam(p.samples[i]);
       }
     }

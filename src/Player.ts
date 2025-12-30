@@ -301,9 +301,6 @@ export class Player {
   }
 
   readSong(song: any) {
-    let i;
-    let asc, end;
-    let asc1, end1;
     this.song = song;
     this.synth = [];
     this.num_id = 0;
@@ -311,11 +308,7 @@ export class Player {
     this.session.empty();
     this.view.empty();
 
-    for (
-      i = 0, end = this.song.tracks.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.song.tracks.length; i++) {
       if (
         this.song.tracks[i].type == null ||
         this.song.tracks[i].type === 'REZ'
@@ -331,11 +324,7 @@ export class Player {
 
     this.readScene(this.song.master[0]);
     this.setSceneLength(this.song.master.length);
-    for (
-      i = 0, end1 = this.song.tracks.length, asc1 = 0 <= end1;
-      asc1 ? i < end1 : i > end1;
-      asc1 ? i++ : i--
-    ) {
+    for (let i = 0; i < this.song.tracks.length; i++) {
       this.synth[i].setParam(this.song.tracks[i]);
     }
 
@@ -371,10 +360,10 @@ export class Player {
     this.scene_length = scene_length;
   }
 
-  resetSceneLength(_l?: number) {
+  resetSceneLength() {
     this.scene_length = 0;
-    return Array.from(this.synth).map(
-      (s) => (this.scene_length = Math.max(this.scene_length, s.pattern.length))
-    );
+    for (const s of this.synth) {
+      this.scene_length = Math.max(this.scene_length, s.pattern.length);
+    }
   }
 }

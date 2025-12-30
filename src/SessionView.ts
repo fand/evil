@@ -250,7 +250,12 @@ class SessionView {
   }
 
   // Get the cell under the mouse
-  getPos(rect: DOMRect, wrapper: JQuery, e: JQuery.MouseEventBase, type: string) {
+  getPos(
+    rect: DOMRect,
+    wrapper: JQuery,
+    e: JQuery.MouseEventBase,
+    type: string
+  ) {
     const x = Math.floor(
       (e.clientX! - rect.left + this.wrapper_mixer.scrollLeft()!) / this.w
     );
@@ -467,12 +472,7 @@ class SessionView {
     this.resize();
 
     // Draw tracks
-    for (
-      let x = 0, end = Math.max(this.song.tracks.length + 1, 8), asc = 0 <= end;
-      asc ? x < end : x > end;
-      asc ? x++ : x--
-    ) {
-      var asc1, end1;
+    for (let x = 0; x < Math.max(this.song.tracks.length + 1, 8); x++) {
       var t = this.song.tracks[x];
       if (t != null) {
         if (t.type != null) {
@@ -483,11 +483,7 @@ class SessionView {
         }
       }
 
-      for (
-        y = 0, end1 = Math.max(this.song.length + 1, 10), asc1 = 0 <= end1;
-        asc1 ? y < end1 : y > end1;
-        asc1 ? y++ : y--
-      ) {
+      for (let y = 0; y < Math.max(this.song.length + 1, 10); y++) {
         if (t != null && t.patterns[y] != null) {
           this.drawCellTracks(t.patterns[y], x, y);
         } else {
@@ -498,11 +494,7 @@ class SessionView {
 
     // Draw master
     this.drawMasterName();
-    for (
-      y = 0, end2 = Math.max(this.song.length + 1, 10), asc2 = 0 <= end2;
-      asc2 ? y < end2 : y > end2;
-      asc2 ? y++ : y--
-    ) {
+    for (let y = 0; y < Math.max(this.song.length + 1, 10); y++) {
       if (this.song.master[y] != null) {
         this.drawCellMaster(this.song.master[y], 0, y);
       } else {
@@ -669,11 +661,7 @@ class SessionView {
       this.current_cells = cells;
     }
 
-    for (
-      let i = 0, end = this.current_cells.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.current_cells.length; i++) {
       if (this.current_cells[i] != null) {
         this.drawActive(i, this.current_cells[i]);
       }

@@ -239,15 +239,11 @@ class Synth {
       this.pattern[l] = note;
       return;
     }
-    for (
-      let i = l, end = r, asc = l <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = l; i < r; i++) {
       this.pattern[i] = 'sustain';
     }
     this.pattern[l] = -note;
-    return (this.pattern[r] = 'end');
+    this.pattern[r] = 'end';
   }
 
   activate() {
