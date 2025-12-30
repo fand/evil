@@ -538,7 +538,7 @@ export class SamplerView {
     }
   }
 
-  activate(i) {
+  activate(i: number) {
     this.is_active = true;
     this.initCanvas();
   }

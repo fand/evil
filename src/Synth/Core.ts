@@ -86,7 +86,7 @@ class Noise {
     };
   }
 
-  setParam(p) {
+  setParam(p: any) {
     this.shape = p.shape;
     this.octave = p.octave;
     this.interval = p.interval;
@@ -168,14 +168,14 @@ class VCO {
     this.shape = shape;
     if (this.shape === 'SUPERSAW') {
       for (o of Array.from(this.oscs)) {
-        o.type = OSC_TYPE['SAW'];
+        o.type = OSC_TYPE['SAW'] as OscillatorType;
         o.connect(this.node);
       }
       this.osc.disconnect();
       return (this.node.gain.value = 0.9);
     } else if (this.shape === 'SUPERRECT') {
       for (o of Array.from(this.oscs)) {
-        o.type = OSC_TYPE['RECT'];
+        o.type = OSC_TYPE['RECT'] as OscillatorType;
         o.connect(this.node);
       }
       this.osc.disconnect();
@@ -184,7 +184,7 @@ class VCO {
       for (o of Array.from(this.oscs)) {
         o.disconnect();
       }
-      this.osc.type = OSC_TYPE[this.shape];
+      this.osc.type = OSC_TYPE[this.shape as keyof typeof OSC_TYPE] as OscillatorType;
       this.osc.connect(this.node);
       return (this.node.gain.value = 1.0);
     }
@@ -226,7 +226,7 @@ class VCO {
     };
   }
 
-  setParam(p) {
+  setParam(p: any) {
     this.octave = p.octave;
     this.interval = p.interval;
     this.fine = p.fine;
@@ -278,7 +278,7 @@ class EG {
     return { adsr: this.getADSR(), range: this.getRange() };
   }
 
-  setParam(p) {
+  setParam(p: any) {
     [this.attack, this.decay, this.sustain, this.release] = Array.from(p.adsr);
     return this.setRange(p.range[0], p.range[1]);
   }
@@ -405,7 +405,7 @@ export class SynthCore {
     };
   }
 
-  setParam(p) {
+  setParam(p: any) {
     let i;
     if (p.vcos != null) {
       let asc, end;

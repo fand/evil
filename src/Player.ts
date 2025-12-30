@@ -203,7 +203,7 @@ export class Player {
   addSynth(scene_pos?: number, name?: string) {
     const s = new Synth(this.context, this.num_id++, this, name);
     s.setScale(this.scene.scale);
-    s.setKey(this.scene.key);
+    s.setKey(this.scene.key as NoteKey);
 
     this.synth.push(s);
     this.mixer.addSynth(s);
@@ -225,7 +225,7 @@ export class Player {
     if (type === 'REZ') {
       s_new = new Synth(this.context, idx, this, s_old.name);
       s_new.setScale(this.scene.scale);
-      s_new.setKey(this.scene.key);
+      s_new.setKey(this.scene.key as NoteKey);
     } else {
       s_new = new Sampler(this.context, idx, this, s_old.name);
     }
@@ -283,7 +283,7 @@ export class Player {
     }
   }
 
-  solo(solos) {
+  solo(solos: number[]) {
     if (solos.length === 0) {
       for (let s of Array.from(this.synth)) {
         s.demute();
@@ -300,7 +300,7 @@ export class Player {
     }
   }
 
-  readSong(song) {
+  readSong(song: any) {
     let i;
     let asc, end;
     let asc1, end1;
@@ -347,7 +347,7 @@ export class Player {
     return this.resetSceneLength();
   }
 
-  readScene(scene) {
+  readScene(scene: any) {
     if (scene.bpm != null) {
       this.setBPM(scene.bpm);
       this.view.setBPM(scene.bpm);

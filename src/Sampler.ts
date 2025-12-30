@@ -93,7 +93,7 @@ class Sampler {
     this.effects = [];
   }
 
-  connect(dst) {
+  connect(dst: AudioNode | Panner) {
     if (dst instanceof Panner) {
       return this.return.connect(dst.in);
     } else {
@@ -128,7 +128,7 @@ class Sampler {
     return this.core.noteOff();
   }
 
-  playAt(time) {
+  playAt(time: number) {
     this.time = time;
     const mytime = this.time % this.pattern.length;
     this.view.playAt(mytime);
@@ -147,11 +147,11 @@ class Sampler {
     return this.view.stop();
   }
 
-  pause(time) {
+  pause(time: number) {
     return this.core.noteOff();
   }
 
-  setPattern(_pattern_obj) {
+  setPattern(_pattern_obj: { name: string; pattern: any[] }) {
     this.pattern_obj = $.extend(true, {}, _pattern_obj);
     this.pattern = this.pattern_obj.pattern;
     this.pattern_name = this.pattern_obj.name;
@@ -245,7 +245,7 @@ class Sampler {
     return this.player.resetSceneLength();
   }
 
-  addNote(time, note, gain) {
+  addNote(time: number, note: number, gain: number) {
     if (!Array.isArray(this.pattern[time])) {
       this.pattern[time] = [[this.pattern[time], 1.0]];
     }
@@ -263,7 +263,7 @@ class Sampler {
     return this.pattern[time].push([note, gain]);
   }
 
-  removeNote(pos) {
+  removeNote(pos: { x_abs: number; note: number }) {
     for (let i = 0; i < this.pattern[pos.x_abs].length; i++) {
       if (this.pattern[pos.x_abs][i][0] === pos.note) {
         this.pattern[pos.x_abs].splice(i, 1);
@@ -271,7 +271,7 @@ class Sampler {
     }
   }
 
-  activate(i) {
+  activate(i: number) {
     return this.view.activate(i);
   }
   inactivate() {
@@ -322,7 +322,7 @@ class Sampler {
     return p;
   }
 
-  setParam(p) {
+  setParam(p: any) {
     if (p != null) {
       return this.core.setParam(p);
     }
@@ -339,7 +339,7 @@ class Sampler {
     return Array.from(this.effects).map((f) => f.getParam());
   }
 
-  insertEffect(fx) {
+  insertEffect(fx: any) {
     if (this.effects.length === 0) {
       this.send.disconnect();
       this.send.connect(fx.in);
@@ -353,7 +353,7 @@ class Sampler {
     return this.effects.push(fx);
   }
 
-  removeEffect(fx) {
+  removeEffect(fx: any) {
     let prev;
     const i = this.effects.indexOf(fx);
     if (i === -1) {

@@ -55,7 +55,7 @@ class SynthCoreView {
     return this.fetchParam();
   }
 
-  updateCanvas(name) {
+  updateCanvas(name: string) {
     let canvas: HTMLCanvasElement;
     let context: CanvasRenderingContext2D;
     let adsr: number[];
@@ -108,7 +108,7 @@ class SynthCoreView {
     }
   }
 
-  setVCOParam(p) {
+  setVCOParam(p: any[]) {
     for (let i = 0; i < this.vcos.length; i++) {
       var vco = this.vcos.eq(i);
       vco.find('.shape').val(p[i].shape);
@@ -128,7 +128,7 @@ class SynthCoreView {
     return this.updateCanvas('EG');
   }
 
-  setEGParam(p) {
+  setEGParam(p: any) {
     this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
     this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
     this.EG_inputs.eq(2).val(p.adsr[2] * 100);
@@ -145,7 +145,7 @@ class SynthCoreView {
     return this.updateCanvas('FEG');
   }
 
-  setFEGParam(p) {
+  setFEGParam(p: any) {
     for (let i = 0; i < p.length; i++) {
       this.FEG_inputs.eq(i).val(p.adsr[i]);
     }
@@ -158,7 +158,7 @@ class SynthCoreView {
     );
   }
 
-  setFilterParam(p) {
+  setFilterParam(p: any) {
     this.filter_inputs.eq(0).val(p[0]);
     return this.filter_inputs.eq(1).val(p[1]);
   }
@@ -172,7 +172,7 @@ class SynthCoreView {
     }
   }
 
-  setParam(p) {
+  setParam(p: any) {
     if (p.vcos != null) {
       this.setVCOParam(p.vcos);
     }

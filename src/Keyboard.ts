@@ -8,7 +8,7 @@
 import $ from 'jquery';
 import { Player } from './Player';
 
-const KEYCODE_TO_NOTE = {
+const KEYCODE_TO_NOTE: Record<number, number> = {
   90: 1,
   88: 2,
   67: 3,
@@ -51,7 +51,7 @@ const KEYCODE_TO_NOTE = {
   48: 31,
 };
 
-const KEYCODE_TO_NUM = {
+const KEYCODE_TO_NUM: Record<number, number> = {
   49: 1,
   50: 2,
   51: 3,
@@ -156,14 +156,15 @@ class Keyboard {
     }
   }
 
-  onMixer(e) {
+  onMixer(e: KeyboardEvent | number) {
+    const keyCode = typeof e === 'number' ? e : e.keyCode;
     // Session
-    if (e.keyCode === 8 || e.keyCode === 46) {
+    if (keyCode === 8 || keyCode === 46) {
       this.player.session.deleteCell();
     }
 
     // Mute
-    const num = KEYCODE_TO_NUM[e.keyCode];
+    const num = KEYCODE_TO_NUM[keyCode];
     if (num != null && num < 10) {
       if (!Array.from(this.solos).includes(num)) {
         this.solos.push(num);

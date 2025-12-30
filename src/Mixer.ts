@@ -117,7 +117,7 @@ export class Mixer {
     return this.view.empty();
   }
 
-  addSynth(synth) {
+  addSynth(synth: Synth | Sampler) {
     // Create new panner
     const p = new Panner(this.ctx);
     synth.connect(p.in);
@@ -175,7 +175,7 @@ export class Mixer {
     };
   }
 
-  readParam(p) {
+  readParam(p: { gain_tracks: number[]; gain_master: number; pan_tracks: number[]; pan_master: number } | null) {
     if (p == null) {
       return;
     }
@@ -220,7 +220,7 @@ export class Mixer {
     return fx;
   }
 
-  addTracksEffect(x, name) {
+  addTracksEffect(x: number, name: string) {
     let fx;
     if (name === 'Fuzz') {
       fx = new Fuzz(this.ctx);
@@ -253,12 +253,11 @@ export class Mixer {
 
     prev.disconnect();
     if (this.effects_master[i + 1] != null) {
-      prev.connect(this.effects_master[i + 1]);
+      prev.connect(this.effects_master[i + 1].in);
     } else {
       prev.connect(this.return);
-
-      fx.disconnect();
     }
+    fx.disconnect();
 
     return this.effects_master.splice(i, 1);
   }

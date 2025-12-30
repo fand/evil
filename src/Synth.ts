@@ -17,7 +17,7 @@ import { Delay } from './FX/Delay';
 import { Reverb } from './FX/Reverb';
 import { Compressor } from './FX/Compressor';
 import { Double } from './FX/Double';
-import { SCALE_LIST } from './Constant';
+import { SCALE_LIST, NoteKey } from './Constant';
 import type { Player } from './Player';
 import type { FX } from './FX/FX';
 
@@ -64,7 +64,7 @@ class Synth {
     this.pattern_obj = { name: this.pattern_name, pattern: this.pattern };
     this.time = 0;
     this.scale_name = 'Major';
-    this.scale = SCALE_LIST[this.scale_name];
+    this.scale = SCALE_LIST[this.scale_name as keyof typeof SCALE_LIST];
     this.view = new SynthView(this, this.id);
     this.core = new SynthCore(this, this.ctx, this.id);
 
@@ -101,17 +101,17 @@ class Synth {
     this.duration = duration;
   }
 
-  setKey(key) {
+  setKey(key: NoteKey) {
     return this.core.setKey(key);
   }
 
-  setNote(note) {
+  setNote(note: number) {
     return this.core.setNote(note);
   }
 
-  setScale(scale_name) {
+  setScale(scale_name: string) {
     this.scale_name = scale_name;
-    this.scale = SCALE_LIST[this.scale_name];
+    this.scale = SCALE_LIST[this.scale_name as keyof typeof SCALE_LIST];
     this.core.scale = this.scale;
     return this.view.changeScale(this.scale);
   }
@@ -191,7 +191,7 @@ class Synth {
     this.core.noteOff();
   }
 
-  setPattern(pattern_obj) {
+  setPattern(pattern_obj: { name: string; pattern: any[] }) {
     this.pattern_obj = JSON.parse(JSON.stringify(pattern_obj));
     this.pattern = this.pattern_obj.pattern;
     this.pattern_name = this.pattern_obj.name;
@@ -298,7 +298,7 @@ class Synth {
     return p;
   }
 
-  setParam(p) {
+  setParam(p: any) {
     if (p == null) {
       return;
     }

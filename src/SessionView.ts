@@ -250,12 +250,12 @@ class SessionView {
   }
 
   // Get the cell under the mouse
-  getPos(rect, wrapper, e, type) {
+  getPos(rect: DOMRect, wrapper: JQuery, e: JQuery.MouseEventBase, type: string) {
     const x = Math.floor(
-      (e.clientX - rect.left + this.wrapper_mixer.scrollLeft()!) / this.w
+      (e.clientX! - rect.left + this.wrapper_mixer.scrollLeft()!) / this.w
     );
     const y = Math.floor(
-      (e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) /
+      (e.clientY! - rect.top + wrapper.scrollTop()! - this.offset_translate) /
         this.h
     );
     return {
@@ -265,23 +265,23 @@ class SessionView {
     };
   }
 
-  getPlayPos(rect, wrapper, e) {
+  getPlayPos(rect: DOMRect, wrapper: JQuery, e: JQuery.MouseEventBase) {
     const x = Math.floor(
-      (e.clientX - rect.left + this.wrapper_mixer.scrollLeft()!) / this.w
+      (e.clientX! - rect.left + this.wrapper_mixer.scrollLeft()!) / this.w
     );
     let y = Math.floor(
-      (e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) /
+      (e.clientY! - rect.top + wrapper.scrollTop()! - this.offset_translate) /
         this.h
     );
 
     // inside canvas && not track name space
     if (
       !(
-        e.clientX - rect.left + this.wrapper_mixer.scrollLeft()! - x * this.w <
+        e.clientX! - rect.left + this.wrapper_mixer.scrollLeft()! - x * this.w <
           20 &&
-        e.clientY -
+        e.clientY! -
           rect.top +
-          wrapper.scrollTop() -
+          wrapper.scrollTop()! -
           this.offset_translate -
           y * this.h <
           20
@@ -459,7 +459,7 @@ class SessionView {
   }
 
   // Read song from @song.
-  readSong(song, current_cells) {
+  readSong(song: any, current_cells: any[]) {
     let y;
     let asc2, end2;
     this.song = song;
@@ -519,7 +519,7 @@ class SessionView {
     return this.song_creator.val(this.song.creator);
   }
 
-  drawCellTracks(p, x, y) {
+  drawCellTracks(p: { name: string }, x: number, y: number) {
     this.clearCell(this.ctx_tracks, x, y);
 
     if (this.track_color[x] == null) {
@@ -554,7 +554,7 @@ class SessionView {
     );
   }
 
-  drawCellMaster(p, x, y) {
+  drawCellMaster(p: { name: string }, x: number, y: number) {
     this.clearCell(this.ctx_master, x, y);
 
     this.ctx_master.strokeStyle = this.color[1];
@@ -581,7 +581,7 @@ class SessionView {
     return this.ctx_master.fillText(p.name, 24, (y + 1) * this.h - 6);
   }
 
-  drawEmpty(ctx, x, y) {
+  drawEmpty(ctx: CanvasRenderingContext2D, x: number, y: number) {
     this.clearCell(ctx, x, y);
     ctx.strokeStyle = this.color[0];
     ctx.lineWidth = 1;
@@ -593,7 +593,7 @@ class SessionView {
     );
   }
 
-  drawEmptyMaster(y) {
+  drawEmptyMaster(y: number) {
     this.clearCell(this.ctx_master, 0, y);
     this.ctx_master.strokeStyle = this.color[0];
     this.ctx_master.lineWidth = 1;
@@ -616,7 +616,7 @@ class SessionView {
     );
   }
 
-  clearCell(ctx, x, y) {
+  clearCell(ctx: CanvasRenderingContext2D, x: number, y: number) {
     if (ctx === this.ctx_master) {
       return ctx.clearRect(0, y * this.h, this.w_master, this.h);
     } else {
@@ -652,11 +652,11 @@ class SessionView {
     return (this.ctx_tracks.shadowBlur = 0);
   }
 
-  drawPatternName(x, y, p) {
+  drawPatternName(x: number, y: number, p: { name: string }) {
     return this.drawCellTracks(p, x, y);
   }
 
-  drawScene(pos, cells) {
+  drawScene(pos: number, cells: any[]) {
     this.ctx_tracks_on.clearRect(
       0,
       this.scene_pos * this.h,
@@ -689,7 +689,7 @@ class SessionView {
     }
   }
 
-  drawActive(x, y) {
+  drawActive(x: number, y: number) {
     this.clearActive(x);
     this.ctx_tracks_on.drawImage(
       this.img_play,
@@ -705,7 +705,7 @@ class SessionView {
     return (this.last_active[x] = y);
   }
 
-  drawActiveMaster(y) {
+  drawActiveMaster(y: number) {
     this.ctx_master_on.clearRect(0, 0, this.w_master, 10000);
     return this.ctx_master_on.drawImage(
       this.img_play,
@@ -720,7 +720,7 @@ class SessionView {
     );
   }
 
-  drawDrag(ctx, pos) {
+  drawDrag(ctx: CanvasRenderingContext2D, pos: { x: number; y: number }) {
     this.clearHover(ctx);
 
     // @click_pos is NOT empty
@@ -766,7 +766,7 @@ class SessionView {
     return (this.hover_pos = pos);
   }
 
-  drawDragMaster(ctx, pos) {
+  drawDragMaster(ctx: CanvasRenderingContext2D, pos: { x: number; y: number }) {
     this.clearHover(ctx);
 
     // @click_pos is NOT empty
@@ -792,7 +792,7 @@ class SessionView {
     return (this.hover_pos = pos);
   }
 
-  drawHover(ctx, pos) {
+  drawHover(ctx: CanvasRenderingContext2D, pos: { x: number; y: number }) {
     this.clearHover(ctx);
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     if (ctx === this.ctx_master_hover) {
@@ -803,7 +803,7 @@ class SessionView {
     return (this.hover_pos = pos);
   }
 
-  clearHover(ctx) {
+  clearHover(ctx: CanvasRenderingContext2D) {
     // for tracks
     if (ctx === this.ctx_tracks_hover) {
       // Don't know why '+2' is needed .... but it's needed!!!
@@ -839,7 +839,7 @@ class SessionView {
     }
   }
 
-  clearActive(x) {
+  clearActive(x: number) {
     return this.ctx_tracks_on.clearRect(
       x * this.w,
       this.last_active[x] * this.h,
@@ -854,7 +854,7 @@ class SessionView {
   }
 
   // Cue the cells to play
-  cueTracks(x, y) {
+  cueTracks(x: number, y: number) {
     if (
       this.song.tracks[x] != null &&
       this.song.tracks[x].patterns[y] != null
@@ -879,7 +879,7 @@ class SessionView {
     }
   }
 
-  cueMaster(x, y) {
+  cueMaster(x: number, y: number) {
     if (this.song.master[y] != null) {
       this.model.cueScene(y);
       this.ctx_master_on.drawImage(
@@ -901,8 +901,8 @@ class SessionView {
   }
 
   // Light the play buttons on beat.
-  beat(is_master, cells) {
-    let c;
+  beat(is_master: boolean, cells: any[]) {
+    let c: any;
     if (is_master) {
       c = cells;
       this.ctx_master_on.drawImage(
@@ -965,7 +965,7 @@ class SessionView {
   }
 
   // Dialogs
-  showSuccess(_url, song_title, user_name) {
+  showSuccess(_url: string, song_title: string, user_name: string) {
     let text, title;
     if (song_title != null) {
       if (user_name != null) {
@@ -1002,7 +1002,7 @@ class SessionView {
       .click(() => this.closeDialog());
   }
 
-  showError(error) {
+  showError(error: any) {
     this.dialog.css({ opacity: '1', 'z-index': '10000' });
     this.dialog.find('#dialog-socials').hide();
     this.dialog.find('#dialog-success').hide();
@@ -1014,7 +1014,7 @@ class SessionView {
   }
 
   // Share button on dialogue
-  share(service) {
+  share(service: string) {
     // Prepare the default text to share
     let text, title;
     if (this.song.title != null) {
@@ -1053,13 +1053,13 @@ class SessionView {
     }
   }
 
-  changeSynth(song, id, type) {
+  changeSynth(song: any, id: number, type: string) {
     this.song = song;
     return this.readSong(this.song, this.current_cells);
   }
 
   // Copy cells by drag.
-  copyCell(src, dst) {
+  copyCell(src: { x: number; y: number }, dst: { x: number; y: number }) {
     if (this.song.tracks[src.x] == null) {
       return;
     }
@@ -1096,7 +1096,7 @@ class SessionView {
     return this.drawCellMaster(this.song.master[dst.y], 0, dst.y);
   }
 
-  copyCellMaster(src, dst) {
+  copyCellMaster(src: { x: number; y: number }, dst: { x: number; y: number }) {
     if (this.song.master[src.y] == null) {
       return;
     }
@@ -1113,7 +1113,7 @@ class SessionView {
   }
 
   // Select cell on click.
-  selectCell(pos) {
+  selectCell(pos: { x: number; y: number; type: string }) {
     if (this.song.tracks[pos.x] == null) {
       return;
     }
@@ -1173,7 +1173,7 @@ class SessionView {
     return this.model.player.sidebar.show(this.song, this.select_pos);
   }
 
-  selectCellMaster(pos) {
+  selectCellMaster(pos: { x: number; y: number; type: string }) {
     if (this.song.master[pos.y] == null) {
       return;
     }

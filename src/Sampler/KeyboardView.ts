@@ -132,7 +132,7 @@ export class SamplerKeyboardView {
     );
   }
 
-  drawHover(i) {
+  drawHover(i: number) {
     this.ctx_off.fillStyle = this.color[1];
     this.ctx_off.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
     return this.ctx_off.fillText(

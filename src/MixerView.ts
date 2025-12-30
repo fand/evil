@@ -85,7 +85,7 @@ export class MixerView {
     return this.console_master.on('change', () => this.setParams());
   }
 
-  drawGainTracks(i, data) {
+  drawGainTracks(i: number, data: Uint8Array) {
     const v = Math.max.apply(null, data);
     const h = ((v - 128) / 128) * 100;
 
@@ -94,7 +94,7 @@ export class MixerView {
     return this.ctx_tracks[i].fillRect(0, 100 - h, 10, h);
   }
 
-  drawGainMaster(data_l, data_r) {
+  drawGainMaster(data_l: Uint8Array, data_r: Uint8Array) {
     const v_l = Math.max.apply(null, data_l);
     const v_r = Math.max.apply(null, data_r);
     const h_l = ((v_l - 128) / 128) * 130;
@@ -107,7 +107,7 @@ export class MixerView {
     return this.ctx_master.fillRect(60, 130 - h_r, 10, h_r);
   }
 
-  addSynth(synth) {
+  addSynth(synth: any) {
     const dom = this.track_dom.clone();
     this.console_tracks.append(dom);
     this.pans.push(dom.find('.pan-slider'));
@@ -149,7 +149,7 @@ export class MixerView {
     }
   }
 
-  readGains(g, g_master) {
+  readGains(g: number[], g_master: number) {
     for (
       let i = 0, end = g.length, asc = 0 <= end;
       asc ? i < end : i > end;
@@ -180,14 +180,14 @@ export class MixerView {
     this.setPans();
   }
 
-  displayGains(gains) {}
+  displayGains(gains: number[]) {}
 
-  pan2pos(v) {
+  pan2pos(v: number) {
     const theta = v * Math.PI;
     return [Math.cos(theta), 0, -Math.sin(theta)];
   }
 
-  pos2pan(v) {
+  pos2pan(v: number[]) {
     return Math.acos(v[0]) / Math.PI;
   }
 

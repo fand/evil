@@ -81,7 +81,7 @@ export class SamplerCoreView {
     this.updateEQCanvas();
   }
 
-  getWaveformPos(e) {
+  getWaveformPos(e: JQuery.MouseEventBase) {
     return e.clientX - this.canvas_waveform.getBoundingClientRect().left;
   }
 
@@ -156,7 +156,7 @@ export class SamplerCoreView {
     });
   }
 
-  bindSample(sample_now: number, param) {
+  bindSample(sample_now: number, param: any) {
     this.sample_now = sample_now;
     this.sample_name.find('span').text(param.wave);
     this.updateWaveformCanvas(this.sample_now);

@@ -26,7 +26,7 @@ export class SampleNode {
   eq_nodes: BiquadFilterNode[];
   panner: Panner;
   pan_value: number;
-  sample: { url: string };
+  sample: { url: string; data?: AudioBuffer };
   buffer: AudioBuffer;
   buffer_duration: number;
   dst: AudioNode;
@@ -85,7 +85,7 @@ export class SampleNode {
   setSample(name: string) {
     this.name = name;
 
-    const sample = SAMPLE.DATA[this.name];
+    const sample = SAMPLE.DATA[this.name as keyof typeof SAMPLE.DATA] as { url: string; data?: AudioBuffer };
     if (sample == null) {
       return;
     }
@@ -110,7 +110,7 @@ export class SampleNode {
             return console.log(err);
           }
         );
-        return (sample.data = this.buffer);
+        return ((sample as any).data = this.buffer);
       };
       return req.send();
     }
@@ -154,7 +154,7 @@ export class SampleNode {
     return [this.head, this.tail, this.speed];
   }
 
-  setEQParam(eq_gains) {
+  setEQParam(eq_gains: [lo: number, mid: number, hi: number]) {
     let ref;
     this.eq_gains = eq_gains;
     return (
@@ -194,7 +194,7 @@ export class SampleNode {
     };
   }
 
-  setParam(p) {
+  setParam(p: any) {
     if (p.wave != null) {
       this.setSample(p.wave);
     }

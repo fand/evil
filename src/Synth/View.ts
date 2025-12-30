@@ -741,7 +741,7 @@ export class SynthView {
     return this.pencil.removeClass('btn-true').addClass('btn-false');
   }
 
-  changeScale(scale) {
+  changeScale(scale: number[]) {
     return this.keyboard.changeScale(scale);
   }
 }

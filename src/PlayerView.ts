@@ -124,25 +124,25 @@ export class PlayerView {
     return this.play.removeClass('fa-pause').addClass('fa-play');
   }
 
-  setBPM(bpm) {
+  setBPM(bpm: number) {
     return this.bpm.val(bpm);
   }
 
-  setScale(scale) {
+  setScale(scale: string) {
     return this.scale.val(scale);
   }
 
-  setKey(key) {
-    for (var k in KEY_LIST) {
-      var v = KEY_LIST[k];
-      if (v == key) {
+  setKey(key: string) {
+    for (const k in KEY_LIST) {
+      const v = KEY_LIST[k as keyof typeof KEY_LIST];
+      if (v === parseInt(key, 10)) {
         this.key.val(k);
         break;
       }
     }
   }
 
-  setParam(bpm, key, scale) {
+  setParam(bpm: number, key: string, scale: string) {
     this.setBPM(bpm);
     this.setKey(key);
     return this.setScale(scale);
@@ -208,7 +208,7 @@ export class PlayerView {
     this.model.moveBottom();
   }
 
-  setSynthNum(total, now) {
+  setSynthNum(total: number, now: number) {
     this.synth_total = total;
     if (now < total - 1) {
       return this.btn_right.attr('data-line1', 'next');
