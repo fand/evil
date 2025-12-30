@@ -7,7 +7,6 @@ import {
   Track,
 } from './Song';
 import $ from 'jquery';
-import { SynthPatternObject } from './Synth/SynthView';
 import type { Player } from './Player';
 import type { Instrument, InstrumentType } from './Instrument';
 
@@ -163,9 +162,9 @@ class Session {
     const name = s.id + '-' + pos;
     s.setPatternName(name);
 
-    const patterns: SynthPatternObject[] = [];
+    const patterns: (PatternObject | undefined)[] = [];
     patterns[pos] = { name: s.pattern_name, pattern: s.pattern };
-    const s_obj = {
+    const s_obj: Track = {
       id: s.id,
       type: s.type,
       name: s.name,
@@ -294,11 +293,11 @@ class Session {
   // Save parameters for tracks into @song.
   saveTracks() {
     for (let i = 0; i < this.player.instruments.length; i++) {
-      const param = this.player.instruments[i].getParam();
-      if (this.song.tracks[i].patterns) {
-        param.patterns = this.song.tracks[i].patterns;
-      }
-      this.song.tracks[i] = param;
+      const inst = this.player.instruments[i];
+      const track = this.song.tracks[i];
+      track.params = inst.getParam();
+      track.name = inst.name;
+      track.effects = inst.getEffectsParam();
     }
   }
 
@@ -408,13 +407,13 @@ class Session {
     const pat_name = id + '-' + this.scene_pos;
     inst.setPatternName(pat_name);
 
-    const patterns: SynthPatternObject[] = [];
+    const patterns: (PatternObject | undefined)[] = [];
     patterns[this.scene_pos] = { name: pat_name, pattern: inst.pattern };
 
     const s_params: Track = {
       id,
       type,
-      name: 'Synth #' + id,
+      name: type === 'REZ' ? 'Synth #' + id : 'Sampler #' + id,
       patterns,
       gain: 1.0,
       pan: 0.0,

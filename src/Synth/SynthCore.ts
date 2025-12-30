@@ -2,6 +2,7 @@ import { SynthCoreView } from './CoreView';
 import { MutekiTimer } from '../MutekiTimer';
 import { KEY_LIST, NoteKey, SEMITONE, STREAM_LENGTH } from '../Constant';
 import type { Synth } from '../Synth';
+import type { SynthParam, VCOParam, EGParam } from '../Song';
 
 //#
 // CONSTANTS
@@ -64,7 +65,7 @@ class Noise {
     this.shape = shape;
   }
 
-  getParam() {
+  getParam(): VCOParam {
     return {
       shape: this.shape,
       octave: this.octave,
@@ -73,7 +74,7 @@ class Noise {
     };
   }
 
-  setParam(p: any) {
+  setParam(p: VCOParam) {
     this.shape = p.shape;
     this.octave = p.octave;
     this.interval = p.interval;
@@ -206,7 +207,7 @@ class VCO {
     this.node.connect(this.dst);
   }
 
-  getParam() {
+  getParam(): VCOParam {
     return {
       shape: this.shape,
       octave: this.octave,
@@ -215,7 +216,7 @@ class VCO {
     };
   }
 
-  setParam(p: any) {
+  setParam(p: VCOParam) {
     this.octave = p.octave;
     this.interval = p.interval;
     this.fine = p.fine;
@@ -263,11 +264,14 @@ class EG {
     this.max = max;
   }
 
-  getParam() {
-    return { adsr: this.getADSR(), range: this.getRange() };
+  getParam(): EGParam {
+    return {
+      adsr: this.getADSR() as EGParam['adsr'],
+      range: this.getRange(),
+    };
   }
 
-  setParam(p: any) {
+  setParam(p: EGParam) {
     [this.attack, this.decay, this.sustain, this.release] = p.adsr;
     this.setRange(p.range[0], p.range[1]);
   }
@@ -382,7 +386,7 @@ export class SynthCore {
     );
   }
 
-  getParam() {
+  getParam(): SynthParam {
     return {
       type: 'REZ',
       vcos: this.vcos.map((v) => v.getParam()),
@@ -394,7 +398,7 @@ export class SynthCore {
     };
   }
 
-  setParam(p: any) {
+  setParam(p: Partial<SynthParam>) {
     if (p.vcos !== undefined) {
       for (let i = 0; i < p.vcos.length; i++) {
         this.vcos[i].setParam(p.vcos[i]);

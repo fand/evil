@@ -12,6 +12,13 @@ import { SCALE_LIST, NoteKey } from './Constant';
 import type { Player } from './Player';
 import type { FX } from './FX/FX';
 import type { Instrument, InstrumentType } from './Instrument';
+import type { Session } from './Session';
+import type {
+  SynthPattern,
+  SynthPatternObject,
+  SynthParam,
+  EffectParam,
+} from './Song';
 
 const T2 = new MutekiTimer();
 
@@ -23,8 +30,8 @@ class Synth implements Instrument {
   name: string;
   type: InstrumentType;
   pattern_name: string;
-  pattern: any[];
-  pattern_obj: { name: string; pattern: any[] };
+  pattern: SynthPattern;
+  pattern_obj: SynthPatternObject;
   time: number;
   scale_name: string;
   scale: number[];
@@ -33,7 +40,7 @@ class Synth implements Instrument {
   is_on: boolean;
   is_sustaining: boolean;
   is_performing: boolean;
-  session: any;
+  session: Session;
   send: GainNode;
   return: GainNode;
   effects: FX[];
@@ -140,27 +147,28 @@ class Synth implements Instrument {
       return;
     }
 
+    const note = this.pattern[mytime];
+
     // off
-    if (this.pattern[mytime] === 0) {
+    if (note === 0) {
       this.core.noteOff();
 
       // sustain start
-    } else if (this.pattern[mytime] < 0) {
+    } else if (typeof note === 'number' && note < 0) {
       this.is_sustaining = true;
-      const n = -this.pattern[mytime];
-      this.core.setNote(n);
+      this.core.setNote(-note);
       this.core.noteOn();
 
       // sustain mid
-    } else if (this.pattern[mytime] === 'sustain') {
+    } else if (note === 'sustain') {
       // do nothing
       // sustain end
-    } else if (this.pattern[mytime] === 'end') {
+    } else if (note === 'end') {
       T2.setTimeout(() => this.core.noteOff(), this.duration - 10);
 
       // single note
-    } else {
-      this.core.setNote(this.pattern[mytime]);
+    } else if (typeof note === 'number') {
+      this.core.setNote(note);
       this.core.noteOn();
       T2.setTimeout(() => this.core.noteOff(), this.duration - 10);
     }
@@ -179,14 +187,14 @@ class Synth implements Instrument {
     this.core.noteOff();
   }
 
-  setPattern(pattern_obj: { name: string; pattern: any[] }) {
+  setPattern(pattern_obj: SynthPatternObject) {
     this.pattern_obj = JSON.parse(JSON.stringify(pattern_obj));
     this.pattern = this.pattern_obj.pattern;
     this.pattern_name = this.pattern_obj.name;
     this.view.setPattern(this.pattern_obj);
   }
 
-  getPattern() {
+  getPattern(): SynthPatternObject {
     this.pattern_obj = { name: this.pattern_name, pattern: this.pattern };
     return $.extend(true, {}, this.pattern_obj);
   }
@@ -260,7 +268,7 @@ class Synth implements Instrument {
 
   setSynthName(name: string) {
     this.name = name;
-    this.session.setSynthName(this.id, this.name);
+    this.session.setTrackName(this.id, this.name);
     this.view.setSynthName(this.name);
   }
 
@@ -278,15 +286,17 @@ class Synth implements Instrument {
   }
 
   // Get params as object.
-  getParam() {
-    const p: any = this.core.getParam();
-    p.name = this.name;
-    p.scale_name = this.scale_name;
-    p.effects = this.getEffectsParam();
-    return p;
+  getParam(): SynthParam & { name: string; effects: EffectParam[] } {
+    const p = this.core.getParam();
+    return {
+      ...p,
+      name: this.name,
+      scale_name: this.scale_name,
+      effects: this.getEffectsParam(),
+    };
   }
 
-  setParam(p: any) {
+  setParam(p: Partial<SynthParam & { effects: EffectParam[] }>) {
     if (!p) {
       return;
     }
@@ -332,7 +342,7 @@ class Synth implements Instrument {
     }
   }
 
-  getEffectsParam() {
+  getEffectsParam(): EffectParam[] {
     return this.effects.map((f) => f.getParam());
   }
 

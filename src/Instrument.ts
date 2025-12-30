@@ -1,5 +1,11 @@
 import type { Panner } from './Panner';
 import type { FX } from './FX/FX';
+import type {
+  Pattern,
+  PatternObject,
+  TrackParam,
+  EffectParam,
+} from './Song';
 
 export interface InstrumentView {
   dom: JQuery;
@@ -9,7 +15,7 @@ export interface Instrument {
   id: number;
   name: string;
   type: InstrumentType;
-  pattern: any[];
+  pattern: Pattern;
   pattern_name: string;
   view: InstrumentView;
 
@@ -25,20 +31,20 @@ export interface Instrument {
   playAt(time: number): void;
   unmute(): void;
   mute(): void;
-  setParam(p: any): void;
-  getParam(): any;
+  setParam(p: Partial<TrackParam>): void;
+  getParam(): TrackParam;
   deactivate(): void;
   activate(): void;
   connect(dst: AudioNode | Panner): void;
   disconnect(): void;
   setGain(gain: number): void;
   getGain(): number;
-  setPattern(pattern_obj: { name: string; pattern: any[] }): void;
-  getPattern(): { name: string; pattern: any[] };
+  setPattern(pattern_obj: PatternObject): void;
+  getPattern(): PatternObject;
   clearPattern(): void;
   setPatternName(pattern_name: string): void;
   insertEffect(fx: FX): void;
-  getEffectsParam(): any[];
+  getEffectsParam(): EffectParam[];
 }
 
 export type InstrumentType = 'REZ' | 'SAMPLER';

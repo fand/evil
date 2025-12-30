@@ -82,7 +82,7 @@ export type SynthParam = {
 export type SampleNodeParam = {
   wave: string;
   time: [start: number, end: number, loop: number];
-  gains: number[];
+  gains: [lo: number, mid: number, hi: number];
   output: [volume: number, pan: number];
 };
 
@@ -120,6 +120,16 @@ export type Song = {
 export type PatternObject = {
   name: string;
   pattern: Pattern;
+};
+
+export type SynthPatternObject = {
+  name: string;
+  pattern: SynthPattern;
+};
+
+export type SamplerPatternObject = {
+  name: string;
+  pattern: SamplerPattern;
 };
 
 export type Track = {

@@ -1,6 +1,7 @@
 import { SampleNode as SamplerNode } from './SampleNode';
 import { SamplerCoreView } from './CoreView';
 import type { Sampler } from '../Sampler';
+import type { SamplerParam, SampleNodeParam } from '../Song';
 
 export class SamplerCore {
   parent: Sampler;
@@ -82,7 +83,7 @@ export class SamplerCore {
   }
 
   setSampleGain(i: number, gain: number) {
-    this.samples[i].setParam({ gain });
+    this.samples[i].setOutputParam(this.samples[i].pan_value, gain);
   }
 
   getSampleTimeParam(i: number) {
@@ -112,14 +113,14 @@ export class SamplerCore {
     this.view.setSampleOutputParam(this.getSampleOutputParam(sample_now));
   }
 
-  getParam() {
+  getParam(): SamplerParam {
     return {
       type: 'SAMPLER',
       samples: this.samples.map((s) => s.getParam()),
     };
   }
 
-  setParam(p: any) {
+  setParam(p: Partial<SamplerParam>) {
     if (p.samples) {
       for (let i = 0; i < p.samples.length; i++) {
         this.samples[i].setParam(p.samples[i]);

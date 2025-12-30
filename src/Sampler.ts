@@ -5,6 +5,13 @@ import $ from 'jquery';
 import type { Player } from './Player';
 import type { Session } from './Session';
 import type { Instrument, InstrumentType } from './Instrument';
+import type { FX } from './FX/FX';
+import type {
+  SamplerPattern,
+  SamplerPatternObject,
+  SamplerParam,
+  EffectParam,
+} from './Song';
 
 class Sampler implements Instrument {
   ctx: AudioContext;
@@ -13,8 +20,8 @@ class Sampler implements Instrument {
   name: string;
   type: InstrumentType;
   pattern_name: string;
-  pattern: any[];
-  pattern_obj: { name: string; pattern: any[] };
+  pattern: SamplerPattern;
+  pattern_obj: SamplerPatternObject;
   time: number;
   view: SamplerView;
   core: SamplerCore;
@@ -22,7 +29,7 @@ class Sampler implements Instrument {
   session: Session;
   send: GainNode;
   return: GainNode;
-  effects: any[];
+  effects: FX[];
 
   constructor(ctx: AudioContext, id: number, player: Player, name?: string) {
     this.ctx = ctx;
@@ -125,7 +132,7 @@ class Sampler implements Instrument {
     this.time = time;
     const mytime = this.time % this.pattern.length;
     this.view.playAt(mytime);
-    if (this.pattern[mytime] !== 0) {
+    if (this.pattern[mytime].length > 0) {
       const notes = this.pattern[mytime];
       this.core.noteOn(notes);
     }
@@ -144,14 +151,14 @@ class Sampler implements Instrument {
     this.core.noteOff();
   }
 
-  setPattern(_pattern_obj: { name: string; pattern: any[] }) {
+  setPattern(_pattern_obj: SamplerPatternObject) {
     this.pattern_obj = $.extend(true, {}, _pattern_obj);
     this.pattern = this.pattern_obj.pattern;
     this.pattern_name = this.pattern_obj.name;
     this.view.setPattern(this.pattern_obj);
   }
 
-  getPattern() {
+  getPattern(): SamplerPatternObject {
     this.pattern_obj = { name: this.pattern_name, pattern: this.pattern };
     return $.extend(true, {}, this.pattern_obj);
   }
@@ -305,14 +312,16 @@ class Sampler implements Instrument {
     this.disconnect();
   }
 
-  getParam() {
-    const p: any = this.core.getParam();
-    p.name = this.name;
-    p.effects = this.getEffectsParam();
-    return p;
+  getParam(): SamplerParam & { name: string; effects: EffectParam[] } {
+    const p = this.core.getParam();
+    return {
+      ...p,
+      name: this.name,
+      effects: this.getEffectsParam(),
+    };
   }
 
-  setParam(p: any) {
+  setParam(p: Partial<SamplerParam>) {
     if (p) {
       this.core.setParam(p);
     }
@@ -326,11 +335,11 @@ class Sampler implements Instrument {
     this.core.unmute();
   }
 
-  getEffectsParam() {
+  getEffectsParam(): EffectParam[] {
     return this.effects.map((f) => f.getParam());
   }
 
-  insertEffect(fx: any) {
+  insertEffect(fx: FX) {
     if (this.effects.length === 0) {
       this.send.disconnect();
       this.send.connect(fx.in);
@@ -344,13 +353,13 @@ class Sampler implements Instrument {
     this.effects.push(fx);
   }
 
-  removeEffect(fx: any) {
+  removeEffect(fx: FX) {
     const i = this.effects.indexOf(fx);
     if (i === -1) {
       return;
     }
 
-    let prev;
+    let prev: GainNode | FX;
     if (i === 0) {
       prev = this.send;
     } else {
