@@ -1042,7 +1042,7 @@ export class SessionView {
 
     // addSynth when tracks[dst.x] is empty.
     if (this.song.tracks[dst.x] == null) {
-      dst.x = this.model.readTrack(this.song, src, dst);
+      dst.x = this.model.loadTrack(this.song, src, dst);
       this.current_cells.length = dst.x + 1;
       this.song.tracks[dst.x].type = this.song.tracks[src.x].type;
     }
@@ -1062,7 +1062,7 @@ export class SessionView {
       this.drawCellTracks(pattern, dst.x, dst.y);
     }
 
-    this.model.readPattern(
+    this.model.loadPattern(
       this.song.tracks[dst.x].patterns[dst.y],
       dst.x,
       dst.y
@@ -1083,7 +1083,7 @@ export class SessionView {
     this.drawCellMaster(this.song.master[dst.x], 0, dst.y);
 
     // save @song.master to @session.song.master
-    return this.model.readMaster(this.song.master[dst.y], dst.y);
+    return this.model.loadMaster(this.song.master[dst.y], dst.y);
   }
 
   // Select cell on click.

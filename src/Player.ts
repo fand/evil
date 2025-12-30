@@ -307,7 +307,7 @@ export class Player {
       }
     }
 
-    this.readScene(this.song.master[0]);
+    this.loadScene(this.song.master[0]);
     this.setSceneLength(this.song.master.length);
     for (let i = 0; i < this.song.tracks.length; i++) {
       this.instruments[i].setParam(this.song.tracks[i]);
@@ -315,7 +315,7 @@ export class Player {
 
     this.session.setInstrument(this.instruments);
     this.session.loadSong();
-    this.mixer.readParam(this.song.mixer);
+    this.mixer.loadParam(this.song.mixer);
 
     this.view.setInstrumentCount(
       this.instruments.length,
@@ -324,7 +324,7 @@ export class Player {
     this.resetSceneLength();
   }
 
-  readScene(scene: any) {
+  loadScene(scene: any) {
     if (scene.bpm) {
       this.setBPM(scene.bpm);
       this.view.setBPM(scene.bpm);

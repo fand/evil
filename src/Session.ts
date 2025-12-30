@@ -121,7 +121,7 @@ class Session {
     }
 
     if (this.song.master[this.scene_pos]) {
-      this.player.readScene(this.song.master[this.scene_pos]);
+      this.player.loadScene(this.song.master[this.scene_pos]);
     }
     this.player.setSceneLength(this.scene_length);
     this.view.loadSong(this.current_cells);
@@ -184,7 +184,7 @@ class Session {
   }
 
   // Read given song, called by Player.
-  readTrack(
+  loadTrack(
     song: Song,
     src: { x: number; y: number },
     dst: { x: number; y: number }
@@ -213,7 +213,7 @@ class Session {
     return this.song.tracks.length - 1;
   }
 
-  readPattern(pat: any, idx: number, pat_num: number) {
+  loadPattern(pat: any, idx: number, pat_num: number) {
     this.song.tracks[idx].patterns[pat_num] = pat;
     if (!this.song.master[pat_num]) {
       this.song.master[pat_num] = {
@@ -229,7 +229,7 @@ class Session {
     }
   }
 
-  readMaster(pat: any, pat_num: number) {
+  loadMaster(pat: any, pat_num: number) {
     this.song.master[pat_num] = pat;
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
@@ -311,7 +311,7 @@ class Session {
     this.song.master[y] = obj;
     this.view.loadSong(this.current_cells);
     if (y === this.scene_pos) {
-      this.player.readScene(obj);
+      this.player.loadScene(obj);
     }
   }
 
