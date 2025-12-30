@@ -5,7 +5,8 @@
       "Bash(npm audit:*)",
       "Bash(npx tsc:*)",
       "Bash(cat:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(git show:*)"
     ]
   }
 }

@@ -306,7 +306,9 @@ export class Player {
     // Set song to Session (single source of truth)
     this.session.song = song;
 
-    for (let i = 0; i < this.song.tracks.length; i++) {
+    // Cache track count to avoid infinite loop (addSynth modifies song.tracks)
+    const trackCount = this.song.tracks.length;
+    for (let i = 0; i < trackCount; i++) {
       if (!this.song.tracks[i].type || this.song.tracks[i].type === 'REZ') {
         this.addSynth(0, this.song.tracks[i].name);
       }
