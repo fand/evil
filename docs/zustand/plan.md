@@ -104,8 +104,10 @@ interface AppState {
 - [ ] Remove remaining `this.model` read references (future)
 
 ### Phase 3: AudioGraph Integration
-- [ ] Subscribe to BPM/Key/Scale
-- [ ] Sync WebAudio parameters with store
+- [x] Synth subscribes to Key/Scale from store
+- [x] SynthCore oscillator frequencies update on Key change
+- [x] Scale array and view update on Scale change
+- [ ] Remove Player → Instrument push calls (future optimization)
 
 ### Phase 4: SessionView Migration
 - [ ] Subscribe to song.tracks, currentCells
