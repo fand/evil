@@ -52,6 +52,49 @@ export type EffectParam =
   | CompressorEffectParam
   | DelayEffectParam;
 
+// VCO parameter type
+export type VCOParam = {
+  shape: string;
+  octave: number;
+  interval: number;
+  fine: number;
+};
+
+// Envelope generator parameter type
+export type EGParam = {
+  adsr: [attack: number, decay: number, sustain: number, release: number];
+  range: [min: number, max: number];
+};
+
+// Synth parameter type
+export type SynthParam = {
+  type: 'REZ';
+  vcos: VCOParam[];
+  gains: number[];
+  eg: EGParam;
+  feg: EGParam;
+  filter: [cutoff: number, q: number];
+  harmony: boolean;
+  scale_name?: string;
+};
+
+// Sample node parameter type
+export type SampleNodeParam = {
+  wave: string;
+  time: [start: number, end: number, loop: number];
+  gains: number[];
+  output: [volume: number, pan: number];
+};
+
+// Sampler parameter type
+export type SamplerParam = {
+  type: 'SAMPLER';
+  samples: SampleNodeParam[];
+};
+
+// Track instrument parameter type
+export type TrackParam = SynthParam | SamplerParam;
+
 export const DEFAULT_SCENE = {
   name: 'section-0',
   bpm: 144,
@@ -84,7 +127,7 @@ export type Track = {
   type: InstrumentType;
   name: string;
   patterns: (PatternObject | undefined)[];
-  params: Record<string, unknown>[];
+  params?: TrackParam;
   gain: number;
   pan: number;
   effects?: EffectParam[];

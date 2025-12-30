@@ -170,7 +170,6 @@ class Session {
       type: s.type,
       name: s.name,
       patterns,
-      params: [],
       gain: 1.0,
       pan: 0.0,
     };
@@ -417,7 +416,6 @@ class Session {
       type,
       name: 'Synth #' + id,
       patterns,
-      params: [],
       gain: 1.0,
       pan: 0.0,
     };
