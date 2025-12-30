@@ -4,14 +4,14 @@ import { SamplerView } from './Sampler/SamplerView';
 import $ from 'jquery';
 import type { Player } from './Player';
 import type { Session } from './Session';
-import type { Instrument } from './Instrument';
+import type { Instrument, InstrumentType } from './Instrument';
 
 class Sampler implements Instrument {
   ctx: AudioContext;
   id: number;
   player: Player;
   name: string;
-  type: string;
+  type: InstrumentType;
   pattern_name: string;
   pattern: any[];
   pattern_obj: { name: string; pattern: any[] };

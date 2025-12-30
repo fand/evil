@@ -8,7 +8,7 @@ export interface InstrumentView {
 export interface Instrument {
   id: number;
   name: string;
-  type: string;
+  type: InstrumentType;
   pattern: any[];
   pattern_name: string;
   view: InstrumentView;

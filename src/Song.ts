@@ -1,32 +1,44 @@
 import type { InstrumentType } from './Instrument';
 
+export const DEFAULT_SCENE = {
+  name: 'section-0',
+  bpm: 144,
+  key: 'A',
+  scale: 'minor',
+};
+
 export const DEFAULT_SONG: Song = {
   tracks: [],
   length: 1,
-  master: [
-    {
-      name: 'section-0',
-      bpm: 144,
-      key: 'A',
-      scale: 'minor',
-    },
-  ],
+  master: [DEFAULT_SCENE],
 };
 
 export type Song = {
   tracks: Track[];
   length: number;
-  master: Master[];
+  master: Scene[];
   mixer?: MixerParam | null;
+  title?: string;
+  creator?: string;
+};
+
+export type PatternObject = {
+  name: string;
+  pattern: unknown[];
 };
 
 export type Track = {
-  type?: InstrumentType;
+  id: number;
+  type: InstrumentType;
   name: string;
-  [key: string]: unknown;
+  patterns: (PatternObject | undefined)[];
+  params: unknown[];
+  gain: number;
+  pan: number;
+  effects?: unknown[];
 };
 
-export type Master = {
+export type Scene = {
   name: string;
   bpm: number;
   key: string;

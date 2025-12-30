@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import type { Session } from './Session';
+import type { Song } from './Song';
 
 declare global {
   interface Window {
@@ -9,7 +10,7 @@ declare global {
 
 export class SessionView {
   model: Session;
-  song: any;
+  song: Song;
   wrapper_mixer: JQuery;
   wrapper_master: JQuery;
   wrapper_tracks: JQuery;
@@ -64,7 +65,7 @@ export class SessionView {
   is_clicked: boolean = false;
   scene_pos: number = 0;
 
-  constructor(model: any, song: any) {
+  constructor(model: Session, song: Song) {
     // DOMs for session view.
     this.model = model;
     this.song = song;
@@ -450,15 +451,15 @@ export class SessionView {
 
   // Set params for @song (ref to @model.song).
   setSongTitle() {
-    return (this.song.title = this.song_title.val());
+    this.song.title = this.song_title.val()?.toString();
   }
 
   setCreatorName() {
-    return (this.song.creator = this.song_creator.val());
+    this.song.creator = this.song_creator.val()?.toString();
   }
 
   // Read song from @song.
-  readSong(song: any, current_cells: any[]) {
+  readSong(song: Song, current_cells: any[]) {
     this.song = song;
     this.current_cells = current_cells;
     this.resize();
@@ -476,8 +477,9 @@ export class SessionView {
       }
 
       for (let y = 0; y < Math.max(this.song.length + 1, 10); y++) {
-        if (t != null && t.patterns[y] != null) {
-          this.drawCellTracks(t.patterns[y], x, y);
+        const p = t?.patterns[y];
+        if (p !== undefined) {
+          this.drawCellTracks(p, x, y);
         } else {
           this.drawEmpty(this.ctx_tracks, x, y);
         }
@@ -499,8 +501,8 @@ export class SessionView {
     this.selectCellMaster(this.select_pos);
 
     // set Global info
-    this.song_title.val(this.song.title);
-    return this.song_creator.val(this.song.creator);
+    this.song_title.val(this.song.title ?? '');
+    return this.song_creator.val(this.song.creator ?? '');
   }
 
   drawCellTracks(p: { name: string }, x: number, y: number) {
@@ -703,18 +705,12 @@ export class SessionView {
   drawDrag(ctx: CanvasRenderingContext2D, pos: { x: number; y: number }) {
     this.clearHover(ctx);
 
-    // @click_pos is NOT empty
-    if (this.song.tracks[this.click_pos.x] == null) {
+    const pattern =
+      this.song.tracks[this.click_pos.x]?.patterns?.[this.click_pos.y];
+    if (pattern == null) {
       return;
     }
-    if (this.song.tracks[this.click_pos.x].patterns == null) {
-      return;
-    }
-    if (this.song.tracks[this.click_pos.x].patterns[this.click_pos.y] == null) {
-      return;
-    }
-    const { name } =
-      this.song.tracks[this.click_pos.x].patterns[this.click_pos.y];
+    const { name } = pattern;
 
     if (pos.y >= Math.max(this.song.length, 10) || pos.y < 0) {
       return;
@@ -939,7 +935,7 @@ export class SessionView {
     return this.drawCellTracks(pat[2], pat[0], pat[1]);
   }
 
-  addInstrument(song: any, _pos?: any) {
+  addInstrument(song: Song, _pos?: any) {
     this.song = song;
     return this.readSong(this.song, this.current_cells);
   }
@@ -1061,7 +1057,10 @@ export class SessionView {
       {},
       this.song.tracks[src.x].patterns[src.y]
     );
-    this.drawCellTracks(this.song.tracks[dst.x].patterns[dst.y], dst.x, dst.y);
+    const pattern = this.song.tracks[dst.x]?.patterns?.[dst.y];
+    if (pattern) {
+      this.drawCellTracks(pattern, dst.x, dst.y);
+    }
 
     this.model.readPattern(
       this.song.tracks[dst.x].patterns[dst.y],
@@ -1135,12 +1134,15 @@ export class SessionView {
       this.h - 2
     );
 
-    this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][1];
-    this.ctx_tracks_hover.fillText(
-      this.song.tracks[pos.x].patterns[pos.y].name,
-      pos.x * this.w + 24,
-      (pos.y + 1) * this.h - 6
-    );
+    const pattern = this.song.tracks[pos.x]?.patterns?.[pos.y];
+    if (pattern) {
+      this.ctx_tracks_hover.fillStyle = this.track_color[pos.x][1];
+      this.ctx_tracks_hover.fillText(
+        pattern.name,
+        pos.x * this.w + 24,
+        (pos.y + 1) * this.h - 6
+      );
+    }
 
     this.select_pos = pos;
     this.select_pos.type = 'tracks';

@@ -11,7 +11,7 @@ import { Double } from './FX/Double';
 import { SCALE_LIST, NoteKey } from './Constant';
 import type { Player } from './Player';
 import type { FX } from './FX/FX';
-import type { Instrument } from './Instrument';
+import type { Instrument, InstrumentType } from './Instrument';
 
 const T2 = new MutekiTimer();
 
@@ -21,7 +21,7 @@ class Synth implements Instrument {
   id: number;
   player: Player;
   name: string;
-  type: string;
+  type: InstrumentType;
   pattern_name: string;
   pattern: any[];
   pattern_obj: { name: string; pattern: any[] };
