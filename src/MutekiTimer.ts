@@ -69,22 +69,6 @@ class MutekiTimer {
   }
 }
 
-let tid = +new Date();
-const pool = {};
-const _setTimeout = function (func, interval) {
-  const t = new MutekiTimer();
-  t.setTimeout(func, interval);
-  pool[++tid] = t;
-  return tid;
-};
-
-const _clearTimeout = function (id) {
-  if (pool[id] != null) {
-    pool[id].clearTimeout();
-  }
-  return undefined;
-};
-
 export { MutekiTimer };
 
 function __guard__(value, transform) {
