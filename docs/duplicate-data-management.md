@@ -85,15 +85,39 @@ export class SynthView {
 
 ---
 
-## 4. Sampler と SamplerView: pattern の二重管理
+## 4. Sampler と SamplerView: pattern の二重管理 ✅ 解決済み
 
 **ファイル**:
-- `src/Sampler.ts:22-24`
+- `src/Sampler.ts`
 - `src/Sampler/SamplerView.ts`
 
-**現状**: Synth/SynthView と同じ構造の問題
+**解決方法**: Synth/SynthView と同様に修正
 
-**改善案**: Synth/SynthView と同様に修正
+```typescript
+// Sampler.ts
+class Sampler {
+  pattern_obj: SamplerPatternObject;  // ← 単一ソース
+
+  get pattern(): SamplerPattern {
+    return this.pattern_obj.pattern;
+  }
+
+  get pattern_name(): string {
+    return this.pattern_obj.name;
+  }
+}
+
+// SamplerView.ts
+class SamplerView {
+  get pattern(): SamplerPattern {
+    return this.model.pattern;
+  }
+
+  get pattern_obj(): SamplerPatternObject {
+    return this.model.pattern_obj;
+  }
+}
+```
 
 ---
 
@@ -120,30 +144,22 @@ class Session {
 
 ---
 
-## 6. Synth と SynthCore: scale の参照保持
+## 6. Synth と SynthCore: scale の参照保持 ✅ 解決済み
 
 **ファイル**:
-- `src/Synth.ts:37` - Synth.scale
-- `src/Synth/SynthCore.ts:358` - SynthCore.scale
+- `src/Synth.ts`
+- `src/Synth/SynthCore.ts`
 
-**現状**:
+**解決方法**: SynthCore.scale を getter にして parent.scale を参照
+
 ```typescript
-// Synth.ts
-export class Synth {
-  scale: NoteScale;
-}
-
-// SynthCore.ts - 初期化時に Synth.scale を受け取り保持
+// SynthCore.ts
 export class SynthCore {
-  scale: NoteScale;
+  get scale(): number[] {
+    return this.parent.scale;
+  }
 }
 ```
-
-**問題点**:
-- SynthCore が初期化時に scale を受け取り独自に保持
-- Synth.setScale() で Synth.scale が更新されるとき、SynthCore.scale も更新が必要
-
-**改善案**: SynthCore は Synth への参照を持ち、必要時に synth.scale を参照
 
 ---
 
@@ -155,5 +171,7 @@ export class SynthCore {
 | 高 | 3. Synth/SynthView: pattern | ✅ 解決済み |
 | 中 | 1. Player: bpm/key/scale/scene | ✅ 解決済み |
 | 中 | 5. Player/Session: scene_length | ✅ 解決済み |
-| 低 | 4. Sampler/SamplerView | 未対応 |
-| 低 | 6. Synth/SynthCore: scale | 未対応 |
+| 低 | 4. Sampler/SamplerView | ✅ 解決済み |
+| 低 | 6. Synth/SynthCore: scale | ✅ 解決済み |
+
+**すべての問題が解決済みです。**
