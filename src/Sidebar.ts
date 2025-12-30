@@ -13,7 +13,7 @@ class Sidebar {
   sidebar_pos: { x: number; y: number; type: string };
   view: SidebarView;
   song: any;
-  select_pos: { x: number; y: number; type: string };
+  select_pos: { x: number; y: number; type: string } = { x: -1, y: -1, type: '' };
 
   constructor(ctx: AudioContext, player: any, session: any, mixer: any) {
     this.addMasterEffect = this.addMasterEffect.bind(this);
@@ -26,7 +26,7 @@ class Sidebar {
     this.view = new SidebarView(this);
   }
 
-  show(song, select_pos) {
+  show(song: any, select_pos: { x: number; y: number; type: string }) {
     this.song = song;
     this.select_pos = select_pos;
     if (this.select_pos.type === 'tracks') {
@@ -51,7 +51,7 @@ class Sidebar {
     }
   }
 
-  saveMaster(obj) {
+  saveMaster(obj: any) {
     if (this.sidebar_pos.y === -1) {
       return;
     }
@@ -67,11 +67,11 @@ class Sidebar {
     return this.session.saveTracksEffect(this.sidebar_pos);
   }
 
-  addMasterEffect(name) {
+  addMasterEffect(name: string) {
     return this.mixer.addMasterEffect(name);
   }
 
-  addTracksEffect(name) {
+  addTracksEffect(name: string) {
     return this.mixer.addTracksEffect(this.sidebar_pos.x, name);
   }
 
@@ -79,11 +79,11 @@ class Sidebar {
     return this.view.setBPM(bpm);
   }
 
-  setKey(key) {
+  setKey(key: string) {
     return this.view.setKey(key);
   }
 
-  setScale(scale) {
+  setScale(scale: string) {
     return this.view.setScale(scale);
   }
 }

@@ -8,6 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
+import type { Session } from './Session';
 
 declare global {
   interface Window {
@@ -16,7 +17,7 @@ declare global {
 }
 
 class SessionView {
-  model: any;
+  model: Session;
   song: any;
   wrapper_mixer: JQuery;
   wrapper_master: JQuery;
@@ -64,13 +65,13 @@ class SessionView {
   social_twitter: JQuery;
   social_facebook: JQuery;
   social_hatena: JQuery;
-  offset_y: number;
-  font_size: number;
+  offset_y: number = 20;
+  font_size: number = 12;
   rect_tracks: DOMRect;
   rect_master: DOMRect;
-  offset_translate: number;
-  is_clicked: boolean;
-  scene_pos: number;
+  offset_translate: number = 720;
+  is_clicked: boolean = false;
+  scene_pos: number = 0;
 
   constructor(model: any, song: any) {
     // DOMs for session view.
@@ -146,9 +147,12 @@ class SessionView {
 
     this.hover_pos = { x: -1, y: -1 };
     this.click_pos = { x: -1, y: -1 };
-    //        @select_pos = x:-1, y:-1
     this.select_pos = { x: 0, y: 0, type: 'master' };
     this.last_clicked = performance.now();
+
+    // Initialize rect before initCanvas is called asynchronously
+    this.rect_tracks = this.canvas_tracks_hover.getBoundingClientRect();
+    this.rect_master = this.canvas_master_hover.getBoundingClientRect();
 
     // DOMs to save songs.
     this.dialog = $('#dialog');
@@ -249,49 +253,54 @@ class SessionView {
   }
 
   // Get the cell under the mouse
-  getPos(rect, wrapper, e, type) {
-    const _x = Math.floor(
-      (e.clientX - rect.left + this.wrapper_mixer.scrollLeft()) / this.w
+  getPos(
+    rect: DOMRect,
+    wrapper: JQuery,
+    e: JQuery.MouseEventBase,
+    type: string
+  ) {
+    const x = Math.floor(
+      (e.clientX! - rect.left + this.wrapper_mixer.scrollLeft()!) / this.w
     );
-    const _y = Math.floor(
-      (e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) /
+    const y = Math.floor(
+      (e.clientY! - rect.top + wrapper.scrollTop()! - this.offset_translate) /
         this.h
     );
     return {
-      x: _x,
-      y: _y,
+      x,
+      y,
       type,
     };
   }
 
-  getPlayPos(rect, wrapper, e) {
-    const _x = Math.floor(
-      (e.clientX - rect.left + this.wrapper_mixer.scrollLeft()) / this.w
+  getPlayPos(rect: DOMRect, wrapper: JQuery, e: JQuery.MouseEventBase) {
+    const x = Math.floor(
+      (e.clientX! - rect.left + this.wrapper_mixer.scrollLeft()!) / this.w
     );
-    let _y = Math.floor(
-      (e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) /
+    let y = Math.floor(
+      (e.clientY! - rect.top + wrapper.scrollTop()! - this.offset_translate) /
         this.h
     );
 
     // inside canvas && not track name space
     if (
       !(
-        e.clientX - rect.left + this.wrapper_mixer.scrollLeft() - _x * this.w <
+        e.clientX! - rect.left + this.wrapper_mixer.scrollLeft()! - x * this.w <
           20 &&
-        e.clientY -
+        e.clientY! -
           rect.top +
-          wrapper.scrollTop() -
+          wrapper.scrollTop()! -
           this.offset_translate -
-          _y * this.h <
+          y * this.h <
           20
       )
     ) {
-      _y = -1;
+      y = -1;
     }
 
     return {
-      x: _x,
-      y: _y,
+      x,
+      y,
     };
   }
 
@@ -414,10 +423,10 @@ class SessionView {
       });
 
     this.wrapper_master.on('scroll', (e) =>
-      this.wrapper_tracks_sub.scrollTop(this.wrapper_master.scrollTop())
+      this.wrapper_tracks_sub.scrollTop(this.wrapper_master.scrollTop()!)
     );
     this.wrapper_tracks_sub.on('scroll', (e) =>
-      this.wrapper_master.scrollTop(this.wrapper_tracks_sub.scrollTop())
+      this.wrapper_master.scrollTop(this.wrapper_tracks_sub.scrollTop()!)
     );
 
     // for Other view
@@ -458,7 +467,7 @@ class SessionView {
   }
 
   // Read song from @song.
-  readSong(song, current_cells) {
+  readSong(song: any, current_cells: any[]) {
     let y;
     let asc2, end2;
     this.song = song;
@@ -466,12 +475,7 @@ class SessionView {
     this.resize();
 
     // Draw tracks
-    for (
-      let x = 0, end = Math.max(this.song.tracks.length + 1, 8), asc = 0 <= end;
-      asc ? x < end : x > end;
-      asc ? x++ : x--
-    ) {
-      var asc1, end1;
+    for (let x = 0; x < Math.max(this.song.tracks.length + 1, 8); x++) {
       var t = this.song.tracks[x];
       if (t != null) {
         if (t.type != null) {
@@ -482,11 +486,7 @@ class SessionView {
         }
       }
 
-      for (
-        y = 0, end1 = Math.max(this.song.length + 1, 10), asc1 = 0 <= end1;
-        asc1 ? y < end1 : y > end1;
-        asc1 ? y++ : y--
-      ) {
+      for (let y = 0; y < Math.max(this.song.length + 1, 10); y++) {
         if (t != null && t.patterns[y] != null) {
           this.drawCellTracks(t.patterns[y], x, y);
         } else {
@@ -497,11 +497,7 @@ class SessionView {
 
     // Draw master
     this.drawMasterName();
-    for (
-      y = 0, end2 = Math.max(this.song.length + 1, 10), asc2 = 0 <= end2;
-      asc2 ? y < end2 : y > end2;
-      asc2 ? y++ : y--
-    ) {
+    for (let y = 0; y < Math.max(this.song.length + 1, 10); y++) {
       if (this.song.master[y] != null) {
         this.drawCellMaster(this.song.master[y], 0, y);
       } else {
@@ -518,7 +514,7 @@ class SessionView {
     return this.song_creator.val(this.song.creator);
   }
 
-  drawCellTracks(p, x, y) {
+  drawCellTracks(p: { name: string }, x: number, y: number) {
     this.clearCell(this.ctx_tracks, x, y);
 
     if (this.track_color[x] == null) {
@@ -553,7 +549,7 @@ class SessionView {
     );
   }
 
-  drawCellMaster(p, x, y) {
+  drawCellMaster(p: { name: string }, x: number, y: number) {
     this.clearCell(this.ctx_master, x, y);
 
     this.ctx_master.strokeStyle = this.color[1];
@@ -580,7 +576,7 @@ class SessionView {
     return this.ctx_master.fillText(p.name, 24, (y + 1) * this.h - 6);
   }
 
-  drawEmpty(ctx, x, y) {
+  drawEmpty(ctx: CanvasRenderingContext2D, x: number, y: number) {
     this.clearCell(ctx, x, y);
     ctx.strokeStyle = this.color[0];
     ctx.lineWidth = 1;
@@ -592,7 +588,7 @@ class SessionView {
     );
   }
 
-  drawEmptyMaster(y) {
+  drawEmptyMaster(y: number) {
     this.clearCell(this.ctx_master, 0, y);
     this.ctx_master.strokeStyle = this.color[0];
     this.ctx_master.lineWidth = 1;
@@ -615,7 +611,7 @@ class SessionView {
     );
   }
 
-  clearCell(ctx, x, y) {
+  clearCell(ctx: CanvasRenderingContext2D, x: number, y: number) {
     if (ctx === this.ctx_master) {
       return ctx.clearRect(0, y * this.h, this.w_master, this.h);
     } else {
@@ -651,11 +647,11 @@ class SessionView {
     return (this.ctx_tracks.shadowBlur = 0);
   }
 
-  drawPatternName(x, y, p) {
+  drawPatternName(x: number, y: number, p: { name: string }) {
     return this.drawCellTracks(p, x, y);
   }
 
-  drawScene(pos, cells) {
+  drawScene(pos: number, cells: any[]) {
     this.ctx_tracks_on.clearRect(
       0,
       this.scene_pos * this.h,
@@ -668,11 +664,7 @@ class SessionView {
       this.current_cells = cells;
     }
 
-    for (
-      let i = 0, end = this.current_cells.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.current_cells.length; i++) {
       if (this.current_cells[i] != null) {
         this.drawActive(i, this.current_cells[i]);
       }
@@ -688,7 +680,7 @@ class SessionView {
     }
   }
 
-  drawActive(x, y) {
+  drawActive(x: number, y: number) {
     this.clearActive(x);
     this.ctx_tracks_on.drawImage(
       this.img_play,
@@ -704,7 +696,7 @@ class SessionView {
     return (this.last_active[x] = y);
   }
 
-  drawActiveMaster(y) {
+  drawActiveMaster(y: number) {
     this.ctx_master_on.clearRect(0, 0, this.w_master, 10000);
     return this.ctx_master_on.drawImage(
       this.img_play,
@@ -719,7 +711,7 @@ class SessionView {
     );
   }
 
-  drawDrag(ctx, pos) {
+  drawDrag(ctx: CanvasRenderingContext2D, pos: { x: number; y: number }) {
     this.clearHover(ctx);
 
     // @click_pos is NOT empty
@@ -765,7 +757,7 @@ class SessionView {
     return (this.hover_pos = pos);
   }
 
-  drawDragMaster(ctx, pos) {
+  drawDragMaster(ctx: CanvasRenderingContext2D, pos: { x: number; y: number }) {
     this.clearHover(ctx);
 
     // @click_pos is NOT empty
@@ -791,7 +783,7 @@ class SessionView {
     return (this.hover_pos = pos);
   }
 
-  drawHover(ctx, pos) {
+  drawHover(ctx: CanvasRenderingContext2D, pos: { x: number; y: number }) {
     this.clearHover(ctx);
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     if (ctx === this.ctx_master_hover) {
@@ -802,7 +794,7 @@ class SessionView {
     return (this.hover_pos = pos);
   }
 
-  clearHover(ctx) {
+  clearHover(ctx: CanvasRenderingContext2D) {
     // for tracks
     if (ctx === this.ctx_tracks_hover) {
       // Don't know why '+2' is needed .... but it's needed!!!
@@ -838,7 +830,7 @@ class SessionView {
     }
   }
 
-  clearActive(x) {
+  clearActive(x: number) {
     return this.ctx_tracks_on.clearRect(
       x * this.w,
       this.last_active[x] * this.h,
@@ -853,7 +845,7 @@ class SessionView {
   }
 
   // Cue the cells to play
-  cueTracks(x, y) {
+  cueTracks(x: number, y: number) {
     if (
       this.song.tracks[x] != null &&
       this.song.tracks[x].patterns[y] != null
@@ -878,7 +870,7 @@ class SessionView {
     }
   }
 
-  cueMaster(x, y) {
+  cueMaster(x: number, y: number) {
     if (this.song.master[y] != null) {
       this.model.cueScene(y);
       this.ctx_master_on.drawImage(
@@ -900,8 +892,8 @@ class SessionView {
   }
 
   // Light the play buttons on beat.
-  beat(is_master, cells) {
-    let c;
+  beat(is_master: boolean, cells: any[]) {
+    let c: any;
     if (is_master) {
       c = cells;
       this.ctx_master_on.drawImage(
@@ -915,7 +907,7 @@ class SessionView {
         16,
         15
       );
-      return window.setTimeout(
+      window.setTimeout(
         () =>
           this.ctx_master_on.clearRect(
             c[0] * this.w + 3,
@@ -926,39 +918,34 @@ class SessionView {
         100
       );
     } else {
-      return (() => {
-        const result = [];
-        for (c of Array.from(cells)) {
-          this.ctx_tracks_on.drawImage(
-            this.img_play,
-            36,
-            0,
-            18,
-            18,
-            c[0] * this.w + 3,
-            c[1] * this.h + 3,
-            16,
-            15
-          );
-          result.push(
-            window.setTimeout(
-              () =>
-                this.ctx_tracks_on.clearRect(
-                  c[0] * this.w + 3,
-                  c[1] * this.h + 3,
-                  16,
-                  15
-                ),
-              100
-            )
-          );
-        }
-        return result;
-      })();
+      for (c of Array.from(cells)) {
+        this.ctx_tracks_on.drawImage(
+          this.img_play,
+          36,
+          0,
+          18,
+          18,
+          c[0] * this.w + 3,
+          c[1] * this.h + 3,
+          16,
+          15
+        );
+
+        window.setTimeout(
+          () =>
+            this.ctx_tracks_on.clearRect(
+              c[0] * this.w + 3,
+              c[1] * this.h + 3,
+              16,
+              15
+            ),
+          100
+        );
+      }
     }
   }
 
-  editPattern(pos) {
+  editPattern(pos: { x: number; y: number }) {
     const pat = this.model.editPattern(pos.x, pos.y);
     return this.drawCellTracks(pat[2], pat[0], pat[1]);
   }
@@ -969,7 +956,7 @@ class SessionView {
   }
 
   // Dialogs
-  showSuccess(_url, song_title, user_name) {
+  showSuccess(_url: string, song_title: string, user_name: string) {
     let text, title;
     if (song_title != null) {
       if (user_name != null) {
@@ -1006,7 +993,7 @@ class SessionView {
       .click(() => this.closeDialog());
   }
 
-  showError(error) {
+  showError(error: any) {
     this.dialog.css({ opacity: '1', 'z-index': '10000' });
     this.dialog.find('#dialog-socials').hide();
     this.dialog.find('#dialog-success').hide();
@@ -1018,7 +1005,7 @@ class SessionView {
   }
 
   // Share button on dialogue
-  share(service) {
+  share(service: string) {
     // Prepare the default text to share
     let text, title;
     if (this.song.title != null) {
@@ -1057,13 +1044,13 @@ class SessionView {
     }
   }
 
-  changeSynth(song, id, type) {
+  changeSynth(song: any, id: number, type: string) {
     this.song = song;
     return this.readSong(this.song, this.current_cells);
   }
 
   // Copy cells by drag.
-  copyCell(src, dst) {
+  copyCell(src: { x: number; y: number }, dst: { x: number; y: number }) {
     if (this.song.tracks[src.x] == null) {
       return;
     }
@@ -1100,7 +1087,7 @@ class SessionView {
     return this.drawCellMaster(this.song.master[dst.y], 0, dst.y);
   }
 
-  copyCellMaster(src, dst) {
+  copyCellMaster(src: { x: number; y: number }, dst: { x: number; y: number }) {
     if (this.song.master[src.y] == null) {
       return;
     }
@@ -1117,7 +1104,7 @@ class SessionView {
   }
 
   // Select cell on click.
-  selectCell(pos) {
+  selectCell(pos: { x: number; y: number; type: string }) {
     if (this.song.tracks[pos.x] == null) {
       return;
     }
@@ -1177,7 +1164,7 @@ class SessionView {
     return this.model.player.sidebar.show(this.song, this.select_pos);
   }
 
-  selectCellMaster(pos) {
+  selectCellMaster(pos: { x: number; y: number; type: string }) {
     if (this.song.master[pos.y] == null) {
       return;
     }

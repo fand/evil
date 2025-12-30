@@ -20,7 +20,7 @@ export class Delay extends FX {
   lofi: BiquadFilterNode;
   feedback: GainNode;
 
-  view: DelayView;
+  override view: DelayView;
 
   constructor(ctx: AudioContext) {
     super(ctx);

@@ -42,6 +42,10 @@ export class KeyboardView {
 
     this.scale = this.sequencer.model.scale;
 
+    // Initialize rect and offset before initCanvas
+    this.rect = this.canvas.getBoundingClientRect();
+    this.offset = { x: this.rect.left, y: this.rect.top };
+
     this.initCanvas();
     this.initEvent();
   }
@@ -56,7 +60,7 @@ export class KeyboardView {
     return Array.from({ length: this.num }, (_, i) => this.drawNormal(i));
   }
 
-  getPos(e) {
+  getPos(e: JQuery.MouseEventBase) {
     this.rect = this.canvas.getBoundingClientRect();
     return Math.floor((e.clientY - this.rect.top) / this.h);
   }
@@ -101,7 +105,8 @@ export class KeyboardView {
       });
   }
 
-  drawNormal(i) {
+  drawNormal(i: number | { x: number; y: number }) {
+    if (typeof i !== 'number') return;
     this.clearNormal(i);
     this.ctx.fillStyle = this.color[0];
     if (this.isKey(i)) {
@@ -112,7 +117,7 @@ export class KeyboardView {
     return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
   }
 
-  drawHover(i) {
+  drawHover(i: number) {
     this.ctx.fillStyle = this.color[1];
     this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
     if (this.isKey(i)) {
@@ -121,7 +126,7 @@ export class KeyboardView {
     return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
   }
 
-  drawActive(i) {
+  drawActive(i: number) {
     this.clearNormal(i);
     this.ctx.fillStyle = this.color[2];
     this.ctx.fillRect(0, i * this.h, this.w, this.h);
@@ -129,25 +134,26 @@ export class KeyboardView {
     return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
   }
 
-  clearNormal(i) {
+  clearNormal(i: number | { x: number; y: number }) {
+    if (typeof i !== 'number') return;
     return this.ctx.clearRect(0, i * this.h, this.w, this.h);
   }
 
-  clearActive(i) {
+  clearActive(i: number | { x: number; y: number }) {
     this.clearNormal(i);
     return this.drawNormal(i);
   }
 
-  changeScale(scale) {
+  changeScale(scale: number[]) {
     this.scale = scale;
     return Array.from({ length: this.num }, (_, i) => this.drawNormal(i));
   }
 
-  text(i) {
+  text(i: number) {
     return ((this.num - i - 1) % this.scale.length) + 1 + 'th';
   }
 
-  isKey(i) {
+  isKey(i: number) {
     return (this.num - i - 1) % this.scale.length === 0;
   }
 }

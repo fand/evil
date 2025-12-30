@@ -124,29 +124,25 @@ export class PlayerView {
     return this.play.removeClass('fa-pause').addClass('fa-play');
   }
 
-  setBPM(bpm) {
+  setBPM(bpm: number) {
     return this.bpm.val(bpm);
   }
-  setScale(scale) {
+
+  setScale(scale: string) {
     return this.scale.val(scale);
   }
-  setKey(key) {
-    return (() => {
-      const result = [];
-      for (var k in KEY_LIST) {
-        var v = KEY_LIST[k];
-        if ((v = key)) {
-          this.key.val(k);
-          break;
-        } else {
-          result.push(undefined);
-        }
+
+  setKey(key: string) {
+    for (const k in KEY_LIST) {
+      const v = KEY_LIST[k as keyof typeof KEY_LIST];
+      if (v === parseInt(key, 10)) {
+        this.key.val(k);
+        break;
       }
-      return result;
-    })();
+    }
   }
 
-  setParam(bpm, key, scale) {
+  setParam(bpm: number, key: string, scale: string) {
     this.setBPM(bpm);
     this.setKey(key);
     return this.setScale(scale);
@@ -167,7 +163,7 @@ export class PlayerView {
     );
     this.btn_left.show();
     if (this.synth_now === this.synth_total - 1) {
-      return this.btn_right.attr('data-line1', 'new');
+      this.btn_right.attr('data-line1', 'new');
     }
   }
 
@@ -186,7 +182,7 @@ export class PlayerView {
       this.model.moveLeft(this.synth_now);
     }
     if (this.synth_now === 0) {
-      return this.btn_left.hide();
+      this.btn_left.hide();
     }
   }
 
@@ -197,7 +193,7 @@ export class PlayerView {
     this.btn_top.hide();
     this.btn_bottom.show();
     this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
-    return this.model.moveTop();
+    this.model.moveTop();
   }
 
   moveBottom() {
@@ -209,10 +205,10 @@ export class PlayerView {
     this.btn_top.show();
     this.btn_bottom.hide();
     this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
-    return this.model.moveBottom();
+    this.model.moveBottom();
   }
 
-  setSynthNum(total, now) {
+  setSynthNum(total: number, now: number) {
     this.synth_total = total;
     if (now < total - 1) {
       return this.btn_right.attr('data-line1', 'next');
@@ -220,8 +216,8 @@ export class PlayerView {
   }
 
   resize() {
-    const w = $(window).width();
-    const h = $(window).height();
+    const w = window.innerWidth;
+    const h = window.innerHeight;
     const space_w = (w - 910) / 2;
     const space_h = (h - 600) / 2;
 

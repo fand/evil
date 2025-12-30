@@ -17,9 +17,9 @@ export type ReverbParams = {
 
 export class Reverb extends FX {
   reverb: ConvolverNode;
-  name: string;
+  name: string = 'BIG_SNARE';
 
-  view: ReverbView;
+  override view: ReverbView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -29,7 +29,7 @@ export class Reverb extends FX {
     this.wet.connect(this.out);
     this.in.connect(this.out);
 
-    this.setIR('BIG_SNARE');
+    this.setIR(this.name);
 
     this.view = new ReverbView(this);
   }

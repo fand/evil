@@ -33,10 +33,10 @@ const T2 = new MutekiTimer();
 class Noise {
   ctx: AudioContext;
   node: ScriptProcessorNode;
-  octave: number;
-  fine: number;
-  interval: number;
-  shape: string;
+  octave: number = 0;
+  fine: number = 0;
+  interval: number = 0;
+  shape: string = 'NOISE';
 
   constructor(ctx: AudioContext) {
     this.ctx = ctx;
@@ -44,8 +44,9 @@ class Noise {
     this.node.onaudioprocess = (event) => {
       const data_L = event.outputBuffer.getChannelData(0);
       const data_R = event.outputBuffer.getChannelData(1);
-      return Array.from({ length: data_L.length }, (_, i) =>
-        (data_L[i] = data_R[i] = Math.random())
+      return Array.from(
+        { length: data_L.length },
+        (_, i) => (data_L[i] = data_R[i] = Math.random())
       );
     };
   }
@@ -85,7 +86,7 @@ class Noise {
     };
   }
 
-  setParam(p) {
+  setParam(p: any) {
     this.shape = p.shape;
     this.octave = p.octave;
     this.interval = p.interval;
@@ -105,8 +106,8 @@ class VCO {
   node: GainNode;
   osc: OscillatorNode;
   oscs: OscillatorNode[];
-  shape: string;
-  dst: AudioNode;
+  shape: string = 'SINE';
+  dst: AudioNode | undefined;
 
   constructor(ctx: AudioContext) {
     this.ctx = ctx;
@@ -167,14 +168,14 @@ class VCO {
     this.shape = shape;
     if (this.shape === 'SUPERSAW') {
       for (o of Array.from(this.oscs)) {
-        o.type = OSC_TYPE['SAW'];
+        o.type = OSC_TYPE['SAW'] as OscillatorType;
         o.connect(this.node);
       }
       this.osc.disconnect();
       return (this.node.gain.value = 0.9);
     } else if (this.shape === 'SUPERRECT') {
       for (o of Array.from(this.oscs)) {
-        o.type = OSC_TYPE['RECT'];
+        o.type = OSC_TYPE['RECT'] as OscillatorType;
         o.connect(this.node);
       }
       this.osc.disconnect();
@@ -183,7 +184,9 @@ class VCO {
       for (o of Array.from(this.oscs)) {
         o.disconnect();
       }
-      this.osc.type = OSC_TYPE[this.shape];
+      this.osc.type = OSC_TYPE[
+        this.shape as keyof typeof OSC_TYPE
+      ] as OscillatorType;
       this.osc.connect(this.node);
       return (this.node.gain.value = 1.0);
     }
@@ -225,7 +228,7 @@ class VCO {
     };
   }
 
-  setParam(p) {
+  setParam(p: any) {
     this.octave = p.octave;
     this.interval = p.interval;
     this.fine = p.fine;
@@ -277,7 +280,7 @@ class EG {
     return { adsr: this.getADSR(), range: this.getRange() };
   }
 
-  setParam(p) {
+  setParam(p: any) {
     [this.attack, this.decay, this.sustain, this.release] = Array.from(p.adsr);
     return this.setRange(p.range[0], p.range[1]);
   }
@@ -348,7 +351,7 @@ export class SynthCore {
   feg: EG;
   gain_res: GainNode;
   view: SynthCoreView;
-  note: number;
+  note: number = 0;
 
   constructor(parent: Synth, ctx: AudioContext, id: number) {
     this.parent = parent;
@@ -404,25 +407,15 @@ export class SynthCore {
     };
   }
 
-  setParam(p) {
+  setParam(p: any) {
     let i;
     if (p.vcos != null) {
-      let asc, end;
-      for (
-        i = 0, end = p.vcos.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
+      for (let i = 0; i < p.vcos.length; i++) {
         this.vcos[i].setParam(p.vcos[i]);
       }
     }
     if (p.gains != null) {
-      let asc1, end1;
-      for (
-        i = 0, end1 = p.gains.length, asc1 = 0 <= end1;
-        asc1 ? i < end1 : i > end1;
-        asc1 ? i++ : i--
-      ) {
+      for (let i = 0; i < p.gains.length; i++) {
         this.gains[i].gain.value = p.gains[i];
       }
     }
@@ -549,17 +542,18 @@ export class SynthCore {
 
   setNote(note: number) {
     this.note = note;
-    return (() => {
-      const result = [];
-      for (var v of Array.from(this.vcos)) {
-        v.setNote(this.noteToSemitone(this.note, v.interval));
-        result.push(v.setFreq());
-      }
-      return result;
-    })();
+
+    for (var v of Array.from(this.vcos)) {
+      v.setNote(this.noteToSemitone(this.note, v.interval));
+      v.setFreq();
+    }
   }
 
   mute() {
     this.is_mute = true;
+  }
+
+  unmute() {
+    this.is_mute = false;
   }
 }

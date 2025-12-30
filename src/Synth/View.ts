@@ -17,11 +17,9 @@ declare global {
 }
 
 // TODO: merge with SamplerPattern
-type SynthPattern = (number | 'sustain' | 'end')[];
+export type SynthPattern = (number | 'sustain' | 'end')[];
 
-const DEFAULT_PATTERN: SynthPattern = [];
-
-type SynthPatternObject = { name: string; pattern: SynthPattern };
+export type SynthPatternObject = { name: string; pattern: SynthPattern };
 
 type SynthPos = {
   x: number;
@@ -93,12 +91,12 @@ export class SynthView {
   click_pos: { x: number; y: number };
   rect: DOMRect;
   offset: { x: number; y: number };
-  time: number;
-  is_sustaining: boolean;
-  sustain_l: number;
-  sustain_r: number;
-  is_adding: boolean;
-  is_active: boolean;
+  time: number = 0;
+  is_sustaining: boolean = false;
+  sustain_l: number = 0;
+  sustain_r: number = 0;
+  is_adding: boolean = false;
+  is_active: boolean = false;
 
   constructor(model: Synth, id: number) {
     this.model = model;
@@ -175,6 +173,10 @@ export class SynthView {
     this.is_clicked = false;
     this.hover_pos = { x: -1, y: -1 };
     this.click_pos = { x: -1, y: -1 };
+
+    // Initialize rect and offset before initCanvas is called asynchronously
+    this.rect = this.canvas_off.getBoundingClientRect();
+    this.offset = { x: this.rect.left, y: this.rect.top };
 
     this.initEvent();
   }
@@ -686,13 +688,9 @@ export class SynthView {
             }
           }
           if (i < this.page) {
-            return (() => {
-              const result = [];
-              while (this.page !== i) {
-                result.push(this.model.player.backward(true));
-              }
-              return result;
-            })();
+            while (this.page !== i) {
+              this.model.player.backward(true);
+            }
           } // force
         });
       });
@@ -709,6 +707,10 @@ export class SynthView {
   activate() {
     this.is_active = true;
     return this.initCanvas();
+  }
+
+  deactivate() {
+    this.is_active = false;
   }
 
   setSynthName(name: string) {
@@ -747,7 +749,7 @@ export class SynthView {
     return this.pencil.removeClass('btn-true').addClass('btn-false');
   }
 
-  changeScale(scale) {
+  changeScale(scale: number[]) {
     return this.keyboard.changeScale(scale);
   }
 }

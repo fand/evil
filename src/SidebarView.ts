@@ -129,7 +129,7 @@ class SidebarView {
     return this.wrapper.css('left', '0px');
   }
 
-  showMaster(o) {
+  showMaster(o: any) {
     this.hideMasterControl();
 
     let s = '';
@@ -160,12 +160,12 @@ class SidebarView {
     return this.master_control.hide();
   }
 
-  addMasterEffect(name) {
+  addMasterEffect(name: any) {
     const fx = this.model.addMasterEffect(name);
     return fx.appendTo(this.master_effects);
   }
 
-  addTracksEffect(name) {
+  addTracksEffect(name: any) {
     const fx = this.model.addTracksEffect(name);
     return fx.appendTo(this.tracks_effects);
   }
@@ -174,11 +174,11 @@ class SidebarView {
     this.master_bpm.val(bpm);
   }
 
-  setKey(key) {
+  setKey(key: string) {
     this.master_key.val(key);
   }
 
-  setScale(scale) {
+  setScale(scale: string) {
     this.master_scale.val(scale);
   }
 }

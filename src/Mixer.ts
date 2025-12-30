@@ -17,10 +17,11 @@ import { Compressor } from './FX/Compressor';
 import { FX } from './FX/FX';
 import type { Sampler } from './Sampler';
 import type { Synth } from './Synth';
+import type { Player } from './Player';
 
 export class Mixer {
   ctx: AudioContext;
-  player: any;
+  player: Player;
   gain_master: number;
   gain_tracks: number[];
   out: GainNode;
@@ -33,17 +34,15 @@ export class Mixer {
   limiter: Limiter;
   effects_master: FX[];
   view: MixerView;
-  pan_tracks: number[];
-  pan_master: number;
+  pan_tracks: number[] = [];
+  pan_master: number = 0;
 
-  constructor(ctx: AudioContext, player: any) {
+  constructor(ctx: AudioContext, player: Player) {
     this.addMasterEffect = this.addMasterEffect.bind(this);
     this.ctx = ctx;
     this.player = player;
     this.gain_master = 1.0;
-    this.gain_tracks = Array.from(this.player.synth).map((s: any) =>
-      s.getGain()
-    );
+    this.gain_tracks = this.player.synth.map((s) => s.getGain());
 
     this.out = this.ctx.createGain();
     this.out.gain.value = this.gain_master;
@@ -92,11 +91,7 @@ export class Mixer {
 
   drawGains() {
     // Tracks
-    for (
-      let i = 0, end = this.analysers.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.analysers.length; i++) {
       var data = new Uint8Array(this.analysers[i].frequencyBinCount);
       this.analysers[i].getByteTimeDomainData(data);
       this.view.drawGainTracks(i, data);
@@ -117,7 +112,7 @@ export class Mixer {
     return this.view.empty();
   }
 
-  addSynth(synth) {
+  addSynth(synth: Synth | Sampler) {
     // Create new panner
     const p = new Panner(this.ctx);
     synth.connect(p.in);
@@ -128,25 +123,24 @@ export class Mixer {
     synth.connect(a);
     this.analysers.push(a);
 
-    return this.view.addSynth(synth);
+    this.view.addSynth();
   }
 
   setGains(gain_tracks: number[], gain_master: number) {
     this.gain_tracks = gain_tracks;
     this.gain_master = gain_master;
-    for (
-      let i = 0, end = this.gain_tracks.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+
+    for (let i = 0; i < this.gain_tracks.length; i++) {
       this.player.synth[i].setGain(this.gain_tracks[i]);
     }
-    return (this.out.gain.value = this.gain_master);
+
+    this.out.gain.value = this.gain_master;
   }
 
   setPans(pan_tracks: number[], pan_master: number) {
     this.pan_tracks = pan_tracks;
     this.pan_master = pan_master;
+
     for (let i = 0; i < this.pan_tracks.length; i++) {
       this.panners[i].setPosition(this.pan_tracks[i]);
     }
@@ -163,7 +157,7 @@ export class Mixer {
     this.pan_tracks = pan_tracks;
     this.pan_master = pan_master;
     this.setPans(this.pan_tracks, this.pan_master);
-    return this.view.readPans(this.pan_tracks, this.pan_master);
+    this.view.readPans(this.pan_tracks, this.pan_master);
   }
 
   getParam() {
@@ -175,12 +169,19 @@ export class Mixer {
     };
   }
 
-  readParam(p) {
+  readParam(
+    p: {
+      gain_tracks: number[];
+      gain_master: number;
+      pan_tracks: number[];
+      pan_master: number;
+    } | null
+  ) {
     if (p == null) {
       return;
     }
     this.readGains(p.gain_tracks, p.gain_master);
-    return this.readPans(p.pan_tracks, p.pan_master);
+    this.readPans(p.pan_tracks, p.pan_master);
   }
 
   changeSynth(idx: number, synth: Synth | Sampler) {
@@ -200,6 +201,8 @@ export class Mixer {
       fx = new Compressor(this.ctx);
     } else if (name === 'Double') {
       fx = new Double(this.ctx);
+    } else {
+      throw new TypeError(`Invalid FX type: ${name}`);
     }
 
     const pos = this.effects_master.length;
@@ -218,8 +221,8 @@ export class Mixer {
     return fx;
   }
 
-  addTracksEffect(x, name) {
-    let fx;
+  addTracksEffect(x: number, name: string) {
+    let fx: FX;
     if (name === 'Fuzz') {
       fx = new Fuzz(this.ctx);
     } else if (name === 'Delay') {
@@ -230,6 +233,8 @@ export class Mixer {
       fx = new Compressor(this.ctx);
     } else if (name === 'Double') {
       fx = new Double(this.ctx);
+    } else {
+      throw new TypeError(`Invalid effect type: ${name}`);
     }
 
     this.player.synth[x].insertEffect(fx);
@@ -251,12 +256,11 @@ export class Mixer {
 
     prev.disconnect();
     if (this.effects_master[i + 1] != null) {
-      prev.connect(this.effects_master[i + 1]);
+      prev.connect(this.effects_master[i + 1].in);
     } else {
       prev.connect(this.return);
-
-      fx.disconnect();
     }
+    fx.disconnect();
 
     return this.effects_master.splice(i, 1);
   }

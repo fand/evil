@@ -18,9 +18,9 @@ export class Double extends FX {
   delay: DelayNode;
   pan_l: Panner;
   pan_r: Panner;
-  pos: number;
+  pos: number = 1;
 
-  view: DoubleView;
+  override view: DoubleView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -29,7 +29,8 @@ export class Double extends FX {
 
     this.pan_l = new Panner(this.ctx);
     this.pan_r = new Panner(this.ctx);
-    this.setWidth(1);
+    this.pan_l.setPosition(this.pos);
+    this.pan_r.setPosition(-this.pos);
 
     this.in.connect(this.pan_l.in);
     this.in.connect(this.delay);

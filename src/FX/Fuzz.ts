@@ -21,11 +21,11 @@ export type FuzzParams = {
 
 export class Fuzz extends FX {
   fuzz: WaveShaperNode;
-  type: string;
-  samples: number;
-  gain: number;
+  type: string = 'Sigmoid';
+  samples: number = 2048;
+  gain: number = 0.08;
 
-  view: FuzzView;
+  override view: FuzzView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -34,8 +34,7 @@ export class Fuzz extends FX {
     this.fuzz.connect(this.out);
     this.in.gain.value = 1.0;
     this.out.gain.value = 1.0;
-    this.type = 'Sigmoid';
-    this.samples = 2048;
+
     this.fuzz.curve = new Float32Array(this.samples);
     this.setGain(0.08);
 
@@ -52,38 +51,17 @@ export class Fuzz extends FX {
     const sigmax = 2.0 / (1 + Math.exp(-this.gain * 1.0)) - 1.0;
     const ratio = 1.0 / sigmax;
 
-    if (this.type === 'Sigmoid') {
-      return (() => {
-        const result = [];
-        for (
-          let i = 0, end = this.samples, asc = 0 <= end;
-          asc ? i < end : i > end;
-          asc ? i++ : i--
-        ) {
-          var x = (i * 2.0) / this.samples - 1.0;
-          var sigmoid =
-            2.0 / (1 + Math.exp(-Math.pow(this.gain, 3) * 1000 * x)) - 1.0;
-          result.push((this.fuzz.curve[i] = sigmoid * ratio));
-        }
-        return result;
-      })();
-    } else if (this.type === 'Octavia') {
-      return (() => {
-        const result1 = [];
-        for (
-          let i = 0, end1 = this.samples, asc1 = 0 <= end1;
-          asc1 ? i < end1 : i > end1;
-          asc1 ? i++ : i--
-        ) {
-          var x = (i * 2.0) / this.samples - 1.0;
-          var sigmoid =
-            2.0 / (1 + Math.exp(-Math.pow(this.gain, 2) * 10 * x)) - 1.0;
-          result1.push(
-            (this.fuzz.curve[i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0)
-          );
-        }
-        return result1;
-      })();
+    for (let i = 0; i < this.samples; i++) {
+      const x = (i * 2.0) / this.samples - 1.0;
+      if (this.type === 'Sigmoid') {
+        const sigmoid =
+          2.0 / (1 + Math.exp(-Math.pow(this.gain, 3) * 1000 * x)) - 1.0;
+        this.fuzz.curve![i] = sigmoid * ratio;
+      } else if (this.type === 'Octavia') {
+        const sigmoid =
+          2.0 / (1 + Math.exp(-Math.pow(this.gain, 2) * 10 * x)) - 1.0;
+        this.fuzz.curve![i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0;
+      }
     }
   }
 

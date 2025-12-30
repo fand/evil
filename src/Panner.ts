@@ -4,7 +4,7 @@ export class Panner {
   out: ChannelMergerNode;
   l: GainNode;
   r: GainNode;
-  pos: number;
+  pos: number = 0.5;
 
   constructor(ctx: AudioContext) {
     this.ctx = ctx;
@@ -16,7 +16,8 @@ export class Panner {
     this.in.connect(this.r, 1);
     this.l.connect(this.out, 0, 0);
     this.r.connect(this.out, 0, 1);
-    this.setPosition(0.5);
+    this.l.gain.value = this.pos;
+    this.r.gain.value = 1.0 - this.pos;
   }
 
   connect(dst: AudioNode) {

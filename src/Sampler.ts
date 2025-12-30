@@ -11,7 +11,7 @@ import { Panner } from './Panner';
 import { SamplerCore } from './Sampler/Core';
 import { SamplerView } from './Sampler/View';
 import $ from 'jquery';
-import type { InstrumentType, Player } from './Player';
+import type { Player } from './Player';
 
 class Sampler {
   ctx: AudioContext;
@@ -31,15 +31,13 @@ class Sampler {
   return: GainNode;
   effects: any[];
 
-  constructor(ctx: AudioContext, id: number, player: Player, name: string) {
+  constructor(ctx: AudioContext, id: number, player: Player, name?: string) {
     this.ctx = ctx;
     this.id = id;
     this.player = player;
-    this.name = name;
+
+    this.name = name ?? `Sampler #${id}`;
     this.type = 'SAMPLER';
-    if (this.name == null) {
-      this.name = 'Sampler #' + this.id;
-    }
 
     this.pattern_name = 'pattern 0';
     this.pattern = [
@@ -95,7 +93,7 @@ class Sampler {
     this.effects = [];
   }
 
-  connect(dst) {
+  connect(dst: AudioNode | Panner) {
     if (dst instanceof Panner) {
       return this.return.connect(dst.in);
     } else {
@@ -130,7 +128,7 @@ class Sampler {
     return this.core.noteOff();
   }
 
-  playAt(time) {
+  playAt(time: number) {
     this.time = time;
     const mytime = this.time % this.pattern.length;
     this.view.playAt(mytime);
@@ -149,11 +147,11 @@ class Sampler {
     return this.view.stop();
   }
 
-  pause(time) {
+  pause(time: number) {
     return this.core.noteOff();
   }
 
-  setPattern(_pattern_obj) {
+  setPattern(_pattern_obj: { name: string; pattern: any[] }) {
     this.pattern_obj = $.extend(true, {}, _pattern_obj);
     this.pattern = this.pattern_obj.pattern;
     this.pattern_name = this.pattern_obj.name;
@@ -247,16 +245,12 @@ class Sampler {
     return this.player.resetSceneLength();
   }
 
-  addNote(time, note, gain) {
+  addNote(time: number, note: number, gain: number) {
     if (!Array.isArray(this.pattern[time])) {
       this.pattern[time] = [[this.pattern[time], 1.0]];
     }
 
-    for (
-      let i = 0, end = this.pattern[time].length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.pattern[time].length; i++) {
       if (this.pattern[time][i][0] === note) {
         this.pattern[time].splice(i, 1);
       }
@@ -265,29 +259,20 @@ class Sampler {
     return this.pattern[time].push([note, gain]);
   }
 
-  removeNote(pos) {
-    return (() => {
-      const result = [];
-      for (
-        let i = 0, end = this.pattern[pos.x_abs].length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
-        if (this.pattern[pos.x_abs][i][0] === pos.note) {
-          result.push(this.pattern[pos.x_abs].splice(i, 1));
-        } else {
-          result.push(undefined);
-        }
+  removeNote(pos: { x_abs: number; note: number }) {
+    for (let i = 0; i < this.pattern[pos.x_abs].length; i++) {
+      if (this.pattern[pos.x_abs][i][0] === pos.note) {
+        this.pattern[pos.x_abs].splice(i, 1);
       }
-      return result;
-    })();
+    }
   }
 
-  activate(i) {
-    return this.view.activate(i);
+  activate() {
+    this.view.activate();
   }
-  inactivate() {
-    return this.view.inactivate();
+
+  deactivate() {
+    this.view.deactivate();
   }
 
   redraw(time: number) {
@@ -334,24 +319,25 @@ class Sampler {
     return p;
   }
 
-  setParam(p) {
+  setParam(p: any) {
     if (p != null) {
       return this.core.setParam(p);
     }
   }
 
   mute() {
-    return this.core.mute();
+    this.core.mute();
   }
-  demute() {
-    return this.core.demute();
+
+  unmute() {
+    this.core.unmute();
   }
 
   getEffectsParam() {
     return Array.from(this.effects).map((f) => f.getParam());
   }
 
-  insertEffect(fx) {
+  insertEffect(fx: any) {
     if (this.effects.length === 0) {
       this.send.disconnect();
       this.send.connect(fx.in);
@@ -365,7 +351,7 @@ class Sampler {
     return this.effects.push(fx);
   }
 
-  removeEffect(fx) {
+  removeEffect(fx: any) {
     let prev;
     const i = this.effects.indexOf(fx);
     if (i === -1) {

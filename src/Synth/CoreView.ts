@@ -9,7 +9,7 @@
 import $ from 'jquery';
 import type { SynthCore } from './Core';
 
-class SynthCoreView {
+export class SynthCoreView {
   model: SynthCore;
   id: number;
   dom: JQuery;
@@ -55,10 +55,10 @@ class SynthCoreView {
     return this.fetchParam();
   }
 
-  updateCanvas(name) {
-    let canvas = null;
-    let context = null;
-    let adsr = null;
+  updateCanvas(name: string) {
+    let canvas: HTMLCanvasElement;
+    let context: CanvasRenderingContext2D;
+    let adsr: number[];
     if (name === 'EG') {
       canvas = this.canvasEG;
       context = this.contextEG;
@@ -94,43 +94,28 @@ class SynthCoreView {
   fetchVCOParam() {
     const harmony = this.vcos.eq(0).find('.harmony').val() as string;
 
-    const result = [];
-    for (
-      let i = 0, end = this.vcos.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
-      var vco = this.vcos.eq(i);
-      result.push(
-        this.model.setVCOParam(
-          i,
-          vco.find('.shape').val() as string,
-          parseInt(vco.find('.octave').val() as string),
-          parseInt(vco.find('.interval').val() as string),
-          parseInt(vco.find('.fine').val() as string),
-          harmony
-        )
+    for (let i = 0; i < this.vcos.length; i++) {
+      const vco = this.vcos.eq(i);
+
+      this.model.setVCOParam(
+        i,
+        vco.find('.shape').val() as string,
+        parseInt(vco.find('.octave').val() as string),
+        parseInt(vco.find('.interval').val() as string),
+        parseInt(vco.find('.fine').val() as string),
+        harmony
       );
     }
-    return result;
   }
 
-  setVCOParam(p) {
-    return (() => {
-      const result = [];
-      for (
-        let i = 0, end = this.vcos.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
-        var vco = this.vcos.eq(i);
-        vco.find('.shape').val(p[i].shape);
-        vco.find('.octave').val(p[i].octave);
-        vco.find('.interval').val(p[i].interval);
-        result.push(vco.find('.fine').val(p[i].fine));
-      }
-      return result;
-    })();
+  setVCOParam(p: any[]) {
+    for (let i = 0; i < this.vcos.length; i++) {
+      var vco = this.vcos.eq(i);
+      vco.find('.shape').val(p[i].shape);
+      vco.find('.octave').val(p[i].octave);
+      vco.find('.interval').val(p[i].interval);
+      vco.find('.fine').val(p[i].fine);
+    }
   }
 
   fetchEGParam() {
@@ -143,7 +128,7 @@ class SynthCoreView {
     return this.updateCanvas('EG');
   }
 
-  setEGParam(p) {
+  setEGParam(p: any) {
     this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
     this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
     this.EG_inputs.eq(2).val(p.adsr[2] * 100);
@@ -160,7 +145,7 @@ class SynthCoreView {
     return this.updateCanvas('FEG');
   }
 
-  setFEGParam(p) {
+  setFEGParam(p: any) {
     for (let i = 0; i < p.length; i++) {
       this.FEG_inputs.eq(i).val(p.adsr[i]);
     }
@@ -173,7 +158,7 @@ class SynthCoreView {
     );
   }
 
-  setFilterParam(p) {
+  setFilterParam(p: any) {
     this.filter_inputs.eq(0).val(p[0]);
     return this.filter_inputs.eq(1).val(p[1]);
   }
@@ -187,16 +172,12 @@ class SynthCoreView {
     }
   }
 
-  setParam(p) {
+  setParam(p: any) {
     if (p.vcos != null) {
       this.setVCOParam(p.vcos);
     }
     if (p.gains != null) {
-      for (
-        let i = 0, end = p.gains.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
+      for (let i = 0; i < p.gains.length; i++) {
         this.gain_inputs.eq(i).val((p.gains[i] / 0.3) * 100);
       }
     }
@@ -211,5 +192,3 @@ class SynthCoreView {
     }
   }
 }
-
-export { SynthCoreView };

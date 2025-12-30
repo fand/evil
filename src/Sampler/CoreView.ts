@@ -35,7 +35,7 @@ export class SamplerCoreView {
   sample_name: JQuery;
   sample_list: JQuery;
   sample_list_wrapper: JQuery;
-  gain_inputs: JQuery;
+  gain_inputs: JQuery | undefined;
 
   constructor(model: SamplerCore, id: number, dom: JQuery) {
     this.model = model;
@@ -81,7 +81,7 @@ export class SamplerCoreView {
     this.updateEQCanvas();
   }
 
-  getWaveformPos(e) {
+  getWaveformPos(e: JQuery.MouseEventBase) {
     return e.clientX - this.canvas_waveform.getBoundingClientRect().left;
   }
 
@@ -156,7 +156,7 @@ export class SamplerCoreView {
     });
   }
 
-  bindSample(sample_now: number, param) {
+  bindSample(sample_now: number, param: any) {
     this.sample_now = sample_now;
     this.sample_name.find('span').text(param.wave);
     this.updateWaveformCanvas(this.sample_now);
@@ -199,11 +199,7 @@ export class SamplerCoreView {
       ctx.beginPath();
 
       const d = wave.length / w;
-      for (
-        let x = 0, end = w, asc = 0 <= end;
-        asc ? x < end : x > end;
-        asc ? x++ : x--
-      ) {
+      for (let x = 0; x < w; x++) {
         ctx.lineTo(x, wave[Math.floor(x * d)] * h * 0.45);
       }
 
@@ -314,6 +310,9 @@ export class SamplerCoreView {
   }
 
   fetchGains() {
+    if (this.gain_inputs == null) {
+      return;
+    }
     for (let i = 0; i < this.gain_inputs.length; i++) {
       this.model.setSampleGain(
         i,

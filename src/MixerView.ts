@@ -7,9 +7,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
+import type { Mixer } from './Mixer';
 
-class MixerView {
-  model: any;
+export class MixerView {
+  model: Mixer;
   dom: JQuery;
   tracks: JQuery;
   master: JQuery;
@@ -28,8 +29,7 @@ class MixerView {
   ctx_master: CanvasRenderingContext2D;
   track_dom: JQuery;
 
-  constructor(model: any) {
-    let c;
+  constructor(model: Mixer) {
     this.model = model;
     this.dom = $('#mixer');
 
@@ -54,18 +54,18 @@ class MixerView {
     this.canvas_tracks_dom = Array.from(
       this.tracks.find('.vu-meter')
     ) as unknown as JQuery[];
-    this.canvas_tracks = Array.from(this.canvas_tracks_dom).map(
-      (d) => (d as any)[0] as HTMLCanvasElement
+    this.canvas_tracks = this.canvas_tracks_dom.map(
+      (d) => d[0] as HTMLCanvasElement
     );
-    this.ctx_tracks = (() => {
-      const result = [];
-      for (c of Array.from(this.canvas_tracks)) {
-        result.push(c.getContext('2d'));
-      }
-      return result;
-    })();
-    for (c of Array.from(this.canvas_tracks)) {
-      [c.width, c.height] = Array.from([10, 100]);
+
+    this.ctx_tracks = [];
+    for (const c of this.canvas_tracks) {
+      const ctx = c.getContext('2d')!; // TODO: consider context count limit
+      this.ctx_tracks.push(ctx);
+    }
+
+    for (const c of this.canvas_tracks) {
+      [c.width, c.height] = [10, 100];
     }
 
     this.canvas_master_dom = this.master.find('.vu-meter');
@@ -85,7 +85,7 @@ class MixerView {
     return this.console_master.on('change', () => this.setParams());
   }
 
-  drawGainTracks(i, data) {
+  drawGainTracks(i: number, data: Uint8Array) {
     const v = Math.max.apply(null, data);
     const h = ((v - 128) / 128) * 100;
 
@@ -94,7 +94,7 @@ class MixerView {
     return this.ctx_tracks[i].fillRect(0, 100 - h, 10, h);
   }
 
-  drawGainMaster(data_l, data_r) {
+  drawGainMaster(data_l: Uint8Array, data_r: Uint8Array) {
     const v_l = Math.max.apply(null, data_l);
     const v_r = Math.max.apply(null, data_r);
     const h_l = ((v_l - 128) / 128) * 130;
@@ -107,7 +107,7 @@ class MixerView {
     return this.ctx_master.fillRect(60, 130 - h_r, 10, h_r);
   }
 
-  addSynth(synth) {
+  addSynth() {
     const dom = this.track_dom.clone();
     this.console_tracks.append(dom);
     this.pans.push(dom.find('.pan-slider'));
@@ -136,69 +136,54 @@ class MixerView {
   }
 
   setPans() {
-    const p = Array.from(this.pans).map(
-      (_p) => 1.0 - parseFloat((_p as any).val() as string) / 200.0
+    const pans = this.pans.map(
+      (p) => 1.0 - parseFloat((p as any).val() as string) / 200.0
     );
     const p_master = 1.0 - parseFloat(this.pan_master.val() as string) / 200.0;
-    this.model.setPans(p, p_master);
+    this.model.setPans(pans, p_master);
 
-    return (() => {
-      const result = [];
-      for (
-        let i = 0, end = this.pans.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
-        var l = parseInt((this.pans[i] as any).val() as string) - 100;
-        var t = l === 0 ? 'C' : l < 0 ? -l + '% L' : l + '% R';
-        result.push(this.pans_label[i].text(t));
-      }
-      return result;
-    })();
+    for (let i = 0, end = this.pans.length; i < end; i++) {
+      var l = parseInt((this.pans[i] as any).val() as string) - 100;
+      var t = l === 0 ? 'C' : l < 0 ? -l + '% L' : l + '% R';
+      this.pans_label[i].text(t);
+    }
   }
 
-  readGains(g, g_master) {
-    for (
-      let i = 0, end = g.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+  readGains(g: number[], g_master: number) {
+    for (let i = 0; i < g.length; i++) {
       this.gains[i].val(g[i] * 100.0);
     }
-    return this.gain_master.val(g_master * 100.0);
+    this.gain_master.val(g_master * 100.0);
   }
 
-  readPans(p, p_master) {
-    return (() => {
-      const result = [];
-      for (
-        let i = 0, end = p.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
-        this.pans[i].val((1.0 - p[i]) * 200);
+  readPans(p: number[], pan_master: number) {
+    for (let i = 0, end = p.length; i < end; i++) {
+      this.pans[i].val((1.0 - p[i]) * 200);
 
-        var l = (p[i] * 200 - 100) * -1;
-        var t = l === 0 ? 'C' : l < 0 ? -l + '% L' : l + '% R';
-        result.push(this.pans_label[i].text(t));
-      }
-      return result;
-    })();
+      const l = (p[i] * 200 - 100) * -1;
+      const t = l === 0 ? 'C' : l < 0 ? -l + '% L' : l + '% R';
+
+      this.pans_label[i].text(t);
+    }
+
+    const l = (pan_master * 200 - 100) * -1;
+    const t = l === 0 ? 'C' : l < 0 ? -l + '% L' : l + '% R';
+    this.pan_master.text(t);
   }
 
   setParams() {
     this.setGains();
-    return this.setPans();
+    this.setPans();
   }
 
-  displayGains(gains) {}
+  displayGains(gains: number[]) {}
 
-  pan2pos(v) {
+  pan2pos(v: number) {
     const theta = v * Math.PI;
     return [Math.cos(theta), 0, -Math.sin(theta)];
   }
 
-  pos2pan(v) {
+  pos2pan(v: number[]) {
     return Math.acos(v[0]) / Math.PI;
   }
 
@@ -212,5 +197,3 @@ class MixerView {
     return (this.pans_label = []);
   }
 }
-
-export { MixerView };

@@ -18,7 +18,7 @@ export const KEY_LIST = {
 export type NoteKey = keyof typeof KEY_LIST;
 
 export function isNoteKey(key: string): key is NoteKey {
-  return KEY_LIST[key] != null;
+  return key in KEY_LIST;
 }
 
 export const SCALE_LIST = {
@@ -36,7 +36,7 @@ export const SCALE_LIST = {
 export type NoteScale = keyof typeof SCALE_LIST;
 
 export function isNoteScale(scale: string): scale is NoteScale {
-  return SCALE_LIST[scale] != null;
+  return scale in SCALE_LIST;
 }
 
 export const STREAM_LENGTH = 1024;

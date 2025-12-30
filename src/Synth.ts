@@ -17,7 +17,7 @@ import { Delay } from './FX/Delay';
 import { Reverb } from './FX/Reverb';
 import { Compressor } from './FX/Compressor';
 import { Double } from './FX/Double';
-import { SCALE_LIST } from './Constant';
+import { SCALE_LIST, NoteKey } from './Constant';
 import type { Player } from './Player';
 import type { FX } from './FX/FX';
 
@@ -46,17 +46,16 @@ class Synth {
   return: GainNode;
   effects: FX[];
   T: MutekiTimer;
-  duration: number;
+  duration: number = 0;
 
-  constructor(ctx: AudioContext, id: number, player: Player, name: string) {
+  constructor(ctx: AudioContext, id: number, player: Player, name?: string) {
     this.ctx = ctx;
     this.id = id;
     this.player = player;
-    this.name = name;
+
+    this.name = name ?? `Synth #${id}`;
     this.type = 'REZ';
-    if (this.name == null) {
-      this.name = 'Synth #' + this.id;
-    }
+
     this.pattern_name = 'pattern 0';
     this.pattern = [
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -65,7 +64,7 @@ class Synth {
     this.pattern_obj = { name: this.pattern_name, pattern: this.pattern };
     this.time = 0;
     this.scale_name = 'Major';
-    this.scale = SCALE_LIST[this.scale_name];
+    this.scale = SCALE_LIST[this.scale_name as keyof typeof SCALE_LIST];
     this.view = new SynthView(this, this.id);
     this.core = new SynthCore(this, this.ctx, this.id);
 
@@ -102,17 +101,17 @@ class Synth {
     this.duration = duration;
   }
 
-  setKey(key) {
+  setKey(key: NoteKey) {
     return this.core.setKey(key);
   }
 
-  setNote(note) {
+  setNote(note: number) {
     return this.core.setNote(note);
   }
 
-  setScale(scale_name) {
+  setScale(scale_name: string) {
     this.scale_name = scale_name;
-    this.scale = SCALE_LIST[this.scale_name];
+    this.scale = SCALE_LIST[this.scale_name as keyof typeof SCALE_LIST];
     this.core.scale = this.scale;
     return this.view.changeScale(this.scale);
   }
@@ -192,7 +191,7 @@ class Synth {
     this.core.noteOff();
   }
 
-  setPattern(pattern_obj) {
+  setPattern(pattern_obj: { name: string; pattern: any[] }) {
     this.pattern_obj = JSON.parse(JSON.stringify(pattern_obj));
     this.pattern = this.pattern_obj.pattern;
     this.pattern_name = this.pattern_obj.name;
@@ -240,19 +239,19 @@ class Synth {
       this.pattern[l] = note;
       return;
     }
-    for (
-      let i = l, end = r, asc = l <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = l; i < r; i++) {
       this.pattern[i] = 'sustain';
     }
     this.pattern[l] = -note;
-    return (this.pattern[r] = 'end');
+    this.pattern[r] = 'end';
   }
 
   activate() {
     this.view.activate();
+  }
+
+  deactivate() {
+    this.view.deactivate();
   }
 
   redraw(time: number) {
@@ -299,18 +298,22 @@ class Synth {
     return p;
   }
 
-  setParam(p) {
+  setParam(p: any) {
     if (p == null) {
       return;
     }
     this.core.setParam(p);
     if (p.effects != null) {
-      return this.setEffects(p.effects);
+      this.setEffects(p.effects);
     }
   }
 
   mute() {
-    return this.core.mute();
+    this.core.mute();
+  }
+
+  unmute() {
+    this.core.unmute();
   }
 
   // Set effects' params from the song.
@@ -320,29 +323,25 @@ class Synth {
     }
     this.effects = [];
 
-    return (() => {
-      const result = [];
-      for (const e of Array.from(effects_new)) {
-        let fx: FX;
-        if (e.effect === 'Fuzz') {
-          fx = new Fuzz(this.ctx);
-        } else if (e.effect === 'Delay') {
-          fx = new Delay(this.ctx);
-        } else if (e.effect === 'Reverb') {
-          fx = new Reverb(this.ctx);
-        } else if (e.effect === 'Comp') {
-          fx = new Compressor(this.ctx);
-        } else if (e.effect === 'Double') {
-          fx = new Double(this.ctx);
-        } else {
-          throw new Error(`Invalid FX type: ${e.effect}`);
-        }
-
-        this.insertEffect(fx);
-        result.push(fx.setParam(e));
+    for (const e of Array.from(effects_new)) {
+      let fx: FX;
+      if (e.effect === 'Fuzz') {
+        fx = new Fuzz(this.ctx);
+      } else if (e.effect === 'Delay') {
+        fx = new Delay(this.ctx);
+      } else if (e.effect === 'Reverb') {
+        fx = new Reverb(this.ctx);
+      } else if (e.effect === 'Comp') {
+        fx = new Compressor(this.ctx);
+      } else if (e.effect === 'Double') {
+        fx = new Double(this.ctx);
+      } else {
+        throw new Error(`Invalid FX type: ${e.effect}`);
       }
-      return result;
-    })();
+
+      this.insertEffect(fx);
+      fx.setParam(e);
+    }
   }
 
   getEffectsParam() {

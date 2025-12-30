@@ -106,11 +106,11 @@ export class SamplerView {
   click_pos: { x: number; y: number };
   rect: DOMRect;
   offset: { x: number; y: number };
-  time: number;
-  is_adding: boolean;
-  is_removing: boolean;
-  is_active: boolean;
-  sample_now: number;
+  time: number = 0;
+  is_adding: boolean = false;
+  is_removing: boolean = false;
+  is_active: boolean = false;
+  sample_now: number = 0;
 
   constructor(model: Sampler, id: number) {
     this.model = model;
@@ -179,6 +179,10 @@ export class SamplerView {
     this.hover_pos = { x: -1, y: -1 };
     this.click_pos = { x: -1, y: -1 };
 
+    // Initialize rect and offset before initCanvas
+    this.rect = this.canvas_off.getBoundingClientRect();
+    this.offset = { x: this.rect.left, y: this.rect.top };
+
     this.initEvent();
     this.initCanvas();
   }
@@ -195,16 +199,8 @@ export class SamplerView {
     this.rect = this.canvas_off.getBoundingClientRect();
     this.offset = { x: this.rect.left, y: this.rect.top };
 
-    for (
-      let i = 0, end = this.cells_y, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
-      for (
-        var j = 0, end1 = this.cells_x, asc1 = 0 <= end1;
-        asc1 ? j < end1 : j > end1;
-        asc1 ? j++ : j--
-      ) {
+    for (let i = 0; i < this.cells_y; i++) {
+      for (let j = 0; j < this.cells_x; j++) {
         this.ctx_off.drawImage(
           this.cell,
           0,
@@ -344,11 +340,7 @@ export class SamplerView {
     //   this.pattern[pos.x_abs] = [[this.pattern[pos.x_abs], 1.0]];
     // }
 
-    for (
-      let i = 0, end = this.pattern[pos.x_abs].length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.pattern[pos.x_abs].length; i++) {
       if (this.pattern[pos.x_abs][i][0] === pos.note) {
         this.pattern[pos.x_abs].splice(i, 1);
       }
@@ -370,18 +362,14 @@ export class SamplerView {
   }
 
   removeNote(pos: SamplerPos) {
-    for (
-      let i = 0, end = this.pattern[pos.x_abs].length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.pattern[pos.x_abs].length; i++) {
       if (this.pattern[pos.x_abs][i][0] === pos.note) {
         this.pattern[pos.x_abs].splice(i, 1);
       }
     }
 
     this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
-    return this.model.removeNote(pos);
+    this.model.removeNote(pos);
   }
 
   playAt(time: number) {
@@ -393,11 +381,7 @@ export class SamplerView {
     if (this.time % this.cells_x === 0) {
       this.drawPattern(this.time);
     }
-    for (
-      let i = 0, end = this.cells_y, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.cells_y; i++) {
       this.ctx_off.drawImage(
         this.cell,
         0,
@@ -441,11 +425,7 @@ export class SamplerView {
     this.page = Math.floor(this.time / this.cells_x);
     this.ctx_on.clearRect(0, 0, 832, 260);
 
-    for (
-      let i = 0, end = this.cells_x, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.cells_x; i++) {
       for (var j of Array.from(this.pattern[this.page * this.cells_x + i])) {
         var y = this.cells_y - j[0];
         this.ctx_on.drawImage(
@@ -516,13 +496,9 @@ export class SamplerView {
             }
           }
           if (i < this.page) {
-            return (() => {
-              const result = [];
-              while (this.page !== i) {
-                result.push(this.model.player.backward(true));
-              }
-              return result;
-            })();
+            while (this.page !== i) {
+              this.model.player.backward(true);
+            }
           } // force
         });
       });
@@ -546,12 +522,12 @@ export class SamplerView {
     }
   }
 
-  activate(i) {
+  activate() {
     this.is_active = true;
     this.initCanvas();
   }
 
-  inactivate() {
+  deactivate() {
     this.is_active = false;
   }
 

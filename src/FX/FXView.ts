@@ -9,6 +9,7 @@ export class FXView {
   constructor(model: FX, dom: JQuery) {
     this.model = model;
     this.dom = dom;
+    this.dom_side = this.dom.find('.sidebar-effect');
     this.minus_side = this.dom_side.find('.sidebar-effect-minus');
   }
 
