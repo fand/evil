@@ -5,6 +5,53 @@ export type SamplerNote = [note: number, velocity: number];
 export type SamplerPattern = SamplerNote[][];
 export type Pattern = SynthPattern | SamplerPattern;
 
+// Effect parameter types
+export type FuzzEffectParam = {
+  effect: 'Fuzz';
+  type: string;
+  gain: number;
+  input: number;
+  output: number;
+};
+
+export type DoubleEffectParam = {
+  effect: 'Double';
+  delay: number;
+  width: number;
+};
+
+export type ReverbEffectParam = {
+  effect: 'Reverb';
+  name: string;
+  wet: number;
+};
+
+export type CompressorEffectParam = {
+  effect: 'Compressor';
+  attack: number;
+  release: number;
+  threshold: number;
+  ratio: number;
+  knee: number;
+  input: number;
+  output: number;
+};
+
+export type DelayEffectParam = {
+  effect: 'Delay';
+  delay: number;
+  feedback: number;
+  lofi: number;
+  wet: number;
+};
+
+export type EffectParam =
+  | FuzzEffectParam
+  | DoubleEffectParam
+  | ReverbEffectParam
+  | CompressorEffectParam
+  | DelayEffectParam;
+
 export const DEFAULT_SCENE = {
   name: 'section-0',
   bpm: 144,
@@ -37,10 +84,10 @@ export type Track = {
   type: InstrumentType;
   name: string;
   patterns: (PatternObject | undefined)[];
-  params: unknown[];
+  params: Record<string, unknown>[];
   gain: number;
   pan: number;
-  effects?: unknown[];
+  effects?: EffectParam[];
 };
 
 export type Scene = {
