@@ -11,12 +11,15 @@ class Sidebar {
   mixer: Mixer;
   sidebar_pos: { x: number; y: number; type: string };
   view: SidebarView;
-  song: Song | undefined;
   select_pos: { x: number; y: number; type: string } = {
     x: -1,
     y: -1,
     type: '',
   };
+
+  get song(): Song {
+    return this.session.song;
+  }
 
   constructor(
     ctx: AudioContext,
@@ -34,8 +37,7 @@ class Sidebar {
     this.view = new SidebarView(this);
   }
 
-  show(song: Song, select_pos: { x: number; y: number; type: string }) {
-    this.song = song;
+  show(select_pos: { x: number; y: number; type: string }) {
     this.select_pos = select_pos;
     if (this.select_pos.type === 'tracks') {
       if (

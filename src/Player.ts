@@ -39,7 +39,10 @@ export class Player {
   sidebar: Sidebar;
   scene_length: number = 32;
   view: PlayerView;
-  song!: Song;
+
+  get song(): Song {
+    return this.session.song;
+  }
 
   constructor(ctx: AudioContext) {
     this.scene = { name: '', bpm: this.bpm, key: this.key, scale: this.scale };
@@ -286,12 +289,14 @@ export class Player {
   }
 
   readSong(song: Song) {
-    this.song = song;
     this.instruments = [];
     this.num_id = 0;
     this.mixer.empty();
     this.session.empty();
     this.view.empty();
+
+    // Set song to Session (single source of truth)
+    this.session.song = song;
 
     for (let i = 0; i < this.song.tracks.length; i++) {
       if (!this.song.tracks[i].type || this.song.tracks[i].type === 'REZ') {
@@ -309,7 +314,7 @@ export class Player {
     }
 
     this.session.setInstrument(this.instruments);
-    this.session.readSong(this.song);
+    this.session.readSong();
     this.mixer.readParam(this.song.mixer);
 
     this.view.setInstrumentCount(

@@ -10,7 +10,10 @@ declare global {
 
 export class SessionView {
   model: Session;
-  song: Song;
+
+  get song(): Song {
+    return this.model.song;
+  }
   wrapper_mixer: JQuery;
   wrapper_master: JQuery;
   wrapper_tracks: JQuery;
@@ -65,10 +68,9 @@ export class SessionView {
   is_clicked: boolean = false;
   scene_pos: number = 0;
 
-  constructor(model: Session, song: Song) {
+  constructor(model: Session) {
     // DOMs for session view.
     this.model = model;
-    this.song = song;
     this.wrapper_mixer = $('#mixer-tracks');
     this.wrapper_master = $('#session-master-wrapper');
     this.wrapper_tracks = $('#session-tracks-wrapper');
@@ -446,7 +448,7 @@ export class SessionView {
     this.social_facebook.on('click', () => this.share('facebook'));
     this.social_hatena.on('click', () => this.share('hatena'));
 
-    return this.readSong(this.song, this.current_cells);
+    return this.readSong(this.current_cells);
   }
 
   // Set params for @song (ref to @model.song).
@@ -458,9 +460,8 @@ export class SessionView {
     this.song.creator = this.song_creator.val()?.toString();
   }
 
-  // Read song from @song.
-  readSong(song: Song, current_cells: any[]) {
-    this.song = song;
+  // Read song from model.song.
+  readSong(current_cells: any[]) {
     this.current_cells = current_cells;
     this.resize();
 
@@ -935,9 +936,8 @@ export class SessionView {
     return this.drawCellTracks(pat[2], pat[0], pat[1]);
   }
 
-  addInstrument(song: Song, _pos?: any) {
-    this.song = song;
-    return this.readSong(this.song, this.current_cells);
+  addInstrument(_pos?: any) {
+    return this.readSong(this.current_cells);
   }
 
   // Dialogs
@@ -1147,7 +1147,7 @@ export class SessionView {
     this.select_pos = pos;
     this.select_pos.type = 'tracks';
 
-    return this.model.player.sidebar.show(this.song, this.select_pos);
+    return this.model.player.sidebar.show(this.select_pos);
   }
 
   selectCellMaster(pos: { x: number; y: number; type: string }) {
@@ -1199,7 +1199,7 @@ export class SessionView {
     this.select_pos = pos;
     this.select_pos.type = 'master';
 
-    return this.model.player.sidebar.show(this.song, this.select_pos);
+    return this.model.player.sidebar.show(this.select_pos);
   }
 
   getSelectPos() {
