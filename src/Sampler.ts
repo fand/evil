@@ -4,8 +4,9 @@ import { SamplerView } from './Sampler/SamplerView';
 import $ from 'jquery';
 import type { Player } from './Player';
 import type { Session } from './Session';
+import type { Instrument } from './Instrument';
 
-class Sampler {
+class Sampler implements Instrument {
   ctx: AudioContext;
   id: number;
   player: Player;

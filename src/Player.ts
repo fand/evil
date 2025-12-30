@@ -11,6 +11,7 @@ import {
   type NoteKey,
   type NoteScale,
 } from './Constant';
+import type { Instrument, InstrumentType } from './Instrument';
 
 declare global {
   interface Window {
@@ -19,9 +20,6 @@ declare global {
 }
 
 export type Scene = { bpm: number; key: string; scale: string };
-
-export type Instrument = Synth | Sampler;
-export type InstrumentType = 'REZ' | 'SAMPLER';
 
 const T = new MutekiTimer();
 

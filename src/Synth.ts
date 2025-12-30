@@ -11,11 +11,12 @@ import { Double } from './FX/Double';
 import { SCALE_LIST, NoteKey } from './Constant';
 import type { Player } from './Player';
 import type { FX } from './FX/FX';
+import type { Instrument } from './Instrument';
 
 const T2 = new MutekiTimer();
 
 // Manages SynthCore, SynthView.
-class Synth {
+class Synth implements Instrument {
   ctx: AudioContext;
   id: number;
   player: Player;

@@ -7,7 +7,8 @@ import { Double } from './FX/Double';
 import { Reverb } from './FX/Reverb';
 import { Compressor } from './FX/Compressor';
 import { FX } from './FX/FX';
-import type { Instrument, Player } from './Player';
+import type { Player } from './Player';
+import type { Instrument } from './Instrument';
 
 export class Mixer {
   ctx: AudioContext;

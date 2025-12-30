@@ -2,7 +2,8 @@ import { SessionView } from './SessionView';
 import { Song } from './Song';
 import $ from 'jquery';
 import { SynthPatternObject } from './Synth/SynthView';
-import type { Instrument, Player } from './Player';
+import type { Player } from './Player';
+import type { Instrument } from './Instrument';
 
 // Control the patterns for tracks.
 class Session {
