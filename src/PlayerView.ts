@@ -7,6 +7,7 @@
  */
 import $ from 'jquery';
 import { KEY_LIST } from './Constant';
+import type { Player } from './Player';
 
 declare global {
   interface Window {
@@ -14,8 +15,8 @@ declare global {
   }
 }
 
-class PlayerView {
-  model: any;
+export class PlayerView {
+  model: Player;
   dom: JQuery;
   bpm: JQuery;
   key: JQuery;
@@ -37,7 +38,7 @@ class PlayerView {
   synth_now: number;
   synth_total: number;
 
-  constructor(model: any) {
+  constructor(model: Player) {
     this.model = model;
     this.dom = $('#control');
 
@@ -260,5 +261,3 @@ class PlayerView {
     return this.instruments.empty();
   }
 }
-
-export { PlayerView };

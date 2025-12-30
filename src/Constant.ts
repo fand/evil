@@ -17,6 +17,10 @@ export const KEY_LIST = {
 
 export type NoteKey = keyof typeof KEY_LIST;
 
+export function isNoteKey(key: string): key is NoteKey {
+  return KEY_LIST[key] != null;
+}
+
 export const SCALE_LIST = {
   Major: [0, 2, 4, 5, 7, 9, 11],
   minor: [0, 2, 3, 5, 7, 8, 10],
@@ -30,6 +34,10 @@ export const SCALE_LIST = {
 };
 
 export type NoteScale = keyof typeof SCALE_LIST;
+
+export function isNoteScale(scale: string): scale is NoteScale {
+  return SCALE_LIST[scale] != null;
+}
 
 export const STREAM_LENGTH = 1024;
 export const SEMITONE = 1.05946309;

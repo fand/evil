@@ -18,6 +18,8 @@ import { Reverb } from './FX/Reverb';
 import { Compressor } from './FX/Compressor';
 import { Double } from './FX/Double';
 import { SCALE_LIST } from './Constant';
+import type { Player } from './Player';
+import type { FX } from './FX/FX';
 
 const T2 = new MutekiTimer();
 
@@ -25,7 +27,7 @@ const T2 = new MutekiTimer();
 class Synth {
   ctx: AudioContext;
   id: number;
-  player: any;
+  player: Player;
   name: string;
   type: string;
   pattern_name: string;
@@ -42,11 +44,11 @@ class Synth {
   session: any;
   send: GainNode;
   return: GainNode;
-  effects: any[];
+  effects: FX[];
   T: MutekiTimer;
   duration: number;
 
-  constructor(ctx: AudioContext, id: number, player: any, name: string) {
+  constructor(ctx: AudioContext, id: number, player: Player, name: string) {
     this.ctx = ctx;
     this.id = id;
     this.player = player;
@@ -84,7 +86,7 @@ class Synth {
     this.T = new MutekiTimer();
   }
 
-  connect(dst) {
+  connect(dst: AudioNode) {
     if (dst instanceof Panner) {
       return this.return.connect(dst.in);
     } else {
@@ -93,15 +95,17 @@ class Synth {
   }
 
   disconnect() {
-    return this.return.disconnect();
+    this.return.disconnect();
   }
 
-  setDuration(duration) {
+  setDuration(duration: number) {
     this.duration = duration;
   }
+
   setKey(key) {
     return this.core.setKey(key);
   }
+
   setNote(note) {
     return this.core.setNote(note);
   }
@@ -113,14 +117,15 @@ class Synth {
     return this.view.changeScale(this.scale);
   }
 
-  setGain(gain) {
-    return this.core.setGain(gain);
+  setGain(gain: number) {
+    this.core.setGain(gain);
   }
-  getGain() {
+
+  getGain(): number {
     return this.core.gain;
   }
 
-  noteOn(note, force) {
+  noteOn(note: number, force: boolean) {
     if (force || !this.is_performing) {
       this.core.setNote(note);
       this.core.noteOn();
@@ -130,7 +135,7 @@ class Synth {
     }
   }
 
-  noteOff(force) {
+  noteOff(force: boolean) {
     if (force) {
       this.is_performing = false;
     }
@@ -139,7 +144,7 @@ class Synth {
     }
   }
 
-  playAt(time) {
+  playAt(time: number) {
     this.time = time;
     const mytime = this.time % this.pattern.length;
     this.view.playAt(mytime);
@@ -175,20 +180,20 @@ class Synth {
   }
 
   play() {
-    return this.view.play();
+    this.view.play();
   }
 
   stop() {
     this.core.noteOff();
-    return this.view.stop();
+    this.view.stop();
   }
 
-  pause(time) {
-    return this.core.noteOff();
+  pause() {
+    this.core.noteOff();
   }
 
-  setPattern(_pattern_obj) {
-    this.pattern_obj = $.extend(true, {}, _pattern_obj);
+  setPattern(pattern_obj) {
+    this.pattern_obj = JSON.parse(JSON.stringify(pattern_obj));
     this.pattern = this.pattern_obj.pattern;
     this.pattern_name = this.pattern_obj.name;
     return this.view.setPattern(this.pattern_obj);
@@ -222,15 +227,15 @@ class Synth {
     return this.player.resetSceneLength();
   }
 
-  addNote(time, note) {
-    return (this.pattern[time] = note);
+  addNote(time: number, note: number) {
+    this.pattern[time] = note;
   }
 
-  removeNote(time) {
+  removeNote(time: number) {
     return (this.pattern[time] = 0);
   }
 
-  sustainNote(l, r, note) {
+  sustainNote(l: number, r: number, note: number) {
     if (l === r) {
       this.pattern[l] = note;
       return;
@@ -246,11 +251,11 @@ class Synth {
     return (this.pattern[r] = 'end');
   }
 
-  activate(i) {
-    this.view.activate(i);
+  activate() {
+    this.view.activate();
   }
 
-  deactivate(_i?: number) {
+  deactivate() {
     this.view.deactivate();
   }
 
@@ -278,11 +283,15 @@ class Synth {
 
   // Get new Synth and replace.
   // called by SynthView.
-  changeSynth(type) {
-    var s_new = this.player.changeSynth(this.id, type, s_new);
+  changeSynth(type: string) {
+    if (type !== 'REZ' && type !== 'SAMPLER') {
+      throw new TypeError(`Invalid instrument type: ${type}`);
+    }
+
+    const s_new = this.player.changeSynth(this.id, type);
     this.view.dom.replaceWith(s_new.view.dom);
     this.noteOff(true);
-    return this.disconnect();
+    this.disconnect();
   }
 
   // Get params as object.
@@ -307,22 +316,22 @@ class Synth {
   mute() {
     return this.core.mute();
   }
+
   demute() {
     return this.core.demute();
   }
 
   // Set effects' params from the song.
-  setEffects(effects_new) {
-    let e;
-    for (e of Array.from(this.effects)) {
+  setEffects(effects_new: { effect: string }[]) {
+    for (const e of this.effects) {
       e.disconnect();
     }
     this.effects = [];
 
     return (() => {
       const result = [];
-      for (e of Array.from(effects_new)) {
-        var fx;
+      for (const e of Array.from(effects_new)) {
+        let fx: FX;
         if (e.effect === 'Fuzz') {
           fx = new Fuzz(this.ctx);
         } else if (e.effect === 'Delay') {
@@ -333,6 +342,8 @@ class Synth {
           fx = new Compressor(this.ctx);
         } else if (e.effect === 'Double') {
           fx = new Double(this.ctx);
+        } else {
+          throw new Error(`Invalid FX type: ${e.effect}`);
         }
 
         this.insertEffect(fx);
@@ -346,7 +357,7 @@ class Synth {
     return Array.from(this.effects).map((f) => f.getParam());
   }
 
-  insertEffect(fx) {
+  insertEffect(fx: FX) {
     if (this.effects.length === 0) {
       this.send.disconnect();
       this.send.connect(fx.in);
@@ -360,13 +371,13 @@ class Synth {
     return this.effects.push(fx);
   }
 
-  removeEffect(fx) {
-    let prev;
+  removeEffect(fx: FX) {
     const i = this.effects.indexOf(fx);
     if (i === -1) {
       return;
     }
 
+    let prev: GainNode | FX;
     if (i === 0) {
       prev = this.send;
     } else {

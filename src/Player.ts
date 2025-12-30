@@ -14,18 +14,25 @@ import { Synth } from './Synth';
 import { Sampler } from './Sampler';
 import { PlayerView } from './PlayerView';
 import { MutekiTimer } from './MutekiTimer';
-import type { NoteKey, NoteScale } from './Constant';
+import {
+  isNoteKey,
+  isNoteScale,
+  KEY_LIST,
+  type NoteKey,
+  type NoteScale,
+} from './Constant';
 
-declare const CONTEXT: AudioContext;
 declare global {
   interface Window {
     keyboard: any;
   }
 }
 
+export type InstrumentType = 'REZ' | 'SAMPLER';
+
 const T = new MutekiTimer();
 
-class Player {
+export class Player {
   bpm: number = 120;
   duration: number = 500; // msec
   key: NoteKey = 'A';
@@ -70,27 +77,36 @@ class Player {
       s.setDuration(this.duration);
     }
 
-    return this.sidebar.setBPM(this.bpm);
+    this.sidebar.setBPM(this.bpm);
   }
 
-  setKey(key: NoteKey) {
+  setKey(key: string) {
+    if (!isNoteKey(key)) {
+      throw new TypeError(`Invalid Key: ${key}`);
+    }
+
     this.key = key;
     this.scene.key = this.key;
     for (var s of Array.from(this.synth)) {
       s.setKey(this.key);
     }
 
-    return this.sidebar.setKey(this.key);
+    this.sidebar.setKey(this.key);
   }
 
-  setScale(scale: NoteScale) {
+  setScale(scale: string) {
+    if (!isNoteScale(scale)) {
+      throw new TypeError(`Invalid scale: ${scale}`);
+    }
+
     this.scale = scale;
     this.scene.scale = this.scale;
-    for (var s of Array.from(this.synth)) {
+
+    for (const s of this.synth) {
       s.setScale(this.scale);
     }
 
-    return this.sidebar.setScale(this.scale);
+    this.sidebar.setScale(this.scale);
   }
 
   isPlaying(): boolean {
@@ -100,9 +116,12 @@ class Player {
   play() {
     this.is_playing = true;
     this.session.play();
-    return T.setTimeout(() => {
-      // s.play() for s in @synth
-      return this.playNext();
+
+    T.setTimeout(() => {
+      for (const s of this.synth) {
+        s.play();
+      }
+      this.playNext();
     }, 150);
   }
 
@@ -119,7 +138,7 @@ class Player {
     for (var s of Array.from(this.synth)) {
       s.pause(this.time);
     }
-    return (this.is_playing = false);
+    this.is_playing = false;
   }
 
   forward() {
@@ -127,10 +146,10 @@ class Player {
       this.session.nextMeasure(this.synth);
     }
     this.time = (this.time + 32) % this.scene_length;
-    return this.synth_now.redraw(this.time);
+    this.synth_now.redraw(this.time);
   }
 
-  backward(force) {
+  backward(force: boolean) {
     if (force) {
       if (this.time >= 32) {
         this.time = (this.time - 32) % this.scene_length;
@@ -142,11 +161,11 @@ class Player {
         this.time = this.time - (this.time % 32);
       }
     }
-    return this.synth_now.redraw(this.time);
+    this.synth_now.redraw(this.time);
   }
 
   toggleLoop() {
-    return this.session.toggleLoop();
+    this.session.toggleLoop();
   }
 
   noteOn(note: number, force: boolean) {
@@ -199,30 +218,30 @@ class Player {
   }
 
   // Called by instruments.
-  changeSynth(id, type) {
-    let s_new;
-    const s_old = this.synth[id];
+  changeSynth(idx: number, type: InstrumentType) {
+    const s_old = this.synth[idx];
 
+    let s_new: Synth | Sampler; // TODO: add type Instrument
     if (type === 'REZ') {
-      s_new = new Synth(this.context, id, this, s_old.name);
+      s_new = new Synth(this.context, idx, this, s_old.name);
       s_new.setScale(this.scene.scale);
       s_new.setKey(this.scene.key);
     } else if (type === 'SAMPLER') {
-      s_new = new Sampler(this.context, id, this, s_old.name);
+      s_new = new Sampler(this.context, idx, this, s_old.name);
     }
 
-    this.synth_now = this.synth[id] = s_new;
+    this.synth_now = this.synth[idx] = s_new;
     this.synth_now = s_new;
 
-    this.mixer.changeSynth(id, s_new);
-    this.session.changeSynth(id, type, s_new);
-    this.view.changeSynth(id, type);
+    this.mixer.changeSynth(idx, s_new);
+    this.session.changeSynth(idx, type, s_new);
+    this.view.changeSynth(idx, type);
 
     return s_new;
   }
 
   // Called by PlayerView.
-  moveRight(next_idx) {
+  moveRight(next_idx: number) {
     if (next_idx === this.synth.length) {
       this.addSynth();
       this.session.play();
@@ -235,7 +254,7 @@ class Player {
     return window.keyboard.setMode('SYNTH');
   }
 
-  moveLeft(next_idx) {
+  moveLeft(next_idx: number) {
     this.synth[next_idx + 1].inactivate();
     this.synth_now = this.synth[next_idx];
     this.synth_now.activate(next_idx);
@@ -244,14 +263,14 @@ class Player {
   }
 
   moveTop() {
-    return window.keyboard.setMode('MIXER');
+    window.keyboard.setMode('MIXER');
   }
 
   moveBottom() {
-    return window.keyboard.setMode('SYNTH');
+    window.keyboard.setMode('SYNTH');
   }
 
-  moveTo(synth_num) {
+  moveTo(synth_num: number) {
     this.view.moveBottom();
     if (synth_num < this.synth_pos) {
       return (() => {
@@ -273,24 +292,22 @@ class Player {
   }
 
   solo(solos) {
-    let s;
     if (solos.length === 0) {
-      for (s of Array.from(this.synth)) {
+      for (let s of Array.from(this.synth)) {
         s.demute();
       }
       return;
     }
-    return (() => {
-      const result = [];
-      for (s of Array.from(this.synth)) {
-        if (Array.from(solos).includes(s.id + 1)) {
-          result.push(s.demute());
-        } else {
-          result.push(s.mute());
-        }
+
+    const result = [];
+    for (let s of Array.from(this.synth)) {
+      if (Array.from(solos).includes(s.id + 1)) {
+        result.push(s.demute());
+      } else {
+        result.push(s.mute());
       }
-      return result;
-    })();
+    }
+    return result;
   }
 
   readSong(song) {
@@ -365,7 +382,7 @@ class Player {
     return this.scene;
   }
 
-  setSceneLength(scene_length) {
+  setSceneLength(scene_length: number) {
     this.scene_length = scene_length;
   }
 
@@ -376,14 +393,12 @@ class Player {
     );
   }
 
-  showSuccess(url) {
+  showSuccess(url: string) {
     console.log('success!');
     return console.log(url);
   }
 
-  showError(error) {
+  showError(error: string) {
     return console.log(error);
   }
 }
-
-export { Player };

@@ -10,13 +10,13 @@
 import { Panner } from './Panner';
 import { SamplerCore } from './Sampler/Core';
 import { SamplerView } from './Sampler/View';
-import { SAMPLES } from './Sampler/Constant';
 import $ from 'jquery';
+import type { Player } from './Player';
 
 class Sampler {
   ctx: AudioContext;
   id: number;
-  player: any;
+  player: Player;
   name: string;
   type: string;
   pattern_name: string;
@@ -31,7 +31,7 @@ class Sampler {
   return: GainNode;
   effects: any[];
 
-  constructor(ctx: AudioContext, id: number, player: any, name: string) {
+  constructor(ctx: AudioContext, id: number, player: Player, name: string) {
     this.ctx = ctx;
     this.id = id;
     this.player = player;
