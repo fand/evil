@@ -95,7 +95,7 @@ export class SampleNode {
       return (this.buffer = sample.data);
     } else {
       const req = new XMLHttpRequest();
-      req.open('GET', sample.url, true);
+      req.open('GET', import.meta.env.BASE_URL + sample.url, true);
       req.responseType = 'arraybuffer';
       req.onload = () => {
         this.ctx.decodeAudioData(
