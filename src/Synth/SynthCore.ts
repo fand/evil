@@ -17,9 +17,6 @@ const OSC_TYPE = {
 const TIME_OFFSET = [2, 3, 5, 7, 11, 13, 17];
 const FREQ_OFFSET = [0.1, 0.15, 0.25, 0.35, 0.55, 0.65, 0.85];
 
-// Timer only for this module
-const T2 = new MutekiTimer();
-
 // Noise Oscillator.
 class Noise {
   ctx: AudioContext;

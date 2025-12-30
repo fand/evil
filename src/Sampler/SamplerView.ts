@@ -514,7 +514,7 @@ export class SamplerView {
     this.is_active = false;
   }
 
-  setSynthName(name: string) {
+  setInstrumentName(name: string) {
     this.inst_name.val(name);
   }
 

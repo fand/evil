@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-class SessionView {
+export class SessionView {
   model: Session;
   song: any;
   wrapper_mixer: JQuery;
@@ -459,8 +459,6 @@ class SessionView {
 
   // Read song from @song.
   readSong(song: any, current_cells: any[]) {
-    let y;
-    let asc2, end2;
     this.song = song;
     this.current_cells = current_cells;
     this.resize();
@@ -1035,11 +1033,6 @@ class SessionView {
     }
   }
 
-  changeSynth(song: any, id: number, type: string) {
-    this.song = song;
-    return this.readSong(this.song, this.current_cells);
-  }
-
   // Copy cells by drag.
   copyCell(src: { x: number; y: number }, dst: { x: number; y: number }) {
     if (this.song.tracks[src.x] == null) {
@@ -1213,5 +1206,3 @@ class SessionView {
     }
   }
 }
-
-export { SessionView };

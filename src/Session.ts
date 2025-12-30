@@ -3,8 +3,6 @@ import { Song } from './Song';
 import $ from 'jquery';
 import { SynthPatternObject } from './Synth/SynthView';
 import type { Instrument, Player } from './Player';
-import type { Synth } from './Synth';
-import type { Sampler } from './Sampler';
 
 // Control the patterns for tracks.
 class Session {
@@ -193,10 +191,10 @@ class Session {
       this.song.length = dst.y + 1;
     }
 
-    // add track pattern
-    let synth_num = dst.x;
+    // Add track pattern
+    let dst_x = dst.x;
     if (this.song.tracks.length <= dst.x) {
-      synth_num = this.song.tracks.length;
+      dst_x = this.song.tracks.length;
 
       if (this.song.tracks[src.x].type === 'REZ') {
         this.player.addSynth(dst.y);
@@ -208,16 +206,16 @@ class Session {
     return this.song.tracks.length - 1;
   }
 
-  readPattern(pat: any, synth_num: number, pat_num: number) {
-    this.song.tracks[synth_num].patterns[pat_num] = pat;
+  readPattern(pat: any, idx: number, pat_num: number) {
+    this.song.tracks[idx].patterns[pat_num] = pat;
     if (!this.song.master[pat_num]) {
       this.song.master[pat_num] = { name: 'section-' + pat_num };
     }
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
     }
-    if (this.current_cells[synth_num] === pat_num) {
-      this.player.instruments[synth_num].setPattern(pat);
+    if (this.current_cells[idx] === pat_num) {
+      this.player.instruments[idx].setPattern(pat);
     }
   }
 
@@ -228,7 +226,7 @@ class Session {
     }
   }
 
-  editPattern(_synth_num: number, pat_num: number) {
+  editPattern(idx: number, pat_num: number) {
     // add master
     if (!this.song.master[pat_num]) {
       this.song.master[pat_num] = { name: 'section-' + pat_num };
@@ -238,34 +236,34 @@ class Session {
     }
 
     // add track pattern
-    let synth_num = _synth_num;
-    if (this.song.tracks.length <= _synth_num) {
-      synth_num = this.song.tracks.length;
+    let track_idx = idx;
+    if (this.song.tracks.length <= idx) {
+      track_idx = this.song.tracks.length;
       this.player.addSynth(pat_num);
     }
 
     // Save old pattern (for old @current_cells)
-    this.savePattern(synth_num, this.current_cells[synth_num]);
+    this.savePattern(track_idx, this.current_cells[track_idx]);
 
-    if (this.song.tracks[synth_num].patterns[pat_num]) {
-      this.player.instruments[synth_num].setPattern(
-        this.song.tracks[synth_num].patterns[pat_num]
+    if (this.song.tracks[track_idx].patterns[pat_num]) {
+      this.player.instruments[track_idx].setPattern(
+        this.song.tracks[track_idx].patterns[pat_num]
       );
     } else {
       // set new pattern
-      const pat_name = synth_num + '-' + pat_num;
-      this.player.instruments[synth_num].clearPattern();
-      this.player.instruments[synth_num].setPatternName(pat_name);
-      this.song.tracks[synth_num].patterns[pat_num] =
-        this.player.instruments[synth_num].getPattern();
+      const pat_name = track_idx + '-' + pat_num;
+      this.player.instruments[track_idx].clearPattern();
+      this.player.instruments[track_idx].setPatternName(pat_name);
+      this.song.tracks[track_idx].patterns[pat_num] =
+        this.player.instruments[track_idx].getPattern();
     }
 
     // draw
-    this.current_cells[synth_num] = pat_num;
+    this.current_cells[track_idx] = pat_num;
     this.view.readSong(this.song, this.current_cells);
-    this.player.moveTo(synth_num);
+    this.player.moveTo(track_idx);
 
-    return [synth_num, pat_num, this.song.tracks[synth_num].patterns[pat_num]];
+    return [track_idx, pat_num, this.song.tracks[track_idx].patterns[pat_num]];
   }
 
   // Save patterns into @song.
@@ -371,29 +369,29 @@ class Session {
 
   // Set current pattern name of a synth.
   // called by Synth, Sampler
-  setPatternName(synth_id: number, name: string) {
-    const pat_num = this.current_cells[synth_id];
+  setPatternName(track_idx: number, name: string) {
+    const pat_num = this.current_cells[track_idx];
 
-    if (this.song.tracks[synth_id].patterns[pat_num]) {
-      this.song.tracks[synth_id].patterns[pat_num].name = name;
+    if (this.song.tracks[track_idx].patterns[pat_num]) {
+      this.song.tracks[track_idx].patterns[pat_num].name = name;
     } else {
-      this.song.tracks[synth_id].patterns[pat_num] = { name };
+      this.song.tracks[track_idx].patterns[pat_num] = { name };
     }
 
     this.view.drawPatternName(
-      synth_id,
+      track_idx,
       pat_num,
-      this.song.tracks[synth_id].patterns[pat_num]
+      this.song.tracks[track_idx].patterns[pat_num]
     );
   }
 
   // called by Player.
-  changeInstrument(id: number, type: string, synth_new: any) {
+  changeInstrument(id: number, type: string, inst: any) {
     const pat_name = id + '-' + this.scene_pos;
-    synth_new.setPatternName(pat_name);
+    inst.setPatternName(pat_name);
 
     const patterns: SynthPatternObject[] = [];
-    patterns[this.scene_pos] = { name: pat_name, pattern: synth_new.pattern };
+    patterns[this.scene_pos] = { name: pat_name, pattern: inst.pattern };
 
     const s_params = {
       id,
@@ -405,7 +403,7 @@ class Session {
       pan: 0.0,
     };
     this.song.tracks[id] = s_params;
-    synth_new.setPattern(patterns[this.scene_pos]);
+    inst.setPattern(patterns[this.scene_pos]);
 
     // Swap patterns[0] and current patterns.
     [

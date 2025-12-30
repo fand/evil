@@ -3,6 +3,7 @@ import { SamplerCore } from './Sampler/SamplerCore';
 import { SamplerView } from './Sampler/SamplerView';
 import $ from 'jquery';
 import type { Player } from './Player';
+import type { Session } from './Session';
 
 class Sampler {
   ctx: AudioContext;
@@ -17,7 +18,7 @@ class Sampler {
   view: SamplerView;
   core: SamplerCore;
   is_sustaining: boolean;
-  session: any;
+  session: Session;
   send: GainNode;
   return: GainNode;
   effects: any[];
@@ -273,8 +274,8 @@ class Sampler {
 
   setInstrumentName(name: string) {
     this.name = name;
-    this.session.setSynthName(this.id, this.name);
-    this.view.setSynthName(this.name);
+    this.session.setTrackName(this.id, this.name);
+    this.view.setInstrumentName(this.name);
   }
 
   // called by SamplerView.

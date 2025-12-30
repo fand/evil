@@ -99,7 +99,7 @@ export class MixerView {
     return this.ctx_master.fillRect(60, 130 - h_r, 10, h_r);
   }
 
-  addSynth() {
+  addInstrument() {
     const dom = this.track_dom.clone();
     this.console_tracks.append(dom);
     this.pans.push(dom.find('.pan-slider'));

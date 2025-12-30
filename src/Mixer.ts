@@ -7,8 +7,6 @@ import { Double } from './FX/Double';
 import { Reverb } from './FX/Reverb';
 import { Compressor } from './FX/Compressor';
 import { FX } from './FX/FX';
-import type { Sampler } from './Sampler';
-import type { Synth } from './Synth';
 import type { Instrument, Player } from './Player';
 
 export class Mixer {
@@ -115,7 +113,7 @@ export class Mixer {
     instrument.connect(a);
     this.analysers.push(a);
 
-    this.view.addSynth();
+    this.view.addInstrument();
   }
 
   setGains(gain_tracks: number[], gain_master: number) {
@@ -176,9 +174,9 @@ export class Mixer {
     this.readPans(p.pan_tracks, p.pan_master);
   }
 
-  changeInstrument(idx: number, synth: Synth | Sampler) {
-    synth.connect(this.panners[idx].in);
-    return synth.connect(this.analysers[idx]);
+  changeInstrument(idx: number, instrument: Instrument) {
+    instrument.connect(this.panners[idx].in);
+    instrument.connect(this.analysers[idx]);
   }
 
   addMasterEffect(name: string) {
