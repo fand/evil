@@ -85,18 +85,6 @@ const _clearTimeout = function (id) {
   return undefined;
 };
 
-(MutekiTimer as any).use = () => {
-  (window as any).setTimeout = _setTimeout;
-  return ((window as any).clearTimeout = _clearTimeout);
-};
-
-(MutekiTimer as any).unuse = () => {
-  (window as any).setTimeout = wsetTimeout;
-  return ((window as any).clearTimeout = wclearTimeout);
-};
-
-(MutekiTimer as any).isEnabled = () => !!TIMER_PATH;
-
 export { MutekiTimer };
 
 function __guard__(value, transform) {

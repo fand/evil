@@ -655,8 +655,6 @@ class SessionView {
     return this.drawCellTracks(p, x, y);
   }
 
-  drawSceneName(y, name) {}
-
   drawScene(pos, cells) {
     this.ctx_tracks_on.clearRect(
       0,

@@ -216,10 +216,6 @@ class VCO {
     this.node.connect(this.dst);
   }
 
-  disconnect() {
-    this.node.disconnect();
-  }
-
   getParam() {
     return {
       shape: this.shape,
@@ -565,10 +561,6 @@ export class SynthCore {
 
   mute() {
     this.is_mute = true;
-  }
-
-  unmute() {
-    this.is_mute = false;
   }
 }
 

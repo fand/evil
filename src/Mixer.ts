@@ -131,10 +131,6 @@ class Mixer {
     return this.view.addSynth(synth);
   }
 
-  removeSynth(i) {
-    return this.panners.splice(i);
-  }
-
   setGains(gain_tracks, gain_master) {
     this.gain_tracks = gain_tracks;
     this.gain_master = gain_master;

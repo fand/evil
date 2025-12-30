@@ -133,10 +133,6 @@ class Session {
     return (this.cue_queue = []);
   }
 
-  getScene(i) {
-    return this.song.master[i];
-  }
-
   // Display current states via SessionView.
   play() {
     return this.view.drawScene(this.scene_pos, this.current_cells);
@@ -160,11 +156,6 @@ class Session {
   cueScene(scene_num) {
     this.is_waiting_next_scene = true;
     return (this.next_scene_pos = scene_num);
-  }
-
-  next() {
-    this.nextScene();
-    return this.nextPattern();
   }
 
   addSynth(s, _pos) {

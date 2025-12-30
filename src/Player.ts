@@ -357,11 +357,6 @@ export class Player {
     return this.resetSceneLength();
   }
 
-  clearSong() {
-    this.synth = [];
-    return (this.num_id = 0);
-  }
-
   readScene(scene) {
     if (scene.bpm != null) {
       this.setBPM(scene.bpm);
@@ -393,12 +388,4 @@ export class Player {
     );
   }
 
-  showSuccess(url: string) {
-    console.log('success!');
-    return console.log(url);
-  }
-
-  showError(error: string) {
-    return console.log(error);
-  }
 }

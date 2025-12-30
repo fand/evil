@@ -255,10 +255,6 @@ class Synth {
     this.view.activate();
   }
 
-  deactivate() {
-    this.view.deactivate();
-  }
-
   redraw(time: number) {
     this.time = time;
     this.view.drawPattern(this.time);
@@ -315,10 +311,6 @@ class Synth {
 
   mute() {
     return this.core.mute();
-  }
-
-  unmute() {
-    return this.core.unmute();
   }
 
   // Set effects' params from the song.
