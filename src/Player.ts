@@ -226,7 +226,7 @@ export class Player {
       s_new = new Synth(this.context, idx, this, s_old.name);
       s_new.setScale(this.scene.scale);
       s_new.setKey(this.scene.key);
-    } else if (type === 'SAMPLER') {
+    } else {
       s_new = new Sampler(this.context, idx, this, s_old.name);
     }
 
@@ -273,21 +273,13 @@ export class Player {
   moveTo(synth_num: number) {
     this.view.moveBottom();
     if (synth_num < this.synth_pos) {
-      return (() => {
-        const result = [];
-        while (synth_num !== this.synth_pos) {
-          result.push(this.view.moveLeft());
-        }
-        return result;
-      })();
+      while (synth_num !== this.synth_pos) {
+        this.view.moveLeft();
+      }
     } else {
-      return (() => {
-        const result1 = [];
-        while (synth_num !== this.synth_pos) {
-          result1.push(this.view.moveRight());
-        }
-        return result1;
-      })();
+      while (synth_num !== this.synth_pos) {
+        this.view.moveRight();
+      }
     }
   }
 
@@ -299,15 +291,13 @@ export class Player {
       return;
     }
 
-    const result = [];
     for (let s of Array.from(this.synth)) {
       if (Array.from(solos).includes(s.id + 1)) {
-        result.push(s.demute());
+        s.demute();
       } else {
-        result.push(s.mute());
+        s.mute();
       }
     }
-    return result;
   }
 
   readSong(song) {
@@ -387,5 +377,4 @@ export class Player {
       (s) => (this.scene_length = Math.max(this.scene_length, s.pattern.length))
     );
   }
-
 }

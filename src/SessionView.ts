@@ -8,6 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
+import type { Session } from './Session';
 
 declare global {
   interface Window {
@@ -16,7 +17,7 @@ declare global {
 }
 
 class SessionView {
-  model: any;
+  model: Session;
   song: any;
   wrapper_mixer: JQuery;
   wrapper_master: JQuery;
@@ -250,25 +251,25 @@ class SessionView {
 
   // Get the cell under the mouse
   getPos(rect, wrapper, e, type) {
-    const _x = Math.floor(
-      (e.clientX - rect.left + this.wrapper_mixer.scrollLeft()) / this.w
+    const x = Math.floor(
+      (e.clientX - rect.left + this.wrapper_mixer.scrollLeft()!) / this.w
     );
-    const _y = Math.floor(
+    const y = Math.floor(
       (e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) /
         this.h
     );
     return {
-      x: _x,
-      y: _y,
+      x,
+      y,
       type,
     };
   }
 
   getPlayPos(rect, wrapper, e) {
-    const _x = Math.floor(
-      (e.clientX - rect.left + this.wrapper_mixer.scrollLeft()) / this.w
+    const x = Math.floor(
+      (e.clientX - rect.left + this.wrapper_mixer.scrollLeft()!) / this.w
     );
-    let _y = Math.floor(
+    let y = Math.floor(
       (e.clientY - rect.top + wrapper.scrollTop() - this.offset_translate) /
         this.h
     );
@@ -276,22 +277,22 @@ class SessionView {
     // inside canvas && not track name space
     if (
       !(
-        e.clientX - rect.left + this.wrapper_mixer.scrollLeft() - _x * this.w <
+        e.clientX - rect.left + this.wrapper_mixer.scrollLeft()! - x * this.w <
           20 &&
         e.clientY -
           rect.top +
           wrapper.scrollTop() -
           this.offset_translate -
-          _y * this.h <
+          y * this.h <
           20
       )
     ) {
-      _y = -1;
+      y = -1;
     }
 
     return {
-      x: _x,
-      y: _y,
+      x,
+      y,
     };
   }
 
@@ -414,10 +415,10 @@ class SessionView {
       });
 
     this.wrapper_master.on('scroll', (e) =>
-      this.wrapper_tracks_sub.scrollTop(this.wrapper_master.scrollTop())
+      this.wrapper_tracks_sub.scrollTop(this.wrapper_master.scrollTop()!)
     );
     this.wrapper_tracks_sub.on('scroll', (e) =>
-      this.wrapper_master.scrollTop(this.wrapper_tracks_sub.scrollTop())
+      this.wrapper_master.scrollTop(this.wrapper_tracks_sub.scrollTop()!)
     );
 
     // for Other view
@@ -915,7 +916,7 @@ class SessionView {
         16,
         15
       );
-      return window.setTimeout(
+      window.setTimeout(
         () =>
           this.ctx_master_on.clearRect(
             c[0] * this.w + 3,
@@ -926,39 +927,34 @@ class SessionView {
         100
       );
     } else {
-      return (() => {
-        const result = [];
-        for (c of Array.from(cells)) {
-          this.ctx_tracks_on.drawImage(
-            this.img_play,
-            36,
-            0,
-            18,
-            18,
-            c[0] * this.w + 3,
-            c[1] * this.h + 3,
-            16,
-            15
-          );
-          result.push(
-            window.setTimeout(
-              () =>
-                this.ctx_tracks_on.clearRect(
-                  c[0] * this.w + 3,
-                  c[1] * this.h + 3,
-                  16,
-                  15
-                ),
-              100
-            )
-          );
-        }
-        return result;
-      })();
+      for (c of Array.from(cells)) {
+        this.ctx_tracks_on.drawImage(
+          this.img_play,
+          36,
+          0,
+          18,
+          18,
+          c[0] * this.w + 3,
+          c[1] * this.h + 3,
+          16,
+          15
+        );
+
+        window.setTimeout(
+          () =>
+            this.ctx_tracks_on.clearRect(
+              c[0] * this.w + 3,
+              c[1] * this.h + 3,
+              16,
+              15
+            ),
+          100
+        );
+      }
     }
   }
 
-  editPattern(pos) {
+  editPattern(pos: { x: number; y: number }) {
     const pat = this.model.editPattern(pos.x, pos.y);
     return this.drawCellTracks(pat[2], pat[0], pat[1]);
   }

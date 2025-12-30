@@ -163,7 +163,7 @@ export class Mixer {
     this.pan_tracks = pan_tracks;
     this.pan_master = pan_master;
     this.setPans(this.pan_tracks, this.pan_master);
-    return this.view.readPans(this.pan_tracks, this.pan_master);
+    this.view.readPans(this.pan_tracks, this.pan_master);
   }
 
   getParam() {
@@ -180,7 +180,7 @@ export class Mixer {
       return;
     }
     this.readGains(p.gain_tracks, p.gain_master);
-    return this.readPans(p.pan_tracks, p.pan_master);
+    this.readPans(p.pan_tracks, p.pan_master);
   }
 
   changeSynth(idx: number, synth: Synth | Sampler) {
@@ -200,6 +200,8 @@ export class Mixer {
       fx = new Compressor(this.ctx);
     } else if (name === 'Double') {
       fx = new Double(this.ctx);
+    } else {
+      throw new TypeError(`Invalid FX type: ${name}`);
     }
 
     const pos = this.effects_master.length;

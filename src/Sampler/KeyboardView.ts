@@ -36,8 +36,8 @@ export class SamplerKeyboardView {
     this.off_dom = this.sequencer.dom.find('.keyboard-on');
     this.canvas_on = this.on_dom[0] as HTMLCanvasElement;
     this.canvas_off = this.off_dom[0] as HTMLCanvasElement;
-    this.ctx_on = this.canvas_on.getContext('2d');
-    this.ctx_off = this.canvas_off.getContext('2d');
+    this.ctx_on = this.canvas_on.getContext('2d')!;
+    this.ctx_off = this.canvas_off.getContext('2d')!;
 
     this.w = 64;
     this.h = 26;
@@ -65,18 +65,11 @@ export class SamplerKeyboardView {
     this.offset = { x: this.rect.left, y: this.rect.top };
 
     this.ctx_off.fillStyle = this.color[0];
-    return (() => {
-      const result = [];
-      for (
-        let i = 0, end = this.cells_y, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
-        this.drawNormal(i);
-        result.push(this.drawText(i));
-      }
-      return result;
-    })();
+
+    for (let i = 0; i < this.cells_y; i++) {
+      this.drawNormal(i);
+      this.drawText(i);
+    }
   }
 
   getPos(e: JQuery.MouseMoveEvent | JQuery.MouseDownEvent) {
@@ -181,12 +174,15 @@ export class SamplerKeyboardView {
   }
 
   selectSample(sample_now: number) {
-    this.ctx_on.clearRect(
-      0,
-      (this.cells_y - this.sample_last - 1) * this.h,
-      this.w,
-      this.h
-    );
+    if (this.sample_last !== undefined) {
+      this.ctx_on.clearRect(
+        0,
+        (this.cells_y - this.sample_last - 1) * this.h,
+        this.w,
+        this.h
+      );
+    }
+
     this.ctx_on.fillStyle = 'rgba(255, 200, 230, 0.3)';
     this.ctx_on.fillRect(
       0,
@@ -194,6 +190,7 @@ export class SamplerKeyboardView {
       this.w,
       this.h
     );
-    return (this.sample_last = sample_now);
+
+    this.sample_last = sample_now;
   }
 }

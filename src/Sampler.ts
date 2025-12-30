@@ -31,15 +31,13 @@ class Sampler {
   return: GainNode;
   effects: any[];
 
-  constructor(ctx: AudioContext, id: number, player: Player, name: string) {
+  constructor(ctx: AudioContext, id: number, player: Player, name?: string) {
     this.ctx = ctx;
     this.id = id;
     this.player = player;
-    this.name = name;
+
+    this.name = name ?? `Sampler #${id}`;
     this.type = 'SAMPLER';
-    if (this.name == null) {
-      this.name = 'Sampler #' + this.id;
-    }
 
     this.pattern_name = 'pattern 0';
     this.pattern = [
@@ -266,21 +264,11 @@ class Sampler {
   }
 
   removeNote(pos) {
-    return (() => {
-      const result = [];
-      for (
-        let i = 0, end = this.pattern[pos.x_abs].length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
-        if (this.pattern[pos.x_abs][i][0] === pos.note) {
-          result.push(this.pattern[pos.x_abs].splice(i, 1));
-        } else {
-          result.push(undefined);
-        }
+    for (let i = 0; i < this.pattern[pos.x_abs].length; i++) {
+      if (this.pattern[pos.x_abs][i][0] === pos.note) {
+        this.pattern[pos.x_abs].splice(i, 1);
       }
-      return result;
-    })();
+    }
   }
 
   activate(i) {

@@ -17,11 +17,9 @@ declare global {
 }
 
 // TODO: merge with SamplerPattern
-type SynthPattern = (number | 'sustain' | 'end')[];
+export type SynthPattern = (number | 'sustain' | 'end')[];
 
-const DEFAULT_PATTERN: SynthPattern = [];
-
-type SynthPatternObject = { name: string; pattern: SynthPattern };
+export type SynthPatternObject = { name: string; pattern: SynthPattern };
 
 type SynthPos = {
   x: number;
@@ -686,13 +684,9 @@ export class SynthView {
             }
           }
           if (i < this.page) {
-            return (() => {
-              const result = [];
-              while (this.page !== i) {
-                result.push(this.model.player.backward(true));
-              }
-              return result;
-            })();
+            while (this.page !== i) {
+              this.model.player.backward(true);
+            }
           } // force
         });
       });

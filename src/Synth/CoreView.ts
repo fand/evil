@@ -56,9 +56,9 @@ class SynthCoreView {
   }
 
   updateCanvas(name) {
-    let canvas = null;
-    let context = null;
-    let adsr = null;
+    let canvas: HTMLCanvasElement;
+    let context: CanvasRenderingContext2D;
+    let adsr: number[];
     if (name === 'EG') {
       canvas = this.canvasEG;
       context = this.contextEG;
@@ -94,43 +94,28 @@ class SynthCoreView {
   fetchVCOParam() {
     const harmony = this.vcos.eq(0).find('.harmony').val() as string;
 
-    const result = [];
-    for (
-      let i = 0, end = this.vcos.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
-      var vco = this.vcos.eq(i);
-      result.push(
-        this.model.setVCOParam(
-          i,
-          vco.find('.shape').val() as string,
-          parseInt(vco.find('.octave').val() as string),
-          parseInt(vco.find('.interval').val() as string),
-          parseInt(vco.find('.fine').val() as string),
-          harmony
-        )
+    for (let i = 0; i < this.vcos.length; i++) {
+      const vco = this.vcos.eq(i);
+
+      this.model.setVCOParam(
+        i,
+        vco.find('.shape').val() as string,
+        parseInt(vco.find('.octave').val() as string),
+        parseInt(vco.find('.interval').val() as string),
+        parseInt(vco.find('.fine').val() as string),
+        harmony
       );
     }
-    return result;
   }
 
   setVCOParam(p) {
-    return (() => {
-      const result = [];
-      for (
-        let i = 0, end = this.vcos.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
-        var vco = this.vcos.eq(i);
-        vco.find('.shape').val(p[i].shape);
-        vco.find('.octave').val(p[i].octave);
-        vco.find('.interval').val(p[i].interval);
-        result.push(vco.find('.fine').val(p[i].fine));
-      }
-      return result;
-    })();
+    for (let i = 0; i < this.vcos.length; i++) {
+      var vco = this.vcos.eq(i);
+      vco.find('.shape').val(p[i].shape);
+      vco.find('.octave').val(p[i].octave);
+      vco.find('.interval').val(p[i].interval);
+      vco.find('.fine').val(p[i].fine);
+    }
   }
 
   fetchEGParam() {

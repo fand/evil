@@ -370,18 +370,14 @@ export class SamplerView {
   }
 
   removeNote(pos: SamplerPos) {
-    for (
-      let i = 0, end = this.pattern[pos.x_abs].length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.pattern[pos.x_abs].length; i++) {
       if (this.pattern[pos.x_abs][i][0] === pos.note) {
         this.pattern[pos.x_abs].splice(i, 1);
       }
     }
 
     this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
-    return this.model.removeNote(pos);
+    this.model.removeNote(pos);
   }
 
   playAt(time: number) {
@@ -516,13 +512,9 @@ export class SamplerView {
             }
           }
           if (i < this.page) {
-            return (() => {
-              const result = [];
-              while (this.page !== i) {
-                result.push(this.model.player.backward(true));
-              }
-              return result;
-            })();
+            while (this.page !== i) {
+              this.model.player.backward(true);
+            }
           } // force
         });
       });

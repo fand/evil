@@ -10,6 +10,7 @@
 import { SessionView } from './SessionView';
 import { Song } from './Song';
 import $ from 'jquery';
+import { SynthPatternObject } from './Synth/View';
 
 // Control the patterns for tracks.
 class Session {
@@ -140,9 +141,9 @@ class Session {
 
   beat() {
     if (this.is_waiting_next_scene) {
-      return this.view.beat(true, [0, this.next_scene_pos]);
+      this.view.beat(true, [0, this.next_scene_pos]);
     } else {
-      return this.view.beat(false, this.cue_queue);
+      this.view.beat(false, this.cue_queue);
     }
   }
 
@@ -164,7 +165,7 @@ class Session {
     const name = s.id + '-' + pos;
     s.setPatternName(name);
 
-    const patterns = [];
+    const patterns: SynthPatternObject[] = [];
     patterns[pos] = { name: s.pattern_name, pattern: s.pattern };
     const s_obj = {
       id: s.id,
@@ -288,21 +289,13 @@ class Session {
 
   // Save parameters for tracks into @song.
   saveTracks() {
-    return (() => {
-      const result = [];
-      for (
-        let i = 0, end = this.player.synth.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
-        var param = this.player.synth[i].getParam();
-        if (this.song.tracks[i].patterns != null) {
-          param.patterns = this.song.tracks[i].patterns;
-        }
-        result.push((this.song.tracks[i] = param));
+    for (let i = 0, end = this.player.synth.length; i < end; i++) {
+      var param = this.player.synth[i].getParam();
+      if (this.song.tracks[i].patterns != null) {
+        param.patterns = this.song.tracks[i].patterns;
       }
-      return result;
-    })();
+      this.song.tracks[i] = param;
+    }
   }
 
   saveTracksEffect(pos) {
@@ -414,7 +407,7 @@ class Session {
     const pat_name = id + '-' + this.scene_pos;
     synth_new.setPatternName(pat_name);
 
-    const patterns = [];
+    const patterns: SynthPatternObject[] = [];
     patterns[this.scene_pos] = { name: pat_name, pattern: synth_new.pattern };
 
     const s_params = {

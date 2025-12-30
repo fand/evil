@@ -190,7 +190,7 @@ class Keyboard {
     const num = KEYCODE_TO_NUM[keyCode];
     if (num != null && num < 10) {
       this.solos = this.solos.filter((n) => n !== num);
-      return this.player.solo(this.solos);
+      this.player.solo(this.solos);
     }
   }
 }

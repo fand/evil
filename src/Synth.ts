@@ -48,15 +48,14 @@ class Synth {
   T: MutekiTimer;
   duration: number;
 
-  constructor(ctx: AudioContext, id: number, player: Player, name: string) {
+  constructor(ctx: AudioContext, id: number, player: Player, name?: string) {
     this.ctx = ctx;
     this.id = id;
     this.player = player;
-    this.name = name;
+
+    this.name = name ?? `Synth #${id}`;
     this.type = 'REZ';
-    if (this.name == null) {
-      this.name = 'Synth #' + this.id;
-    }
+
     this.pattern_name = 'pattern 0';
     this.pattern = [
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -305,7 +304,7 @@ class Synth {
     }
     this.core.setParam(p);
     if (p.effects != null) {
-      return this.setEffects(p.effects);
+      this.setEffects(p.effects);
     }
   }
 
@@ -320,29 +319,25 @@ class Synth {
     }
     this.effects = [];
 
-    return (() => {
-      const result = [];
-      for (const e of Array.from(effects_new)) {
-        let fx: FX;
-        if (e.effect === 'Fuzz') {
-          fx = new Fuzz(this.ctx);
-        } else if (e.effect === 'Delay') {
-          fx = new Delay(this.ctx);
-        } else if (e.effect === 'Reverb') {
-          fx = new Reverb(this.ctx);
-        } else if (e.effect === 'Comp') {
-          fx = new Compressor(this.ctx);
-        } else if (e.effect === 'Double') {
-          fx = new Double(this.ctx);
-        } else {
-          throw new Error(`Invalid FX type: ${e.effect}`);
-        }
-
-        this.insertEffect(fx);
-        result.push(fx.setParam(e));
+    for (const e of Array.from(effects_new)) {
+      let fx: FX;
+      if (e.effect === 'Fuzz') {
+        fx = new Fuzz(this.ctx);
+      } else if (e.effect === 'Delay') {
+        fx = new Delay(this.ctx);
+      } else if (e.effect === 'Reverb') {
+        fx = new Reverb(this.ctx);
+      } else if (e.effect === 'Comp') {
+        fx = new Compressor(this.ctx);
+      } else if (e.effect === 'Double') {
+        fx = new Double(this.ctx);
+      } else {
+        throw new Error(`Invalid FX type: ${e.effect}`);
       }
-      return result;
-    })();
+
+      this.insertEffect(fx);
+      fx.setParam(e);
+    }
   }
 
   getEffectsParam() {

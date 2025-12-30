@@ -36,7 +36,7 @@ const initEvil = function () {
   const keyboard = new Keyboard(player);
   (window as any).keyboard = keyboard;
 
-  const footer_size = $(window).height() / 2 - 300;
+  const footer_size = window.innerHeight / 2 - 300;
   $('footer').css('height', footer_size + 'px');
 
   // Read song

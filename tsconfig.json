@@ -6,7 +6,7 @@
     "strict": false,
     "noImplicitAny": false,
     "noImplicitThis": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "strictPropertyInitialization": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
