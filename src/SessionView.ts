@@ -130,7 +130,7 @@ export class SessionView {
       ],
     };
 
-    this.track_color = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => this.color);
+    this.track_color = [0, 1, 2, 3, 4, 5, 6, 7].map(() => this.color);
 
     this.img_play = new Image();
     this.img_play.src = import.meta.env.BASE_URL + 'img/play.png';
@@ -314,7 +314,7 @@ export class SessionView {
           return this.drawHover(this.ctx_tracks_hover, pos);
         }
       })
-      .on('mouseout', (e) => {
+      .on('mouseout', () => {
         this.clearHover(this.ctx_tracks_hover);
         this.hover_pos = { x: -1, y: -1 };
         return (this.is_clicked = false);
@@ -381,7 +381,7 @@ export class SessionView {
           return this.drawHover(this.ctx_master_hover, pos);
         }
       })
-      .on('mouseout', (e) => {
+      .on('mouseout', () => {
         this.clearHover(this.ctx_master_hover);
         this.hover_pos = { x: -1, y: -1 };
         return (this.is_clicked = false);
@@ -416,10 +416,10 @@ export class SessionView {
         return (this.is_clicked = false);
       });
 
-    this.wrapper_master.on('scroll', (e) =>
+    this.wrapper_master.on('scroll', () =>
       this.wrapper_tracks_sub.scrollTop(this.wrapper_master.scrollTop()!)
     );
-    this.wrapper_tracks_sub.on('scroll', (e) =>
+    this.wrapper_tracks_sub.on('scroll', () =>
       this.wrapper_master.scrollTop(this.wrapper_tracks_sub.scrollTop()!)
     );
 
@@ -936,7 +936,7 @@ export class SessionView {
     return this.drawCellTracks(pat[2], pat[0], pat[1]);
   }
 
-  addInstrument(_pos?: any) {
+  addInstrument() {
     return this.loadSong(this.current_cells);
   }
 
@@ -978,7 +978,7 @@ export class SessionView {
       .click(() => this.closeDialog());
   }
 
-  showError(error: any) {
+  showError() {
     this.dialog.css({ opacity: '1', 'z-index': '10000' });
     this.dialog.find('#dialog-socials').hide();
     this.dialog.find('#dialog-success').hide();
@@ -992,17 +992,15 @@ export class SessionView {
   // Share button on dialogue
   share(service: string) {
     // Prepare the default text to share
-    let text, title;
+    let text;
     if (this.song.title != null) {
       if (this.song.creator != null) {
         text = '"' + this.song.title + '" by ' + this.song.creator;
       } else {
         text = '"' + this.song.title + '"';
       }
-      title = text + ' :: evil';
     } else {
       text = '"evil" by gmork';
-      title = 'evil';
     }
 
     const url = location.href;

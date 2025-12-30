@@ -168,7 +168,7 @@ export class MixerView {
     this.setPans();
   }
 
-  displayGains(gains: number[]) {}
+  displayGains() {}
 
   pan2pos(v: number) {
     const theta = v * Math.PI;

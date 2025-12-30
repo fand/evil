@@ -1,5 +1,4 @@
 import { SynthCoreView } from './CoreView';
-import { MutekiTimer } from '../MutekiTimer';
 import { KEY_LIST, NoteKey, SEMITONE, STREAM_LENGTH } from '../Constant';
 import type { Synth } from '../Synth';
 import type { SynthParam, VCOParam, EGParam } from '../Song';
@@ -511,7 +510,6 @@ export class SynthCore {
 
   // Converts interval (n-th note) to semitones.
   noteToSemitone(note: number, shift: number) {
-    let semitone: number;
     if (this.is_harmony) {
       note = note + shift;
       if (shift > 0) {
@@ -520,14 +518,16 @@ export class SynthCore {
       if (shift < 0) {
         note++;
       }
-      return (semitone =
+      return (
         Math.floor((note - 1) / this.scale.length) * 12 +
-        this.scale[(note - 1) % this.scale.length]);
+        this.scale[(note - 1) % this.scale.length]
+      );
     } else {
-      return (semitone =
+      return (
         Math.floor((note - 1) / this.scale.length) * 12 +
         this.scale[(note - 1) % this.scale.length] +
-        shift);
+        shift
+      );
     }
   }
 

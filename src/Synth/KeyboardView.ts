@@ -88,13 +88,13 @@ export class KeyboardView {
         this.sequencer.model.noteOn(this.num - pos, true);
         this.click_pos = pos;
       })
-      .on('mouseup', (e) => {
+      .on('mouseup', () => {
         this.is_clicked = false;
         this.clearActive(this.click_pos);
         this.sequencer.model.noteOff(true);
         this.click_pos = { x: -1, y: -1 };
       })
-      .on('mouseout', (e) => {
+      .on('mouseout', () => {
         this.clearActive(this.hover_pos);
         this.sequencer.model.noteOff(true);
         this.hover_pos = { x: -1, y: -1 };
