@@ -12,6 +12,7 @@ import {
   type NoteScale,
 } from './Constant';
 import type { Instrument, InstrumentType } from './Instrument';
+import { Song } from './Song';
 
 declare global {
   interface Window {
@@ -40,7 +41,7 @@ export class Player {
   sidebar: Sidebar;
   scene_length: number = 32;
   view: PlayerView;
-  song: any;
+  song!: Song;
 
   constructor(ctx: AudioContext) {
     this.scene = { bpm: this.bpm, key: this.key, scale: this.scale };
@@ -286,7 +287,7 @@ export class Player {
     }
   }
 
-  readSong(song: any) {
+  readSong(song: Song) {
     this.song = song;
     this.instruments = [];
     this.num_id = 0;

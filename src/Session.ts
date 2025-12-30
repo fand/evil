@@ -1,5 +1,5 @@
 import { SessionView } from './SessionView';
-import { Song } from './Song';
+import { DEFAULT_SONG, Song } from './Song';
 import $ from 'jquery';
 import { SynthPatternObject } from './Synth/SynthView';
 import type { Player } from './Player';
@@ -42,7 +42,7 @@ class Session {
 
     this.cue_queue = [];
 
-    this.song = Song.DEFAULT;
+    this.song = DEFAULT_SONG;
 
     this.view = new SessionView(this, this.song);
   }

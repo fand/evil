@@ -1,18 +1,41 @@
-const _master = {
-  name: 'section-0',
-  bpm: 144,
-  key: 'A',
-  scale: 'minor',
-};
+import type { InstrumentType } from './Instrument';
 
-const SONG_DEFAULT = {
+export const DEFAULT_SONG: Song = {
   tracks: [],
   length: 1,
-  master: [_master],
+  master: [
+    {
+      name: 'section-0',
+      bpm: 144,
+      key: 'A',
+      scale: 'minor',
+    },
+  ],
 };
 
-class Song {
-  static DEFAULT = SONG_DEFAULT;
-}
+export type Song = {
+  tracks: Track[];
+  length: number;
+  master: Master[];
+  mixer?: MixerParam | null;
+};
 
-export { Song };
+export type Track = {
+  type?: InstrumentType;
+  name: string;
+  [key: string]: unknown;
+};
+
+export type Master = {
+  name: string;
+  bpm: number;
+  key: string;
+  scale: string;
+};
+
+export type MixerParam = {
+  gain_tracks: number[];
+  gain_master: number;
+  pan_tracks: number[];
+  pan_master: number;
+};

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { Player } from './Player';
 import { Keyboard } from './Keyboard';
-import { Song } from './Song';
+import { DEFAULT_SONG, Song } from './Song';
 
 const sorry = function () {
   $('#top-sorry').show();
@@ -33,11 +33,15 @@ const initEvil = function () {
   $('footer').css('height', footer_size + 'px');
 
   // Read song
-  if ((window as any).song_loaded) {
-    player.readSong(JSON.parse((window as any).song_loaded.json));
-  } else {
-    player.readSong(Song.DEFAULT);
-  }
+  const song: Song = (() => {
+    if ((window as any).song_loaded) {
+      return JSON.parse((window as any).song_loaded.json);
+    } else {
+      return DEFAULT_SONG;
+    }
+  })();
+
+  player.readSong(song);
 };
 
 // ------------------------------------------------------------------------------
