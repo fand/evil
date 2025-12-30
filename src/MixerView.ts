@@ -107,7 +107,7 @@ export class MixerView {
     this.pans_label.push(dom.find('.pan-label'));
 
     const d = dom.find('.vu-meter');
-    this.canvas_tracks_dom.push(d as any);
+    this.canvas_tracks_dom.push(d);
     const canvas = d[0] as HTMLCanvasElement;
     this.canvas_tracks.push(canvas);
     this.ctx_tracks.push(canvas.getContext('2d')!);
@@ -120,8 +120,8 @@ export class MixerView {
   }
 
   setGains() {
-    const g = Array.from(this.gains).map(
-      (_g) => parseFloat((_g as any).val() as string) / 100.0
+    const g = this.gains.map(
+      (_g) => parseFloat(_g.val() as string) / 100.0
     );
     const g_master = parseFloat(this.gain_master.val() as string) / 100.0;
     return this.model.setGains(g, g_master);
@@ -129,13 +129,13 @@ export class MixerView {
 
   setPans() {
     const pans = this.pans.map(
-      (p) => 1.0 - parseFloat((p as any).val() as string) / 200.0
+      (p) => 1.0 - parseFloat(p.val() as string) / 200.0
     );
     const p_master = 1.0 - parseFloat(this.pan_master.val() as string) / 200.0;
     this.model.setPans(pans, p_master);
 
     for (let i = 0, end = this.pans.length; i < end; i++) {
-      const l = parseInt((this.pans[i] as any).val() as string) - 100;
+      const l = parseInt(this.pans[i].val() as string) - 100;
       const t = l === 0 ? 'C' : l < 0 ? -l + '% L' : l + '% R';
       this.pans_label[i].text(t);
     }

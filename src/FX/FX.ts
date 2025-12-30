@@ -1,5 +1,8 @@
 import $ from 'jquery';
 import type { FXView } from './FXView';
+import type { EffectParam } from '../Song';
+import type { Instrument } from '../Instrument';
+import type { Mixer } from '../Mixer';
 
 export abstract class FX {
   abstract view: FXView;
@@ -8,7 +11,7 @@ export abstract class FX {
   protected dry: GainNode;
   wet: GainNode;
   out: GainNode;
-  protected source: any;
+  protected source: Instrument | Mixer | undefined;
 
   constructor(ctx: AudioContext) {
     this.ctx = ctx;
@@ -51,10 +54,12 @@ export abstract class FX {
   }
 
   remove() {
-    this.source.removeEffect(this);
+    if (this.source && 'removeEffect' in this.source) {
+      (this.source as Instrument).removeEffect(this);
+    }
   }
 
-  setSource(source: any) {
+  setSource(source: Instrument | Mixer) {
     this.source = source;
   }
 
@@ -62,8 +67,8 @@ export abstract class FX {
     // Override in subclasses
   }
 
-  getParam(): any {
+  getParam(): EffectParam {
     // Override in subclasses
-    return {};
+    return { effect: '' };
   }
 }

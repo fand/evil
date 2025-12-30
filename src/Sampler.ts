@@ -123,8 +123,8 @@ class Sampler implements Instrument {
   setDuration() {}
   setKey() {}
   setScale() {}
-  setNote(note: number) {
-    (this.core as any).setNote(note);
+  setNote() {
+    // SamplerCore does not support setNote
   }
 
   setGain(gain: number) {

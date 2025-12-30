@@ -1,5 +1,7 @@
+import type { SynthView } from './SynthView';
+
 export class KeyboardView {
-  sequencer: any;
+  sequencer: SynthView;
   dom: JQuery;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -14,7 +16,7 @@ export class KeyboardView {
   rect: DOMRect;
   offset: { x: number; y: number };
 
-  constructor(sequencer: any) {
+  constructor(sequencer: SynthView) {
     // Keyboard
     this.sequencer = sequencer;
     this.dom = this.sequencer.dom.find('.keyboard');

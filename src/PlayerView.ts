@@ -1,10 +1,11 @@
 import $ from 'jquery';
 import { KEY_LIST } from './Constant';
 import type { Player } from './Player';
+import type { Keyboard } from './Keyboard';
 
 declare global {
   interface Window {
-    keyboard: any;
+    keyboard: Keyboard;
   }
 }
 
@@ -110,7 +111,7 @@ export class PlayerView {
     }
   }
 
-  viewStop(receiver?: any) {
+  viewStop(receiver?: Player) {
     if (receiver != null) {
       receiver.stop();
     }

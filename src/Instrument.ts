@@ -18,6 +18,7 @@ export interface Instrument {
   pattern: Pattern;
   pattern_name: string;
   view: InstrumentView;
+  effects: FX[];
 
   setDuration(duration: number): void;
   setKey(key: string): void;
@@ -44,6 +45,7 @@ export interface Instrument {
   clearPattern(): void;
   setPatternName(pattern_name: string): void;
   insertEffect(fx: FX): void;
+  removeEffect(fx: FX): void;
   getEffectsParam(): EffectParam[];
 }
 

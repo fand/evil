@@ -1,9 +1,12 @@
 import $ from 'jquery';
 import type { Sidebar } from './Sidebar';
+import type { Keyboard } from './Keyboard';
+import type { Instrument } from './Instrument';
+import type { Scene } from './Song';
 
 declare global {
   interface Window {
-    keyboard: any;
+    keyboard: Keyboard;
   }
 }
 
@@ -112,18 +115,20 @@ class SidebarView {
   }
 
   saveTracksEffect() {
-    return Array.from(this.tracks_effects).map((f: any) => f.getParam());
+    return Array.from(this.tracks_effects).map((f: Element) =>
+      (f as unknown as { getParam: () => unknown }).getParam()
+    );
   }
 
-  showTracks(track: any) {
+  showTracks(track: Instrument) {
     this.tracks_effects.find('.sidebar-effect').remove();
-    for (const f of Array.from(track.effects) as any[]) {
-      f.appendTo(this.tracks_effects);
+    for (const f of track.effects) {
+      f.appendTo(this.tracks_effects[0]);
     }
     return this.wrapper.css('left', '0px');
   }
 
-  showMaster(o: any) {
+  showMaster(o: Partial<Scene>) {
     this.hideMasterControl();
 
     let s = '';
@@ -154,12 +159,12 @@ class SidebarView {
     return this.master_control.hide();
   }
 
-  addMasterEffect(name: any) {
+  addMasterEffect(name: string) {
     const fx = this.model.addMasterEffect(name);
     return fx.appendTo(this.master_effects[0]);
   }
 
-  addTracksEffect(name: any) {
+  addTracksEffect(name: string) {
     const fx = this.model.addTracksEffect(name);
     return fx.appendTo(this.tracks_effects[0]);
   }

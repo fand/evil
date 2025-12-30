@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import type { SamplerCore } from './SamplerCore';
+import type { SampleNodeParam } from '../Song';
 
 export class SamplerCoreView {
   model: SamplerCore;
@@ -147,7 +148,7 @@ export class SamplerCoreView {
     });
   }
 
-  bindSample(sample_now: number, param: any) {
+  bindSample(sample_now: number, param: SampleNodeParam) {
     this.sample_now = sample_now;
     this.sample_name.find('span').text(param.wave);
     this.updateWaveformCanvas(this.sample_now);

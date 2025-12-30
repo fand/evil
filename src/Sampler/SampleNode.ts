@@ -100,7 +100,7 @@ export class SampleNode {
             console.log(err);
           }
         );
-        (sample as any).data = this.buffer;
+        sample.data = this.buffer;
       };
       req.send();
     }

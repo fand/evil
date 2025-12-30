@@ -2,7 +2,7 @@ import type { Mixer } from './Mixer';
 import type { Player } from './Player';
 import type { Session } from './Session';
 import { SidebarView } from './SidebarView';
-import { Song } from './Song';
+import type { Scene, Song } from './Song';
 
 class Sidebar {
   ctx: AudioContext;
@@ -61,11 +61,11 @@ class Sidebar {
     }
   }
 
-  saveMaster(obj: any) {
+  saveMaster(obj: Partial<Scene>) {
     if (this.sidebar_pos.y === -1) {
       return;
     }
-    return this.session.saveMaster(this.sidebar_pos.y, obj);
+    return this.session.saveMaster(this.sidebar_pos.y, obj as Scene);
   }
 
   saveTracksEffect() {

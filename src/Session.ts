@@ -3,6 +3,7 @@ import {
   DEFAULT_SCENE,
   DEFAULT_SONG,
   PatternObject,
+  Scene,
   Song,
   Track,
 } from './Song';
@@ -14,16 +15,16 @@ import type { Instrument, InstrumentType } from './Instrument';
 class Session {
   ctx: AudioContext;
   player: Player;
-  scenes: any[];
+  scenes: Scene[];
   scene_pos: number;
-  scene: any;
-  current_cells: any[];
-  next_pattern_pos: any[];
+  scene: Scene;
+  current_cells: (number | undefined)[];
+  next_pattern_pos: number[];
   next_scene_pos: number | undefined;
   is_loop: boolean;
   is_waiting_next_pattern: boolean;
   is_waiting_next_scene: boolean;
-  cue_queue: any[];
+  cue_queue: [number, number][];
   song: Song;
   view: SessionView;
   instruments: Instrument[] = [];
@@ -42,7 +43,7 @@ class Session {
     this.player = player;
     this.scenes = [];
     this.scene_pos = 0;
-    this.scene = {};
+    this.scene = { ...DEFAULT_SCENE };
 
     this.current_cells = [];
     this.next_pattern_pos = [];
@@ -185,7 +186,7 @@ class Session {
     this.view.addInstrument();
   }
 
-  setInstrument(inst: any[]) {
+  setInstrument(inst: Instrument[]) {
     this.instruments = inst;
   }
 
@@ -217,7 +218,7 @@ class Session {
     return this.song.tracks.length - 1;
   }
 
-  loadPattern(pat: any, idx: number, pat_num: number) {
+  loadPattern(pat: PatternObject | undefined, idx: number, pat_num: number) {
     this.song.tracks[idx].patterns[pat_num] = pat;
     if (!this.song.master[pat_num]) {
       this.song.master[pat_num] = {
@@ -233,7 +234,7 @@ class Session {
     }
   }
 
-  loadMaster(pat: any, pat_num: number) {
+  loadMaster(pat: Scene, pat_num: number) {
     this.song.master[pat_num] = pat;
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
@@ -311,7 +312,7 @@ class Session {
   }
 
   // Save master track into @song.
-  saveMaster(y: number, obj: any) {
+  saveMaster(y: number, obj: Scene) {
     this.song.master[y] = obj;
     this.view.loadSong(this.current_cells);
     if (y === this.scene_pos) {
@@ -406,7 +407,7 @@ class Session {
   }
 
   // called by Player.
-  changeInstrument(id: number, type: InstrumentType, inst: any) {
+  changeInstrument(id: number, type: InstrumentType, inst: Instrument) {
     const pat_name = id + '-' + this.scene_pos;
     inst.setPatternName(pat_name);
 
@@ -440,7 +441,7 @@ class Session {
     this.next_pattern_pos = [];
     this.scenes = [];
     this.scene_pos = 0;
-    this.scene = {};
+    this.scene = { ...DEFAULT_SCENE };
     this.scene_length = 32;
 
     this.current_cells = [];

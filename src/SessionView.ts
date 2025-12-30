@@ -1,10 +1,11 @@
 import $ from 'jquery';
 import type { Session } from './Session';
 import type { Song } from './Song';
+import type { Keyboard } from './Keyboard';
 
 declare global {
   interface Window {
-    keyboard: any;
+    keyboard: Keyboard;
   }
 }
 
@@ -44,7 +45,7 @@ export class SessionView {
   track_color: string[][];
   img_play: HTMLImageElement;
   last_active: number[];
-  current_cells: any[];
+  current_cells: (number | undefined)[];
   hover_pos: { x: number; y: number; type?: string };
   click_pos: { x: number; y: number; type?: string };
   select_pos: { x: number; y: number; type: string };
@@ -461,7 +462,7 @@ export class SessionView {
   }
 
   // Read song from model.song.
-  loadSong(current_cells: any[]) {
+  loadSong(current_cells: (number | undefined)[]) {
     this.current_cells = current_cells;
     this.resize();
 
@@ -643,7 +644,7 @@ export class SessionView {
     return this.drawCellTracks(p, x, y);
   }
 
-  drawScene(pos: number, cells: any[]) {
+  drawScene(pos: number, cells: (number | undefined)[]) {
     this.ctx_tracks_on.clearRect(
       0,
       this.scene_pos * this.h,
@@ -878,10 +879,9 @@ export class SessionView {
   }
 
   // Light the play buttons on beat.
-  beat(is_master: boolean, cells: any[]) {
-    let c: any;
+  beat(is_master: boolean, cells: [number, number | undefined] | [number, number][]) {
     if (is_master) {
-      c = cells;
+      const c = cells as [number, number | undefined];
       this.ctx_master_on.drawImage(
         this.img_play,
         36,
@@ -904,7 +904,7 @@ export class SessionView {
         100
       );
     } else {
-      for (c of Array.from(cells)) {
+      for (const c of cells as [number, number][]) {
         this.ctx_tracks_on.drawImage(
           this.img_play,
           36,

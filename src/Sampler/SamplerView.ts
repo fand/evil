@@ -1,10 +1,11 @@
 import $ from 'jquery';
 import { SamplerKeyboardView } from './SamplerKeyboardView';
 import type { Sampler } from '../Sampler';
+import type { Keyboard } from '../Keyboard';
 
 declare global {
   interface Window {
-    keyboard: any;
+    keyboard: Keyboard;
   }
 }
 
