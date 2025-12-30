@@ -3,6 +3,13 @@ import { Player } from './Player';
 import { Keyboard } from './Keyboard';
 import { DEFAULT_SONG, Song } from './Song';
 
+declare global {
+  interface Window {
+    keyboard: Keyboard;
+    song_loaded?: { json: string };
+  }
+}
+
 const sorry = function () {
   $('#top-sorry').show();
   $('#top-logo-wrapper').addClass('logo-sorry');
@@ -27,15 +34,15 @@ const initEvil = function () {
   const ctx = new AudioContext();
   const player = new Player(ctx);
   const keyboard = new Keyboard(player);
-  (window as any).keyboard = keyboard;
+  window.keyboard = keyboard;
 
   const footer_size = window.innerHeight / 2 - 300;
   $('footer').css('height', footer_size + 'px');
 
   // Read song
   const song: Song = (() => {
-    if ((window as any).song_loaded) {
-      return JSON.parse((window as any).song_loaded.json);
+    if (window.song_loaded) {
+      return JSON.parse(window.song_loaded.json);
     } else {
       return DEFAULT_SONG;
     }
