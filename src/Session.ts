@@ -367,8 +367,9 @@ class Session {
     this.scene_pos = 0;
     this.scene_length = 0;
 
-    for (let i = 0; i < this.song.tracks.length; i++) {
-      const pat = this.song.tracks[i].patterns[0];
+    // Use instruments.length since song.tracks may have grown during addSynth
+    for (let i = 0; i < this.instruments.length; i++) {
+      const pat = this.song.tracks[i]?.patterns[0];
       if (pat) {
         this.instruments[i].setPattern(pat);
         this.current_cells[i] = 0;
