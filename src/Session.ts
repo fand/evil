@@ -17,7 +17,6 @@ class Session {
   scenes: any[];
   scene_pos: number;
   scene: any;
-  scene_length: number;
   current_cells: any[];
   next_pattern_pos: any[];
   next_scene_pos: number | undefined;
@@ -29,13 +28,21 @@ class Session {
   view: SessionView;
   instruments: Instrument[] = [];
 
+  // Player.scene_length is the single source of truth
+  get scene_length(): number {
+    return this.player.scene_length;
+  }
+
+  set scene_length(value: number) {
+    this.player.scene_length = value;
+  }
+
   constructor(ctx: AudioContext, player: Player) {
     this.ctx = ctx;
     this.player = player;
     this.scenes = [];
     this.scene_pos = 0;
     this.scene = {};
-    this.scene_length = 32;
 
     this.current_cells = [];
     this.next_pattern_pos = [];
@@ -123,7 +130,6 @@ class Session {
     if (this.song.master[this.scene_pos]) {
       this.player.loadScene(this.song.master[this.scene_pos]);
     }
-    this.player.setSceneLength(this.scene_length);
     this.view.loadSong(this.current_cells);
     this.view.drawScene(this.scene_pos, this.current_cells);
     this.next_pattern_pos = [];

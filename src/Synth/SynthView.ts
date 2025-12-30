@@ -72,9 +72,16 @@ export class SynthView {
   fx: JQuery;
   is_fx_view: boolean;
   keyboard: KeyboardView;
-  pattern: SynthPattern;
-  pattern_obj: SynthPatternObject;
   page: number;
+
+  // Reference model's pattern (single source of truth)
+  get pattern(): SynthPattern {
+    return this.model.pattern;
+  }
+
+  get pattern_obj(): SynthPatternObject {
+    return this.model.pattern_obj;
+  }
   page_total: number;
   last_time: number;
   last_page: number;
@@ -151,11 +158,6 @@ export class SynthView {
     this.keyboard = new KeyboardView(this);
 
     // Flags / Params
-    this.pattern = [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0,
-    ];
-    this.pattern_obj = { name: this.model.pattern_name, pattern: this.pattern };
     this.page = 0;
     this.page_total = 1;
 
@@ -479,7 +481,6 @@ export class SynthView {
     // 3. Place the new note
     // ========================================
     this.pattern[pos.x_abs] = pos.note;
-    this.model.addNote(pos.x_abs, pos.note);
     this.clearColumnOn(pos.x);
     this.drawCellOn(CellType.Note, pos.x, pos.y);
   }
@@ -487,7 +488,6 @@ export class SynthView {
   removeNote(pos: SynthPos) {
     this.pattern[pos.x_abs] = 0;
     this.clearCellOn(pos.x, pos.y);
-    this.model.removeNote(pos.x_abs);
   }
 
   sustainNote(l: number, r: number, pos: SynthPos) {
@@ -541,8 +541,6 @@ export class SynthView {
 
     this.drawCellOn(CellType.SustainStart, l % this.cells_x, pos.y);
     this.drawCellOn(CellType.SustainEnd, r % this.cells_x, pos.y);
-
-    this.model.sustainNote(l, r, pos.note);
   }
 
   endSustain(time?: number) {
@@ -580,9 +578,8 @@ export class SynthView {
     this.last_time = this.time;
   }
 
-  setPattern(pattern_obj: SynthPatternObject) {
-    this.pattern_obj = pattern_obj;
-    this.pattern = this.pattern_obj.pattern;
+  setPattern(_pattern_obj: SynthPatternObject) {
+    // pattern_obj is now accessed via getter from model
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);
@@ -622,12 +619,9 @@ export class SynthView {
     if (this.page_total === 8) {
       return;
     }
-    this.pattern = this.pattern.concat([
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0,
-    ]);
-    this.page_total++;
+    // model.plusPattern modifies model.pattern (accessed via getter)
     this.model.plusPattern();
+    this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern();
     this.minus.removeClass('btn-false').addClass('btn-true');
 
@@ -641,9 +635,9 @@ export class SynthView {
       return;
     }
 
-    this.pattern = this.pattern.slice(0, this.pattern.length - this.cells_x);
-    this.page_total--;
+    // model.minusPattern modifies model.pattern (accessed via getter)
     this.model.minusPattern();
+    this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern();
     this.plus.removeClass('btn-false').addClass('btn-true');
 

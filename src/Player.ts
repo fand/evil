@@ -23,10 +23,7 @@ declare global {
 const T = new MutekiTimer();
 
 export class Player {
-  bpm: number = 120;
   duration: number = 500; // msec
-  key: NoteKey = 'A';
-  scale: NoteScale = 'Major';
   is_playing: boolean = false;
   time: number = 0;
   scene: Scene;
@@ -40,12 +37,26 @@ export class Player {
   scene_length: number = 32;
   view: PlayerView;
 
+  // scene is the single source of truth for bpm/key/scale
+  get bpm(): number {
+    return this.scene.bpm;
+  }
+
+  get key(): NoteKey {
+    return this.scene.key as NoteKey;
+  }
+
+  get scale(): NoteScale {
+    return this.scene.scale as NoteScale;
+  }
+
   get song(): Song {
     return this.session.song;
   }
 
   constructor(ctx: AudioContext) {
-    this.scene = { name: '', bpm: this.bpm, key: this.key, scale: this.scale };
+    // Initialize scene first (single source of truth)
+    this.scene = { name: '', bpm: 120, key: 'A', scale: 'Major' };
 
     this.context = ctx;
 
@@ -59,8 +70,7 @@ export class Player {
   }
 
   setBPM(bpm: number) {
-    this.bpm = bpm;
-    this.scene.bpm = this.bpm;
+    this.scene.bpm = bpm;
 
     // @duration = (60000.0 / @bpm) / 8.0
     this.duration = 7500.0 / this.bpm;
@@ -76,8 +86,7 @@ export class Player {
       throw new TypeError(`Invalid Key: ${key}`);
     }
 
-    this.key = key;
-    this.scene.key = this.key;
+    this.scene.key = key;
     for (const s of this.instruments) {
       s.setKey(this.key);
     }
@@ -90,8 +99,7 @@ export class Player {
       throw new TypeError(`Invalid scale: ${scale}`);
     }
 
-    this.scale = scale;
-    this.scene.scale = this.scale;
+    this.scene.scale = scale;
 
     for (const s of this.instruments) {
       s.setScale(this.scale);
