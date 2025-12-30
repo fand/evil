@@ -41,7 +41,7 @@ const initEvil = function () {
     }
   })();
 
-  player.readSong(song);
+  player.loadSong(song);
 };
 
 // ------------------------------------------------------------------------------

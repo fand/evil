@@ -124,7 +124,7 @@ class Session {
       this.player.readScene(this.song.master[this.scene_pos]);
     }
     this.player.setSceneLength(this.scene_length);
-    this.view.readSong(this.current_cells);
+    this.view.loadSong(this.current_cells);
     this.view.drawScene(this.scene_pos, this.current_cells);
     this.next_pattern_pos = [];
     this.next_scene_pos = undefined;
@@ -273,7 +273,7 @@ class Session {
 
     // draw
     this.current_cells[track_idx] = pat_num;
-    this.view.readSong(this.current_cells);
+    this.view.loadSong(this.current_cells);
     this.player.moveTo(track_idx);
 
     return [track_idx, pat_num, this.song.tracks[track_idx].patterns[pat_num]!];
@@ -309,7 +309,7 @@ class Session {
   // Save master track into @song.
   saveMaster(y: number, obj: any) {
     this.song.master[y] = obj;
-    this.view.readSong(this.current_cells);
+    this.view.loadSong(this.current_cells);
     if (y === this.scene_pos) {
       this.player.readScene(obj);
     }
@@ -358,7 +358,7 @@ class Session {
   }
 
   // Read the song (uses this.song set by Player).
-  readSong() {
+  loadSong() {
     this.scene_pos = 0;
     this.scene_length = 0;
 
@@ -373,7 +373,7 @@ class Session {
       }
     }
 
-    this.view.readSong(this.current_cells);
+    this.view.loadSong(this.current_cells);
   }
 
   // Set a track name of @song.
@@ -463,14 +463,14 @@ class Session {
         this.player.instruments[p.x].clearPattern();
         this.current_cells[p.x] = undefined;
       }
-      this.view.readSong(this.current_cells);
+      this.view.loadSong(this.current_cells);
     } else if (p.type === 'master') {
       // clear bpm, key, scale (except name)
       this.song.master[p.y] = {
         ...DEFAULT_SCENE,
         name: this.song.master[p.y].name,
       };
-      this.view.readSong(this.current_cells);
+      this.view.loadSong(this.current_cells);
     }
   }
 }

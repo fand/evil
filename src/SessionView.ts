@@ -448,7 +448,7 @@ export class SessionView {
     this.social_facebook.on('click', () => this.share('facebook'));
     this.social_hatena.on('click', () => this.share('hatena'));
 
-    return this.readSong(this.current_cells);
+    return this.loadSong(this.current_cells);
   }
 
   // Set params for @song (ref to @model.song).
@@ -461,7 +461,7 @@ export class SessionView {
   }
 
   // Read song from model.song.
-  readSong(current_cells: any[]) {
+  loadSong(current_cells: any[]) {
     this.current_cells = current_cells;
     this.resize();
 
@@ -937,7 +937,7 @@ export class SessionView {
   }
 
   addInstrument(_pos?: any) {
-    return this.readSong(this.current_cells);
+    return this.loadSong(this.current_cells);
   }
 
   // Dialogs

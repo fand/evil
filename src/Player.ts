@@ -288,7 +288,7 @@ export class Player {
     }
   }
 
-  readSong(song: Song) {
+  loadSong(song: Song) {
     this.instruments = [];
     this.num_id = 0;
     this.mixer.empty();
@@ -314,7 +314,7 @@ export class Player {
     }
 
     this.session.setInstrument(this.instruments);
-    this.session.readSong();
+    this.session.loadSong();
     this.mixer.readParam(this.song.mixer);
 
     this.view.setInstrumentCount(
