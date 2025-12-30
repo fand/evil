@@ -332,7 +332,7 @@ export class Player {
 
     this.loadScene(this.song.master[0]);
     this.setSceneLength(this.song.master.length);
-    for (let i = 0; i < this.song.tracks.length; i++) {
+    for (let i = 0; i < trackCount; i++) {
       this.instruments[i].setParam(this.song.tracks[i]);
     }
 
