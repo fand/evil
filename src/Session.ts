@@ -10,6 +10,7 @@ import {
 import $ from 'jquery';
 import type { Player } from './Player';
 import type { Instrument, InstrumentType } from './Instrument';
+import { store } from './store';
 
 // Control the patterns for tracks.
 class Session {
@@ -90,6 +91,7 @@ class Session {
       }
       this.current_cells[q[0]] = q[1];
     }
+    store.getState().setCurrentCells(this.current_cells);
     this.view.drawScene(this.scene_pos, this.current_cells);
     this.next_pattern_pos = [];
     this.cue_queue = [];
@@ -112,6 +114,8 @@ class Session {
       this.view.clearAllActive();
       this.scene_pos = this.next_scene_pos = 0;
       this.current_cells = this.song.tracks.map(() => 0);
+      store.getState().setScenePos(0);
+      store.getState().setCurrentCells(this.current_cells);
       return;
     }
 
@@ -133,6 +137,8 @@ class Session {
     }
     this.view.loadSong(this.current_cells);
     this.view.drawScene(this.scene_pos, this.current_cells);
+    store.getState().setScenePos(this.scene_pos);
+    store.getState().setCurrentCells(this.current_cells);
     this.next_pattern_pos = [];
     this.next_scene_pos = undefined;
     this.cue_queue = [];
@@ -379,6 +385,8 @@ class Session {
       }
     }
 
+    store.getState().setScenePos(this.scene_pos);
+    store.getState().setCurrentCells(this.current_cells);
     this.view.loadSong(this.current_cells);
   }
 
@@ -456,6 +464,9 @@ class Session {
     this.cue_queue = [];
 
     this.song = { tracks: [], master: [], length: 0, mixer: null };
+
+    store.getState().setScenePos(0);
+    store.getState().setCurrentCells([]);
   }
 
   deleteCell() {

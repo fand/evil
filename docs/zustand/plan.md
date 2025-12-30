@@ -110,9 +110,10 @@ interface AppState {
 - [ ] Remove Player → Instrument push calls (future optimization)
 
 ### Phase 4: SessionView Migration
-- [ ] Subscribe to song.tracks, currentCells
-- [ ] Convert cuePattern/editPattern to actions
-- [ ] Handle scene switching
+- [x] Session syncs scenePos/currentCells to store
+- [x] nextPattern/nextScene/loadSong/empty update store
+- [ ] SessionView subscribes to store (future - Session still pushes)
+- [ ] Convert cuePattern/editPattern to store actions (future)
 
 ### Phase 5: SynthView/SamplerView Migration
 - [ ] Subscribe to pattern data
