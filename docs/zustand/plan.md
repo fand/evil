@@ -116,9 +116,13 @@ interface AppState {
 - [ ] Convert cuePattern/editPattern to store actions (future)
 
 ### Phase 5: SynthView/SamplerView Migration
-- [ ] Subscribe to pattern data
-- [ ] Convert note editing to actions
-- [ ] Handle page/scroll state
+- [x] Synth subscribes to Key/Scale from store (done in Phase 3)
+- [ ] Pattern sync to store (complex - needs track/cell index)
+- [ ] Convert note editing to store actions (future)
+- [ ] page/scroll state remains view-local (by design)
+
+**Note**: Pattern editing in SynthView directly mutates `this.model.pattern` via getter.
+Full migration requires refactoring to action-based pattern updates with track/cell context.
 
 ## Concerns & Mitigations
 
@@ -143,3 +147,21 @@ interface AppState {
 - VU meter data (real-time audio analysis)
 - Canvas hover/click coordinates (view-local)
 - Animation frame timing
+
+## Current Status Summary
+
+| Component | Store Sync | Store Subscribe |
+|-----------|------------|-----------------|
+| Player    | ✅ BPM/Key/Scale/isPlaying/song | - |
+| PlayerView | - | ✅ isPlaying/BPM/Key/Scale |
+| Session   | ✅ scenePos/currentCells | - |
+| SessionView | - | ❌ (Session pushes) |
+| Synth     | - | ✅ Key/Scale |
+| SynthView | - | ❌ (Synth pushes) |
+
+**Data Flow Achieved:**
+```
+User Input → Model.action() → store.update() → View.subscribe() → DOM
+                            ↓
+                     Model.view.draw() (legacy, coexists)
+```
