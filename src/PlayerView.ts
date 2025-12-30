@@ -214,9 +214,6 @@ export class PlayerView {
     const space_w = (w - 910) / 2;
     const space_h = (h - 600) / 2;
 
-    const pw = space_w / 2 - 50;
-    const ph = space_h / 2 - 50;
-
     this.btn_left.css({
       width: space_w + 'px',
       padding: '250px ' + 25 + 'px',

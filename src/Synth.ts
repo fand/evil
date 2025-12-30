@@ -36,7 +36,6 @@ class Synth {
   send: GainNode;
   return: GainNode;
   effects: FX[];
-  T: MutekiTimer;
   duration: number = 0;
 
   constructor(ctx: AudioContext, id: number, player: Player, name?: string) {
@@ -72,8 +71,6 @@ class Synth {
     this.send.connect(this.return);
 
     this.effects = [];
-
-    this.T = new MutekiTimer();
   }
 
   connect(dst: AudioNode) {

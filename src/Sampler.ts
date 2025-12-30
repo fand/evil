@@ -139,7 +139,7 @@ class Sampler {
     this.view.stop();
   }
 
-  pause(time: number) {
+  pause() {
     this.core.noteOff();
   }
 
