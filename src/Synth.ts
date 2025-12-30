@@ -247,29 +247,30 @@ class Synth {
   }
 
   activate(i) {
-    return this.view.activate(i);
-  }
-  inactivate(_i?: number) {
-    return this.view.inactivate();
+    this.view.activate(i);
   }
 
-  redraw(time) {
+  deactivate(_i?: number) {
+    this.view.deactivate();
+  }
+
+  redraw(time: number) {
     this.time = time;
-    return this.view.drawPattern(this.time);
+    this.view.drawPattern(this.time);
   }
 
   // called by SynthView.
-  inputPatternName(pattern_name) {
+  inputPatternName(pattern_name: string) {
     this.pattern_name = pattern_name;
-    return this.session.setPatternName(this.id, this.pattern_name);
+    this.session.setPatternName(this.id, this.pattern_name);
   }
 
-  setPatternName(pattern_name) {
+  setPatternName(pattern_name: string) {
     this.pattern_name = pattern_name;
-    return this.view.setPatternName(this.pattern_name);
+    this.view.setPatternName(this.pattern_name);
   }
 
-  setSynthName(name) {
+  setSynthName(name: string) {
     this.name = name;
     this.session.setSynthName(this.id, this.name);
     return this.view.setSynthName(this.name);

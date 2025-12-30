@@ -31,6 +31,18 @@ type SynthPos = {
   note: number;
 };
 
+// Cell sprite X offsets in sequencer_cell.png
+const CELL_SIZE = 26;
+const enum CellType {
+  Empty = 0,
+  Note = 26,
+  Hover = 52,
+  Playhead = 78,
+  SustainStart = 104,
+  SustainMiddle = 130,
+  SustainEnd = 156,
+}
+
 class SynthView {
   model: Synth;
   id: number;
@@ -168,53 +180,125 @@ class SynthView {
   }
 
   initCanvas() {
+    const width = this.cells_x * CELL_SIZE;
+    const height = this.cells_y * CELL_SIZE;
     this.canvas_hover.width =
       this.canvas_on.width =
       this.canvas_off.width =
-        832;
+        width;
     this.canvas_hover.height =
       this.canvas_on.height =
       this.canvas_off.height =
-        520;
+        height;
     this.rect = this.canvas_off.getBoundingClientRect();
     this.offset = { x: this.rect.left, y: this.rect.top };
 
-    for (
-      let i = 0, end = this.cells_y, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
-      for (
-        var j = 0, end1 = this.cells_x, asc1 = 0 <= end1;
-        asc1 ? j < end1 : j > end1;
-        asc1 ? j++ : j--
-      ) {
-        this.ctx_off.drawImage(
-          this.cell,
-          0,
-          0,
-          26,
-          26, // src (x, y, w, h)
-          j * 26,
-          i * 26,
-          26,
-          26 // dst (x, y, w, h)
-        );
+    for (let y = 0; y < this.cells_y; y++) {
+      for (let x = 0; x < this.cells_x; x++) {
+        this.drawCellOff(CellType.Empty, x, y);
       }
     }
     return this.setPattern(this.pattern_obj);
   }
 
-  getPos(e) {
+  // ========================================
+  // Canvas drawing helpers
+  // ========================================
+
+  private drawCellOn(type: CellType, x: number, y: number) {
+    this.ctx_on.drawImage(
+      this.cell,
+      type,
+      0,
+      CELL_SIZE,
+      CELL_SIZE,
+      x * CELL_SIZE,
+      y * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE
+    );
+  }
+
+  private drawCellOff(type: CellType, x: number, y: number) {
+    this.ctx_off.drawImage(
+      this.cell,
+      type,
+      0,
+      CELL_SIZE,
+      CELL_SIZE,
+      x * CELL_SIZE,
+      y * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE
+    );
+  }
+
+  private drawCellHover(type: CellType, x: number, y: number) {
+    this.ctx_hover.drawImage(
+      this.cell,
+      type,
+      0,
+      CELL_SIZE,
+      CELL_SIZE,
+      x * CELL_SIZE,
+      y * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE
+    );
+  }
+
+  private clearCellOn(x: number, y: number) {
+    this.ctx_on.clearRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  }
+
+  private clearCellHover(x: number, y: number) {
+    this.ctx_hover.clearRect(
+      x * CELL_SIZE,
+      y * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE
+    );
+  }
+
+  private clearColumnOn(x: number) {
+    this.ctx_on.clearRect(
+      x * CELL_SIZE,
+      0,
+      CELL_SIZE,
+      this.cells_y * CELL_SIZE
+    );
+  }
+
+  private clearColumnsOn(x: number, width: number) {
+    this.ctx_on.clearRect(
+      x * CELL_SIZE,
+      0,
+      width * CELL_SIZE,
+      this.cells_y * CELL_SIZE
+    );
+  }
+
+  private clearAllOn() {
+    this.ctx_on.clearRect(
+      0,
+      0,
+      this.cells_x * CELL_SIZE,
+      this.cells_y * CELL_SIZE
+    );
+  }
+
+  // ========================================
+
+  getPos(e: JQuery.MouseEventBase): SynthPos {
     this.rect = this.canvas_off.getBoundingClientRect();
-    const _x = Math.floor((e.clientX - this.rect.left) / 26);
-    const _y = Math.floor((e.clientY - this.rect.top) / 26);
+    const x = Math.floor((e.clientX - this.rect.left) / CELL_SIZE);
+    const y = Math.floor((e.clientY - this.rect.top) / CELL_SIZE);
     return {
-      x: _x,
-      y: _y,
-      x_abs: this.page * this.cells_x + _x,
-      y_abs: _y,
-      note: this.cells_y - _y,
+      x,
+      y,
+      x_abs: this.page * this.cells_x + x,
+      y_abs: y,
+      note: this.cells_y - y,
     };
   }
 
@@ -226,23 +310,8 @@ class SynthView {
 
         // Show current pos.
         if (pos !== this.hover_pos) {
-          this.ctx_hover.clearRect(
-            this.hover_pos.x * 26,
-            this.hover_pos.y * 26,
-            26,
-            26
-          );
-          this.ctx_hover.drawImage(
-            this.cell,
-            52,
-            0,
-            26,
-            26,
-            pos.x * 26,
-            pos.y * 26,
-            26,
-            26
-          );
+          this.clearCellHover(this.hover_pos.x, this.hover_pos.y);
+          this.drawCellHover(CellType.Hover, pos.x, pos.y);
           this.hover_pos = pos;
         }
 
@@ -300,12 +369,7 @@ class SynthView {
         }
       })
       .on('mouseout', (e) => {
-        this.ctx_hover.clearRect(
-          this.hover_pos.x * 26,
-          this.hover_pos.y * 26,
-          26,
-          26
-        );
+        this.clearCellHover(this.hover_pos.x, this.hover_pos.y);
         this.hover_pos = { x: -1, y: -1 };
         this.is_clicked = false;
         return (this.is_adding = false);
@@ -390,41 +454,20 @@ class SynthView {
         i--;
       }
 
-      // Clear the previous cell
-      this.ctx_on.clearRect(((pos.x_abs - 1) % this.cells_x) * 26, 0, 26, 1000);
+      const prevX = (pos.x_abs - 1) % this.cells_x;
+      this.clearColumnOn(prevX);
       // Calculate Y position from sustain start (negative, so add)
-      // After the while loop, pattern[i] is guaranteed to be a number (sustain start)
       const y = this.cells_y + (this.pattern[i] as number);
 
       const prevNote = this.pattern[pos.x_abs - 1];
       if (typeof prevNote === 'number' && prevNote < 0) {
         // Previous cell is sustain start → convert to regular note (flip sign)
         this.pattern[pos.x_abs - 1] = -prevNote;
-        this.ctx_on.drawImage(
-          this.cell,
-          0,
-          0,
-          26,
-          26,
-          ((pos.x_abs - 1) % this.cells_x) * 26,
-          y * 26,
-          26,
-          26
-        );
+        this.drawCellOn(CellType.Empty, prevX, y);
       } else {
         // Previous cell is 'sustain' → convert to 'end' to terminate
         this.pattern[pos.x_abs - 1] = 'end';
-        this.ctx_on.drawImage(
-          this.cell,
-          156,
-          0,
-          26,
-          26,
-          ((pos.x_abs - 1) % this.cells_x) * 26,
-          y * 26,
-          26,
-          26
-        );
+        this.drawCellOn(CellType.SustainEnd, prevX, y);
       }
     }
 
@@ -436,31 +479,21 @@ class SynthView {
       this.pattern[i] = 0;
       i++;
     }
-    this.ctx_on.clearRect(pos.x * 26, 0, (i - pos.x_abs) * 26, 1000);
+    this.clearColumnsOn(pos.x, i - pos.x_abs);
 
     // ========================================
     // 3. Place the new note
     // ========================================
     this.pattern[pos.x_abs] = pos.note;
     this.model.addNote(pos.x_abs, pos.note);
-    this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
-    return this.ctx_on.drawImage(
-      this.cell,
-      26,
-      0,
-      26,
-      26,
-      pos.x * 26,
-      pos.y * 26,
-      26,
-      26
-    );
+    this.clearColumnOn(pos.x);
+    this.drawCellOn(CellType.Note, pos.x, pos.y);
   }
 
   removeNote(pos: SynthPos) {
     this.pattern[pos.x_abs] = 0;
-    this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
-    return this.model.removeNote(pos.x_abs);
+    this.clearCellOn(pos.x, pos.y);
+    this.model.removeNote(pos.x_abs);
   }
 
   sustainNote(l: number, r: number, pos: SynthPos) {
@@ -470,24 +503,12 @@ class SynthView {
     }
 
     // Clear cells from l to r
-    for (let i = l; i <= r; i++) {
-      this.ctx_on.clearRect((i % this.cells_x) * 26, 0, 26, 1000);
-    }
+    this.clearColumnsOn(l % this.cells_x, r - l + 1);
 
     // Mark cells between l and r as sustain
     for (let i = l + 1; i < r; i++) {
       this.pattern[i] = 'sustain';
-      this.ctx_on.drawImage(
-        this.cell,
-        130,
-        0,
-        26,
-        26,
-        (i % this.cells_x) * 26,
-        pos.y * 26,
-        26,
-        26
-      );
+      this.drawCellOn(CellType.SustainMiddle, i % this.cells_x, pos.y);
     }
 
     if (this.pattern[l] === 'sustain' || this.pattern[l] === 'end') {
@@ -495,96 +516,39 @@ class SynthView {
       while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
         i--;
       }
-      this.ctx_on.clearRect(((l - 1) % this.cells_x) * 26, 0, 26, 1000);
+      const prevX = (l - 1) % this.cells_x;
+      this.clearColumnOn(prevX);
       const y = this.cells_y + (this.pattern[i] as number);
       const prevNoteL = this.pattern[l - 1];
       if (typeof prevNoteL === 'number' && prevNoteL < 0) {
         this.pattern[l - 1] = -prevNoteL;
-        this.ctx_on.drawImage(
-          this.cell,
-          0,
-          0,
-          26,
-          26,
-          ((l - 1) % this.cells_x) * 26,
-          y * 26,
-          26,
-          26
-        );
+        this.drawCellOn(CellType.Empty, prevX, y);
       } else {
         this.pattern[l - 1] = 'end';
-        this.ctx_on.drawImage(
-          this.cell,
-          156,
-          0,
-          26,
-          26,
-          ((l - 1) % this.cells_x) * 26,
-          y * 26,
-          26,
-          26
-        );
+        this.drawCellOn(CellType.SustainEnd, prevX, y);
       }
     }
 
     const noteR = this.pattern[r];
     if (typeof noteR === 'number' && noteR < 0) {
       const y = this.cells_y + noteR;
+      const nextX = (r + 1) % this.cells_x;
       if (this.pattern[r + 1] === 'end') {
         this.pattern[r + 1] = -noteR;
-        this.ctx_on.drawImage(
-          this.cell,
-          26,
-          0,
-          26,
-          26,
-          ((r + 1) % this.cells_x) * 26,
-          y * 26,
-          26,
-          26
-        );
+        this.drawCellOn(CellType.Note, nextX, y);
       } else {
         this.pattern[r + 1] = noteR;
-        this.ctx_on.drawImage(
-          this.cell,
-          104,
-          0,
-          26,
-          26,
-          ((r + 1) % this.cells_x) * 26,
-          y * 26,
-          26,
-          26
-        );
+        this.drawCellOn(CellType.SustainStart, nextX, y);
       }
     }
 
     this.pattern[l] = -pos.note;
     this.pattern[r] = 'end';
 
-    this.ctx_on.drawImage(
-      this.cell,
-      104,
-      0,
-      26,
-      26,
-      (l % this.cells_x) * 26,
-      pos.y * 26,
-      26,
-      26
-    );
-    this.ctx_on.drawImage(
-      this.cell,
-      156,
-      0,
-      26,
-      26,
-      (r % this.cells_x) * 26,
-      pos.y * 26,
-      26,
-      26
-    );
-    return this.model.sustainNote(l, r, pos.note);
+    this.drawCellOn(CellType.SustainStart, l % this.cells_x, pos.y);
+    this.drawCellOn(CellType.SustainEnd, r % this.cells_x, pos.y);
+
+    this.model.sustainNote(l, r, pos.note);
   }
 
   endSustain(time?: number) {
@@ -595,12 +559,13 @@ class SynthView {
       } else if (typeof note === 'number') {
         this.pattern[time - 1] = note * -1;
       }
-      return (this.is_sustaining = false);
+
+      this.is_sustaining = false;
     }
   }
 
   // Show the position bar.
-  playAt(time) {
+  playAt(time: number) {
     this.time = time;
     if (this.is_nosync) {
       return;
@@ -610,45 +575,25 @@ class SynthView {
       this.endSustain();
       this.drawPattern(this.time);
     }
-    for (
-      let i = 0, end = this.cells_y, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
-      this.ctx_off.drawImage(
-        this.cell,
-        0,
-        0,
-        26,
-        26,
-        (this.last_time % this.cells_x) * 26,
-        i * 26,
-        26,
-        26
-      );
-      this.ctx_off.drawImage(
-        this.cell,
-        78,
-        0,
-        26,
-        26,
-        (this.time % this.cells_x) * 26,
-        i * 26,
-        26,
-        26
-      );
+
+    const lastX = this.last_time % this.cells_x;
+    const currX = this.time % this.cells_x;
+    for (let y = 0; y < this.cells_y; y++) {
+      this.drawCellOff(CellType.Empty, lastX, y);
+      this.drawCellOff(CellType.Playhead, currX, y);
     }
-    return (this.last_time = this.time);
+
+    this.last_time = this.time;
   }
 
-  setPattern(pattern_obj) {
+  setPattern(pattern_obj: SynthPatternObject) {
     this.pattern_obj = pattern_obj;
     this.pattern = this.pattern_obj.pattern;
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);
     this.setMarker();
-    return this.setPatternName(this.pattern_obj.name);
+    this.setPatternName(this.pattern_obj.name);
   }
 
   drawPattern(time?: number) {
@@ -656,60 +601,24 @@ class SynthView {
       this.time = time;
     }
     this.page = Math.floor(this.time / this.cells_x);
-    this.ctx_on.clearRect(0, 0, 832, 520);
+    this.clearAllOn();
 
-    let last_y = 0;
-
-    for (
-      let i = 0, end = this.cells_x, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
-      var y;
-      var note = this.pattern[this.page * this.cells_x + i];
+    let lastY = 0;
+    for (let x = 0; x < this.cells_x; x++) {
+      const note = this.pattern[this.page * this.cells_x + x];
       if (note === 'sustain') {
-        this.ctx_on.drawImage(
-          this.cell,
-          130,
-          0,
-          26,
-          26,
-          i * 26,
-          last_y * 26,
-          26,
-          26
-        );
+        this.drawCellOn(CellType.SustainMiddle, x, lastY);
       } else if (note === 'end') {
-        this.ctx_on.drawImage(
-          this.cell,
-          156,
-          0,
-          26,
-          26,
-          i * 26,
-          last_y * 26,
-          26,
-          26
-        );
-        last_y = 0;
+        this.drawCellOn(CellType.SustainEnd, x, lastY);
+        lastY = 0;
       } else if (note < 0) {
-        y = this.cells_y + note; // @cells_y - (- note)
-        this.ctx_on.drawImage(
-          this.cell,
-          104,
-          0,
-          26,
-          26,
-          i * 26,
-          y * 26,
-          26,
-          26
-        );
-        last_y = y;
+        const y = this.cells_y + note;
+        this.drawCellOn(CellType.SustainStart, x, y);
+        lastY = y;
       } else {
-        y = this.cells_y - note;
-        this.ctx_on.drawImage(this.cell, 26, 0, 26, 26, i * 26, y * 26, 26, 26);
-        last_y = y;
+        const y = this.cells_y - note;
+        this.drawCellOn(CellType.Note, x, y);
+        lastY = y;
       }
     }
     return this.setMarker();
@@ -727,8 +636,9 @@ class SynthView {
     this.model.plusPattern();
     this.drawPattern();
     this.minus.removeClass('btn-false').addClass('btn-true');
+
     if (this.page_total === 8) {
-      return this.plus.removeClass('btn-true').addClass('btn-false');
+      this.plus.removeClass('btn-true').addClass('btn-false');
     }
   }
 
@@ -736,13 +646,15 @@ class SynthView {
     if (this.page_total === 1) {
       return;
     }
+
     this.pattern = this.pattern.slice(0, this.pattern.length - this.cells_x);
     this.page_total--;
     this.model.minusPattern();
     this.drawPattern();
     this.plus.removeClass('btn-false').addClass('btn-true');
+
     if (this.page_total === 1) {
-      return this.minus.removeClass('btn-true').addClass('btn-false');
+      this.minus.removeClass('btn-true').addClass('btn-false');
     }
   }
 
@@ -759,7 +671,8 @@ class SynthView {
       .addClass('marker-now');
     this.markers.find('.marker-pos').text(this.page + 1);
     this.markers.find('.marker-total').text(this.page_total);
-    return this.pos_markers
+
+    this.pos_markers
       .filter((i: number) => i < this.page_total)
       .each((i: number) => {
         this.pos_markers.eq(i).on('mousedown', () => {
@@ -783,18 +696,9 @@ class SynthView {
 
   play() {}
   stop() {
-    for (let i = 0; i < this.cells_y; i++) {
-      this.ctx_off.drawImage(
-        this.cell,
-        0,
-        0,
-        26,
-        26,
-        (this.last_time % this.cells_x) * 26,
-        i * 26,
-        26,
-        26
-      );
+    const x = this.last_time % this.cells_x;
+    for (let y = 0; y < this.cells_y; y++) {
+      this.drawCellOff(CellType.Empty, x, y);
     }
   }
 
@@ -803,16 +707,17 @@ class SynthView {
     return this.initCanvas();
   }
 
-  inactivate() {
-    return (this.is_active = false);
+  deactivate() {
+    this.is_active = false;
   }
 
-  setSynthName(name) {
-    return this.synth_name.val(name);
+  setSynthName(name: string) {
+    this.synth_name.val(name);
   }
-  setPatternName(name) {
+
+  setPatternName(name: string) {
     this.pattern_name.val(name);
-    return (this.pattern_obj.name = name);
+    this.pattern_obj.name = name;
   }
 
   toggleNoSync() {
@@ -823,18 +728,9 @@ class SynthView {
     } else {
       this.is_nosync = true;
       this.nosync.removeClass('btn-false').addClass('btn-true');
-      for (let i = 0; i < this.cells_y; i++) {
-        this.ctx_off.drawImage(
-          this.cell,
-          0,
-          0,
-          26,
-          26,
-          (this.time % this.cells_x) * 26,
-          i * 26,
-          26,
-          26
-        );
+      const x = this.time % this.cells_x;
+      for (let y = 0; y < this.cells_y; y++) {
+        this.drawCellOff(CellType.Empty, x, y);
       }
     }
   }
