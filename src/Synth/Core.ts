@@ -10,6 +10,7 @@
 import { SynthCoreView } from './CoreView';
 import { MutekiTimer } from '../MutekiTimer';
 import { KEY_LIST, NoteKey, SEMITONE, STREAM_LENGTH } from '../Constant';
+import type { Synth } from '../Synth';
 
 //#
 // CONSTANTS
@@ -32,11 +33,10 @@ const T2 = new MutekiTimer();
 class Noise {
   ctx: AudioContext;
   node: ScriptProcessorNode;
-  octae: number;
+  octave: number;
   fine: number;
   interval: number;
   shape: string;
-  octave: number;
 
   constructor(ctx: AudioContext) {
     this.ctx = ctx;
@@ -50,22 +50,29 @@ class Noise {
     };
   }
 
-  connect(dst) {
-    return this.node.connect(dst);
+  connect(dst: AudioNode) {
+    this.node.connect(dst);
   }
-  setOctave(octae) {
-    this.octae = octae;
+
+  setOctave(octave: number) {
+    this.octave = octave;
   }
-  setFine(fine) {
+
+  setFine(fine: number) {
     this.fine = fine;
   }
+
   setNote() {}
-  setInterval(interval) {
+
+  setInterval(interval: number) {
     this.interval = interval;
   }
+
   setFreq() {}
+
   setKey() {}
-  setShape(shape) {
+
+  setShape(shape: string) {
     this.shape = shape;
   }
 
@@ -132,26 +139,30 @@ class VCO {
     }
   }
 
-  setOctave(octave) {
+  setOctave(octave: number) {
     this.octave = octave;
   }
-  setNote(note) {
+
+  setNote(note: number) {
     this.note = note;
   }
-  setKey(freq_key) {
+
+  setKey(freq_key: number) {
     this.freq_key = freq_key;
   }
-  setInterval(interval) {
+
+  setInterval(interval: number) {
     this.interval = interval;
   }
 
-  setFine(fine) {
+  setFine(fine: number) {
     this.fine = fine;
     this.osc.detune.value = this.fine;
     return Array.from(this.oscs).map((o) => (o.detune.value = this.fine));
   }
 
-  setShape(shape) {
+  setShape(shape: string) {
+    // todo: shape type
     let o;
     this.shape = shape;
     if (this.shape === 'SUPERSAW') {
@@ -196,17 +207,17 @@ class VCO {
     }
   }
 
-  connect(dst) {
+  connect(dst: AudioNode) {
     this.dst = dst;
     this.osc.connect(this.node);
     for (var o of Array.from(this.oscs)) {
       o.connect(this.node);
     }
-    return this.node.connect(this.dst);
+    this.node.connect(this.dst);
   }
 
   disconnect() {
-    return this.node.disconnect();
+    this.node.disconnect();
   }
 
   getParam() {
@@ -222,7 +233,7 @@ class VCO {
     this.octave = p.octave;
     this.interval = p.interval;
     this.fine = p.fine;
-    return this.setShape(p.shape);
+    this.setShape(p.shape);
   }
 }
 
@@ -249,17 +260,19 @@ class EG {
   getADSR() {
     return [this.attack, this.decay, this.sustain, this.release];
   }
-  setADSR(attack, decay, sustain, release) {
+
+  setADSR(attack: number, decay: number, sustain: number, release: number) {
     this.attack = attack / 50000.0;
     this.decay = decay / 50000.0;
     this.sustain = sustain / 100.0;
     return (this.release = release / 50000.0);
   }
 
-  getRange() {
+  getRange(): [min: number, max: number] {
     return [this.min, this.max];
   }
-  setRange(min, max) {
+
+  setRange(min: number, max: number) {
     this.min = min;
     this.max = max;
   }
@@ -267,27 +280,28 @@ class EG {
   getParam() {
     return { adsr: this.getADSR(), range: this.getRange() };
   }
+
   setParam(p) {
     [this.attack, this.decay, this.sustain, this.release] = Array.from(p.adsr);
     return this.setRange(p.range[0], p.range[1]);
   }
 
-  noteOn(time) {
+  noteOn(time: number) {
     this.target.cancelScheduledValues(time);
 
     this.target.setValueAtTime(this.target.value, time);
 
     this.target.linearRampToValueAtTime(this.max, time + this.attack);
-    return this.target.linearRampToValueAtTime(
+    this.target.linearRampToValueAtTime(
       this.sustain * (this.max - this.min) + this.min,
       time + this.attack + this.decay
     );
   }
 
-  noteOff(time) {
+  noteOff(time: number) {
     this.target.linearRampToValueAtTime(this.min, time + this.release);
     this.target.linearRampToValueAtTime(0, time + this.release + 0.001);
-    return this.target.cancelScheduledValues(time + this.release + 0.002);
+    this.target.cancelScheduledValues(time + this.release + 0.002);
   }
 }
 
@@ -303,28 +317,28 @@ class ResFilter {
     this.lpf.gain.value = 1.0;
   }
 
-  connect(dst) {
+  connect(dst: AudioNode) {
     return this.lpf.connect(dst);
   }
+
   disconnect() {
     return this.lpf.disconnect();
   }
-  getResonance() {
-    return this.lpf.Q.value;
-  }
-  setQ(Q) {
+
+  setQ(Q: number) {
     return (this.lpf.Q.value = Q);
   }
-  getQ() {
+
+  getQ(): number {
     return this.lpf.Q.value;
   }
 }
 
 // Manages VCO, Noise, ResFilter, EG.
-class SynthCore {
-  parent: any;
+export class SynthCore {
+  parent: Synth;
   ctx: AudioContext;
-  id: any;
+  id: number;
   node: GainNode;
   gain: number;
   is_mute: boolean;
@@ -340,7 +354,7 @@ class SynthCore {
   view: SynthCoreView;
   note: number;
 
-  constructor(parent: any, ctx: AudioContext, id: any) {
+  constructor(parent: Synth, ctx: AudioContext, id: number) {
     this.parent = parent;
     this.ctx = ctx;
     this.id = id;
@@ -429,25 +443,33 @@ class SynthCore {
     return this.view.setParam(p);
   }
 
-  setVCOParam(i, shape, oct, interval, fine, harmony) {
+  setVCOParam(
+    i: number,
+    shape: string,
+    oct: number,
+    interval: number,
+    fine: number,
+    harmony: string
+  ) {
     this.vcos[i].setShape(shape);
     this.vcos[i].setOctave(oct);
     this.vcos[i].setInterval(interval);
     this.vcos[i].setFine(fine);
     this.vcos[i].setFreq();
     if (harmony != null) {
-      return (this.is_harmony = harmony === 'harmony');
+      this.is_harmony = harmony === 'harmony';
     }
   }
 
-  setEGParam(a, d, s, r) {
-    return this.eg.setADSR(a, d, s, r);
-  }
-  setFEGParam(a, d, s, r) {
-    return this.feg.setADSR(a, d, s, r);
+  setEGParam(a: number, d: number, s: number, r: number) {
+    this.eg.setADSR(a, d, s, r);
   }
 
-  setFilterParam(freq, q) {
+  setFEGParam(a: number, d: number, s: number, r: number) {
+    this.feg.setADSR(a, d, s, r);
+  }
+
+  setFilterParam(freq: number, q: number) {
     this.feg.setRange(80, Math.pow(freq / 1000, 2.0) * 25000 + 80);
     this.filter.setQ(q);
     if (q > 1) {
@@ -455,12 +477,12 @@ class SynthCore {
     }
   }
 
-  setVCOGain(i, gain) {
+  setVCOGain(i: number, gain: number) {
     //# Keep total gain <= 0.9
     return (this.gains[i].gain.value = (gain / 100.0) * 0.3);
   }
 
-  setGain(gain) {
+  setGain(gain: number) {
     this.gain = gain;
     return this.eg.setRange(0.0, this.gain);
   }
@@ -497,19 +519,19 @@ class SynthCore {
     this.scale = scale;
   }
 
-  connect(dst) {
+  connect(dst: AudioNode) {
     this.node.connect(this.filter.lpf);
     return this.filter.connect(dst);
   }
 
   disconnect() {
     this.filter.disconnect();
-    return this.node.disconnect();
+    this.node.disconnect();
   }
 
   // Converts interval (n-th note) to semitones.
-  noteToSemitone(note, shift) {
-    let semitone;
+  noteToSemitone(note: number, shift: number) {
+    let semitone: number;
     if (this.is_harmony) {
       note = note + shift;
       if (shift > 0) {
@@ -529,7 +551,7 @@ class SynthCore {
     }
   }
 
-  setNote(note) {
+  setNote(note: number) {
     this.note = note;
     return (() => {
       const result = [];
@@ -542,14 +564,13 @@ class SynthCore {
   }
 
   mute() {
-    return (this.is_mute = true);
+    this.is_mute = true;
   }
+
   demute() {
-    return (this.is_mute = false);
+    this.is_mute = false;
   }
 }
-
-export { SynthCore };
 
 function __range__(left, right, inclusive) {
   let range = [];

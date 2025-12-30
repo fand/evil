@@ -1,2 +1,1 @@
-const SYNTH_CONSTANT = 1;
-export { SYNTH_CONSTANT };
+export const SYNTH_CONSTANT = 1;

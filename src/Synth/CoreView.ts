@@ -7,10 +7,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 import $ from 'jquery';
+import type { SynthCore } from './Core';
 
 class SynthCoreView {
-  model: any;
-  id: any;
+  model: SynthCore;
+  id: number;
   dom: JQuery;
   vcos: JQuery;
   EG_inputs: JQuery;
@@ -22,7 +23,7 @@ class SynthCoreView {
   contextEG: CanvasRenderingContext2D;
   contextFEG: CanvasRenderingContext2D;
 
-  constructor(model: any, id: any, dom: JQuery) {
+  constructor(model: SynthCore, id: number, dom: JQuery) {
     this.model = model;
     this.id = id;
     this.dom = dom;

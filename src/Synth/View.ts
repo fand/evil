@@ -8,6 +8,7 @@
  */
 import $ from 'jquery';
 import { KeyboardView } from './KeyboardView';
+import type { Synth } from '../Synth';
 
 declare global {
   interface Window {
@@ -15,9 +16,24 @@ declare global {
   }
 }
 
+// TODO: merge with SamplerPattern
+type SynthPattern = (number | 'sustain' | 'end')[];
+
+const DEFAULT_PATTERN: SynthPattern = [];
+
+type SynthPatternObject = { name: string; pattern: SynthPattern };
+
+type SynthPos = {
+  x: number;
+  y: number;
+  x_abs: number;
+  y_abs: number;
+  note: number;
+};
+
 class SynthView {
-  model: any;
-  id: any;
+  model: Synth;
+  id: number;
   dom: JQuery;
   synth_name: JQuery;
   pattern_name: JQuery;
@@ -54,8 +70,8 @@ class SynthView {
   fx: JQuery;
   is_fx_view: boolean;
   keyboard: KeyboardView;
-  pattern: any[];
-  pattern_obj: { name: string; pattern: any[] };
+  pattern: SynthPattern;
+  pattern_obj: SynthPatternObject;
   page: number;
   page_total: number;
   last_time: number;
@@ -72,7 +88,7 @@ class SynthView {
   is_adding: boolean;
   is_active: boolean;
 
-  constructor(model: any, id: any) {
+  constructor(model: Synth, id: number) {
     this.model = model;
     this.id = id;
     this.dom = $('#tmpl_synth').clone();
@@ -359,20 +375,33 @@ class SynthView {
     });
   }
 
-  addNote(pos) {
+  addNote(pos: SynthPos) {
     let i, y;
+
+    // ========================================
+    // 1. Handle placing note inside existing sustained note
+    //    → Truncate the sustain at previous position
+    // ========================================
     if (
       this.pattern[pos.x_abs] === 'end' ||
       this.pattern[pos.x_abs] === 'sustain'
     ) {
+      // Find the start of the sustained note (negative value)
       i = pos.x_abs - 1;
       while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
         i--;
       }
+
+      // Clear the previous cell
       this.ctx_on.clearRect(((pos.x_abs - 1) % this.cells_x) * 26, 0, 26, 1000);
-      y = this.cells_y + this.pattern[i];
-      if (this.pattern[pos.x_abs - 1] < 0) {
-        this.pattern[pos.x_abs - 1] = -this.pattern[pos.x_abs - 1];
+      // Calculate Y position from sustain start (negative, so add)
+      // After the while loop, pattern[i] is guaranteed to be a number (sustain start)
+      y = this.cells_y + (this.pattern[i] as number);
+
+      const prevNote = this.pattern[pos.x_abs - 1];
+      if (typeof prevNote === 'number' && prevNote < 0) {
+        // Previous cell is sustain start → convert to regular note (flip sign)
+        this.pattern[pos.x_abs - 1] = -prevNote;
         this.ctx_on.drawImage(
           this.cell,
           0,
@@ -385,6 +414,7 @@ class SynthView {
           26
         );
       } else {
+        // Previous cell is 'sustain' → convert to 'end' to terminate
         this.pattern[pos.x_abs - 1] = 'end';
         this.ctx_on.drawImage(
           this.cell,
@@ -400,6 +430,9 @@ class SynthView {
       }
     }
 
+    // ========================================
+    // 2. Clear any sustain cells after current position
+    // ========================================
     i = pos.x_abs + 1;
     while (this.pattern[i] === 'end' || this.pattern[i] === 'sustain') {
       this.pattern[i] = 0;
@@ -407,6 +440,9 @@ class SynthView {
     }
     this.ctx_on.clearRect(pos.x * 26, 0, (i - pos.x_abs) * 26, 1000);
 
+    // ========================================
+    // 3. Place the new note
+    // ========================================
     this.pattern[pos.x_abs] = pos.note;
     this.model.addNote(pos.x_abs, pos.note);
     this.ctx_on.clearRect(pos.x * 26, 0, 26, 1000);
@@ -471,9 +507,10 @@ class SynthView {
         i--;
       }
       this.ctx_on.clearRect(((l - 1) % this.cells_x) * 26, 0, 26, 1000);
-      y = this.cells_y + this.pattern[i];
-      if (this.pattern[l - 1] < 0) {
-        this.pattern[l - 1] = -this.pattern[l - 1];
+      y = this.cells_y + (this.pattern[i] as number);
+      const prevNoteL = this.pattern[l - 1];
+      if (typeof prevNoteL === 'number' && prevNoteL < 0) {
+        this.pattern[l - 1] = -prevNoteL;
         this.ctx_on.drawImage(
           this.cell,
           0,
@@ -501,10 +538,11 @@ class SynthView {
       }
     }
 
-    if (this.pattern[r] < 0) {
-      y = this.cells_y + this.pattern[r];
+    const noteR = this.pattern[r];
+    if (typeof noteR === 'number' && noteR < 0) {
+      y = this.cells_y + noteR;
       if (this.pattern[r + 1] === 'end') {
-        this.pattern[r + 1] = -this.pattern[r];
+        this.pattern[r + 1] = -noteR;
         this.ctx_on.drawImage(
           this.cell,
           26,
@@ -517,7 +555,7 @@ class SynthView {
           26
         );
       } else {
-        this.pattern[r + 1] = this.pattern[r];
+        this.pattern[r + 1] = noteR;
         this.ctx_on.drawImage(
           this.cell,
           104,
@@ -561,11 +599,12 @@ class SynthView {
   }
 
   endSustain(time?: number) {
-    if (this.is_sustaining) {
-      if (this.pattern[time - 1] === 'sustain') {
+    if (this.is_sustaining && time != null) {
+      const note = this.pattern[time - 1];
+      if (note === 'sustain') {
         this.pattern[time - 1] = 'end';
-      } else {
-        this.pattern[time - 1] *= -1;
+      } else if (typeof note === 'number') {
+        this.pattern[time - 1] = note * -1;
       }
       return (this.is_sustaining = false);
     }
