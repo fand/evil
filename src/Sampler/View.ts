@@ -538,12 +538,12 @@ export class SamplerView {
     }
   }
 
-  activate(i: number) {
+  activate() {
     this.is_active = true;
     this.initCanvas();
   }
 
-  inactivate() {
+  deactivate() {
     this.is_active = false;
   }
 

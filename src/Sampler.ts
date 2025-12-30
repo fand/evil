@@ -11,7 +11,7 @@ import { Panner } from './Panner';
 import { SamplerCore } from './Sampler/Core';
 import { SamplerView } from './Sampler/View';
 import $ from 'jquery';
-import type { InstrumentType, Player } from './Player';
+import type { Player } from './Player';
 
 class Sampler {
   ctx: AudioContext;
@@ -271,11 +271,12 @@ class Sampler {
     }
   }
 
-  activate(i: number) {
-    return this.view.activate(i);
+  activate() {
+    this.view.activate();
   }
-  inactivate() {
-    return this.view.inactivate();
+
+  deactivate() {
+    this.view.deactivate();
   }
 
   redraw(time: number) {
@@ -329,10 +330,11 @@ class Sampler {
   }
 
   mute() {
-    return this.core.mute();
+    this.core.mute();
   }
-  demute() {
-    return this.core.demute();
+
+  unmute() {
+    this.core.unmute();
   }
 
   getEffectsParam() {

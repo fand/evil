@@ -11,11 +11,14 @@ import { SessionView } from './SessionView';
 import { Song } from './Song';
 import $ from 'jquery';
 import { SynthPatternObject } from './Synth/View';
+import type { Player } from './Player';
+import type { Synth } from './Synth';
+import type { Sampler } from './Sampler';
 
 // Control the patterns for tracks.
 class Session {
   ctx: AudioContext;
-  player: any;
+  player: Player;
   scenes: any[];
   scene_pos: number;
   scene: any;
@@ -29,9 +32,9 @@ class Session {
   cue_queue: any[];
   song: any;
   view: SessionView;
-  synth: any[];
+  synth: (Synth | Sampler)[];
 
-  constructor(ctx: AudioContext, player: any) {
+  constructor(ctx: AudioContext, player: Player) {
     this.ctx = ctx;
     this.player = player;
     this.scenes = [];
@@ -59,7 +62,7 @@ class Session {
   }
 
   // Read patterns for the next measure.
-  nextMeasure(synth: any, _time?: number) {
+  nextMeasure(synth: (Synth | Sampler)[], _time?: number) {
     this.synth = synth;
     if (this.is_loop) {
       if (this.is_waiting_next_scene) {
@@ -107,15 +110,12 @@ class Session {
       return;
     }
 
-    for (
-      let i = 0, end = this.synth.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 0; i < this.synth.length; i++) {
       if (this.song.tracks[i].patterns[this.scene_pos] == null) {
         continue;
       }
-      var pat = this.song.tracks[i].patterns[this.scene_pos];
+
+      const pat = this.song.tracks[i].patterns[this.scene_pos];
       if (pat != null && pat !== null) {
         this.synth[i].setPattern(pat);
         this.scene_length = Math.max(this.scene_length, pat.pattern.length);
@@ -188,7 +188,11 @@ class Session {
   }
 
   // Read given song, called by Player.
-  readTrack(song: any, src: { x: number; y: number }, dst: { x: number; y: number }) {
+  readTrack(
+    song: any,
+    src: { x: number; y: number },
+    dst: { x: number; y: number }
+  ) {
     // add master
     this.song = song;
     if (this.song.master[dst.y] == null) {
@@ -355,11 +359,8 @@ class Session {
     this.song = song;
     this.scene_pos = 0;
     this.scene_length = 0;
-    for (
-      let i = 0, end = this.song.tracks.length, asc = 0 <= end;
-      asc ? i < end : i > end;
-      asc ? i++ : i--
-    ) {
+
+    for (let i = 0; i < this.song.tracks.length; i++) {
       var pat = this.song.tracks[i].patterns[0];
       if (pat != null && pat !== null) {
         this.synth[i].setPattern(pat);

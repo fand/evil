@@ -42,7 +42,7 @@ export class Player {
   scene: { bpm: number; key: string; scale: string };
   num_id: number = 0;
   context: AudioContext;
-  synth: any[] = []; // TODO: add type
+  synth: (Synth | Sampler)[] = []; // TODO: add type
   mixer: Mixer;
   session: Session;
   sidebar: Sidebar;
@@ -73,7 +73,7 @@ export class Player {
 
     // @duration = (60000.0 / @bpm) / 8.0
     this.duration = 7500.0 / this.bpm;
-    for (var s of Array.from(this.synth)) {
+    for (const s of this.synth) {
       s.setDuration(this.duration);
     }
 
@@ -247,7 +247,7 @@ export class Player {
       this.session.play();
     }
 
-    this.synth[next_idx - 1].inactivate();
+    this.synth[next_idx - 1].deactivate();
     this.synth_now = this.synth[next_idx];
     this.synth_now.activate(next_idx);
     this.synth_pos++;
@@ -255,7 +255,7 @@ export class Player {
   }
 
   moveLeft(next_idx: number) {
-    this.synth[next_idx + 1].inactivate();
+    this.synth[next_idx + 1].deactivate();
     this.synth_now = this.synth[next_idx];
     this.synth_now.activate(next_idx);
     this.synth_pos--;
@@ -286,14 +286,14 @@ export class Player {
   solo(solos: number[]) {
     if (solos.length === 0) {
       for (let s of Array.from(this.synth)) {
-        s.demute();
+        s.unmute();
       }
       return;
     }
 
     for (let s of Array.from(this.synth)) {
       if (Array.from(solos).includes(s.id + 1)) {
-        s.demute();
+        s.unmute();
       } else {
         s.mute();
       }

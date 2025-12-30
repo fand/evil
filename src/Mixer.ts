@@ -17,10 +17,11 @@ import { Compressor } from './FX/Compressor';
 import { FX } from './FX/FX';
 import type { Sampler } from './Sampler';
 import type { Synth } from './Synth';
+import type { Player } from './Player';
 
 export class Mixer {
   ctx: AudioContext;
-  player: any;
+  player: Player;
   gain_master: number;
   gain_tracks: number[];
   out: GainNode;
@@ -36,14 +37,12 @@ export class Mixer {
   pan_tracks: number[];
   pan_master: number;
 
-  constructor(ctx: AudioContext, player: any) {
+  constructor(ctx: AudioContext, player: Player) {
     this.addMasterEffect = this.addMasterEffect.bind(this);
     this.ctx = ctx;
     this.player = player;
     this.gain_master = 1.0;
-    this.gain_tracks = Array.from(this.player.synth).map((s: any) =>
-      s.getGain()
-    );
+    this.gain_tracks = this.player.synth.map((s) => s.getGain());
 
     this.out = this.ctx.createGain();
     this.out.gain.value = this.gain_master;
@@ -175,7 +174,14 @@ export class Mixer {
     };
   }
 
-  readParam(p: { gain_tracks: number[]; gain_master: number; pan_tracks: number[]; pan_master: number } | null) {
+  readParam(
+    p: {
+      gain_tracks: number[];
+      gain_master: number;
+      pan_tracks: number[];
+      pan_master: number;
+    } | null
+  ) {
     if (p == null) {
       return;
     }
@@ -221,7 +227,7 @@ export class Mixer {
   }
 
   addTracksEffect(x: number, name: string) {
-    let fx;
+    let fx: FX;
     if (name === 'Fuzz') {
       fx = new Fuzz(this.ctx);
     } else if (name === 'Delay') {
@@ -232,6 +238,8 @@ export class Mixer {
       fx = new Compressor(this.ctx);
     } else if (name === 'Double') {
       fx = new Double(this.ctx);
+    } else {
+      throw new TypeError(`Invalid effect type: ${name}`);
     }
 
     this.player.synth[x].insertEffect(fx);

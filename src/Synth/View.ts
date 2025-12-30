@@ -705,6 +705,10 @@ export class SynthView {
     return this.initCanvas();
   }
 
+  deactivate() {
+    this.is_active = false;
+  }
+
   setSynthName(name: string) {
     this.synth_name.val(name);
   }

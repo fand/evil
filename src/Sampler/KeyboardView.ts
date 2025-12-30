@@ -1,4 +1,3 @@
-import { Sampler } from '../Sampler';
 import { SamplerView } from './View';
 
 /*

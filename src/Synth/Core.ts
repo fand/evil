@@ -184,7 +184,9 @@ class VCO {
       for (o of Array.from(this.oscs)) {
         o.disconnect();
       }
-      this.osc.type = OSC_TYPE[this.shape as keyof typeof OSC_TYPE] as OscillatorType;
+      this.osc.type = OSC_TYPE[
+        this.shape as keyof typeof OSC_TYPE
+      ] as OscillatorType;
       this.osc.connect(this.node);
       return (this.node.gain.value = 1.0);
     }
@@ -559,5 +561,9 @@ export class SynthCore {
 
   mute() {
     this.is_mute = true;
+  }
+
+  unmute() {
+    this.is_mute = false;
   }
 }
