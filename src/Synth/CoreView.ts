@@ -92,28 +92,27 @@ class SynthCoreView {
   }
 
   fetchVCOParam() {
-    const harmony = this.vcos.eq(0).find('.harmony').val();
-    return (() => {
-      const result = [];
-      for (
-        let i = 0, end = this.vcos.length, asc = 0 <= end;
-        asc ? i < end : i > end;
-        asc ? i++ : i--
-      ) {
-        var vco = this.vcos.eq(i);
-        result.push(
-          this.model.setVCOParam(
-            i,
-            vco.find('.shape').val() as string,
-            parseInt(vco.find('.octave').val() as string),
-            parseInt(vco.find('.interval').val() as string),
-            parseInt(vco.find('.fine').val() as string),
-            harmony
-          )
-        );
-      }
-      return result;
-    })();
+    const harmony = this.vcos.eq(0).find('.harmony').val() as string;
+
+    const result = [];
+    for (
+      let i = 0, end = this.vcos.length, asc = 0 <= end;
+      asc ? i < end : i > end;
+      asc ? i++ : i--
+    ) {
+      var vco = this.vcos.eq(i);
+      result.push(
+        this.model.setVCOParam(
+          i,
+          vco.find('.shape').val() as string,
+          parseInt(vco.find('.octave').val() as string),
+          parseInt(vco.find('.interval').val() as string),
+          parseInt(vco.find('.fine').val() as string),
+          harmony
+        )
+      );
+    }
+    return result;
   }
 
   setVCOParam(p) {

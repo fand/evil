@@ -308,16 +308,20 @@ export class SamplerView {
 
     // Headers
     this.synth_type.on('change', () =>
-      this.model.changeSynth(this.synth_type.val())
+      this.model.changeSynth(this.synth_type.val() as string)
     );
     this.synth_name
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
-      .on('change', () => this.model.setSynthName(this.synth_name.val()));
+      .on('change', () =>
+        this.model.setSynthName(this.synth_name.val() as string)
+      );
     this.pattern_name
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
-      .on('change', () => this.model.setPatternName(this.pattern_name.val()));
+      .on('change', () =>
+        this.model.setPatternName(this.pattern_name.val() as string)
+      );
 
     this.marker_prev.on('click', () => this.model.player.backward(true));
     this.marker_next.on('click', () => this.model.player.forward());

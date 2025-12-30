@@ -377,16 +377,20 @@ class SynthView {
 
     // Headers
     this.synth_type.on('change', () =>
-      this.model.changeSynth(this.synth_type.val())
+      this.model.changeSynth(this.synth_type.val() as string)
     );
     this.synth_name
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
-      .on('change', () => this.model.setSynthName(this.synth_name.val()));
+      .on('change', () =>
+        this.model.setSynthName(this.synth_name.val() as string)
+      );
     this.pattern_name
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
-      .on('change', () => this.model.inputPatternName(this.pattern_name.val()));
+      .on('change', () =>
+        this.model.inputPatternName(this.pattern_name.val() as string)
+      );
     this.pencil.on('click', () => this.pencilMode());
     this.step.on('click', () => this.stepMode());
 
@@ -702,7 +706,7 @@ class SynthView {
     }
   }
 
-  activate(i) {
+  activate() {
     this.is_active = true;
     return this.initCanvas();
   }

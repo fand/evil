@@ -317,8 +317,8 @@ class Synth {
     return this.core.mute();
   }
 
-  demute() {
-    return this.core.demute();
+  unmute() {
+    return this.core.unmute();
   }
 
   // Set effects' params from the song.

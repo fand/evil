@@ -73,8 +73,8 @@ export class PlayerView {
   initEvent() {
     this.dom.on('change', () => {
       this.model.setBPM(parseInt(this.bpm.val() as string));
-      this.model.setKey(this.key.val());
-      return this.model.setScale(this.scale.val());
+      this.model.setKey(this.key.val() as string);
+      return this.model.setScale(this.scale.val() as string);
     });
 
     this.bpm
@@ -90,7 +90,7 @@ export class PlayerView {
     this.play.on('mousedown', () => this.viewPlay());
     this.stop.on('mousedown', () => this.viewStop(this.model));
     this.forward.on('mousedown', () => this.model.forward());
-    this.backward.on('mousedown', () => this.model.backward());
+    this.backward.on('mousedown', () => this.model.backward(false));
     this.loop.on('mousedown', () => {
       if (this.model.toggleLoop()) {
         return this.loop.removeClass('control-off').addClass('control-on');

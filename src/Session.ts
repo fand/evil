@@ -53,7 +53,7 @@ class Session {
     this.view = new SessionView(this, this.song);
   }
 
-  toggleLoop() {
+  toggleLoop(): boolean {
     return (this.is_loop = !this.is_loop);
   }
 

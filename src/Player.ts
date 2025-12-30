@@ -164,8 +164,8 @@ export class Player {
     this.synth_now.redraw(this.time);
   }
 
-  toggleLoop() {
-    this.session.toggleLoop();
+  toggleLoop(): boolean {
+    return this.session.toggleLoop();
   }
 
   noteOn(note: number, force: boolean) {

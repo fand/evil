@@ -567,7 +567,7 @@ export class SynthCore {
     this.is_mute = true;
   }
 
-  demute() {
+  unmute() {
     this.is_mute = false;
   }
 }

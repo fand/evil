@@ -15,6 +15,8 @@ import { Double } from './FX/Double';
 import { Reverb } from './FX/Reverb';
 import { Compressor } from './FX/Compressor';
 import { FX } from './FX/FX';
+import type { Sampler } from './Sampler';
+import type { Synth } from './Synth';
 
 class Mixer {
   ctx: AudioContext;
@@ -185,35 +187,12 @@ class Mixer {
     return this.readPans(p.pan_tracks, p.pan_master);
   }
 
-  changeSynth(id, synth) {
-    synth.connect(this.panners[id].in);
-    return synth.connect(this.analysers[id]);
+  changeSynth(idx: number, synth: Synth | Sampler) {
+    synth.connect(this.panners[idx].in);
+    return synth.connect(this.analysers[idx]);
   }
 
-  // a = @ctx.createAnalyser()
-  // synth.connect(a)
-  // @analysers[id] = a
-
-  // You should Mute / Solo by sending messages to Synth / Samplers.
-  // (for better timing)
-
-  // solo: (id) ->
-  //     return if id >= @panners.length
-  //     for i in [0...@panners.length]
-  //         @panners[i].disconnect() if i != id
-
-  // desolo: (id) ->
-  //     return if id >= @panners.length
-  //     for i in [0...@panners.length]
-  //         @panners[i].connect(@out)
-
-  // mute: (id) ->
-  //     @panners[id].disconnect()
-
-  // demute: (id) ->
-  //     @panners[id].connect(@out)
-
-  addMasterEffect(name) {
+  addMasterEffect(name: string) {
     let fx: FX;
     if (name === 'Fuzz') {
       fx = new Fuzz(this.ctx);

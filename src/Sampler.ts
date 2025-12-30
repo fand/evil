@@ -11,7 +11,7 @@ import { Panner } from './Panner';
 import { SamplerCore } from './Sampler/Core';
 import { SamplerView } from './Sampler/View';
 import $ from 'jquery';
-import type { Player } from './Player';
+import type { InstrumentType, Player } from './Player';
 
 class Sampler {
   ctx: AudioContext;
@@ -286,41 +286,45 @@ class Sampler {
   activate(i) {
     return this.view.activate(i);
   }
-  inactivate(_i?: number) {
+  inactivate() {
     return this.view.inactivate();
   }
 
-  redraw(time) {
+  redraw(time: number) {
     this.time = time;
     return this.view.drawPattern(this.time);
   }
 
-  setSynthName(name) {
+  setSynthName(name: string) {
     this.name = name;
     this.session.setSynthName(this.id, this.name);
     return this.view.setSynthName(this.name);
   }
 
   // called by SamplerView.
-  inputPatternName(pattern_name) {
+  inputPatternName(pattern_name: string) {
     this.pattern_name = pattern_name;
     return this.session.setPatternName(this.id, this.pattern_name);
   }
 
-  setPatternName(pattern_name) {
+  setPatternName(pattern_name: string) {
     this.pattern_name = pattern_name;
     return this.view.setPatternName(this.pattern_name);
   }
 
-  selectSample(sample_now) {
+  selectSample(sample_now: number) {
     return this.core.bindSample(sample_now);
   }
 
-  changeSynth(type) {
-    var s_new = this.player.changeSynth(this.id, type, s_new);
+  changeSynth(type: string) {
+    if (type !== 'REZ' && type !== 'SAMPLER') {
+      throw new TypeError(`Invalid instrument type: ${type}`);
+    }
+
+    const s_new = this.player.changeSynth(this.id, type);
     this.view.dom.replaceWith(s_new.view.dom);
     this.noteOff();
-    return this.disconnect();
+    this.disconnect();
   }
 
   getParam() {
