@@ -376,8 +376,6 @@ class SynthView {
   }
 
   addNote(pos: SynthPos) {
-    let i, y;
-
     // ========================================
     // 1. Handle placing note inside existing sustained note
     //    → Truncate the sustain at previous position
@@ -387,7 +385,7 @@ class SynthView {
       this.pattern[pos.x_abs] === 'sustain'
     ) {
       // Find the start of the sustained note (negative value)
-      i = pos.x_abs - 1;
+      let i = pos.x_abs - 1;
       while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
         i--;
       }
@@ -396,7 +394,7 @@ class SynthView {
       this.ctx_on.clearRect(((pos.x_abs - 1) % this.cells_x) * 26, 0, 26, 1000);
       // Calculate Y position from sustain start (negative, so add)
       // After the while loop, pattern[i] is guaranteed to be a number (sustain start)
-      y = this.cells_y + (this.pattern[i] as number);
+      const y = this.cells_y + (this.pattern[i] as number);
 
       const prevNote = this.pattern[pos.x_abs - 1];
       if (typeof prevNote === 'number' && prevNote < 0) {
@@ -433,7 +431,7 @@ class SynthView {
     // ========================================
     // 2. Clear any sustain cells after current position
     // ========================================
-    i = pos.x_abs + 1;
+    let i = pos.x_abs + 1;
     while (this.pattern[i] === 'end' || this.pattern[i] === 'sustain') {
       this.pattern[i] = 0;
       i++;
@@ -459,34 +457,25 @@ class SynthView {
     );
   }
 
-  removeNote(pos) {
+  removeNote(pos: SynthPos) {
     this.pattern[pos.x_abs] = 0;
     this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
     return this.model.removeNote(pos.x_abs);
   }
 
-  sustainNote(l, r, pos) {
-    let i, y;
-    let asc, end;
-    let asc1, end1, start;
+  sustainNote(l: number, r: number, pos: SynthPos) {
     if (l === r) {
       this.addNote(pos);
       return;
     }
 
-    for (
-      i = l, end = r, asc = l <= end;
-      asc ? i <= end : i >= end;
-      asc ? i++ : i--
-    ) {
+    // Clear cells from l to r
+    for (let i = l; i <= r; i++) {
       this.ctx_on.clearRect((i % this.cells_x) * 26, 0, 26, 1000);
     }
 
-    for (
-      start = l + 1, i = start, end1 = r, asc1 = start <= end1;
-      asc1 ? i < end1 : i > end1;
-      asc1 ? i++ : i--
-    ) {
+    // Mark cells between l and r as sustain
+    for (let i = l + 1; i < r; i++) {
       this.pattern[i] = 'sustain';
       this.ctx_on.drawImage(
         this.cell,
@@ -502,12 +491,12 @@ class SynthView {
     }
 
     if (this.pattern[l] === 'sustain' || this.pattern[l] === 'end') {
-      i = l - 1;
+      let i = l - 1;
       while (this.pattern[i] === 'sustain' || this.pattern[i] === 'end') {
         i--;
       }
       this.ctx_on.clearRect(((l - 1) % this.cells_x) * 26, 0, 26, 1000);
-      y = this.cells_y + (this.pattern[i] as number);
+      const y = this.cells_y + (this.pattern[i] as number);
       const prevNoteL = this.pattern[l - 1];
       if (typeof prevNoteL === 'number' && prevNoteL < 0) {
         this.pattern[l - 1] = -prevNoteL;
@@ -540,7 +529,7 @@ class SynthView {
 
     const noteR = this.pattern[r];
     if (typeof noteR === 'number' && noteR < 0) {
-      y = this.cells_y + noteR;
+      const y = this.cells_y + noteR;
       if (this.pattern[r + 1] === 'end') {
         this.pattern[r + 1] = -noteR;
         this.ctx_on.drawImage(
@@ -794,7 +783,7 @@ class SynthView {
 
   play() {}
   stop() {
-    return __range__(0, this.cells_y, false).map((i) =>
+    for (let i = 0; i < this.cells_y; i++) {
       this.ctx_off.drawImage(
         this.cell,
         0,
@@ -805,8 +794,8 @@ class SynthView {
         i * 26,
         26,
         26
-      )
-    );
+      );
+    }
   }
 
   activate(i) {
@@ -834,7 +823,7 @@ class SynthView {
     } else {
       this.is_nosync = true;
       this.nosync.removeClass('btn-false').addClass('btn-true');
-      return __range__(0, this.cells_y, false).map((i) =>
+      for (let i = 0; i < this.cells_y; i++) {
         this.ctx_off.drawImage(
           this.cell,
           0,
@@ -845,8 +834,8 @@ class SynthView {
           i * 26,
           26,
           26
-        )
-      );
+        );
+      }
     }
   }
 
@@ -868,13 +857,3 @@ class SynthView {
 }
 
 export { SynthView };
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
-}
