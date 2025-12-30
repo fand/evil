@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import $ from 'jquery';
 import type { SynthCore } from './SynthCore';
 
@@ -52,7 +44,7 @@ export class SynthCoreView {
     this.filter_inputs.on('change', () => this.fetchFilterParam());
     this.EG_inputs.on('change', () => this.fetchEGParam());
     this.FEG_inputs.on('change', () => this.fetchFEGParam());
-    return this.fetchParam();
+    this.fetchParam();
   }
 
   updateCanvas(name: string) {
@@ -80,7 +72,7 @@ export class SynthCoreView {
     context.lineTo(w4 * 3, h * (1.0 - adsr[2])); // sustain
     context.lineTo(w4 * (adsr[3] + 3), h); // release
     context.strokeStyle = 'rgb(0, 220, 255)';
-    return context.stroke();
+    context.stroke();
   }
 
   fetchParam() {
@@ -88,7 +80,7 @@ export class SynthCoreView {
     this.fetchEGParam();
     this.fetchFEGParam();
     this.fetchFilterParam();
-    return this.fetchGains();
+    this.fetchGains();
   }
 
   fetchVCOParam() {
@@ -125,14 +117,14 @@ export class SynthCoreView {
       parseFloat(this.EG_inputs.eq(2).val() as string),
       parseFloat(this.EG_inputs.eq(3).val() as string)
     );
-    return this.updateCanvas('EG');
+    this.updateCanvas('EG');
   }
 
   setEGParam(p: any) {
     this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
     this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
     this.EG_inputs.eq(2).val(p.adsr[2] * 100);
-    return this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
+    this.EG_inputs.eq(3).val(p.adsr[3] * 50000);
   }
 
   fetchFEGParam() {
@@ -142,7 +134,7 @@ export class SynthCoreView {
       parseFloat(this.FEG_inputs.eq(2).val() as string),
       parseFloat(this.FEG_inputs.eq(3).val() as string)
     );
-    return this.updateCanvas('FEG');
+    this.updateCanvas('FEG');
   }
 
   setFEGParam(p: any) {
@@ -152,7 +144,7 @@ export class SynthCoreView {
   }
 
   fetchFilterParam() {
-    return this.model.setFilterParam(
+    this.model.setFilterParam(
       parseFloat(this.filter_inputs.eq(0).val() as string),
       parseFloat(this.filter_inputs.eq(1).val() as string)
     );
@@ -160,7 +152,7 @@ export class SynthCoreView {
 
   setFilterParam(p: any) {
     this.filter_inputs.eq(0).val(p[0]);
-    return this.filter_inputs.eq(1).val(p[1]);
+    this.filter_inputs.eq(1).val(p[1]);
   }
 
   fetchGains() {
@@ -173,22 +165,22 @@ export class SynthCoreView {
   }
 
   setParam(p: any) {
-    if (p.vcos != null) {
+    if (p.vcos !== undefined) {
       this.setVCOParam(p.vcos);
     }
-    if (p.gains != null) {
+    if (p.gains !== undefined) {
       for (let i = 0; i < p.gains.length; i++) {
         this.gain_inputs.eq(i).val((p.gains[i] / 0.3) * 100);
       }
     }
-    if (p.eg != null) {
+    if (p.eg !== undefined) {
       this.setEGParam(p.eg);
     }
-    if (p.feg != null) {
+    if (p.feg !== undefined) {
       this.setFEGParam(p.feg);
     }
-    if (p.filter != null) {
-      return this.setFilterParam(p.filter);
+    if (p.filter !== undefined) {
+      this.setFilterParam(p.filter);
     }
   }
 }

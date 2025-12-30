@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import $ from 'jquery';
 import type { FXView } from './FXView';
 
@@ -28,35 +23,35 @@ export abstract class FX {
   }
 
   connect(dst: AudioNode) {
-    return this.out.connect(dst);
+    this.out.connect(dst);
   }
   disconnect() {
-    return this.out.disconnect();
+    this.out.disconnect();
   }
 
   setInput(d: number) {
-    return (this.in.gain.value = d);
+    this.in.gain.value = d;
   }
 
   setOutput(d: number) {
-    return (this.out.gain.value = d);
+    this.out.gain.value = d;
   }
 
   setDry(d: number) {
-    return (this.dry.gain.value = d);
+    this.dry.gain.value = d;
   }
 
   setWet(d: number) {
-    return (this.wet.gain.value = d);
+    this.wet.gain.value = d;
   }
 
   appendTo(dst: HTMLElement) {
     $(dst).append(this.view.dom);
-    return this.view.initEvent();
+    this.view.initEvent();
   }
 
   remove() {
-    return this.source.removeEffect(this);
+    this.source.removeEffect(this);
   }
 
   setSource(source: any) {

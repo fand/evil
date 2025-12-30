@@ -1,12 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { Panner } from './Panner';
 import { SamplerCore } from './Sampler/SamplerCore';
 import { SamplerView } from './Sampler/SamplerView';
@@ -95,21 +86,21 @@ class Sampler {
 
   connect(dst: AudioNode | Panner) {
     if (dst instanceof Panner) {
-      return this.return.connect(dst.in);
+      this.return.connect(dst.in);
     } else {
-      return this.return.connect(dst);
+      this.return.connect(dst);
     }
   }
 
   disconnect() {
-    return this.return.disconnect();
+    this.return.disconnect();
   }
 
   setDuration() {}
   setKey() {}
   setScale() {}
   setNote(note: number) {
-    return (this.core as any).setNote(note);
+    (this.core as any).setNote(note);
   }
 
   setGain(gain: number) {
@@ -121,11 +112,11 @@ class Sampler {
   }
 
   noteOn(note: number) {
-    return this.core.noteOn([[note, 1.0]]);
+    this.core.noteOn([[note, 1.0]]);
   }
 
   noteOff() {
-    return this.core.noteOff();
+    this.core.noteOff();
   }
 
   playAt(time: number) {
@@ -134,28 +125,28 @@ class Sampler {
     this.view.playAt(mytime);
     if (this.pattern[mytime] !== 0) {
       const notes = this.pattern[mytime];
-      return this.core.noteOn(notes);
+      this.core.noteOn(notes);
     }
   }
 
   play() {
-    return this.view.play();
+    this.view.play();
   }
 
   stop() {
     this.core.noteOff();
-    return this.view.stop();
+    this.view.stop();
   }
 
   pause(time: number) {
-    return this.core.noteOff();
+    this.core.noteOff();
   }
 
   setPattern(_pattern_obj: { name: string; pattern: any[] }) {
     this.pattern_obj = $.extend(true, {}, _pattern_obj);
     this.pattern = this.pattern_obj.pattern;
     this.pattern_name = this.pattern_obj.name;
-    return this.view.setPattern(this.pattern_obj);
+    this.view.setPattern(this.pattern_obj);
   }
 
   getPattern() {
@@ -199,7 +190,7 @@ class Sampler {
       [],
     ];
     this.pattern_obj.pattern = this.pattern;
-    return this.view.setPattern(this.pattern_obj);
+    this.view.setPattern(this.pattern_obj);
   }
 
   plusPattern() {
@@ -237,12 +228,12 @@ class Sampler {
       [],
       [],
     ]);
-    return this.player.resetSceneLength();
+    this.player.resetSceneLength();
   }
 
   minusPattern() {
     this.pattern = this.pattern.slice(0, this.pattern.length - 32);
-    return this.player.resetSceneLength();
+    this.player.resetSceneLength();
   }
 
   addNote(time: number, note: number, gain: number) {
@@ -256,7 +247,7 @@ class Sampler {
       }
     }
 
-    return this.pattern[time].push([note, gain]);
+    this.pattern[time].push([note, gain]);
   }
 
   removeNote(pos: { x_abs: number; note: number }) {
@@ -277,28 +268,28 @@ class Sampler {
 
   redraw(time: number) {
     this.time = time;
-    return this.view.drawPattern(this.time);
+    this.view.drawPattern(this.time);
   }
 
   setSynthName(name: string) {
     this.name = name;
     this.session.setSynthName(this.id, this.name);
-    return this.view.setSynthName(this.name);
+    this.view.setSynthName(this.name);
   }
 
   // called by SamplerView.
   inputPatternName(pattern_name: string) {
     this.pattern_name = pattern_name;
-    return this.session.setPatternName(this.id, this.pattern_name);
+    this.session.setPatternName(this.id, this.pattern_name);
   }
 
   setPatternName(pattern_name: string) {
     this.pattern_name = pattern_name;
-    return this.view.setPatternName(this.pattern_name);
+    this.view.setPatternName(this.pattern_name);
   }
 
   selectSample(sample_now: number) {
-    return this.core.bindSample(sample_now);
+    this.core.bindSample(sample_now);
   }
 
   changeSynth(type: string) {
@@ -320,8 +311,8 @@ class Sampler {
   }
 
   setParam(p: any) {
-    if (p != null) {
-      return this.core.setParam(p);
+    if (p) {
+      this.core.setParam(p);
     }
   }
 
@@ -334,7 +325,7 @@ class Sampler {
   }
 
   getEffectsParam() {
-    return Array.from(this.effects).map((f) => f.getParam());
+    return this.effects.map((f) => f.getParam());
   }
 
   insertEffect(fx: any) {
@@ -348,16 +339,16 @@ class Sampler {
 
     fx.connect(this.return);
     fx.setSource(this);
-    return this.effects.push(fx);
+    this.effects.push(fx);
   }
 
   removeEffect(fx: any) {
-    let prev;
     const i = this.effects.indexOf(fx);
     if (i === -1) {
       return;
     }
 
+    let prev;
     if (i === 0) {
       prev = this.send;
     } else {
@@ -365,14 +356,14 @@ class Sampler {
     }
 
     prev.disconnect();
-    if (this.effects[i + 1] != null) {
+    if (this.effects[i + 1]) {
       prev.connect(this.effects[i + 1].in);
     } else {
       prev.connect(this.return);
     }
 
     fx.disconnect();
-    return this.effects.splice(i, 1);
+    this.effects.splice(i, 1);
   }
 }
 

@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 export class KeyboardView {
   sequencer: any;
   dom: JQuery;
@@ -57,7 +52,9 @@ export class KeyboardView {
     this.offset = { x: this.rect.left, y: this.rect.top };
 
     this.ctx.fillStyle = this.color[0];
-    return Array.from({ length: this.num }, (_, i) => this.drawNormal(i));
+    for (let i = 0; i < this.num; i++) {
+      this.drawNormal(i);
+    }
   }
 
   getPos(e: JQuery.MouseEventBase) {
@@ -66,7 +63,7 @@ export class KeyboardView {
   }
 
   initEvent() {
-    return this.dom
+    this.dom
       .on('mousemove', (e) => {
         const pos = this.getPos(e);
 
@@ -81,7 +78,7 @@ export class KeyboardView {
           this.drawActive(pos);
           this.sequencer.model.noteOff(true);
           this.sequencer.model.noteOn(this.num - pos, true);
-          return (this.click_pos = pos);
+          this.click_pos = pos;
         }
       })
       .on('mousedown', (e) => {
@@ -89,19 +86,19 @@ export class KeyboardView {
         const pos = this.getPos(e);
         this.drawActive(pos);
         this.sequencer.model.noteOn(this.num - pos, true);
-        return (this.click_pos = pos);
+        this.click_pos = pos;
       })
       .on('mouseup', (e) => {
         this.is_clicked = false;
         this.clearActive(this.click_pos);
         this.sequencer.model.noteOff(true);
-        return (this.click_pos = { x: -1, y: -1 });
+        this.click_pos = { x: -1, y: -1 };
       })
       .on('mouseout', (e) => {
         this.clearActive(this.hover_pos);
         this.sequencer.model.noteOff(true);
         this.hover_pos = { x: -1, y: -1 };
-        return (this.click_pos = { x: -1, y: -1 });
+        this.click_pos = { x: -1, y: -1 };
       });
   }
 
@@ -114,7 +111,7 @@ export class KeyboardView {
     }
     this.ctx.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
     this.ctx.fillStyle = this.color[3];
-    return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
+    this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
   }
 
   drawHover(i: number) {
@@ -123,7 +120,7 @@ export class KeyboardView {
     if (this.isKey(i)) {
       this.ctx.fillRect(0, (i + 1) * this.h - 5, this.w, 2);
     }
-    return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
+    this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
   }
 
   drawActive(i: number) {
@@ -131,22 +128,24 @@ export class KeyboardView {
     this.ctx.fillStyle = this.color[2];
     this.ctx.fillRect(0, i * this.h, this.w, this.h);
     this.ctx.fillStyle = this.color[4];
-    return this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
+    this.ctx.fillText(this.text(i), 10, (i + 1) * this.h - 10);
   }
 
   clearNormal(i: number | { x: number; y: number }) {
     if (typeof i !== 'number') return;
-    return this.ctx.clearRect(0, i * this.h, this.w, this.h);
+    this.ctx.clearRect(0, i * this.h, this.w, this.h);
   }
 
   clearActive(i: number | { x: number; y: number }) {
     this.clearNormal(i);
-    return this.drawNormal(i);
+    this.drawNormal(i);
   }
 
   changeScale(scale: number[]) {
     this.scale = scale;
-    return Array.from({ length: this.num }, (_, i) => this.drawNormal(i));
+    for (let i = 0; i < this.num; i++) {
+      this.drawNormal(i);
+    }
   }
 
   text(i: number) {

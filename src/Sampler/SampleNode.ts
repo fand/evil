@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { SAMPLE_RATE } from '../Constant';
 import { Panner } from '../Panner';
 import { SAMPLES as SAMPLE } from './Constant';
@@ -54,22 +46,19 @@ export class SampleNode {
 
     this.eq_gains = [0.0, 0.0, 0.0];
 
-    const [eq1, eq2, eq3] = Array.from([
-      this.ctx.createBiquadFilter(),
-      this.ctx.createBiquadFilter(),
-      this.ctx.createBiquadFilter(),
-    ]);
-    [eq1.type, eq2.type, eq3.type] = Array.from([
-      'lowshelf',
-      'peaking',
-      'highshelf',
-    ]);
-    [eq1.Q.value, eq2.Q.value, eq3.Q.value] = Array.from([0.6, 0.6, 0.6]);
-    [eq1.frequency.value, eq2.frequency.value, eq3.frequency.value] =
-      Array.from([350, 2000, 4000]);
-    [eq1.gain.value, eq2.gain.value, eq3.gain.value] = Array.from(
-      this.eq_gains
-    );
+    const eq1 = this.ctx.createBiquadFilter();
+    const eq2 = this.ctx.createBiquadFilter();
+    const eq3 = this.ctx.createBiquadFilter();
+    eq1.type = 'lowshelf';
+    eq2.type = 'peaking';
+    eq3.type = 'highshelf';
+    eq1.Q.value = eq2.Q.value = eq3.Q.value = 0.6;
+    eq1.frequency.value = 350;
+    eq2.frequency.value = 2000;
+    eq3.frequency.value = 4000;
+    eq1.gain.value = this.eq_gains[0];
+    eq2.gain.value = this.eq_gains[1];
+    eq3.gain.value = this.eq_gains[2];
     this.eq_nodes = [eq1, eq2, eq3];
 
     this.panner = new Panner(this.ctx);
@@ -86,13 +75,13 @@ export class SampleNode {
     this.name = name;
 
     const sample = SAMPLE.DATA[this.name as keyof typeof SAMPLE.DATA] as { url: string; data?: AudioBuffer };
-    if (sample == null) {
+    if (!sample) {
       return;
     }
 
     this.sample = sample;
-    if (sample.data != null) {
-      return (this.buffer = sample.data);
+    if (sample.data) {
+      this.buffer = sample.data;
     } else {
       const req = new XMLHttpRequest();
       req.open('GET', import.meta.env.BASE_URL + sample.url, true);
@@ -103,16 +92,16 @@ export class SampleNode {
           (buffer) => {
             this.buffer = buffer;
             this.buffer_duration = this.buffer.length / SAMPLE_RATE;
-            return this.parent.sampleLoaded(this.id);
+            this.parent.sampleLoaded(this.id);
           },
           (err) => {
             console.log('Failed to fetch ' + sample.url);
-            return console.log(err);
+            console.log(err);
           }
         );
-        return ((sample as any).data = this.buffer);
+        (sample as any).data = this.buffer;
       };
-      return req.send();
+      req.send();
     }
   }
 
@@ -122,10 +111,10 @@ export class SampleNode {
   }
 
   noteOn(gain: number, time: number) {
-    if (this.buffer == null || this.buffer_duration == null) {
+    if (!this.buffer || !this.buffer_duration) {
       return;
     }
-    if (this.source_old != null) {
+    if (this.source_old) {
       this.source_old.stop(time);
     }
     const source = this.ctx.createBufferSource();
@@ -141,7 +130,7 @@ export class SampleNode {
     source.playbackRate.value = this.speed;
     source.start(0);
     this.node_buf.gain.value = gain;
-    return (this.source_old = source);
+    this.source_old = source;
   }
 
   setTimeParam(head: number, tail: number, speed: number) {
@@ -155,16 +144,10 @@ export class SampleNode {
   }
 
   setEQParam(eq_gains: [lo: number, mid: number, hi: number]) {
-    let ref;
     this.eq_gains = eq_gains;
-    return (
-      ([
-        this.eq_nodes[0].gain.value,
-        this.eq_nodes[1].gain.value,
-        this.eq_nodes[2].gain.value,
-      ] = Array.from((ref = Array.from(this.eq_gains).map((g) => g * 0.2)))),
-      ref
-    );
+    this.eq_nodes[0].gain.value = this.eq_gains[0] * 0.2;
+    this.eq_nodes[1].gain.value = this.eq_gains[1] * 0.2;
+    this.eq_nodes[2].gain.value = this.eq_gains[2] * 0.2;
   }
 
   getEQParam() {
@@ -174,7 +157,7 @@ export class SampleNode {
   setOutputParam(pan_value: number, gain: number) {
     this.pan_value = pan_value;
     this.panner.setPosition(this.pan_value);
-    return (this.out.gain.value = gain);
+    this.out.gain.value = gain;
   }
 
   getOutputParam(): [pan: number, gain: number] {
@@ -195,17 +178,17 @@ export class SampleNode {
   }
 
   setParam(p: any) {
-    if (p.wave != null) {
+    if (p.wave !== undefined) {
       this.setSample(p.wave);
     }
-    if (p.time != null) {
+    if (p.time !== undefined) {
       this.setTimeParam(p.time[0], p.time[1], p.time[2]);
     }
-    if (p.gains != null) {
+    if (p.gains !== undefined) {
       this.setEQParam(p.gains);
     }
-    if (p.output != null) {
-      return this.setOutputParam(p.output[0], p.output[1]);
+    if (p.output !== undefined) {
+      this.setOutputParam(p.output[0], p.output[1]);
     }
   }
 }

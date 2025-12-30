@@ -1,12 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import $ from 'jquery';
 import { SamplerKeyboardView } from './SamplerKeyboardView';
 import type { Sampler } from '../Sampler';
@@ -214,7 +205,7 @@ export class SamplerView {
         );
       }
     }
-    return this.setPattern(this.pattern_obj);
+    this.setPattern(this.pattern_obj);
   }
 
   getPos(e: JQuery.MouseMoveEvent | JQuery.MouseDownEvent): SamplerPos {
@@ -263,7 +254,7 @@ export class SamplerView {
           } else {
             this.removeNote(pos);
           }
-          return (this.click_pos = pos);
+          this.click_pos = pos;
         }
       })
       .on('mousedown', (e) => {
@@ -271,23 +262,23 @@ export class SamplerView {
         const pos = this.getPos(e);
 
         let remove = false;
-        for (var note of Array.from(this.pattern[pos.x_abs])) {
+        for (const note of this.pattern[pos.x_abs]) {
           if (note[0] === pos.note) {
             remove = true;
           }
         }
 
         if (remove) {
-          return this.removeNote(pos);
+          this.removeNote(pos);
         } else {
           this.is_adding = true;
-          return this.addNote(pos, 1.0);
+          this.addNote(pos, 1.0);
         }
       })
       .on('mouseup', (e) => {
         this.is_clicked = false;
         this.is_adding = false;
-        return (this.is_removing = false);
+        this.is_removing = false;
       })
       .on('mouseout', (e) => {
         this.ctx_hover.clearRect(
@@ -299,7 +290,7 @@ export class SamplerView {
         this.hover_pos = { x: -1, y: -1 };
         this.is_clicked = false;
         this.is_adding = false;
-        return (this.is_removing = false);
+        this.is_removing = false;
       });
 
     // Headers
@@ -324,22 +315,14 @@ export class SamplerView {
 
     this.nosync.on('click', () => this.toggleNoSync());
     this.plus.on('click', () => this.plusPattern());
-    return this.minus.on('click', () => {
+    this.minus.on('click', () => {
       if (this.pattern.length > this.cells_x) {
-        return this.minusPattern();
+        this.minusPattern();
       }
     });
   }
 
   addNote(pos: SamplerPos, gain: number) {
-    // if (this.pattern[pos.x_abs] === 0) {
-    //   this.pattern[pos.x_abs] = [];
-    // }
-
-    // if (!Array.isArray(this.pattern[pos.x_abs])) {
-    //   this.pattern[pos.x_abs] = [[this.pattern[pos.x_abs], 1.0]];
-    // }
-
     for (let i = 0; i < this.pattern[pos.x_abs].length; i++) {
       if (this.pattern[pos.x_abs][i][0] === pos.note) {
         this.pattern[pos.x_abs].splice(i, 1);
@@ -348,7 +331,7 @@ export class SamplerView {
     this.pattern[pos.x_abs].push([pos.note, gain]);
 
     this.model.addNote(pos.x_abs, pos.note, gain);
-    return this.ctx_on.drawImage(
+    this.ctx_on.drawImage(
       this.cell,
       26,
       26,
@@ -405,7 +388,7 @@ export class SamplerView {
         26
       );
     }
-    return (this.last_time = this.time);
+    this.last_time = this.time;
   }
 
   setPattern(pattern_obj: SamplerPatternObject) {
@@ -415,19 +398,19 @@ export class SamplerView {
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);
     this.setMarker();
-    return this.setPatternName(this.pattern_obj.name);
+    this.setPatternName(this.pattern_obj.name);
   }
 
   drawPattern(time?: number) {
-    if (time != null) {
+    if (time !== undefined) {
       this.time = time;
     }
     this.page = Math.floor(this.time / this.cells_x);
     this.ctx_on.clearRect(0, 0, 832, 260);
 
     for (let i = 0; i < this.cells_x; i++) {
-      for (var j of Array.from(this.pattern[this.page * this.cells_x + i])) {
-        var y = this.cells_y - j[0];
+      for (const j of this.pattern[this.page * this.cells_x + i]) {
+        const y = this.cells_y - j[0];
         this.ctx_on.drawImage(
           this.cell,
           26,
@@ -441,7 +424,7 @@ export class SamplerView {
         );
       }
     }
-    return this.setMarker();
+    this.setMarker();
   }
 
   plusPattern() {
@@ -454,7 +437,7 @@ export class SamplerView {
     this.drawPattern();
     this.minus.removeClass('btn-false').addClass('btn-true');
     if (this.page_total === 8) {
-      return this.plus.removeClass('btn-true').addClass('btn-false');
+      this.plus.removeClass('btn-true').addClass('btn-false');
     }
   }
 
@@ -468,7 +451,7 @@ export class SamplerView {
     this.drawPattern();
     this.plus.removeClass('btn-false').addClass('btn-true');
     if (this.page_total === 1) {
-      return this.minus.removeClass('btn-true').addClass('btn-false');
+      this.minus.removeClass('btn-true').addClass('btn-false');
     }
   }
 
@@ -543,7 +526,7 @@ export class SamplerView {
     if (this.is_nosync) {
       this.is_nosync = false;
       this.nosync.removeClass('btn-true').addClass('btn-false');
-      return this.drawPattern(this.time);
+      this.drawPattern(this.time);
     } else {
       this.is_nosync = true;
       this.nosync.removeClass('btn-false').addClass('btn-true');
@@ -567,6 +550,6 @@ export class SamplerView {
   selectSample(sample_now: number) {
     this.sample_now = sample_now;
     this.keyboard.selectSample(this.sample_now);
-    return this.model.selectSample(this.sample_now);
+    this.model.selectSample(this.sample_now);
   }
 }

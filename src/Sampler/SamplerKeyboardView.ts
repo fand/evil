@@ -1,12 +1,5 @@
 import { SamplerView } from './SamplerView';
 
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 export class SamplerKeyboardView {
   sequencer: SamplerView;
   on_dom: JQuery;
@@ -81,7 +74,7 @@ export class SamplerKeyboardView {
   }
 
   initEvent() {
-    return this.off_dom
+    this.off_dom
       .on('mousemove', (e) => {
         const pos = this.getPos(e);
 
@@ -128,7 +121,7 @@ export class SamplerKeyboardView {
     this.ctx_off.fillStyle = this.color[0];
     this.ctx_off.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
     this.ctx_off.fillStyle = this.color[3];
-    return this.ctx_off.fillText(
+    this.ctx_off.fillText(
       ((this.cells_y - i - 1) % 7) + 1 + 'th',
       10,
       (i + 1) * this.h - 10
@@ -138,7 +131,7 @@ export class SamplerKeyboardView {
   drawHover(i: number) {
     this.ctx_off.fillStyle = this.color[1];
     this.ctx_off.fillRect(0, (i + 1) * this.h - 3, this.w, 2);
-    return this.ctx_off.fillText(
+    this.ctx_off.fillText(
       ((this.cells_y - i - 1) % 7) + 1 + 'th',
       10,
       (i + 1) * this.h - 10
@@ -150,7 +143,7 @@ export class SamplerKeyboardView {
     this.ctx_off.fillStyle = this.color[2];
     this.ctx_off.fillRect(0, i * this.h, this.w, this.h);
     this.ctx_off.fillStyle = this.color[4];
-    return this.ctx_off.fillText(
+    this.ctx_off.fillText(
       ((this.cells_y - i - 1) % 7) + 1 + 'th',
       10,
       (i + 1) * this.h - 10
@@ -158,18 +151,18 @@ export class SamplerKeyboardView {
   }
 
   clearNormal(i: number) {
-    return this.ctx_off.clearRect(0, i * this.h, this.w, this.h);
+    this.ctx_off.clearRect(0, i * this.h, this.w, this.h);
   }
 
   clearActive(i: number) {
     this.clearNormal(i);
     this.drawNormal(i);
-    return this.drawText(i);
+    this.drawText(i);
   }
 
   drawText(i: number) {
     this.ctx_off.fillStyle = this.color[3];
-    return this.ctx_off.fillText(
+    this.ctx_off.fillText(
       ((this.cells_y - i - 1) % 7) + 1 + 'th',
       10,
       (i + 1) * this.h - 10

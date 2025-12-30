@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
-
 import { Player } from './Player';
 
 const KEYCODE_TO_NOTE: Record<number, number> = {
@@ -95,15 +87,15 @@ class Keyboard {
     });
     window.addEventListener('keyup', (e) => {
       this.is_pressed = false;
-      return this.noteOff(e.keyCode);
+      this.noteOff(e.keyCode);
     });
   }
 
   beginInput() {
-    return (this.is_writing = true);
+    this.is_writing = true;
   }
   endInput() {
-    return (this.is_writing = false);
+    this.is_writing = false;
   }
 
   setMode(mode: string) {
@@ -143,7 +135,7 @@ class Keyboard {
         }
     }
 
-    return (this.last_key = keyCode);
+    this.last_key = keyCode;
   }
 
   onPlayer(keyCode: number) {
@@ -151,8 +143,8 @@ class Keyboard {
       this.player.noteOff(true);
     }
     const n = KEYCODE_TO_NOTE[keyCode];
-    if (n != null) {
-      return this.player.noteOn(n, true);
+    if (n !== undefined) {
+      this.player.noteOn(n, true);
     }
   }
 
@@ -165,11 +157,11 @@ class Keyboard {
 
     // Mute
     const num = KEYCODE_TO_NUM[keyCode];
-    if (num != null && num < 10) {
-      if (!Array.from(this.solos).includes(num)) {
+    if (num !== undefined && num < 10) {
+      if (!this.solos.includes(num)) {
         this.solos.push(num);
       }
-      return this.player.solo(this.solos);
+      this.player.solo(this.solos);
     }
   }
 
@@ -184,12 +176,12 @@ class Keyboard {
   }
 
   offPlayer() {
-    return this.player.noteOff(true);
+    this.player.noteOff(true);
   }
 
   offMixer(keyCode: number) {
     const num = KEYCODE_TO_NUM[keyCode];
-    if (num != null && num < 10) {
+    if (num !== undefined && num < 10) {
       this.solos = this.solos.filter((n) => n !== num);
       this.player.solo(this.solos);
     }

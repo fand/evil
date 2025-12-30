@@ -1,12 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { Mixer } from './Mixer';
 import { Session } from './Session';
 import { Sidebar } from './Sidebar';
@@ -87,7 +78,7 @@ export class Player {
 
     this.key = key;
     this.scene.key = this.key;
-    for (var s of Array.from(this.synth)) {
+    for (const s of this.synth) {
       s.setKey(this.key);
     }
 
@@ -126,16 +117,16 @@ export class Player {
   }
 
   stop() {
-    for (var s of Array.from(this.synth)) {
+    for (const s of this.synth) {
       s.stop();
     }
     this.is_playing = false;
     this.view.viewStop();
-    return (this.time = 0);
+    this.time = 0;
   }
 
   pause() {
-    for (var s of Array.from(this.synth)) {
+    for (const s of this.synth) {
       s.pause(this.time);
     }
     this.is_playing = false;
@@ -169,10 +160,10 @@ export class Player {
   }
 
   noteOn(note: number, force: boolean) {
-    return this.synth_now.noteOn(note, force);
+    this.synth_now.noteOn(note, force);
   }
   noteOff(force: boolean) {
-    return this.synth_now.noteOff(force);
+    this.synth_now.noteOff(force);
   }
 
   playNext() {
@@ -181,7 +172,7 @@ export class Player {
         this.time = 0;
       }
 
-      for (var s of Array.from(this.synth)) {
+      for (const s of this.synth) {
         s.playAt(this.time);
       }
 
@@ -194,9 +185,9 @@ export class Player {
       }
 
       this.time++;
-      return T.setTimeout(() => this.playNext(), this.duration);
+      T.setTimeout(() => this.playNext(), this.duration);
     } else {
-      return this.stop();
+      this.stop();
     }
   }
 
@@ -207,14 +198,14 @@ export class Player {
 
     this.synth.push(s);
     this.mixer.addSynth(s);
-    return this.session.addSynth(s, scene_pos);
+    this.session.addSynth(s, scene_pos);
   }
 
   addSampler(scene_pos?: number, name?: string) {
     const s = new Sampler(this.context, this.num_id++, this, name);
     this.synth.push(s);
     this.mixer.addSynth(s);
-    return this.session.addSynth(s, scene_pos);
+    this.session.addSynth(s, scene_pos);
   }
 
   // Called by instruments.
@@ -251,7 +242,7 @@ export class Player {
     this.synth_now = this.synth[next_idx];
     this.synth_now.activate(next_idx);
     this.synth_pos++;
-    return window.keyboard.setMode('SYNTH');
+    window.keyboard.setMode('SYNTH');
   }
 
   moveLeft(next_idx: number) {
@@ -259,7 +250,7 @@ export class Player {
     this.synth_now = this.synth[next_idx];
     this.synth_now.activate(next_idx);
     this.synth_pos--;
-    return window.keyboard.setMode('SYNTH');
+    window.keyboard.setMode('SYNTH');
   }
 
   moveTop() {
@@ -285,14 +276,14 @@ export class Player {
 
   solo(solos: number[]) {
     if (solos.length === 0) {
-      for (let s of Array.from(this.synth)) {
+      for (const s of this.synth) {
         s.unmute();
       }
       return;
     }
 
-    for (let s of Array.from(this.synth)) {
-      if (Array.from(solos).includes(s.id + 1)) {
+    for (const s of this.synth) {
+      if (solos.includes(s.id + 1)) {
         s.unmute();
       } else {
         s.mute();
@@ -309,10 +300,7 @@ export class Player {
     this.view.empty();
 
     for (let i = 0; i < this.song.tracks.length; i++) {
-      if (
-        this.song.tracks[i].type == null ||
-        this.song.tracks[i].type === 'REZ'
-      ) {
+      if (!this.song.tracks[i].type || this.song.tracks[i].type === 'REZ') {
         this.addSynth(0, this.song.tracks[i].name);
       }
       if (this.song.tracks[i].type === 'SAMPLER') {
@@ -333,23 +321,23 @@ export class Player {
     this.mixer.readParam(this.song.mixer);
 
     this.view.setSynthNum(this.synth.length, this.synth_pos);
-    return this.resetSceneLength();
+    this.resetSceneLength();
   }
 
   readScene(scene: any) {
-    if (scene.bpm != null) {
+    if (scene.bpm) {
       this.setBPM(scene.bpm);
       this.view.setBPM(scene.bpm);
     }
-    if (scene.key != null) {
+    if (scene.key) {
       this.setKey(scene.key);
       this.view.setKey(scene.key);
     }
-    if (scene.scale != null) {
+    if (scene.scale) {
       this.setScale(scene.scale);
       this.view.setScale(scene.scale);
     }
-    return this.view.setParam(scene.bpm, scene.key, scene.scale);
+    this.view.setParam(scene.bpm, scene.key, scene.scale);
   }
 
   getScene() {

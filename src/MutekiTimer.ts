@@ -1,12 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__, or convert again using --optional-chaining
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * DS208: Avoid top-level this
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 const SOURCE = `\
 let t = 0;
 onmessage = function(e) {
@@ -35,10 +26,7 @@ export class MutekiTimer {
     }
   }
 
-  setTimeout(func: () => void, interval: number) {
-    if (interval == null) {
-      interval = 100;
-    }
+  setTimeout(func: () => void, interval: number = 100) {
     if (typeof this.timer === 'number') {
       this.timer = setTimeout(func, interval);
     } else {

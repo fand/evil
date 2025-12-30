@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import $ from 'jquery';
 import type { SamplerCore } from './SamplerCore';
 
@@ -88,24 +80,24 @@ export class SamplerCoreView {
   initEvent() {
     this.sample.find('input').on('change', () => {
       this.fetchSampleTimeParam();
-      return this.updateWaveformCanvas(this.sample_now);
+      this.updateWaveformCanvas(this.sample_now);
     });
     this.canvas_waveform_dom
       .on('mousedown', (e) => {
         const pos = this.getWaveformPos(e);
         this.clicked_wave = pos;
         if (Math.abs(pos - this.head_wave) < 3) {
-          return (this.target_wave = 'head');
+          this.target_wave = 'head';
         } else if (Math.abs(pos - this.tail_wave) < 3) {
-          return (this.target_wave = 'tail');
+          this.target_wave = 'tail';
         } else if (this.head_wave < pos && pos < this.tail_wave) {
-          return (this.target_wave = 'both');
+          this.target_wave = 'both';
         } else {
-          return (this.target_wave = undefined);
+          this.target_wave = undefined;
         }
       })
       .on('mousemove', (e) => {
-        if (this.target_wave != null) {
+        if (this.target_wave) {
           const pos = this.getWaveformPos(e);
           let d = pos - this.clicked_wave;
 
@@ -127,32 +119,32 @@ export class SamplerCoreView {
           this.fetchSampleTimeParam();
           this.updateWaveformCanvas(this.sample_now);
 
-          return (this.clicked_wave = pos);
+          this.clicked_wave = pos;
         }
       })
       .on('mouseup mouseout', () => {
         this.target_wave = undefined;
-        return this.updateWaveformCanvas(this.sample_now);
+        this.updateWaveformCanvas(this.sample_now);
       });
 
     this.sample_name.on('click', () => {
-      return this.showSampleList();
+      this.showSampleList();
     });
     const self = this;
     this.sample_list.find('div').on('click', function () {
       self.setSample($(this).html());
-      return self.hideSampleList();
+      self.hideSampleList();
     });
     this.sample_list_wrapper.on('click', () => {
-      return this.hideSampleList();
+      this.hideSampleList();
     });
 
     this.eq.on('change', () => {
       this.fetchSampleEQParam();
-      return this.updateEQCanvas();
+      this.updateEQCanvas();
     });
-    return this.output.on('change', () => {
-      return this.fetchSampleOutputParam();
+    this.output.on('change', () => {
+      this.fetchSampleOutputParam();
     });
   }
 
@@ -160,7 +152,7 @@ export class SamplerCoreView {
     this.sample_now = sample_now;
     this.sample_name.find('span').text(param.wave);
     this.updateWaveformCanvas(this.sample_now);
-    return this.updateEQCanvas();
+    this.updateEQCanvas();
   }
 
   showSampleList() {
@@ -169,12 +161,12 @@ export class SamplerCoreView {
       top: position.top + 20 + 'px',
       left: position.left + 'px',
     });
-    return this.sample_list_wrapper.show();
+    this.sample_list_wrapper.show();
   }
 
   hideSampleList() {
     this.sample_list.hide();
-    return this.sample_list_wrapper.hide();
+    this.sample_list_wrapper.hide();
   }
 
   updateWaveformCanvas(sample_now: number) {
@@ -191,7 +183,7 @@ export class SamplerCoreView {
     const hts = this.model.getSampleTimeParam(this.sample_now);
     const _data = this.model.getSampleData(this.sample_now);
 
-    if (_data != null) {
+    if (_data) {
       const wave = _data.getChannelData(0);
 
       // Draw waveform
@@ -213,7 +205,7 @@ export class SamplerCoreView {
     const left = hts[0] * w;
     const right = hts[1] * w;
     if (left < right) {
-      if (this.target_wave != null) {
+      if (this.target_wave) {
         ctx.fillStyle = 'rgba(255, 0, 160, 0.1)';
       } else {
         ctx.fillStyle = 'rgba(255, 0, 160, 0.2)';
@@ -229,7 +221,7 @@ export class SamplerCoreView {
     ctx.beginPath();
     ctx.arc(right, -5, 5, 0, 2 * Math.PI, false);
     ctx.stroke();
-    return ctx.closePath();
+    ctx.closePath();
   }
 
   updateEQCanvas() {
@@ -253,7 +245,7 @@ export class SamplerCoreView {
     ctx.strokeStyle = 'rgb(255, 0, 220)';
     ctx.stroke();
     ctx.closePath();
-    return ctx.translate(0, -h / 2);
+    ctx.translate(0, -h / 2);
   }
 
   setSample(name: string) {
@@ -294,23 +286,23 @@ export class SamplerCoreView {
     this.head_wave = p[0] * 300.0;
     this.tail_wave = p[1] * 300.0;
     const ratio = Math.log(p[2]) / Math.LN10 + 1.0;
-    return this.sample.find('.speed').val(ratio * 100);
+    this.sample.find('.speed').val(ratio * 100);
   }
 
   setSampleEQParam(p: [lo: number, mid: number, hi: number]) {
     this.eq.find('.EQ_lo').val(p[0] + 100.0);
     this.eq.find('.EQ_mid').val(p[1] + 100.0);
-    return this.eq.find('.EQ_hi').val(p[2] + 100.0);
+    this.eq.find('.EQ_hi').val(p[2] + 100.0);
   }
 
   setSampleOutputParam(p: [pan: number, gain: number]) {
-    const [pan, g] = Array.from(p);
+    const [pan, g] = p;
     this.panner.val((1.0 - pan) * 200.0);
-    return this.gain.val(g * 100.0);
+    this.gain.val(g * 100.0);
   }
 
   fetchGains() {
-    if (this.gain_inputs == null) {
+    if (!this.gain_inputs) {
       return;
     }
     for (let i = 0; i < this.gain_inputs.length; i++) {

@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS002: Fix invalid constructor
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { FX } from './FX';
 import { ReverbView } from './ReverbView';
 
@@ -37,13 +30,13 @@ export class Reverb extends FX {
   setIR(name: string) {
     this.name = name;
 
-    if (IR_LOADED[this.name] != null) {
+    if (IR_LOADED[this.name]) {
       this.reverb.buffer = IR_LOADED[this.name];
       return;
     }
 
     const url = IR_URL[this.name];
-    if (url == null) {
+    if (!url) {
       return;
     }
 
@@ -51,29 +44,29 @@ export class Reverb extends FX {
     req.open('GET', url, true);
     req.responseType = 'arraybuffer';
     req.onload = () => {
-      return this.ctx.decodeAudioData(
+      this.ctx.decodeAudioData(
         req.response,
         (buffer) => {
           this.reverb.buffer = buffer;
-          return (IR_LOADED[this.name] = buffer);
+          IR_LOADED[this.name] = buffer;
         },
         (err) => {
           console.log('ajax error');
-          return console.log(err);
+          console.log(err);
         }
       );
     };
-    return req.send();
+    req.send();
   }
 
   setParam(p: Partial<ReverbParams>) {
-    if (p.name != null) {
+    if (p.name !== undefined) {
       this.setIR(p.name);
     }
-    if (p.wet != null) {
+    if (p.wet !== undefined) {
       this.setWet(p.wet);
     }
-    return this.view.setParam(p);
+    this.view.setParam(p);
   }
 
   getParam() {

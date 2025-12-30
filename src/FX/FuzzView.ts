@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS002: Fix invalid constructor
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import type { Fuzz, FuzzParams } from './Fuzz';
 import { FXView } from './FXView';
 import $ from 'jquery';
@@ -31,36 +24,36 @@ export class FuzzView extends FXView {
   initEvent() {
     super.initEvent();
     this.input.on('change', () => {
-      return this.model.setParam({
+      this.model.setParam({
         input: parseFloat(this.input.val() as string) / 100.0,
       });
     });
     this.output.on('change', () => {
-      return this.model.setParam({
+      this.model.setParam({
         output: parseFloat(this.output.val() as string) / 100.0,
       });
     });
     this.type.on('change', () => {
-      return this.model.setParam({ type: this.type.val() as string });
+      this.model.setParam({ type: this.type.val() as string });
     });
-    return this.gain.on('change', () => {
-      return this.model.setParam({
+    this.gain.on('change', () => {
+      this.model.setParam({
         gain: parseFloat(this.gain.val() as string) / 100.0,
       });
     });
   }
 
   setParam(p: Partial<FuzzParams>) {
-    if (p.input != null) {
+    if (p.input !== undefined) {
       this.input.val(p.input * 100);
     }
-    if (p.output != null) {
+    if (p.output !== undefined) {
       this.output.val(p.output * 100);
     }
-    if (p.type != null) {
+    if (p.type !== undefined) {
       this.type.val(p.type);
     }
-    if (p.gain != null) {
+    if (p.gain !== undefined) {
       this.gain.val(p.gain * 100);
     }
   }

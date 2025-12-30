@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS002: Fix invalid constructor
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { FX } from './FX';
 import { DelayView } from './DelayView';
 
@@ -61,19 +54,19 @@ export class Delay extends FX {
   }
 
   setParam(p: Partial<DelayParams>) {
-    if (p.delay != null) {
+    if (p.delay !== undefined) {
       this.setDelay(p.delay);
     }
-    if (p.feedback != null) {
+    if (p.feedback !== undefined) {
       this.setFeedback(p.feedback);
     }
-    if (p.lofi != null) {
+    if (p.lofi !== undefined) {
       this.setLofi(p.lofi);
     }
-    if (p.wet != null) {
+    if (p.wet !== undefined) {
       this.setWet(p.wet);
     }
-    return this.view.setParam(p);
+    this.view.setParam(p);
   }
 
   getParam(): { effect: 'Delay' } & DelayParams {
