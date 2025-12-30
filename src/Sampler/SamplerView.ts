@@ -59,9 +59,9 @@ export class SamplerView {
   model: Sampler;
   id: number;
   dom: JQuery;
-  synth_name: JQuery;
+  inst_name: JQuery;
   pattern_name: JQuery;
-  synth_type: JQuery;
+  inst_type: JQuery;
   header: JQuery;
   markers: JQuery;
   pos_markers: JQuery;
@@ -111,13 +111,13 @@ export class SamplerView {
     this.dom.attr('id', 'sampler' + this.id);
     $('#instruments').append(this.dom);
 
-    this.synth_name = this.dom.find('.synth-name');
-    this.synth_name.val(this.model.name);
+    this.inst_name = this.dom.find('.synth-name');
+    this.inst_name.val(this.model.name);
     this.pattern_name = this.dom.find('.pattern-name');
     this.pattern_name.val(this.model.pattern_name);
 
     // header DOM
-    this.synth_type = this.dom.find('.synth-type');
+    this.inst_type = this.dom.find('.synth-type');
 
     this.header = this.dom.find('.header');
     this.markers = this.dom.find('.markers');
@@ -294,14 +294,14 @@ export class SamplerView {
       });
 
     // Headers
-    this.synth_type.on('change', () =>
-      this.model.changeSynth(this.synth_type.val() as string)
+    this.inst_type.on('change', () =>
+      this.model.changeInstrument(this.inst_type.val() as string)
     );
-    this.synth_name
+    this.inst_name
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
       .on('change', () =>
-        this.model.setSynthName(this.synth_name.val() as string)
+        this.model.setInstrumentName(this.inst_name.val() as string)
       );
     this.pattern_name
       .on('focus', () => window.keyboard.beginInput())
@@ -515,7 +515,7 @@ export class SamplerView {
   }
 
   setSynthName(name: string) {
-    this.synth_name.val(name);
+    this.inst_name.val(name);
   }
 
   setPatternName(name: string) {

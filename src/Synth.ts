@@ -156,7 +156,6 @@ class Synth {
       // sustain mid
     } else if (this.pattern[mytime] === 'sustain') {
       // do nothing
-
       // sustain end
     } else if (this.pattern[mytime] === 'end') {
       T2.setTimeout(() => this.core.noteOff(), this.duration - 10);
@@ -274,7 +273,7 @@ class Synth {
       throw new TypeError(`Invalid instrument type: ${type}`);
     }
 
-    const s_new = this.player.changeSynth(this.id, type);
+    const s_new = this.player.changeInstrument(this.id, type);
     this.view.dom.replaceWith(s_new.view.dom);
     this.noteOff(true);
     this.disconnect();

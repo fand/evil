@@ -9,7 +9,7 @@ import { Compressor } from './FX/Compressor';
 import { FX } from './FX/FX';
 import type { Sampler } from './Sampler';
 import type { Synth } from './Synth';
-import type { Player } from './Player';
+import type { Instrument, Player } from './Player';
 
 export class Mixer {
   ctx: AudioContext;
@@ -34,7 +34,7 @@ export class Mixer {
     this.ctx = ctx;
     this.player = player;
     this.gain_master = 1.0;
-    this.gain_tracks = this.player.synth.map((s) => s.getGain());
+    this.gain_tracks = this.player.instruments.map((s) => s.getGain());
 
     this.out = this.ctx.createGain();
     this.out.gain.value = this.gain_master;
@@ -104,15 +104,15 @@ export class Mixer {
     return this.view.empty();
   }
 
-  addSynth(synth: Synth | Sampler) {
+  addInstrument(instrument: Instrument) {
     // Create new panner
     const p = new Panner(this.ctx);
-    synth.connect(p.in);
+    instrument.connect(p.in);
     p.connect(this.send);
     this.panners.push(p);
 
     const a = this.ctx.createAnalyser();
-    synth.connect(a);
+    instrument.connect(a);
     this.analysers.push(a);
 
     this.view.addSynth();
@@ -123,7 +123,7 @@ export class Mixer {
     this.gain_master = gain_master;
 
     for (let i = 0; i < this.gain_tracks.length; i++) {
-      this.player.synth[i].setGain(this.gain_tracks[i]);
+      this.player.instruments[i].setGain(this.gain_tracks[i]);
     }
 
     this.out.gain.value = this.gain_master;
@@ -176,7 +176,7 @@ export class Mixer {
     this.readPans(p.pan_tracks, p.pan_master);
   }
 
-  changeSynth(idx: number, synth: Synth | Sampler) {
+  changeInstrument(idx: number, synth: Synth | Sampler) {
     synth.connect(this.panners[idx].in);
     return synth.connect(this.analysers[idx]);
   }
@@ -229,7 +229,7 @@ export class Mixer {
       throw new TypeError(`Invalid effect type: ${name}`);
     }
 
-    this.player.synth[x].insertEffect(fx);
+    this.player.instruments[x].insertEffect(fx);
     return fx;
   }
 

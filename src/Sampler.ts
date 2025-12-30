@@ -271,7 +271,7 @@ class Sampler {
     this.view.drawPattern(this.time);
   }
 
-  setSynthName(name: string) {
+  setInstrumentName(name: string) {
     this.name = name;
     this.session.setSynthName(this.id, this.name);
     this.view.setSynthName(this.name);
@@ -292,12 +292,12 @@ class Sampler {
     this.core.bindSample(sample_now);
   }
 
-  changeSynth(type: string) {
+  changeInstrument(type: string) {
     if (type !== 'REZ' && type !== 'SAMPLER') {
       throw new TypeError(`Invalid instrument type: ${type}`);
     }
 
-    const s_new = this.player.changeSynth(this.id, type);
+    const s_new = this.player.changeInstrument(this.id, type);
     this.view.dom.replaceWith(s_new.view.dom);
     this.noteOff();
     this.disconnect();

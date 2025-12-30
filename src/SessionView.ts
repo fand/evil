@@ -941,7 +941,7 @@ class SessionView {
     return this.drawCellTracks(pat[2], pat[0], pat[1]);
   }
 
-  addSynth(song: any, _pos?: any) {
+  addInstrument(song: any, _pos?: any) {
     this.song = song;
     return this.readSong(this.song, this.current_cells);
   }

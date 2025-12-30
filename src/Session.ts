@@ -2,7 +2,7 @@ import { SessionView } from './SessionView';
 import { Song } from './Song';
 import $ from 'jquery';
 import { SynthPatternObject } from './Synth/SynthView';
-import type { Player } from './Player';
+import type { Instrument, Player } from './Player';
 import type { Synth } from './Synth';
 import type { Sampler } from './Sampler';
 
@@ -23,7 +23,7 @@ class Session {
   cue_queue: any[];
   song: any;
   view: SessionView;
-  synth: (Synth | Sampler)[] = [];
+  instruments: Instrument[] = [];
 
   constructor(ctx: AudioContext, player: Player) {
     this.ctx = ctx;
@@ -53,8 +53,8 @@ class Session {
   }
 
   // Read patterns for the next measure.
-  nextMeasure(synth: (Synth | Sampler)[], _time?: number) {
-    this.synth = synth;
+  nextMeasure(insts: Instrument[], _time?: number) {
+    this.instruments = insts;
     if (this.is_loop) {
       if (this.is_waiting_next_scene) {
         return this.nextScene(this.next_scene_pos);
@@ -73,7 +73,7 @@ class Session {
     this.is_waiting_next_pattern = false;
     for (const q of this.cue_queue) {
       const pat = this.song.tracks[q[0]].patterns[q[1]];
-      this.synth[q[0]].setPattern(pat);
+      this.instruments[q[0]].setPattern(pat);
       this.current_cells[q[0]] = q[1];
     }
     this.view.drawScene(this.scene_pos, this.current_cells);
@@ -101,14 +101,14 @@ class Session {
       return;
     }
 
-    for (let i = 0; i < this.synth.length; i++) {
+    for (let i = 0; i < this.instruments.length; i++) {
       const pat = this.song.tracks[i].patterns[this.scene_pos];
       if (pat == null) {
         continue;
       }
 
       if (pat) {
-        this.synth[i].setPattern(pat);
+        this.instruments[i].setPattern(pat);
         this.scene_length = Math.max(this.scene_length, pat.pattern.length);
         this.current_cells[i] = pos;
       }
@@ -150,7 +150,7 @@ class Session {
     this.next_scene_pos = scene_num;
   }
 
-  addSynth(s: any, _pos?: number) {
+  addInstrument(s: Instrument, _pos?: number) {
     const pos = _pos ? _pos : this.scene_pos;
 
     const name = s.id + '-' + pos;
@@ -171,11 +171,11 @@ class Session {
     this.song.tracks.push(s_obj);
     this.current_cells.push(pos);
 
-    this.view.addSynth(this.song);
+    this.view.addInstrument(this.song);
   }
 
-  setSynth(synth: any[]) {
-    this.synth = synth;
+  setInstrument(inst: any[]) {
+    this.instruments = inst;
   }
 
   // Read given song, called by Player.
@@ -192,8 +192,6 @@ class Session {
     if (dst.y + 1 > this.song.length) {
       this.song.length = dst.y + 1;
     }
-
-    const { name } = this.song.tracks[src.x].patterns[src.y];
 
     // add track pattern
     let synth_num = dst.x;
@@ -219,7 +217,7 @@ class Session {
       this.song.length = pat_num + 1;
     }
     if (this.current_cells[synth_num] === pat_num) {
-      this.player.synth[synth_num].setPattern(pat);
+      this.player.instruments[synth_num].setPattern(pat);
     }
   }
 
@@ -250,16 +248,16 @@ class Session {
     this.savePattern(synth_num, this.current_cells[synth_num]);
 
     if (this.song.tracks[synth_num].patterns[pat_num]) {
-      this.player.synth[synth_num].setPattern(
+      this.player.instruments[synth_num].setPattern(
         this.song.tracks[synth_num].patterns[pat_num]
       );
     } else {
       // set new pattern
       const pat_name = synth_num + '-' + pat_num;
-      this.player.synth[synth_num].clearPattern();
-      this.player.synth[synth_num].setPatternName(pat_name);
+      this.player.instruments[synth_num].clearPattern();
+      this.player.instruments[synth_num].setPatternName(pat_name);
       this.song.tracks[synth_num].patterns[pat_num] =
-        this.player.synth[synth_num].getPattern();
+        this.player.instruments[synth_num].getPattern();
     }
 
     // draw
@@ -278,13 +276,13 @@ class Session {
   }
 
   savePattern(x: number, y: number) {
-    this.song.tracks[x].patterns[y] = this.player.synth[x].getPattern();
+    this.song.tracks[x].patterns[y] = this.player.instruments[x].getPattern();
   }
 
   // Save parameters for tracks into @song.
   saveTracks() {
-    for (let i = 0; i < this.player.synth.length; i++) {
-      const param = this.player.synth[i].getParam();
+    for (let i = 0; i < this.player.instruments.length; i++) {
+      const param = this.player.instruments[i].getParam();
       if (this.song.tracks[i].patterns) {
         param.patterns = this.song.tracks[i].patterns;
       }
@@ -294,7 +292,7 @@ class Session {
 
   saveTracksEffect(pos: { x: number }) {
     this.song.tracks[pos.x].effects =
-      this.player.synth[pos.x].getEffectsParam();
+      this.player.instruments[pos.x].getEffectsParam();
   }
 
   // Save master track into @song.
@@ -353,7 +351,7 @@ class Session {
     for (let i = 0; i < this.song.tracks.length; i++) {
       const pat = this.song.tracks[i].patterns[0];
       if (pat) {
-        this.synth[i].setPattern(pat);
+        this.instruments[i].setPattern(pat);
         this.current_cells[i] = 0;
         this.scene_length = Math.max(this.scene_length, pat.pattern.length);
       } else {
@@ -366,13 +364,9 @@ class Session {
 
   // Set a track name of @song.
   // called by Synth, Sampler
-  setSynthName(synth_id: number, name: string) {
-    this.song.tracks[synth_id].name = name;
-    this.view.drawTrackName(
-      synth_id,
-      name,
-      this.song.tracks[synth_id].type
-    );
+  setTrackName(idx: number, name: string) {
+    this.song.tracks[idx].name = name;
+    this.view.drawTrackName(idx, name, this.song.tracks[idx].type);
   }
 
   // Set current pattern name of a synth.
@@ -394,7 +388,7 @@ class Session {
   }
 
   // called by Player.
-  changeSynth(id: number, type: string, synth_new: any) {
+  changeInstrument(id: number, type: string, synth_new: any) {
     const pat_name = id + '-' + this.scene_pos;
     synth_new.setPatternName(pat_name);
 
@@ -422,7 +416,7 @@ class Session {
       this.song.tracks[id].patterns[0],
     ];
 
-    this.view.addSynth(this.song, [id, this.scene_pos]);
+    this.view.addInstrument(this.song, [id, this.scene_pos]);
   }
 
   empty() {
@@ -453,7 +447,7 @@ class Session {
     if (p.type === 'tracks') {
       this.song.tracks[p.x].patterns[p.y] = undefined;
       if (this.current_cells[p.x] === p.y) {
-        this.player.synth[p.x].clearPattern();
+        this.player.instruments[p.x].clearPattern();
         this.current_cells[p.x] = undefined;
       }
       this.view.readSong(this.song, this.current_cells);
