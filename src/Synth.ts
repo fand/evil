@@ -125,7 +125,6 @@ class Synth implements Instrument {
   setScale(scale_name: string) {
     this.scale_name = scale_name;
     this.scale = SCALE_LIST[this.scale_name as keyof typeof SCALE_LIST];
-    this.core.scale = this.scale;
     this.view.changeScale(this.scale);
   }
 

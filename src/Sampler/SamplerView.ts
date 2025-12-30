@@ -86,9 +86,15 @@ export class SamplerView {
   cells_y: number;
   core: JQuery;
   keyboard: SamplerKeyboardView;
-  pattern: SamplerPattern = DEFAULT_PATTERN;
-  pattern_obj: SamplerPatternObject;
   page: number;
+
+  get pattern(): SamplerPattern {
+    return this.model.pattern;
+  }
+
+  get pattern_obj(): SamplerPatternObject {
+    return this.model.pattern_obj;
+  }
   page_total: number;
   last_time: number;
   last_page: number;
@@ -156,10 +162,6 @@ export class SamplerView {
     this.keyboard = new SamplerKeyboardView(this);
 
     // Flags / Params;
-    this.pattern_obj = {
-      name: this.pattern_name.text(),
-      pattern: this.pattern,
-    };
     this.page = 0;
     this.page_total = 1;
 
@@ -330,7 +332,6 @@ export class SamplerView {
     }
     this.pattern[pos.x_abs].push([pos.note, gain]);
 
-    this.model.addNote(pos.x_abs, pos.note, gain);
     this.ctx_on.drawImage(
       this.cell,
       26,
@@ -352,7 +353,6 @@ export class SamplerView {
     }
 
     this.ctx_on.clearRect(pos.x * 26, pos.y * 26, 26, 26);
-    this.model.removeNote(pos);
   }
 
   playAt(time: number) {
@@ -391,9 +391,7 @@ export class SamplerView {
     this.last_time = this.time;
   }
 
-  setPattern(pattern_obj: SamplerPatternObject) {
-    this.pattern_obj = pattern_obj;
-    this.pattern = this.pattern_obj.pattern;
+  setPattern(_pattern_obj: SamplerPatternObject) {
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);
@@ -431,9 +429,8 @@ export class SamplerView {
     if (this.page_total === 8) {
       return;
     }
-    this.pattern = this.pattern.concat(DEFAULT_PATTERN);
-    this.page_total++;
     this.model.plusPattern();
+    this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern();
     this.minus.removeClass('btn-false').addClass('btn-true');
     if (this.page_total === 8) {
@@ -445,9 +442,8 @@ export class SamplerView {
     if (this.page_total === 1) {
       return;
     }
-    this.pattern = this.pattern.slice(0, this.pattern.length - this.cells_x);
-    this.page_total--;
     this.model.minusPattern();
+    this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern();
     this.plus.removeClass('btn-false').addClass('btn-true');
     if (this.page_total === 1) {

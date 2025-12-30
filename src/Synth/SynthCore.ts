@@ -334,8 +334,11 @@ export class SynthCore {
   is_mute: boolean;
   is_on: boolean;
   is_harmony: boolean;
-  scale: number[];
   vcos: (VCO | Noise)[];
+
+  get scale(): number[] {
+    return this.parent.scale;
+  }
   gains: GainNode[];
   filter: ResFilter;
   eg: EG;
@@ -355,7 +358,6 @@ export class SynthCore {
     this.is_on = false;
     this.is_harmony = true;
 
-    this.scale = this.parent.scale;
     this.vcos = [new VCO(this.ctx), new VCO(this.ctx), new Noise(this.ctx)];
     this.gains = [
       this.ctx.createGain(),
@@ -496,9 +498,6 @@ export class SynthCore {
     }
   }
 
-  setScale(scale: number[]) {
-    this.scale = scale;
-  }
 
   connect(dst: AudioNode) {
     this.node.connect(this.filter.lpf);
