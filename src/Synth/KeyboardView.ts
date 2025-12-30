@@ -3,7 +3,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
-class KeyboardView {
+export class KeyboardView {
   sequencer: any;
   dom: JQuery;
   canvas: HTMLCanvasElement;
@@ -53,7 +53,7 @@ class KeyboardView {
     this.offset = { x: this.rect.left, y: this.rect.top };
 
     this.ctx.fillStyle = this.color[0];
-    return __range__(0, this.num, false).map((i) => this.drawNormal(i));
+    return Array.from({ length: this.num }, (_, i) => this.drawNormal(i));
   }
 
   getPos(e) {
@@ -140,7 +140,7 @@ class KeyboardView {
 
   changeScale(scale) {
     this.scale = scale;
-    return __range__(0, this.num, false).map((i) => this.drawNormal(i));
+    return Array.from({ length: this.num }, (_, i) => this.drawNormal(i));
   }
 
   text(i) {
@@ -150,16 +150,4 @@ class KeyboardView {
   isKey(i) {
     return (this.num - i - 1) % this.scale.length === 0;
   }
-}
-
-export { KeyboardView };
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
 }

@@ -43,7 +43,7 @@ const enum CellType {
   SustainEnd = 156,
 }
 
-class SynthView {
+export class SynthView {
   model: Synth;
   id: number;
   dom: JQuery;
@@ -751,5 +751,3 @@ class SynthView {
     return this.keyboard.changeScale(scale);
   }
 }
-
-export { SynthView };

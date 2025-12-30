@@ -8,7 +8,7 @@
  */
 import $ from 'jquery';
 
-class SamplerCoreView {
+export class SamplerCoreView {
   model: any;
   id: any;
   dom: JQuery;
@@ -313,23 +313,9 @@ class SamplerCoreView {
   }
 
   fetchGains() {
-    return __range__(0, this.gain_inputs.length, false).map((i) =>
-      this.model.setNodeGain(
-        i,
-        parseInt(this.gain_inputs.eq(i).val() as string)
-      )
-    );
+    for (let i = 0; i < this.gain_inputs.length; i++) {
+      const v = parseInt(this.gain_inputs.eq(i).val() as string);
+      this.model.setNodeGain(i, v);
+    }
   }
-}
-
-export { SamplerCoreView };
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
 }

@@ -161,9 +161,9 @@ class SynthCoreView {
   }
 
   setFEGParam(p) {
-    return __range__(0, p.length, false).map((i) =>
-      this.FEG_inputs.eq(i).val(p.adsr[i])
-    );
+    for (let i = 0; i < p.length; i++) {
+      this.FEG_inputs.eq(i).val(p.adsr[i]);
+    }
   }
 
   fetchFilterParam() {
@@ -179,9 +179,12 @@ class SynthCoreView {
   }
 
   fetchGains() {
-    return __range__(0, this.gain_inputs.length, false).map((i) =>
-      this.model.setVCOGain(i, parseInt(this.gain_inputs.eq(i).val() as string))
-    );
+    for (let i = 0; i < this.gain_inputs.length; i++) {
+      this.model.setVCOGain(
+        i,
+        parseInt(this.gain_inputs.eq(i).val() as string)
+      );
+    }
   }
 
   setParam(p) {
@@ -210,13 +213,3 @@ class SynthCoreView {
 }
 
 export { SynthCoreView };
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
-}

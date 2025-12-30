@@ -18,7 +18,7 @@ import { FX } from './FX/FX';
 import type { Sampler } from './Sampler';
 import type { Synth } from './Synth';
 
-class Mixer {
+export class Mixer {
   ctx: AudioContext;
   player: any;
   gain_master: number;
@@ -131,7 +131,7 @@ class Mixer {
     return this.view.addSynth(synth);
   }
 
-  setGains(gain_tracks, gain_master) {
+  setGains(gain_tracks: number[], gain_master: number) {
     this.gain_tracks = gain_tracks;
     this.gain_master = gain_master;
     for (
@@ -144,22 +144,22 @@ class Mixer {
     return (this.out.gain.value = this.gain_master);
   }
 
-  setPans(pan_tracks, pan_master) {
+  setPans(pan_tracks: number[], pan_master: number) {
     this.pan_tracks = pan_tracks;
     this.pan_master = pan_master;
-    return __range__(0, this.pan_tracks.length, false).map((i) =>
-      this.panners[i].setPosition(this.pan_tracks[i])
-    );
+    for (let i = 0; i < this.pan_tracks.length; i++) {
+      this.panners[i].setPosition(this.pan_tracks[i]);
+    }
   }
 
-  readGains(gain_tracks, gain_master) {
+  readGains(gain_tracks: number[], gain_master: number) {
     this.gain_tracks = gain_tracks;
     this.gain_master = gain_master;
     this.setGains(this.gain_tracks, this.gain_master);
     return this.view.readGains(this.gain_tracks, this.gain_master);
   }
 
-  readPans(pan_tracks, pan_master) {
+  readPans(pan_tracks: number[], pan_master: number) {
     this.pan_tracks = pan_tracks;
     this.pan_master = pan_master;
     this.setPans(this.pan_tracks, this.pan_master);
@@ -260,16 +260,4 @@ class Mixer {
 
     return this.effects_master.splice(i, 1);
   }
-}
-
-export { Mixer };
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
 }

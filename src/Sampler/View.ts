@@ -531,7 +531,7 @@ export class SamplerView {
   play() {}
 
   stop() {
-    return __range__(0, this.cells_y, false).map((i) =>
+    for (let i = 0; i < this.cells_y; i++) {
       this.ctx_off.drawImage(
         this.cell,
         0,
@@ -542,8 +542,8 @@ export class SamplerView {
         i * 26,
         26,
         26
-      )
-    );
+      );
+    }
   }
 
   activate(i) {
@@ -571,7 +571,8 @@ export class SamplerView {
     } else {
       this.is_nosync = true;
       this.nosync.removeClass('btn-false').addClass('btn-true');
-      return __range__(0, this.cells_y, false).map((i) =>
+
+      for (let i = 0; i < this.cells_y; i++) {
         this.ctx_off.drawImage(
           this.cell,
           0,
@@ -582,8 +583,8 @@ export class SamplerView {
           i * 26,
           26,
           26
-        )
-      );
+        );
+      }
     }
   }
 
@@ -592,14 +593,4 @@ export class SamplerView {
     this.keyboard.selectSample(this.sample_now);
     return this.model.selectSample(this.sample_now);
   }
-}
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
 }

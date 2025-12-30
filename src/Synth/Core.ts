@@ -44,8 +44,8 @@ class Noise {
     this.node.onaudioprocess = (event) => {
       const data_L = event.outputBuffer.getChannelData(0);
       const data_R = event.outputBuffer.getChannelData(1);
-      return __range__(0, data_L.length, false).map(
-        (i) => (data_L[i] = data_R[i] = Math.random())
+      return Array.from({ length: data_L.length }, (_, i) =>
+        (data_L[i] = data_R[i] = Math.random())
       );
     };
   }
@@ -562,14 +562,4 @@ export class SynthCore {
   mute() {
     this.is_mute = true;
   }
-}
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
 }

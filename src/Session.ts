@@ -276,9 +276,9 @@ class Session {
 
   // Save patterns into @song.
   savePatterns() {
-    return __range__(0, this.current_cells.length, false).map((i) =>
-      this.savePattern(i, this.current_cells[i])
-    );
+    for (let i = 0; i < this.current_cells.length; i++) {
+      this.savePattern(i, this.current_cells[i]);
+    }
   }
 
   savePattern(x, y) {
@@ -482,13 +482,3 @@ class Session {
 }
 
 export { Session };
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
-}
