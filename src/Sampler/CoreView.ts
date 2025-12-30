@@ -130,10 +130,9 @@ export class SamplerCoreView {
     this.sample_name.on('click', () => {
       this.showSampleList();
     });
-    const self = this;
-    this.sample_list.find('div').on('click', function () {
-      self.setSample($(this).html());
-      self.hideSampleList();
+    this.sample_list.find('div').on('click', (e) => {
+      this.setSample($(e.currentTarget).html());
+      this.hideSampleList();
     });
     this.sample_list_wrapper.on('click', () => {
       this.hideSampleList();

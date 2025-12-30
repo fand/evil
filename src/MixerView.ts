@@ -135,8 +135,8 @@ export class MixerView {
     this.model.setPans(pans, p_master);
 
     for (let i = 0, end = this.pans.length; i < end; i++) {
-      var l = parseInt((this.pans[i] as any).val() as string) - 100;
-      var t = l === 0 ? 'C' : l < 0 ? -l + '% L' : l + '% R';
+      const l = parseInt((this.pans[i] as any).val() as string) - 100;
+      const t = l === 0 ? 'C' : l < 0 ? -l + '% L' : l + '% R';
       this.pans_label[i].text(t);
     }
   }

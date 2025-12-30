@@ -467,7 +467,7 @@ export class SessionView {
 
     // Draw tracks
     for (let x = 0; x < Math.max(this.song.tracks.length + 1, 8); x++) {
-      var t = this.song.tracks[x];
+      const t = this.song.tracks[x];
       if (t != null) {
         if (t.type != null) {
           this.track_color[x] = this.color_schemes[t.type];
