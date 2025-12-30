@@ -94,14 +94,14 @@ interface AppState {
 ## Migration Phases
 
 ### Phase 1: Store Foundation
-- [ ] Install zustand
-- [ ] Create store with Song + Playback state
-- [ ] Add subscribeWithSelector middleware
+- [x] Install zustand
+- [x] Create store with Song + Playback state
+- [x] Add subscribeWithSelector middleware
 
 ### Phase 2: PlayerView Migration (Simplest)
-- [ ] Subscribe to playback state
-- [ ] Remove `this.model` references
-- [ ] Test playback controls
+- [x] Subscribe to playback state (isPlaying, BPM, Key, Scale)
+- [x] Player syncs state to store
+- [ ] Remove remaining `this.model` read references (future)
 
 ### Phase 3: AudioGraph Integration
 - [ ] Subscribe to BPM/Key/Scale
