@@ -13,10 +13,11 @@ import {
 } from './Constant';
 import type { Instrument, InstrumentType } from './Instrument';
 import { Song, Scene } from './Song';
+import type { Keyboard } from './Keyboard';
 
 declare global {
   interface Window {
-    keyboard: any;
+    keyboard: Keyboard;
   }
 }
 
@@ -334,7 +335,7 @@ export class Player {
     this.resetSceneLength();
   }
 
-  loadScene(scene: any) {
+  loadScene(scene: Partial<Scene>) {
     if (scene.bpm) {
       this.setBPM(scene.bpm);
       this.view.setBPM(scene.bpm);

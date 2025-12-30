@@ -21,7 +21,7 @@ export class ReverbView extends FXView {
   initEvent() {
     super.initEvent();
     this.name.on('change', () => {
-      (this.model as any).setIR(this.name.val() as string);
+      (this.model as Reverb).setIR(this.name.val() as string);
     });
     this.wet.on('change', () => {
       this.model.setParam({

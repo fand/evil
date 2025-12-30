@@ -1,10 +1,11 @@
 import $ from 'jquery';
 import { KeyboardView } from './KeyboardView';
 import type { Synth } from '../Synth';
+import type { Keyboard } from '../Keyboard';
 
 declare global {
   interface Window {
-    keyboard: any;
+    keyboard: Keyboard;
   }
 }
 

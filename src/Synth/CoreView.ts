@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import type { SynthCore } from './SynthCore';
+import type { VCOParam, EGParam, SynthParam } from '../Song';
 
 export class SynthCoreView {
   model: SynthCore;
@@ -100,7 +101,7 @@ export class SynthCoreView {
     }
   }
 
-  setVCOParam(p: any[]) {
+  setVCOParam(p: VCOParam[]) {
     for (let i = 0; i < this.vcos.length; i++) {
       const vco = this.vcos.eq(i);
       vco.find('.shape').val(p[i].shape);
@@ -120,7 +121,7 @@ export class SynthCoreView {
     this.updateCanvas('EG');
   }
 
-  setEGParam(p: any) {
+  setEGParam(p: EGParam) {
     this.EG_inputs.eq(0).val(p.adsr[0] * 50000);
     this.EG_inputs.eq(1).val(p.adsr[1] * 50000);
     this.EG_inputs.eq(2).val(p.adsr[2] * 100);
@@ -137,8 +138,8 @@ export class SynthCoreView {
     this.updateCanvas('FEG');
   }
 
-  setFEGParam(p: any) {
-    for (let i = 0; i < p.length; i++) {
+  setFEGParam(p: EGParam) {
+    for (let i = 0; i < p.adsr.length; i++) {
       this.FEG_inputs.eq(i).val(p.adsr[i]);
     }
   }
@@ -150,7 +151,7 @@ export class SynthCoreView {
     );
   }
 
-  setFilterParam(p: any) {
+  setFilterParam(p: [number, number]) {
     this.filter_inputs.eq(0).val(p[0]);
     this.filter_inputs.eq(1).val(p[1]);
   }
@@ -164,7 +165,7 @@ export class SynthCoreView {
     }
   }
 
-  setParam(p: any) {
+  setParam(p: Partial<SynthParam>) {
     if (p.vcos !== undefined) {
       this.setVCOParam(p.vcos);
     }
