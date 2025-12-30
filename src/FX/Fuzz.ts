@@ -23,9 +23,9 @@ export class Fuzz extends FX {
   fuzz: WaveShaperNode;
   type: string = 'Sigmoid';
   samples: number = 2048;
-  gain: number;
+  gain: number = 0.08;
 
-  view: FuzzView;
+  override view: FuzzView;
 
   constructor(ctx: AudioContext) {
     super(ctx);

@@ -32,7 +32,7 @@ class Session {
   cue_queue: any[];
   song: any;
   view: SessionView;
-  synth: (Synth | Sampler)[];
+  synth: (Synth | Sampler)[] = [];
 
   constructor(ctx: AudioContext, player: Player) {
     this.ctx = ctx;

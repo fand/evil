@@ -20,7 +20,7 @@ export type CompressorParams = {
 
 export class Compressor extends FX {
   comp: DynamicsCompressorNode;
-  view: CompressorView;
+  override view: CompressorView;
 
   constructor(ctx: AudioContext) {
     super(ctx);

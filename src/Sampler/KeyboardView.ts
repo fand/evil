@@ -26,7 +26,7 @@ export class SamplerKeyboardView {
   sample_last: number | undefined;
 
   rect: DOMRect;
-  offset: { x: number; y: number } | undefined;
+  offset: { x: number; y: number };
 
   constructor(sequencer: SamplerView) {
     // Keyboard
@@ -52,6 +52,10 @@ export class SamplerKeyboardView {
 
     this.hover_pos = -1;
     this.click_pos = -1;
+
+    // Initialize rect and offset before initCanvas
+    this.rect = this.canvas_off.getBoundingClientRect();
+    this.offset = { x: this.rect.left, y: this.rect.top };
 
     this.initCanvas();
     this.initEvent();

@@ -6,8 +6,8 @@
 import $ from 'jquery';
 import type { FXView } from './FXView';
 
-export class FX {
-  view: FXView;
+export abstract class FX {
+  abstract view: FXView;
   protected ctx: AudioContext;
   in: GainNode;
   protected dry: GainNode;

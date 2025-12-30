@@ -34,8 +34,8 @@ export class Mixer {
   limiter: Limiter;
   effects_master: FX[];
   view: MixerView;
-  pan_tracks: number[];
-  pan_master: number;
+  pan_tracks: number[] = [];
+  pan_master: number = 0;
 
   constructor(ctx: AudioContext, player: Player) {
     this.addMasterEffect = this.addMasterEffect.bind(this);

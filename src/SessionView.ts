@@ -65,13 +65,13 @@ class SessionView {
   social_twitter: JQuery;
   social_facebook: JQuery;
   social_hatena: JQuery;
-  offset_y: number;
-  font_size: number;
+  offset_y: number = 20;
+  font_size: number = 12;
   rect_tracks: DOMRect;
   rect_master: DOMRect;
-  offset_translate: number;
-  is_clicked: boolean;
-  scene_pos: number;
+  offset_translate: number = 720;
+  is_clicked: boolean = false;
+  scene_pos: number = 0;
 
   constructor(model: any, song: any) {
     // DOMs for session view.
@@ -147,9 +147,12 @@ class SessionView {
 
     this.hover_pos = { x: -1, y: -1 };
     this.click_pos = { x: -1, y: -1 };
-    //        @select_pos = x:-1, y:-1
     this.select_pos = { x: 0, y: 0, type: 'master' };
     this.last_clicked = performance.now();
+
+    // Initialize rect before initCanvas is called asynchronously
+    this.rect_tracks = this.canvas_tracks_hover.getBoundingClientRect();
+    this.rect_master = this.canvas_master_hover.getBoundingClientRect();
 
     // DOMs to save songs.
     this.dialog = $('#dialog');

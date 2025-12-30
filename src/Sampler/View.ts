@@ -106,11 +106,11 @@ export class SamplerView {
   click_pos: { x: number; y: number };
   rect: DOMRect;
   offset: { x: number; y: number };
-  time: number;
-  is_adding: boolean;
-  is_removing: boolean;
-  is_active: boolean;
-  sample_now: number;
+  time: number = 0;
+  is_adding: boolean = false;
+  is_removing: boolean = false;
+  is_active: boolean = false;
+  sample_now: number = 0;
 
   constructor(model: Sampler, id: number) {
     this.model = model;
@@ -178,6 +178,10 @@ export class SamplerView {
     this.is_clicked = false;
     this.hover_pos = { x: -1, y: -1 };
     this.click_pos = { x: -1, y: -1 };
+
+    // Initialize rect and offset before initCanvas
+    this.rect = this.canvas_off.getBoundingClientRect();
+    this.offset = { x: this.rect.left, y: this.rect.top };
 
     this.initEvent();
     this.initCanvas();

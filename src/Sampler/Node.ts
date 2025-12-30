@@ -26,11 +26,11 @@ export class SampleNode {
   eq_nodes: BiquadFilterNode[];
   panner: Panner;
   pan_value: number;
-  sample: { url: string; data?: AudioBuffer };
-  buffer: AudioBuffer;
-  buffer_duration: number;
-  dst: AudioNode;
-  source_old: AudioBufferSourceNode;
+  sample: { url: string; data?: AudioBuffer } | undefined;
+  buffer: AudioBuffer | undefined;
+  buffer_duration: number | undefined;
+  dst: AudioNode | undefined;
+  source_old: AudioBufferSourceNode | undefined;
 
   constructor(ctx: AudioContext, id: number, parent: SamplerCore) {
     this.ctx = ctx;
@@ -122,7 +122,7 @@ export class SampleNode {
   }
 
   noteOn(gain: number, time: number) {
-    if (this.buffer == null) {
+    if (this.buffer == null || this.buffer_duration == null) {
       return;
     }
     if (this.source_old != null) {

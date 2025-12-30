@@ -35,7 +35,7 @@ export class SamplerCoreView {
   sample_name: JQuery;
   sample_list: JQuery;
   sample_list_wrapper: JQuery;
-  gain_inputs: JQuery;
+  gain_inputs: JQuery | undefined;
 
   constructor(model: SamplerCore, id: number, dom: JQuery) {
     this.model = model;
@@ -310,6 +310,9 @@ export class SamplerCoreView {
   }
 
   fetchGains() {
+    if (this.gain_inputs == null) {
+      return;
+    }
     for (let i = 0; i < this.gain_inputs.length; i++) {
       this.model.setSampleGain(
         i,

@@ -42,6 +42,10 @@ export class KeyboardView {
 
     this.scale = this.sequencer.model.scale;
 
+    // Initialize rect and offset before initCanvas
+    this.rect = this.canvas.getBoundingClientRect();
+    this.offset = { x: this.rect.left, y: this.rect.top };
+
     this.initCanvas();
     this.initEvent();
   }

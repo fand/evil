@@ -13,7 +13,7 @@ class Sidebar {
   sidebar_pos: { x: number; y: number; type: string };
   view: SidebarView;
   song: any;
-  select_pos: { x: number; y: number; type: string };
+  select_pos: { x: number; y: number; type: string } = { x: -1, y: -1, type: '' };
 
   constructor(ctx: AudioContext, player: any, session: any, mixer: any) {
     this.addMasterEffect = this.addMasterEffect.bind(this);

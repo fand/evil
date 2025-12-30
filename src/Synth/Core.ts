@@ -33,10 +33,10 @@ const T2 = new MutekiTimer();
 class Noise {
   ctx: AudioContext;
   node: ScriptProcessorNode;
-  octave: number;
-  fine: number;
-  interval: number;
-  shape: string;
+  octave: number = 0;
+  fine: number = 0;
+  interval: number = 0;
+  shape: string = 'NOISE';
 
   constructor(ctx: AudioContext) {
     this.ctx = ctx;
@@ -106,8 +106,8 @@ class VCO {
   node: GainNode;
   osc: OscillatorNode;
   oscs: OscillatorNode[];
-  shape: string;
-  dst: AudioNode;
+  shape: string = 'SINE';
+  dst: AudioNode | undefined;
 
   constructor(ctx: AudioContext) {
     this.ctx = ctx;
@@ -351,7 +351,7 @@ export class SynthCore {
   feg: EG;
   gain_res: GainNode;
   view: SynthCoreView;
-  note: number;
+  note: number = 0;
 
   constructor(parent: Synth, ctx: AudioContext, id: number) {
     this.parent = parent;

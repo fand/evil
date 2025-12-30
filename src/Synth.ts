@@ -46,7 +46,7 @@ class Synth {
   return: GainNode;
   effects: FX[];
   T: MutekiTimer;
-  duration: number;
+  duration: number = 0;
 
   constructor(ctx: AudioContext, id: number, player: Player, name?: string) {
     this.ctx = ctx;
