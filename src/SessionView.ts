@@ -1,12 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import $ from 'jquery';
 import type { Session } from './Session';
 
@@ -16,7 +7,7 @@ declare global {
   }
 }
 
-class SessionView {
+export class SessionView {
   model: Session;
   song: any;
   wrapper_mixer: JQuery;
@@ -468,8 +459,6 @@ class SessionView {
 
   // Read song from @song.
   readSong(song: any, current_cells: any[]) {
-    let y;
-    let asc2, end2;
     this.song = song;
     this.current_cells = current_cells;
     this.resize();
@@ -950,7 +939,7 @@ class SessionView {
     return this.drawCellTracks(pat[2], pat[0], pat[1]);
   }
 
-  addSynth(song: any, _pos?: any) {
+  addInstrument(song: any, _pos?: any) {
     this.song = song;
     return this.readSong(this.song, this.current_cells);
   }
@@ -1042,11 +1031,6 @@ class SessionView {
       const hb_url = 'http://b.hatena.ne.jp/entry/' + url.split('://')[1];
       return window.open(hb_url);
     }
-  }
-
-  changeSynth(song: any, id: number, type: string) {
-    this.song = song;
-    return this.readSong(this.song, this.current_cells);
   }
 
   // Copy cells by drag.
@@ -1222,5 +1206,3 @@ class SessionView {
     }
   }
 }
-
-export { SessionView };

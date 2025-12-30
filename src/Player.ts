@@ -1,12 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { Mixer } from './Mixer';
 import { Session } from './Session';
 import { Sidebar } from './Sidebar';
@@ -17,10 +8,10 @@ import { MutekiTimer } from './MutekiTimer';
 import {
   isNoteKey,
   isNoteScale,
-  KEY_LIST,
   type NoteKey,
   type NoteScale,
 } from './Constant';
+import type { Instrument, InstrumentType } from './Instrument';
 
 declare global {
   interface Window {
@@ -28,7 +19,7 @@ declare global {
   }
 }
 
-export type InstrumentType = 'REZ' | 'SAMPLER';
+export type Scene = { bpm: number; key: string; scale: string };
 
 const T = new MutekiTimer();
 
@@ -39,15 +30,14 @@ export class Player {
   scale: NoteScale = 'Major';
   is_playing: boolean = false;
   time: number = 0;
-  scene: { bpm: number; key: string; scale: string };
+  scene: Scene;
   num_id: number = 0;
   context: AudioContext;
-  synth: (Synth | Sampler)[] = []; // TODO: add type
+  instruments: Instrument[] = [];
+  current_instrument: number = 0;
   mixer: Mixer;
   session: Session;
   sidebar: Sidebar;
-  synth_now: any;
-  synth_pos: number = 0;
   scene_length: number = 32;
   view: PlayerView;
   song: any;
@@ -62,7 +52,6 @@ export class Player {
     this.sidebar = new Sidebar(this.context, this, this.session, this.mixer);
 
     this.addSynth(0);
-    this.synth_now = this.synth[0];
 
     this.view = new PlayerView(this);
   }
@@ -73,7 +62,7 @@ export class Player {
 
     // @duration = (60000.0 / @bpm) / 8.0
     this.duration = 7500.0 / this.bpm;
-    for (const s of this.synth) {
+    for (const s of this.instruments) {
       s.setDuration(this.duration);
     }
 
@@ -87,7 +76,7 @@ export class Player {
 
     this.key = key;
     this.scene.key = this.key;
-    for (var s of Array.from(this.synth)) {
+    for (const s of this.instruments) {
       s.setKey(this.key);
     }
 
@@ -102,7 +91,7 @@ export class Player {
     this.scale = scale;
     this.scene.scale = this.scale;
 
-    for (const s of this.synth) {
+    for (const s of this.instruments) {
       s.setScale(this.scale);
     }
 
@@ -118,7 +107,7 @@ export class Player {
     this.session.play();
 
     T.setTimeout(() => {
-      for (const s of this.synth) {
+      for (const s of this.instruments) {
         s.play();
       }
       this.playNext();
@@ -126,16 +115,16 @@ export class Player {
   }
 
   stop() {
-    for (var s of Array.from(this.synth)) {
+    for (const s of this.instruments) {
       s.stop();
     }
     this.is_playing = false;
     this.view.viewStop();
-    return (this.time = 0);
+    this.time = 0;
   }
 
   pause() {
-    for (var s of Array.from(this.synth)) {
+    for (const s of this.instruments) {
       s.pause(this.time);
     }
     this.is_playing = false;
@@ -143,10 +132,10 @@ export class Player {
 
   forward() {
     if (this.time + 32 > this.scene_length) {
-      this.session.nextMeasure(this.synth);
+      this.session.nextMeasure(this.instruments);
     }
     this.time = (this.time + 32) % this.scene_length;
-    this.synth_now.redraw(this.time);
+    this.instruments[this.current_instrument].redraw(this.time);
   }
 
   backward(force: boolean) {
@@ -161,7 +150,7 @@ export class Player {
         this.time = this.time - (this.time % 32);
       }
     }
-    this.synth_now.redraw(this.time);
+    this.instruments[this.current_instrument].redraw(this.time);
   }
 
   toggleLoop(): boolean {
@@ -169,10 +158,10 @@ export class Player {
   }
 
   noteOn(note: number, force: boolean) {
-    return this.synth_now.noteOn(note, force);
+    this.instruments[this.current_instrument].noteOn(note, force);
   }
   noteOff(force: boolean) {
-    return this.synth_now.noteOff(force);
+    this.instruments[this.current_instrument].noteOff(force);
   }
 
   playNext() {
@@ -181,12 +170,12 @@ export class Player {
         this.time = 0;
       }
 
-      for (var s of Array.from(this.synth)) {
+      for (const s of this.instruments) {
         s.playAt(this.time);
       }
 
       if (this.time % 32 === 31 && this.time + 32 > this.scene_length) {
-        this.session.nextMeasure(this.synth);
+        this.session.nextMeasure(this.instruments);
       }
 
       if (this.time % 8 === 0) {
@@ -194,72 +183,69 @@ export class Player {
       }
 
       this.time++;
-      return T.setTimeout(() => this.playNext(), this.duration);
+      T.setTimeout(() => this.playNext(), this.duration);
     } else {
-      return this.stop();
+      this.stop();
     }
   }
 
-  addSynth(scene_pos?: number, name?: string) {
+  addSynth(idx?: number, name?: string) {
     const s = new Synth(this.context, this.num_id++, this, name);
     s.setScale(this.scene.scale);
     s.setKey(this.scene.key as NoteKey);
 
-    this.synth.push(s);
-    this.mixer.addSynth(s);
-    return this.session.addSynth(s, scene_pos);
+    this.instruments.push(s);
+    this.mixer.addInstrument(s);
+    this.session.addInstrument(s, idx);
   }
 
-  addSampler(scene_pos?: number, name?: string) {
+  addSampler(idx?: number, name?: string) {
     const s = new Sampler(this.context, this.num_id++, this, name);
-    this.synth.push(s);
-    this.mixer.addSynth(s);
-    return this.session.addSynth(s, scene_pos);
+    this.instruments.push(s);
+    this.mixer.addInstrument(s);
+    this.session.addInstrument(s, idx);
   }
 
   // Called by instruments.
-  changeSynth(idx: number, type: InstrumentType) {
-    const s_old = this.synth[idx];
+  changeInstrument(idx: number, type: InstrumentType) {
+    const instOld = this.instruments[idx];
 
-    let s_new: Synth | Sampler; // TODO: add type Instrument
+    let inst: Instrument;
     if (type === 'REZ') {
-      s_new = new Synth(this.context, idx, this, s_old.name);
-      s_new.setScale(this.scene.scale);
-      s_new.setKey(this.scene.key as NoteKey);
+      inst = new Synth(this.context, idx, this, instOld.name);
+      inst.setScale(this.scene.scale);
+      inst.setKey(this.scene.key as NoteKey);
     } else {
-      s_new = new Sampler(this.context, idx, this, s_old.name);
+      inst = new Sampler(this.context, idx, this, instOld.name);
     }
 
-    this.synth_now = this.synth[idx] = s_new;
-    this.synth_now = s_new;
+    this.instruments[idx] = inst;
 
-    this.mixer.changeSynth(idx, s_new);
-    this.session.changeSynth(idx, type, s_new);
-    this.view.changeSynth(idx, type);
+    this.mixer.changeInstrument(idx, inst);
+    this.session.changeInstrument(idx, type, inst);
+    this.view.changeInstrument(idx, type);
 
-    return s_new;
+    return inst;
   }
 
   // Called by PlayerView.
   moveRight(next_idx: number) {
-    if (next_idx === this.synth.length) {
+    if (next_idx === this.instruments.length) {
       this.addSynth();
       this.session.play();
     }
 
-    this.synth[next_idx - 1].deactivate();
-    this.synth_now = this.synth[next_idx];
-    this.synth_now.activate(next_idx);
-    this.synth_pos++;
-    return window.keyboard.setMode('SYNTH');
+    this.instruments[this.current_instrument].deactivate();
+    this.current_instrument = next_idx;
+    this.instruments[this.current_instrument].activate();
+    window.keyboard.setMode('SYNTH');
   }
 
   moveLeft(next_idx: number) {
-    this.synth[next_idx + 1].deactivate();
-    this.synth_now = this.synth[next_idx];
-    this.synth_now.activate(next_idx);
-    this.synth_pos--;
-    return window.keyboard.setMode('SYNTH');
+    this.instruments[this.current_instrument].deactivate();
+    this.current_instrument = next_idx;
+    this.instruments[this.current_instrument].activate();
+    window.keyboard.setMode('SYNTH');
   }
 
   moveTop() {
@@ -270,14 +256,14 @@ export class Player {
     window.keyboard.setMode('SYNTH');
   }
 
-  moveTo(synth_num: number) {
+  moveTo(inst_idx: number) {
     this.view.moveBottom();
-    if (synth_num < this.synth_pos) {
-      while (synth_num !== this.synth_pos) {
+    if (inst_idx < this.current_instrument) {
+      while (inst_idx !== this.current_instrument) {
         this.view.moveLeft();
       }
     } else {
-      while (synth_num !== this.synth_pos) {
+      while (inst_idx !== this.current_instrument) {
         this.view.moveRight();
       }
     }
@@ -285,14 +271,14 @@ export class Player {
 
   solo(solos: number[]) {
     if (solos.length === 0) {
-      for (let s of Array.from(this.synth)) {
+      for (const s of this.instruments) {
         s.unmute();
       }
       return;
     }
 
-    for (let s of Array.from(this.synth)) {
-      if (Array.from(solos).includes(s.id + 1)) {
+    for (const s of this.instruments) {
+      if (solos.includes(s.id + 1)) {
         s.unmute();
       } else {
         s.mute();
@@ -302,17 +288,14 @@ export class Player {
 
   readSong(song: any) {
     this.song = song;
-    this.synth = [];
+    this.instruments = [];
     this.num_id = 0;
     this.mixer.empty();
     this.session.empty();
     this.view.empty();
 
     for (let i = 0; i < this.song.tracks.length; i++) {
-      if (
-        this.song.tracks[i].type == null ||
-        this.song.tracks[i].type === 'REZ'
-      ) {
+      if (!this.song.tracks[i].type || this.song.tracks[i].type === 'REZ') {
         this.addSynth(0, this.song.tracks[i].name);
       }
       if (this.song.tracks[i].type === 'SAMPLER') {
@@ -320,36 +303,37 @@ export class Player {
       }
     }
 
-    this.synth_now = this.synth[0];
-
     this.readScene(this.song.master[0]);
     this.setSceneLength(this.song.master.length);
     for (let i = 0; i < this.song.tracks.length; i++) {
-      this.synth[i].setParam(this.song.tracks[i]);
+      this.instruments[i].setParam(this.song.tracks[i]);
     }
 
-    this.session.setSynth(this.synth);
+    this.session.setInstrument(this.instruments);
     this.session.readSong(this.song);
     this.mixer.readParam(this.song.mixer);
 
-    this.view.setSynthNum(this.synth.length, this.synth_pos);
-    return this.resetSceneLength();
+    this.view.setInstrumentCount(
+      this.instruments.length,
+      this.current_instrument
+    );
+    this.resetSceneLength();
   }
 
   readScene(scene: any) {
-    if (scene.bpm != null) {
+    if (scene.bpm) {
       this.setBPM(scene.bpm);
       this.view.setBPM(scene.bpm);
     }
-    if (scene.key != null) {
+    if (scene.key) {
       this.setKey(scene.key);
       this.view.setKey(scene.key);
     }
-    if (scene.scale != null) {
+    if (scene.scale) {
       this.setScale(scene.scale);
       this.view.setScale(scene.scale);
     }
-    return this.view.setParam(scene.bpm, scene.key, scene.scale);
+    this.view.setParam(scene.bpm, scene.key, scene.scale);
   }
 
   getScene() {
@@ -362,7 +346,7 @@ export class Player {
 
   resetSceneLength() {
     this.scene_length = 0;
-    for (const s of this.synth) {
+    for (const s of this.instruments) {
       this.scene_length = Math.max(this.scene_length, s.pattern.length);
     }
   }

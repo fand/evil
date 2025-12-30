@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import $ from 'jquery';
 import { KEY_LIST } from './Constant';
 import type { Player } from './Player';
@@ -35,8 +28,8 @@ export class PlayerView {
   btn_right: JQuery;
   btn_top: JQuery;
   btn_bottom: JQuery;
-  synth_now: number;
-  synth_total: number;
+  current_instrument: number;
+  instruments_count: number;
 
   constructor(model: Player) {
     this.model = model;
@@ -63,8 +56,8 @@ export class PlayerView {
     this.btn_right = $('#btn-right');
     this.btn_top = $('#btn-top');
     this.btn_bottom = $('#btn-bottom');
-    this.synth_now = 0;
-    this.synth_total = 1;
+    this.current_instrument = 0;
+    this.instruments_count = 1;
 
     this.initEvent();
     this.resize();
@@ -153,16 +146,16 @@ export class PlayerView {
       return;
     }
 
-    this.synth_now++;
-    this.model.moveRight(this.synth_now);
-    this.synth_total = this.model.synth.length;
+    this.current_instrument++;
+    this.model.moveRight(this.current_instrument);
+    this.instruments_count = this.model.instruments.length;
 
     this.instruments.css(
       '-webkit-transform',
-      'translate3d(' + -1110 * this.synth_now + 'px, 0px, 0px)'
+      'translate3d(' + -1110 * this.current_instrument + 'px, 0px, 0px)'
     );
     this.btn_left.show();
-    if (this.synth_now === this.synth_total - 1) {
+    if (this.current_instrument === this.instruments_count - 1) {
       this.btn_right.attr('data-line1', 'new');
     }
   }
@@ -171,17 +164,17 @@ export class PlayerView {
     if (this.is_mixer) {
       return;
     }
-    this.synth_total = this.model.synth.length;
+    this.instruments_count = this.model.instruments.length;
     this.btn_right.attr('data-line1', 'next');
-    if (this.synth_now !== 0) {
-      this.synth_now--;
+    if (this.current_instrument !== 0) {
+      this.current_instrument--;
       this.instruments.css(
         '-webkit-transform',
-        'translate3d(' + -1110 * this.synth_now + 'px, 0px, 0px)'
+        'translate3d(' + -1110 * this.current_instrument + 'px, 0px, 0px)'
       );
-      this.model.moveLeft(this.synth_now);
+      this.model.moveLeft(this.current_instrument);
     }
-    if (this.synth_now === 0) {
+    if (this.current_instrument === 0) {
       this.btn_left.hide();
     }
   }
@@ -198,7 +191,7 @@ export class PlayerView {
 
   moveBottom() {
     this.is_mixer = false;
-    if (this.synth_now !== 0) {
+    if (this.current_instrument !== 0) {
       this.btn_left.show();
     }
     this.btn_right.show();
@@ -208,8 +201,8 @@ export class PlayerView {
     this.model.moveBottom();
   }
 
-  setSynthNum(total: number, now: number) {
-    this.synth_total = total;
+  setInstrumentCount(total: number, now: number) {
+    this.instruments_count = total;
     if (now < total - 1) {
       return this.btn_right.attr('data-line1', 'next');
     }
@@ -220,9 +213,6 @@ export class PlayerView {
     const h = window.innerHeight;
     const space_w = (w - 910) / 2;
     const space_h = (h - 600) / 2;
-
-    const pw = space_w / 2 - 50;
-    const ph = space_h / 2 - 50;
 
     this.btn_left.css({
       width: space_w + 'px',
@@ -244,11 +234,11 @@ export class PlayerView {
     });
   }
 
-  changeSynth(_id?: number, _type?: string) {
-    if (this.synth_now === 0) {
+  changeInstrument(_id?: number, _type?: string) {
+    if (this.current_instrument === 0) {
       this.btn_left.hide();
     }
-    if (this.synth_now === this.synth_total - 1) {
+    if (this.current_instrument === this.instruments_count - 1) {
       return this.btn_right.attr('data-line1', 'new');
     }
   }

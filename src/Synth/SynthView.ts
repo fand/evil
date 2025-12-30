@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import $ from 'jquery';
 import { KeyboardView } from './KeyboardView';
 import type { Synth } from '../Synth';
@@ -200,7 +192,7 @@ export class SynthView {
         this.drawCellOff(CellType.Empty, x, y);
       }
     }
-    return this.setPattern(this.pattern_obj);
+    this.setPattern(this.pattern_obj);
   }
 
   // ========================================
@@ -330,7 +322,7 @@ export class SynthView {
               this.removeNote(pos);
             }
           }
-          return (this.click_pos = pos);
+          this.click_pos = pos;
         }
       })
       .on('mousedown', (e) => {
@@ -345,36 +337,35 @@ export class SynthView {
           ) {
             this.addNote(pos);
             this.sustain_l = this.sustain_r = pos.x_abs;
-            return (this.is_sustaining = true);
+            this.is_sustaining = true;
             // not sustaining
           } else {
             this.addNote(pos);
             this.sustain_l = this.sustain_r = pos.x_abs;
-            return (this.is_sustaining = true);
+            this.is_sustaining = true;
           }
         } else {
           if (this.pattern[pos.x_abs] === pos.note) {
-            return this.removeNote(pos);
+            this.removeNote(pos);
           } else {
             this.is_adding = true;
-            return this.addNote(pos);
+            this.addNote(pos);
           }
         }
       })
       .on('mouseup', (e) => {
         this.is_clicked = false;
         if (!this.is_step) {
-          const pos = this.getPos(e);
-          return (this.is_sustaining = false);
+          this.is_sustaining = false;
         } else {
-          return (this.is_adding = false);
+          this.is_adding = false;
         }
       })
       .on('mouseout', (e) => {
         this.clearCellHover(this.hover_pos.x, this.hover_pos.y);
         this.hover_pos = { x: -1, y: -1 };
         this.is_clicked = false;
-        return (this.is_adding = false);
+        this.is_adding = false;
       });
 
     // Headers
@@ -403,7 +394,7 @@ export class SynthView {
     this.plus.on('click', () => this.plusPattern());
     this.minus.on('click', () => {
       if (this.pattern.length > this.cells_x) {
-        return this.minusPattern();
+        this.minusPattern();
       }
     });
 
@@ -415,7 +406,7 @@ export class SynthView {
           .css({ top: '-22px', padding: '0px 5px 0px 0px' })
           .removeClass('fa-angle-down')
           .addClass('fa-angle-up');
-        return (this.is_panel_opened = false);
+        this.is_panel_opened = false;
       } else {
         this.core.css('height', '280px');
         this.table_wrapper.css('height', '262px');
@@ -423,16 +414,13 @@ export class SynthView {
           .css({ top: '0px', padding: '5px 5px 5px 5px' })
           .removeClass('fa-angle-up')
           .addClass('fa-angle-down');
-        return (this.is_panel_opened = true);
+        this.is_panel_opened = true;
       }
     });
 
-    return this.btn_fx.on('mousedown', () => {
+    this.btn_fx.on('mousedown', () => {
       if (this.is_fx_view) {
-        // @core.css('height', '0px')
-        // @table_wrapper.css('height', '524px')
-        // @btn_fold.css(top: '-22px', padding: '0px 5px 0px 0px').removeClass('fa-angle-down').addClass('fa-angle-up')
-        return (this.is_fx_view = false);
+        this.is_fx_view = false;
       } else {
         this.core.css('height', '280px');
         this.table_wrapper.css('height', '262px');
@@ -440,7 +428,7 @@ export class SynthView {
           .css({ top: '0px', padding: '5px 5px 5px 5px' })
           .removeClass('fa-angle-up')
           .addClass('fa-angle-down');
-        return (this.is_panel_opened = true);
+        this.is_panel_opened = true;
       }
     });
   }
@@ -558,7 +546,7 @@ export class SynthView {
   }
 
   endSustain(time?: number) {
-    if (this.is_sustaining && time != null) {
+    if (this.is_sustaining && time !== undefined) {
       const note = this.pattern[time - 1];
       if (note === 'sustain') {
         this.pattern[time - 1] = 'end';
@@ -603,7 +591,7 @@ export class SynthView {
   }
 
   drawPattern(time?: number) {
-    if (time != null) {
+    if (time !== undefined) {
       this.time = time;
     }
     this.page = Math.floor(this.time / this.cells_x);
@@ -627,7 +615,7 @@ export class SynthView {
         lastY = y;
       }
     }
-    return this.setMarker();
+    this.setMarker();
   }
 
   plusPattern() {
@@ -706,7 +694,7 @@ export class SynthView {
 
   activate() {
     this.is_active = true;
-    return this.initCanvas();
+    this.initCanvas();
   }
 
   deactivate() {
@@ -726,7 +714,7 @@ export class SynthView {
     if (this.is_nosync) {
       this.is_nosync = false;
       this.nosync.removeClass('btn-true').addClass('btn-false');
-      return this.drawPattern(this.time);
+      this.drawPattern(this.time);
     } else {
       this.is_nosync = true;
       this.nosync.removeClass('btn-false').addClass('btn-true');
@@ -740,16 +728,16 @@ export class SynthView {
   pencilMode() {
     this.is_step = false;
     this.pencil.removeClass('btn-false').addClass('btn-true');
-    return this.step.removeClass('btn-true').addClass('btn-false');
+    this.step.removeClass('btn-true').addClass('btn-false');
   }
 
   stepMode() {
     this.is_step = true;
     this.step.removeClass('btn-false').addClass('btn-true');
-    return this.pencil.removeClass('btn-true').addClass('btn-false');
+    this.pencil.removeClass('btn-true').addClass('btn-false');
   }
 
   changeScale(scale: number[]) {
-    return this.keyboard.changeScale(scale);
+    this.keyboard.changeScale(scale);
   }
 }

@@ -1,67 +1,59 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
-
 import { Player } from './Player';
 
-const KEYCODE_TO_NOTE: Record<number, number> = {
-  90: 1,
-  88: 2,
-  67: 3,
-  86: 4,
-  66: 5,
-  78: 6,
-  77: 7,
-  65: 8,
-  83: 9,
-  68: 10,
-  188: 8,
-  190: 9,
-  192: 10,
-  70: 11,
-  71: 12,
-  72: 13,
-  74: 14,
-  75: 15,
-  76: 16,
-  187: 17,
-  81: 15,
-  87: 16,
-  69: 17,
-  82: 18,
-  84: 19,
-  89: 20,
-  85: 21,
-  73: 22,
-  79: 23,
-  80: 24,
-  49: 22,
-  50: 23,
-  51: 24,
-  52: 25,
-  53: 26,
-  54: 27,
-  55: 28,
-  56: 29,
-  57: 30,
-  48: 31,
+const CODE_TO_NOTE: Record<string, number> = {
+  KeyZ: 1,
+  KeyX: 2,
+  KeyC: 3,
+  KeyV: 4,
+  KeyB: 5,
+  KeyN: 6,
+  KeyM: 7,
+  KeyA: 8,
+  KeyS: 9,
+  KeyD: 10,
+  Comma: 8,
+  Period: 9,
+  Backquote: 10,
+  KeyF: 11,
+  KeyG: 12,
+  KeyH: 13,
+  KeyJ: 14,
+  KeyK: 15,
+  KeyL: 16,
+  Equal: 17,
+  KeyQ: 15,
+  KeyW: 16,
+  KeyE: 17,
+  KeyR: 18,
+  KeyT: 19,
+  KeyY: 20,
+  KeyU: 21,
+  KeyI: 22,
+  KeyO: 23,
+  KeyP: 24,
+  Digit1: 22,
+  Digit2: 23,
+  Digit3: 24,
+  Digit4: 25,
+  Digit5: 26,
+  Digit6: 27,
+  Digit7: 28,
+  Digit8: 29,
+  Digit9: 30,
+  Digit0: 31,
 };
 
-const KEYCODE_TO_NUM: Record<number, number> = {
-  49: 1,
-  50: 2,
-  51: 3,
-  52: 4,
-  53: 5,
-  54: 6,
-  55: 7,
-  56: 8,
-  57: 9,
-  48: 0,
+const CODE_TO_NUM: Record<string, number> = {
+  Digit1: 1,
+  Digit2: 2,
+  Digit3: 3,
+  Digit4: 4,
+  Digit5: 5,
+  Digit6: 6,
+  Digit7: 7,
+  Digit8: 8,
+  Digit9: 9,
+  Digit0: 0,
 };
 
 class Keyboard {
@@ -69,7 +61,7 @@ class Keyboard {
   mode: string;
   is_writing: boolean;
   is_pressed: boolean;
-  last_key: number;
+  last_key: string;
   solos: number[];
 
   constructor(player: Player) {
@@ -78,7 +70,7 @@ class Keyboard {
     this.is_writing = false;
     this.is_pressed = false;
 
-    this.last_key = 0;
+    this.last_key = '';
 
     this.solos = [];
 
@@ -91,105 +83,102 @@ class Keyboard {
         return;
       }
       this.is_pressed = true;
-      this.noteOn(e.keyCode); // TODO: use e.code
+      this.noteOn(e.code);
     });
     window.addEventListener('keyup', (e) => {
       this.is_pressed = false;
-      return this.noteOff(e.keyCode);
+      this.noteOff(e.code);
     });
   }
 
   beginInput() {
-    return (this.is_writing = true);
+    this.is_writing = true;
   }
   endInput() {
-    return (this.is_writing = false);
+    this.is_writing = false;
   }
 
   setMode(mode: string) {
     this.mode = mode;
   }
 
-  noteOn(keyCode: number) {
-    if (keyCode === this.last_key) {
+  noteOn(code: string) {
+    if (code === this.last_key) {
       return;
     }
 
-    switch (keyCode) {
-      case 37:
+    switch (code) {
+      case 'ArrowLeft':
         this.player.view.moveLeft();
         break;
-      case 38:
+      case 'ArrowUp':
         this.player.view.moveTop();
         break;
-      case 39:
+      case 'ArrowRight':
         this.player.view.moveRight();
         break;
-      case 40:
+      case 'ArrowDown':
         this.player.view.moveBottom();
         break;
-      case 32:
-        this.player.view.viewPlay();
-        break;
-      case 13:
+      case 'Space':
+      case 'Enter':
         this.player.view.viewPlay();
         break;
       default:
         if (this.mode === 'SYNTH') {
-          this.onPlayer(keyCode);
+          this.onPlayer(code);
         }
         if (this.mode === 'MIXER') {
-          this.onMixer(keyCode);
+          this.onMixer(code);
         }
     }
 
-    return (this.last_key = keyCode);
+    this.last_key = code;
   }
 
-  onPlayer(keyCode: number) {
+  onPlayer(code: string) {
     if (this.player.isPlaying()) {
       this.player.noteOff(true);
     }
-    const n = KEYCODE_TO_NOTE[keyCode];
-    if (n != null) {
-      return this.player.noteOn(n, true);
+    const n = CODE_TO_NOTE[code];
+    if (n !== undefined) {
+      this.player.noteOn(n, true);
     }
   }
 
-  onMixer(e: KeyboardEvent | number) {
-    const keyCode = typeof e === 'number' ? e : e.keyCode;
+  onMixer(code: string) {
     // Session
-    if (keyCode === 8 || keyCode === 46) {
+    if (code === 'Backspace' || code === 'Delete') {
       this.player.session.deleteCell();
     }
 
     // Mute
-    const num = KEYCODE_TO_NUM[keyCode];
-    if (num != null && num < 10) {
-      if (!Array.from(this.solos).includes(num)) {
+    const num = CODE_TO_NUM[code];
+    if (num !== undefined && num < 10) {
+      if (!this.solos.includes(num)) {
         this.solos.push(num);
       }
-      return this.player.solo(this.solos);
+      this.player.solo(this.solos);
     }
   }
 
-  noteOff(keyCode: number) {
+  noteOff(code: string) {
     if (this.mode === 'SYNTH') {
       this.offPlayer();
     }
     if (this.mode === 'MIXER') {
-      this.offMixer(keyCode);
+      this.offMixer(code);
     }
-    this.last_key = 0;
+    this.last_key = '';
   }
 
   offPlayer() {
-    return this.player.noteOff(true);
+    this.player.noteOff(true);
   }
 
-  offMixer(keyCode: number) {
-    const num = KEYCODE_TO_NUM[keyCode];
-    if (num != null && num < 10) {
+  offMixer(code: string) {
+    const num = CODE_TO_NUM[code];
+    if (num !== undefined && num < 10) {
       this.solos = this.solos.filter((n) => n !== num);
       this.player.solo(this.solos);
     }

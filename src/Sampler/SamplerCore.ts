@@ -1,13 +1,4 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
-import { SampleNode as SamplerNode } from './Node';
+import { SampleNode as SamplerNode } from './SampleNode';
 import { SamplerCoreView } from './CoreView';
 import type { Sampler } from '../Sampler';
 
@@ -55,37 +46,34 @@ export class SamplerCore {
       if (notes.length == 0) {
         return;
       }
-      return Array.from(notes).map((n) =>
-        this.samples[n[0] - 1].noteOn(n[1], time)
-      );
+      notes.forEach((n) => this.samples[n[0] - 1].noteOn(n[1], time));
     } else {
       this.samples[notes - 1].noteOn(1, time);
     }
   }
 
   noteOff() {
-    let t0;
-    return (t0 = this.ctx.currentTime); // TODO: ???
+    // TODO: ???
   }
 
   connect(dst: AudioNode) {
-    return this.node.connect(dst);
+    this.node.connect(dst);
   }
 
   setSample(i: number, name: string) {
-    return this.samples[i].setSample(name);
+    this.samples[i].setSample(name);
   }
 
   setSampleTimeParam(i: number, head: number, tail: number, speed: number) {
-    return this.samples[i].setTimeParam(head, tail, speed);
+    this.samples[i].setTimeParam(head, tail, speed);
   }
 
   setSampleEQParam(i: number, lo: number, mid: number, hi: number) {
-    return this.samples[i].setEQParam([lo, mid, hi]);
+    this.samples[i].setEQParam([lo, mid, hi]);
   }
 
   setSampleOutputParam(i: number, pan: number, gain: number) {
-    return this.samples[i].setOutputParam(pan, gain);
+    this.samples[i].setOutputParam(pan, gain);
   }
 
   setGain(gain: number) {
@@ -94,7 +82,7 @@ export class SamplerCore {
   }
 
   setSampleGain(i: number, gain: number) {
-    return this.samples[i].setParam({ gain });
+    this.samples[i].setParam({ gain });
   }
 
   getSampleTimeParam(i: number) {
@@ -114,32 +102,30 @@ export class SamplerCore {
   }
 
   sampleLoaded(id: number) {
-    return this.view.updateWaveformCanvas(id);
+    this.view.updateWaveformCanvas(id);
   }
 
   bindSample(sample_now: number) {
     this.view.bindSample(sample_now, this.samples[sample_now].getParam());
     this.view.setSampleTimeParam(this.getSampleTimeParam(sample_now));
     this.view.setSampleEQParam(this.getSampleEQParam(sample_now));
-    return this.view.setSampleOutputParam(
-      this.getSampleOutputParam(sample_now)
-    );
+    this.view.setSampleOutputParam(this.getSampleOutputParam(sample_now));
   }
 
   getParam() {
     return {
       type: 'SAMPLER',
-      samples: Array.from(this.samples).map((s) => s.getParam()),
+      samples: this.samples.map((s) => s.getParam()),
     };
   }
 
   setParam(p: any) {
-    if (p.samples != null) {
+    if (p.samples) {
       for (let i = 0; i < p.samples.length; i++) {
         this.samples[i].setParam(p.samples[i]);
       }
     }
-    return this.bindSample(0);
+    this.bindSample(0);
   }
 
   mute() {

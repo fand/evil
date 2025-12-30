@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS002: Fix invalid constructor
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { FX } from './FX';
 import { CompressorView } from './CompressorView';
 
@@ -54,28 +47,28 @@ export class Compressor extends FX {
   }
 
   setParam(p: Partial<CompressorParams>) {
-    if (p.attack != null) {
+    if (p.attack !== undefined) {
       this.setAttack(p.attack);
     }
-    if (p.release != null) {
+    if (p.release !== undefined) {
       this.setRelease(p.release);
     }
-    if (p.threshold != null) {
+    if (p.threshold !== undefined) {
       this.setThreshold(p.threshold);
     }
-    if (p.ratio != null) {
+    if (p.ratio !== undefined) {
       this.setRatio(p.ratio);
     }
-    if (p.knee != null) {
+    if (p.knee !== undefined) {
       this.setKnee(p.knee);
     }
-    if (p.input != null) {
+    if (p.input !== undefined) {
       this.setInput(p.input);
     }
-    if (p.output != null) {
+    if (p.output !== undefined) {
       this.setOutput(p.output);
     }
-    return this.view.setParam(p);
+    this.view.setParam(p);
   }
 
   getParam() {

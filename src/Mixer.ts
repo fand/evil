@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { MixerView } from './MixerView';
 import { Panner } from './Panner';
 import { Limiter } from './FX/Limiter';
@@ -15,9 +7,8 @@ import { Double } from './FX/Double';
 import { Reverb } from './FX/Reverb';
 import { Compressor } from './FX/Compressor';
 import { FX } from './FX/FX';
-import type { Sampler } from './Sampler';
-import type { Synth } from './Synth';
 import type { Player } from './Player';
+import type { Instrument } from './Instrument';
 
 export class Mixer {
   ctx: AudioContext;
@@ -42,7 +33,7 @@ export class Mixer {
     this.ctx = ctx;
     this.player = player;
     this.gain_master = 1.0;
-    this.gain_tracks = this.player.synth.map((s) => s.getGain());
+    this.gain_tracks = this.player.instruments.map((s) => s.getGain());
 
     this.out = this.ctx.createGain();
     this.out.gain.value = this.gain_master;
@@ -112,18 +103,18 @@ export class Mixer {
     return this.view.empty();
   }
 
-  addSynth(synth: Synth | Sampler) {
+  addInstrument(instrument: Instrument) {
     // Create new panner
     const p = new Panner(this.ctx);
-    synth.connect(p.in);
+    instrument.connect(p.in);
     p.connect(this.send);
     this.panners.push(p);
 
     const a = this.ctx.createAnalyser();
-    synth.connect(a);
+    instrument.connect(a);
     this.analysers.push(a);
 
-    this.view.addSynth();
+    this.view.addInstrument();
   }
 
   setGains(gain_tracks: number[], gain_master: number) {
@@ -131,7 +122,7 @@ export class Mixer {
     this.gain_master = gain_master;
 
     for (let i = 0; i < this.gain_tracks.length; i++) {
-      this.player.synth[i].setGain(this.gain_tracks[i]);
+      this.player.instruments[i].setGain(this.gain_tracks[i]);
     }
 
     this.out.gain.value = this.gain_master;
@@ -184,9 +175,9 @@ export class Mixer {
     this.readPans(p.pan_tracks, p.pan_master);
   }
 
-  changeSynth(idx: number, synth: Synth | Sampler) {
-    synth.connect(this.panners[idx].in);
-    return synth.connect(this.analysers[idx]);
+  changeInstrument(idx: number, instrument: Instrument) {
+    instrument.connect(this.panners[idx].in);
+    instrument.connect(this.analysers[idx]);
   }
 
   addMasterEffect(name: string) {
@@ -237,7 +228,7 @@ export class Mixer {
       throw new TypeError(`Invalid effect type: ${name}`);
     }
 
-    this.player.synth[x].insertEffect(fx);
+    this.player.instruments[x].insertEffect(fx);
     return fx;
   }
 

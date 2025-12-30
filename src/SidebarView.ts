@@ -1,11 +1,5 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import $ from 'jquery';
+import type { Sidebar } from './Sidebar';
 
 declare global {
   interface Window {
@@ -14,7 +8,7 @@ declare global {
 }
 
 class SidebarView {
-  model: any;
+  model: Sidebar;
   wrapper: JQuery;
   tracks: JQuery;
   master: JQuery;
@@ -34,7 +28,7 @@ class SidebarView {
   add_tracks: JQuery;
   add_tracks_btn: JQuery;
 
-  constructor(model: any) {
+  constructor(model: Sidebar) {
     this.model = model;
     this.wrapper = $('#sidebar-wrapper');
     this.tracks = this.wrapper.find('#sidebar-tracks');
@@ -83,7 +77,7 @@ class SidebarView {
     this.tracks.find('.sidebar-effect').each((i: number, el: HTMLElement) => {
       $(el).on('change', () => {
         // change i-th effect
-        this.model.readTracksEffect(i);
+        // this.model.readTracksEffect(i);
       });
     });
 
@@ -162,12 +156,12 @@ class SidebarView {
 
   addMasterEffect(name: any) {
     const fx = this.model.addMasterEffect(name);
-    return fx.appendTo(this.master_effects);
+    return fx.appendTo(this.master_effects[0]);
   }
 
   addTracksEffect(name: any) {
     const fx = this.model.addTracksEffect(name);
-    return fx.appendTo(this.tracks_effects);
+    return fx.appendTo(this.tracks_effects[0]);
   }
 
   setBPM(bpm: number) {

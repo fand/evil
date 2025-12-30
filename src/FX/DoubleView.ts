@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS002: Fix invalid constructor
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { FXView } from './FXView';
 import $ from 'jquery';
 
@@ -28,7 +21,7 @@ export class DoubleView extends FXView {
   initEvent() {
     super.initEvent();
     this.delay.on('change', () => {
-      return this.model.setParam({
+      this.model.setParam({
         delay: parseFloat(this.delay.val() as string) / 1000.0,
       });
     });
@@ -40,10 +33,10 @@ export class DoubleView extends FXView {
   }
 
   setParam(p: Partial<DoubleParams>) {
-    if (p.delay != null) {
+    if (p.delay !== undefined) {
       this.delay.val(p.delay * 1000);
     }
-    if (p.width != null) {
+    if (p.width !== undefined) {
       this.width.val((p.width - 0.5) * 200);
     }
   }

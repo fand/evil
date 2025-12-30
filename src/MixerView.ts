@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import $ from 'jquery';
 import type { Mixer } from './Mixer';
 
@@ -107,7 +99,7 @@ export class MixerView {
     return this.ctx_master.fillRect(60, 130 - h_r, 10, h_r);
   }
 
-  addSynth() {
+  addInstrument() {
     const dom = this.track_dom.clone();
     this.console_tracks.append(dom);
     this.pans.push(dom.find('.pan-slider'));

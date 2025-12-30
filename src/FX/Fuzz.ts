@@ -1,12 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS002: Fix invalid constructor
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import { FX } from './FX';
 import { FuzzView } from './FuzzView';
 
@@ -66,16 +57,16 @@ export class Fuzz extends FX {
   }
 
   setParam(p: Partial<FuzzParams>) {
-    if (p.type != null) {
+    if (p.type !== undefined) {
       this.setType(p.type);
     }
-    if (p.gain != null) {
+    if (p.gain !== undefined) {
       this.setGain(p.gain);
     }
-    if (p.input != null) {
+    if (p.input !== undefined) {
       this.setInput(p.input);
     }
-    if (p.output != null) {
+    if (p.output !== undefined) {
       this.setOutput(p.output);
     }
     this.view.setParam(p);

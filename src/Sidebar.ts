@@ -1,21 +1,28 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
+import type { Mixer } from './Mixer';
+import type { Player } from './Player';
+import type { Session } from './Session';
 import { SidebarView } from './SidebarView';
 
 class Sidebar {
   ctx: AudioContext;
-  player: any;
-  session: any;
-  mixer: any;
+  player: Player;
+  session: Session;
+  mixer: Mixer;
   sidebar_pos: { x: number; y: number; type: string };
   view: SidebarView;
   song: any;
-  select_pos: { x: number; y: number; type: string } = { x: -1, y: -1, type: '' };
+  select_pos: { x: number; y: number; type: string } = {
+    x: -1,
+    y: -1,
+    type: '',
+  };
 
-  constructor(ctx: AudioContext, player: any, session: any, mixer: any) {
+  constructor(
+    ctx: AudioContext,
+    player: Player,
+    session: Session,
+    mixer: Mixer
+  ) {
     this.addMasterEffect = this.addMasterEffect.bind(this);
     this.addTracksEffect = this.addTracksEffect.bind(this);
     this.ctx = ctx;
@@ -38,7 +45,7 @@ class Sidebar {
       }
       this.saveTracksEffect(this.sidebar_pos.x);
       this.sidebar_pos = this.select_pos;
-      return this.view.showTracks(this.player.synth[this.select_pos.x]);
+      return this.view.showTracks(this.player.instruments[this.select_pos.x]);
     } else {
       if (
         this.sidebar_pos.y === this.select_pos.y &&
