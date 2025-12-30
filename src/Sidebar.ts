@@ -2,6 +2,7 @@ import type { Mixer } from './Mixer';
 import type { Player } from './Player';
 import type { Session } from './Session';
 import { SidebarView } from './SidebarView';
+import { Song } from './Song';
 
 class Sidebar {
   ctx: AudioContext;
@@ -10,7 +11,7 @@ class Sidebar {
   mixer: Mixer;
   sidebar_pos: { x: number; y: number; type: string };
   view: SidebarView;
-  song: any;
+  song: Song | undefined;
   select_pos: { x: number; y: number; type: string } = {
     x: -1,
     y: -1,
@@ -33,7 +34,7 @@ class Sidebar {
     this.view = new SidebarView(this);
   }
 
-  show(song: any, select_pos: { x: number; y: number; type: string }) {
+  show(song: Song, select_pos: { x: number; y: number; type: string }) {
     this.song = song;
     this.select_pos = select_pos;
     if (this.select_pos.type === 'tracks') {
