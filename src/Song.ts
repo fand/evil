@@ -1,5 +1,10 @@
 import type { InstrumentType } from './Instrument';
 
+export type SynthPattern = (number | 'sustain' | 'end')[];
+export type SamplerNote = [note: number, velocity: number];
+export type SamplerPattern = SamplerNote[][];
+export type Pattern = SynthPattern | SamplerPattern;
+
 export const DEFAULT_SCENE = {
   name: 'section-0',
   bpm: 144,
@@ -24,7 +29,7 @@ export type Song = {
 
 export type PatternObject = {
   name: string;
-  pattern: unknown[];
+  pattern: Pattern;
 };
 
 export type Track = {
