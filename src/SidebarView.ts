@@ -85,31 +85,32 @@ class SidebarView {
     });
 
     this.add_master_btn.on('click', () => {
-      return this.addMasterEffect(this.add_master.val());
+      return this.addMasterEffect(this.add_master.val() as string);
     });
 
     return this.add_tracks_btn.on('click', () => {
-      return this.addTracksEffect(this.add_tracks.val());
+      return this.addTracksEffect(this.add_tracks.val() as string);
     });
   }
 
   saveMaster() {
-    const name = this.master_name.val();
-    const bpm = this.master_bpm.val();
-    const key = this.master_key.val();
-    const scale = this.master_scale.val();
+    const name = this.master_name.val() as string | undefined;
+    const bpm = this.master_bpm.val() as string | undefined;
+    const key = this.master_key.val() as string | undefined;
+    const scale = this.master_scale.val() as string | undefined;
     const obj = {
-      name: name != null ? name : undefined,
-      bpm: bpm != null ? bpm : undefined,
-      key: key != null ? key : undefined,
-      scale: scale != null ? scale : undefined,
+      name,
+      bpm: bpm ? parseInt(bpm, 10) : undefined,
+      key,
+      scale,
     };
     this.model.saveMaster(obj);
     return this.showMaster(obj);
   }
 
   clearMaster() {
-    const o = { name: this.master_name.val() };
+    const name = this.master_name.val() as string | undefined;
+    const o = { name };
     this.model.saveMaster(o);
     return this.showMaster(o);
   }

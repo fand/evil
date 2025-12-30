@@ -579,7 +579,7 @@ export class SynthView {
     this.last_time = this.time;
   }
 
-  setPattern() {
+  setPattern(_pattern_obj?: unknown) {
     // pattern_obj is now accessed via getter from model
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;

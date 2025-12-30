@@ -658,8 +658,9 @@ export class SessionView {
     }
 
     for (let i = 0; i < this.current_cells.length; i++) {
-      if (this.current_cells[i] != null) {
-        this.drawActive(i, this.current_cells[i]);
+      const cell = this.current_cells[i];
+      if (cell != null) {
+        this.drawActive(i, cell);
       }
     }
 
@@ -882,6 +883,8 @@ export class SessionView {
   beat(is_master: boolean, cells: [number, number | undefined] | [number, number][]) {
     if (is_master) {
       const c = cells as [number, number | undefined];
+      if (c[1] === undefined) return;
+      const y = c[1];
       this.ctx_master_on.drawImage(
         this.img_play,
         36,
@@ -889,7 +892,7 @@ export class SessionView {
         18,
         18,
         c[0] * this.w + 3,
-        c[1] * this.h + 3,
+        y * this.h + 3,
         16,
         15
       );
@@ -897,7 +900,7 @@ export class SessionView {
         () =>
           this.ctx_master_on.clearRect(
             c[0] * this.w + 3,
-            c[1] * this.h + 3,
+            y * this.h + 3,
             16,
             15
           ),

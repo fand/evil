@@ -173,10 +173,10 @@ export class PlayerView {
     }
   }
 
-  setParam(bpm: number, key: string, scale: string) {
-    this.setBPM(bpm);
-    this.setKey(key);
-    return this.setScale(scale);
+  setParam(bpm?: number, key?: string, scale?: string) {
+    if (bpm !== undefined) this.setBPM(bpm);
+    if (key !== undefined) this.setKey(key);
+    if (scale !== undefined) return this.setScale(scale);
   }
 
   moveRight() {
@@ -272,7 +272,7 @@ export class PlayerView {
     });
   }
 
-  changeInstrument() {
+  changeInstrument(_idx?: number, _type?: string) {
     if (this.current_instrument === 0) {
       this.btn_left.hide();
     }

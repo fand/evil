@@ -46,7 +46,7 @@ class Sidebar {
       ) {
         return;
       }
-      this.saveTracksEffect(this.sidebar_pos.x);
+      this.saveTracksEffect();
       this.sidebar_pos = this.select_pos;
       return this.view.showTracks(this.player.instruments[this.select_pos.x]);
     } else {

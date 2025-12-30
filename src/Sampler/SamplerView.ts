@@ -357,7 +357,7 @@ export class SamplerView {
     this.last_time = this.time;
   }
 
-  setPattern() {
+  setPattern(_pattern_obj?: unknown) {
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);

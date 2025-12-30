@@ -235,7 +235,7 @@ class Session {
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
     }
-    if (this.current_cells[idx] === pat_num) {
+    if (this.current_cells[idx] === pat_num && pat) {
       this.player.instruments[idx].setPattern(pat);
     }
   }
@@ -297,7 +297,8 @@ class Session {
     }
   }
 
-  savePattern(x: number, y: number) {
+  savePattern(x: number, y: number | undefined) {
+    if (y === undefined) return;
     this.song.tracks[x].patterns[y] = this.player.instruments[x].getPattern();
   }
 
@@ -363,8 +364,8 @@ class Session {
           this.song.creator ?? ''
         );
       })
-      .fail((err) => {
-        return this.view.showError(err);
+      .fail(() => {
+        return this.view.showError();
       });
   }
 
@@ -401,6 +402,7 @@ class Session {
   // called by Synth, Sampler
   setPatternName(track_idx: number, name: string) {
     const pat_num = this.current_cells[track_idx];
+    if (pat_num === undefined) return;
 
     if (this.song.tracks[track_idx].patterns[pat_num]) {
       this.song.tracks[track_idx].patterns[pat_num]!.name = name;
@@ -421,7 +423,8 @@ class Session {
     inst.setPatternName(pat_name);
 
     const patterns: (PatternObject | undefined)[] = [];
-    patterns[this.scene_pos] = { name: pat_name, pattern: inst.pattern };
+    const newPattern = { name: pat_name, pattern: inst.pattern };
+    patterns[this.scene_pos] = newPattern;
 
     const s_params: Track = {
       id,
@@ -432,18 +435,21 @@ class Session {
       pan: 0.0,
     };
     this.song.tracks[id] = s_params;
-    inst.setPattern(patterns[this.scene_pos]);
+    inst.setPattern(newPattern);
 
     // Swap patterns[0] and current patterns.
-    [
-      this.song.tracks[id].patterns[0],
-      this.song.tracks[id].patterns[this.current_cells[id]],
-    ] = [
-      this.song.tracks[id].patterns[this.current_cells[id]],
-      this.song.tracks[id].patterns[0],
-    ];
+    const currentCell = this.current_cells[id];
+    if (currentCell !== undefined) {
+      [
+        this.song.tracks[id].patterns[0],
+        this.song.tracks[id].patterns[currentCell],
+      ] = [
+        this.song.tracks[id].patterns[currentCell],
+        this.song.tracks[id].patterns[0],
+      ];
+    }
 
-    this.view.addInstrument([id, this.scene_pos]);
+    this.view.addInstrument();
   }
 
   empty() {
