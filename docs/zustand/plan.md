@@ -75,48 +75,60 @@ User Input → Store Action → State更新 ─┬→ View購読 → DOM
 ### Step 3: Remove Legacy `this.model` References
 **Goal**: View→Model直接参照を段階的にStore経由に置換
 
-**Priority**: Medium - 動作に問題なければ後回し可
-
 **Tasks**:
 - [ ] PlayerView: `this.model.*` → `store.getState().*`
 - [ ] SessionView: `this.model.*` → `store.getState().*`
 - [ ] SynthView: `this.model.*` → `store.getState().*`
 - [ ] SamplerView: `this.model.*` → `store.getState().*`
 
+**Approach**:
+1. 読み取りのみの参照をstore経由に
+2. メソッド呼び出しはstore actionに
+
 ### Step 4: Action-based Pattern Editing
 **Goal**: パターン編集をStore action経由に
 
-**Priority**: Low - 大規模リファクタリング必要
-
 **Tasks**:
-- [ ] `setNote(trackIdx, cellIdx, noteData)` action追加
-- [ ] `clearNote(trackIdx, cellIdx)` action追加
+- [ ] Store: `song.tracks[idx].patterns[pos]` を管理
+- [ ] `setNote(trackIdx, patternIdx, cellIdx, noteData)` action追加
+- [ ] `clearNote(trackIdx, patternIdx, cellIdx)` action追加
+- [ ] `sustainNote(trackIdx, patternIdx, l, r, note)` action追加
 - [ ] SynthView/SamplerViewのマウスイベントをaction呼び出しに
-
-**Blocker**: Pattern編集はtrack/cell indexのコンテキスト必要。現状の直接mutationで問題なし。
+- [ ] Synth/Sampler: pattern getterをstore経由に
 
 ### Step 5: Remove Legacy Model→View Push Calls
 **Goal**: `this.view.drawXxx()`呼び出しを完全削除
 
-**Priority**: Low - Store購読で代替可能な箇所のみ
-
 **Tasks**:
 - [x] Player.moveRight/moveLeft - activate/deactivate削除
 - [x] Session.nextPattern/nextScene - drawScene削除
-- [ ] Session.beat() - view.beat()呼び出し (リアルタイム - Store不向き)
-- [ ] Synth/Sampler - view.setPattern()等 (pattern sync必要)
+- [ ] Session.beat() - view.beat()呼び出し
+- [ ] Synth.setPattern() - view.setPattern()呼び出し
+- [ ] Sampler.setPattern() - view.setPattern()呼び出し
+- [ ] Synth/Sampler - その他view push
+
+### Step 6: Song完全Store管理
+**Goal**: Song全体をStoreで管理、JSON.stringify可能に
+
+**Tasks**:
+- [ ] Store: `song` stateをimmutableに管理
+- [ ] Session: `this.song` → `store.getState().song`
+- [ ] 保存/読込: store経由
+- [ ] Undo/Redo基盤 (optional)
 
 ---
 
-## 残タスク優先度
+## 残タスク (React化に向けて必須)
 
-| Priority | Task | Effort |
-|----------|------|--------|
-| Low | Step 3: this.model参照削除 | Medium |
-| Low | Step 4: Pattern action化 | High |
-| - | Step 5: 残りのpush削除 | pattern sync依存 |
+| # | Task | Effort | 依存 |
+|---|------|--------|------|
+| 3 | this.model参照削除 | Medium | - |
+| 4 | Pattern action化 | High | - |
+| 5 | 残りのpush削除 | Medium | Step 4 |
+| 6 | Song完全Store管理 | High | Step 4 |
+| 7 | React化 | High | Step 3-6 |
 
-**現状で十分動作**。追加の移行は必要に応じて実施。
+**Goal**: React化時にstoreをそのまま使用可能な状態にする。
 
 ---
 
