@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useAppStore, useShallow } from '../../hooks/useStore';
 import { controller } from '../../controller';
-import { KEY_LIST, type NoteKey } from '../../Constant';
+import { type NoteKey } from '../../Constant';
 
 // Key names in display order
 const KEY_NAMES: NoteKey[] = ['A', 'D', 'G', 'C', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'B', 'E'];
@@ -20,18 +20,6 @@ const SCALE_NAMES = [
 ] as const;
 
 /**
- * Convert frequency value to key name
- */
-function frequencyToKeyName(freq: number): NoteKey {
-  for (const [name, value] of Object.entries(KEY_LIST)) {
-    if (Math.abs(value - freq) < 0.01) {
-      return name as NoteKey;
-    }
-  }
-  return 'A'; // Default
-}
-
-/**
  * Scene parameter controls: BPM, Key, Scale
  */
 export function SceneParams() {
@@ -42,9 +30,6 @@ export function SceneParams() {
       scale: state.scene.scale,
     }))
   );
-
-  // Convert stored key (frequency string) to key name for display
-  const keyName = frequencyToKeyName(parseInt(key, 10));
 
   const handleBpmChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     controller.setBPM(parseInt(e.target.value, 10));
@@ -71,7 +56,7 @@ export function SceneParams() {
       key:{' '}
       <select
         name="key"
-        value={keyName}
+        value={key}
         onChange={handleKeyChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
