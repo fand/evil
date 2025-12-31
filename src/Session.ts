@@ -267,20 +267,26 @@ class Session {
       this.player.addSynth(pat_num);
     }
 
+    const instrument = this.player.instruments[track_idx];
+    if (!instrument) {
+      // Instrument not yet created, return empty pattern
+      return [track_idx, pat_num, { name: '', pattern: [] }];
+    }
+
     // Save old pattern (for old @current_cells)
     this.savePattern(track_idx, this.current_cells[track_idx]);
 
     if (this.song.tracks[track_idx].patterns[pat_num]) {
-      this.player.instruments[track_idx].setPattern(
+      instrument.setPattern(
         this.song.tracks[track_idx].patterns[pat_num]!
       );
     } else {
       // set new pattern
       const pat_name = track_idx + '-' + pat_num;
-      this.player.instruments[track_idx].clearPattern();
-      this.player.instruments[track_idx].setPatternName(pat_name);
+      instrument.clearPattern();
+      instrument.setPatternName(pat_name);
       this.song.tracks[track_idx].patterns[pat_num] =
-        this.player.instruments[track_idx].getPattern();
+        instrument.getPattern();
     }
 
     // draw
