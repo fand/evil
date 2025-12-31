@@ -3,6 +3,7 @@ import { SceneParams } from '../components/player/SceneParams';
 import { TransportButtons } from '../components/player/TransportButtons';
 import { NavigationButtons } from '../components/player/NavigationButtons';
 import { useResizeHandler } from '../components/player/useResizeHandler';
+import { SessionGrid } from '../components/session';
 
 // Store roots for cleanup
 const roots: Root[] = [];
@@ -66,6 +67,26 @@ export function mountReactApp() {
   const navRoot = createRoot(navContainer);
   navRoot.render(<NavigationButtonsWithResize />);
   roots.push(navRoot);
+
+  // Mount SessionGrid into #mixer-body (replaces SessionView)
+  const mixerBody = document.getElementById('mixer-body');
+  if (mixerBody) {
+    // Clear existing session canvases - React will render them
+    const mixerTracks = document.getElementById('mixer-tracks');
+    const mixerMaster = document.getElementById('mixer-master');
+    if (mixerTracks) mixerTracks.innerHTML = '';
+    if (mixerMaster) mixerMaster.innerHTML = '';
+
+    // Create container for React session components
+    const sessionContainer = document.createElement('div');
+    sessionContainer.id = 'react-session';
+    sessionContainer.style.display = 'contents';
+    mixerBody.prepend(sessionContainer);
+
+    const sessionRoot = createRoot(sessionContainer);
+    sessionRoot.render(<SessionGrid />);
+    roots.push(sessionRoot);
+  }
 }
 
 /**

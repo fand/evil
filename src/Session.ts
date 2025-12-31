@@ -1,4 +1,4 @@
-import { SessionView } from './SessionView';
+import { SessionViewAdapter } from './components/session/SessionViewAdapter';
 import {
   DEFAULT_SCENE,
   DEFAULT_SONG,
@@ -27,7 +27,7 @@ class Session {
   is_waiting_next_scene: boolean;
   cue_queue: [number, number][];
   song: Song;
-  view: SessionView;
+  view: SessionViewAdapter;
   instruments: Instrument[] = [];
 
   // Player.scene_length is the single source of truth
@@ -58,7 +58,7 @@ class Session {
 
     this.song = { ...DEFAULT_SONG, tracks: [], master: [...DEFAULT_SONG.master] };
 
-    this.view = new SessionView(this);
+    this.view = new SessionViewAdapter(this);
   }
 
   // Sync current song state to store (for React components to read)

@@ -166,11 +166,17 @@ useEffect(() => {
 ```
 
 ### Checklist
-- [ ] Create SessionGrid.tsx
-- [ ] Implement canvas drawing with hooks
-- [ ] Handle mouse events
-- [ ] Create SaveDialog.tsx
-- [ ] Remove SessionView.ts
+- [x] Create SessionGrid.tsx
+- [x] Create TracksCanvas.tsx with canvas drawing hooks
+- [x] Create MasterCanvas.tsx with canvas drawing hooks
+- [x] Create canvasUtils.ts (drawing utilities)
+- [x] Create types.ts (shared types and constants)
+- [x] Create usePlayImage.ts hook
+- [x] Create SongInfo.tsx
+- [x] Create SessionViewAdapter.ts (handles dialogs, syncs store)
+- [x] Handle mouse events (hover, click, drag, double-click)
+- [ ] Create SaveDialog.tsx (dialogs still in SessionViewAdapter)
+- [x] Remove SessionView.ts
 
 ---
 
@@ -304,7 +310,7 @@ Option B: Add React root alongside
 |-------|-----------|--------|
 | 1 | Infrastructure | ✅ Complete |
 | 2 | PlayerControls | ✅ Complete |
-| 3 | SessionGrid | 🔲 Not started |
+| 3 | SessionGrid | ✅ Complete |
 | 4 | SynthEditor | 🔲 Not started |
 | 4 | SamplerEditor | 🔲 Not started |
 | 5 | MixerPanel | 🔲 Not started |
