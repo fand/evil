@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { SamplerKeyboardView } from './SamplerKeyboardView';
 import type { Sampler } from '../Sampler';
 import type { Keyboard } from '../Keyboard';
-import { store, selectCurrentInstrument } from '../store';
+import { store, selectCurrentInstrument, selectPatternVersions } from '../store';
 import { controller } from '../controller';
 
 declare global {
@@ -156,6 +156,13 @@ export class SamplerView {
         this.activate();
       } else {
         this.deactivate();
+      }
+    });
+
+    // Subscribe to pattern changes for this instrument
+    store.subscribe(selectPatternVersions, (versions) => {
+      if (versions[this.id] !== undefined) {
+        this.setPattern();
       }
     });
   }

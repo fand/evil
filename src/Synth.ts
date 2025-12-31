@@ -21,6 +21,9 @@ import type {
 } from './Song';
 import { store, selectKey, selectScale } from './store';
 
+// Note: this.view.setPattern() is replaced by store.triggerPatternRefresh()
+// SynthView subscribes to patternVersions and calls its own setPattern()
+
 const T2 = new MutekiTimer();
 
 // Manages SynthCore, SynthView.
@@ -226,7 +229,7 @@ class Synth implements Instrument {
 
   setPattern(pattern_obj: SynthPatternObject) {
     this.pattern_obj = JSON.parse(JSON.stringify(pattern_obj));
-    this.view.setPattern(this.pattern_obj);
+    store.getState().triggerPatternRefresh(this.id);
   }
 
   getPattern(): SynthPatternObject {
@@ -238,7 +241,7 @@ class Synth implements Instrument {
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0,
     ];
-    this.view.setPattern(this.pattern_obj);
+    store.getState().triggerPatternRefresh(this.id);
   }
 
   // Changes the length of @pattern.

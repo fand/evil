@@ -41,10 +41,10 @@ User Input → Store Action → State更新 ─┬→ View購読 → DOM
 | PlayerView | - | ✅ | - | ✅ |
 | Session | ✅ | - | ✅ removed | ✅ |
 | SessionView | - | ✅ scenePos/cells/beat | - | ✅ |
-| Synth | - | ✅ Key/Scale | setPattern残存 | 🔶 |
-| SynthView | - | ✅ currentInstrument | - | ✅ |
-| Sampler | - | - | setPattern残存 | 🔶 |
-| SamplerView | - | ✅ currentInstrument | - | ✅ |
+| Synth | ✅ patternRefresh | ✅ Key/Scale | play/stop残存 | 🔶 |
+| SynthView | - | ✅ currentInstrument/pattern | - | ✅ |
+| Sampler | ✅ patternRefresh | - | play/stop残存 | 🔶 |
+| SamplerView | - | ✅ currentInstrument/pattern | - | ✅ |
 
 ---
 
@@ -120,15 +120,14 @@ View → controller.action() → Player/Session/Model
 
 **Completed Tasks** (continued):
 - [x] Session.beat() - store.triggerBeat()経由に移行
+- [x] Synth.setPattern() - store.triggerPatternRefresh()経由に移行
+- [x] Sampler.setPattern() - store.triggerPatternRefresh()経由に移行
 
 **Remaining Tasks (保留)**:
-- [ ] Synth.setPattern() - view.setPattern()呼び出し
-- [ ] Sampler.setPattern() - view.setPattern()呼び出し
-- [ ] Synth/Sampler - その他view push
+- [ ] Synth/Sampler - その他view push (play/stop/redraw等)
 
 **Remaining Tasks Status**: 保留 - 以下の理由で後回し:
-- setPattern(): Pattern直接mutationと連動。React化時にlocal state + sync方式が適切
-- 現行のView pushは動作に問題なし。React化時にcomponentで置き換え予定
+- play/stop/redraw: アニメーション系で高頻度、React化時にcomponentで置き換え予定
 
 ### Step 6: Song完全Store管理
 **Goal**: Song全体をStoreで管理、JSON.stringify可能に

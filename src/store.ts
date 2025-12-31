@@ -23,6 +23,8 @@ export type PlaybackState = {
 // UI state
 export type UIState = {
   currentInstrument: number;
+  // Pattern version per instrument - incremented when pattern changes
+  patternVersions: Record<number, number>;
 };
 
 // Full app state
@@ -69,6 +71,7 @@ export type AppActions = {
 
   // UI actions
   setCurrentInstrument: (idx: number) => void;
+  triggerPatternRefresh: (instrumentId: number) => void;
 
   // Utility
   reset: () => void;
@@ -92,6 +95,7 @@ const initialPlayback: PlaybackState = {
 
 const initialUI: UIState = {
   currentInstrument: 0,
+  patternVersions: {},
 };
 
 const initialScene: Scene = {
@@ -203,6 +207,17 @@ export const store = createStore<Store>()(
         ui: { ...state.ui, currentInstrument },
       })),
 
+    triggerPatternRefresh: (instrumentId) =>
+      set((state) => ({
+        ui: {
+          ...state.ui,
+          patternVersions: {
+            ...state.ui.patternVersions,
+            [instrumentId]: (state.ui.patternVersions[instrumentId] || 0) + 1,
+          },
+        },
+      })),
+
     // Utility
     reset: () =>
       set({
@@ -229,3 +244,4 @@ export const selectScenePos = (state: Store) => state.playback.scenePos;
 export const selectIsLoop = (state: Store) => state.playback.isLoop;
 export const selectCurrentInstrument = (state: Store) => state.ui.currentInstrument;
 export const selectBeat = (state: Store) => state.playback.beat;
+export const selectPatternVersions = (state: Store) => state.ui.patternVersions;
