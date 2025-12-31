@@ -2,6 +2,7 @@ import $ from 'jquery';
 import type { Session } from './Session';
 import type { Song } from './Song';
 import type { Keyboard } from './Keyboard';
+import { store, selectScenePos, selectCurrentCells } from './store';
 
 declare global {
   interface Window {
@@ -162,6 +163,22 @@ export class SessionView {
     this.social_twitter = $('#twitter');
     this.social_facebook = $('#facebook');
     this.social_hatena = $('#hatena');
+
+    this.subscribeStore();
+  }
+
+  subscribeStore() {
+    // Subscribe to scenePos changes
+    store.subscribe(selectScenePos, (scenePos) => {
+      const currentCells = store.getState().playback.currentCells;
+      this.drawScene(scenePos, currentCells);
+    });
+
+    // Subscribe to currentCells changes
+    store.subscribe(selectCurrentCells, (currentCells) => {
+      const scenePos = store.getState().playback.scenePos;
+      this.drawScene(scenePos, currentCells);
+    });
   }
 
   initCanvas() {

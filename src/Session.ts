@@ -92,7 +92,7 @@ class Session {
       this.current_cells[q[0]] = q[1];
     }
     store.getState().setCurrentCells(this.current_cells);
-    this.view.drawScene(this.scene_pos, this.current_cells);
+    // drawScene is now triggered by store subscription in SessionView
     this.next_pattern_pos = [];
     this.cue_queue = [];
   }
@@ -136,7 +136,7 @@ class Session {
       this.player.loadScene(this.song.master[this.scene_pos]);
     }
     this.view.loadSong(this.current_cells);
-    this.view.drawScene(this.scene_pos, this.current_cells);
+    // drawScene is now triggered by store subscription in SessionView
     store.getState().setScenePos(this.scene_pos);
     store.getState().setCurrentCells(this.current_cells);
     this.next_pattern_pos = [];
