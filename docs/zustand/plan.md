@@ -35,16 +35,16 @@ User Input → Store Action → State更新 ─┬→ View購読 → DOM
 
 ### 🔶 In Progress
 
-| Component | Store Sync | Store Subscribe | Legacy Push |
-|-----------|:----------:|:---------------:|:-----------:|
-| Player | ✅ | - | ✅ removed |
-| PlayerView | - | ✅ | 残存 |
-| Session | ✅ | - | ✅ drawScene removed |
-| SessionView | - | ✅ scenePos/cells | - |
-| Synth | - | ✅ Key/Scale | - |
-| SynthView | - | ✅ currentInstrument | pattern editing直接 |
-| Sampler | - | - | - |
-| SamplerView | - | ✅ currentInstrument | pattern editing直接 |
+| Component | Store Sync | Store Subscribe | Legacy Push | Status |
+|-----------|:----------:|:---------------:|:-----------:|:------:|
+| Player | ✅ | - | ✅ removed | ✅ |
+| PlayerView | - | ✅ | - | ✅ |
+| Session | ✅ | - | ✅ drawScene removed | ✅ |
+| SessionView | - | ✅ scenePos/cells | beat残存 | 🔶 |
+| Synth | - | ✅ Key/Scale | setPattern残存 | 🔶 |
+| SynthView | - | ✅ currentInstrument | - | ✅ |
+| Sampler | - | - | setPattern残存 | 🔶 |
+| SamplerView | - | ✅ currentInstrument | - | ✅ |
 
 ---
 
@@ -92,27 +92,42 @@ View → controller.action() → Player/Session/Model
 
 **Note**: Pattern gettersはdirect mutation用に維持。Step 4で対応。
 
-### Step 4: Action-based Pattern Editing
+### Step 4: Action-based Pattern Editing (保留)
 **Goal**: パターン編集をStore action経由に
 
-**Tasks**:
-- [ ] Store: `song.tracks[idx].patterns[pos]` を管理
-- [ ] `setNote(trackIdx, patternIdx, cellIdx, noteData)` action追加
-- [ ] `clearNote(trackIdx, patternIdx, cellIdx)` action追加
-- [ ] `sustainNote(trackIdx, patternIdx, l, r, note)` action追加
-- [ ] SynthView/SamplerViewのマウスイベントをaction呼び出しに
-- [ ] Synth/Sampler: pattern getterをstore経由に
+**Status**: 保留 - 以下の理由で後回し:
+- Pattern mutationは高頻度で発生 (マウスドラッグ中など)
+- 毎回immutable updateはパフォーマンス問題
+- React化後もローカルstate + 保存時sync が推奨パターン
 
-### Step 5: Remove Legacy Model→View Push Calls
+**代替アプローチ**:
+- 編集中: 現行のdirect mutation維持
+- 保存時: store.song にsync
+- 表示: store.song から読み取り (React components)
+
+**将来的なTasks** (必要に応じて):
+- [ ] setNote/clearNote/sustainNote actions
+- [ ] SynthView/SamplerView action経由に
+- [ ] Pattern store subscription
+
+### ✅ Step 5: Remove Legacy Model→View Push Calls (部分完了)
 **Goal**: `this.view.drawXxx()`呼び出しを完全削除
 
-**Tasks**:
-- [x] Player.moveRight/moveLeft - activate/deactivate削除
-- [x] Session.nextPattern/nextScene - drawScene削除
+**Completed Tasks**:
+- [x] Player.moveRight/moveLeft - activate/deactivate削除 (store購読に移行)
+- [x] Session.nextPattern/nextScene - drawScene削除 (store購読に移行)
+- [x] SynthView/SamplerView - currentInstrument購読でactivate/deactivate自動化
+
+**Remaining Tasks (保留)**:
 - [ ] Session.beat() - view.beat()呼び出し
 - [ ] Synth.setPattern() - view.setPattern()呼び出し
 - [ ] Sampler.setPattern() - view.setPattern()呼び出し
 - [ ] Synth/Sampler - その他view push
+
+**Remaining Tasks Status**: 保留 - 以下の理由で後回し:
+- Session.beat(): ビート時の視覚フィードバック。cue_queue/next_scene_pos依存で複雑
+- setPattern(): Pattern直接mutationと連動。React化時にlocal state + sync方式が適切
+- 現行のView pushは動作に問題なし。React化時にcomponentで置き換え予定
 
 ### Step 6: Song完全Store管理
 **Goal**: Song全体をStoreで管理、JSON.stringify可能に
@@ -127,13 +142,18 @@ View → controller.action() → Player/Session/Model
 
 ## 残タスク (React化に向けて必須)
 
-| # | Task | Effort | 依存 |
-|---|------|--------|------|
-| 3 | this.model参照削除 | Medium | - |
-| 4 | Pattern action化 | High | - |
-| 5 | 残りのpush削除 | Medium | Step 4 |
-| 6 | Song完全Store管理 | High | Step 4 |
-| 7 | React化 | High | Step 3-6 |
+| # | Task | Effort | Status |
+|---|------|--------|--------|
+| 3 | this.model参照削除 | Medium | ✅ 完了 (controller経由) |
+| 4 | Pattern action化 | High | 保留 (React化後) |
+| 5 | 残りのpush削除 | Medium | 🔶 部分完了 (主要部分完了) |
+| 6 | Song完全Store管理 | High | 未着手 |
+| 7 | React化 | High | 未着手 |
+
+**Current Status**:
+- Controller layer完成、主要なView→Model参照をcontroller経由に
+- Store購読によるactivate/deactivate/drawScene自動化完了
+- 残りのview pushは保留（React化時にcomponentで置き換え）
 
 **Goal**: React化時にstoreをそのまま使用可能な状態にする。
 
