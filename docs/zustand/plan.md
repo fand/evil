@@ -28,19 +28,23 @@ User Input → Store Action → State更新 ─┬→ View購読 → DOM
 | 2 | PlayerView ← Store subscribe | ✅ |
 | 3 | Synth ← Store subscribe (Key/Scale) | ✅ |
 | 4 | Session → Store sync (scenePos/currentCells) | ✅ |
+| 4 | SessionView ← Store subscribe (scenePos/currentCells) | ✅ |
+| 5 | SynthView ← Store subscribe (currentInstrument) | ✅ |
+| 5 | SamplerView ← Store subscribe (currentInstrument) | ✅ |
+| 5 | Player direct activate/deactivate removed | ✅ |
 
 ### 🔶 In Progress
 
 | Component | Store Sync | Store Subscribe | Legacy Push |
 |-----------|:----------:|:---------------:|:-----------:|
-| Player | ✅ | - | - |
+| Player | ✅ | - | ✅ removed |
 | PlayerView | - | ✅ | 残存 |
-| Session | ✅ | - | - |
-| SessionView | - | ❌ | `this.model.view.*` |
+| Session | ✅ | - | ✅ drawScene removed |
+| SessionView | - | ✅ scenePos/cells | - |
 | Synth | - | ✅ Key/Scale | - |
-| SynthView | - | ❌ | `this.model.view.*` |
-| Sampler | - | ❌ | - |
-| SamplerView | - | ❌ | `this.model.view.*` |
+| SynthView | - | ✅ currentInstrument | pattern editing直接 |
+| Sampler | - | - | - |
+| SamplerView | - | ✅ currentInstrument | pattern editing直接 |
 
 ---
 

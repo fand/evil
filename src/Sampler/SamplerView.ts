@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { SamplerKeyboardView } from './SamplerKeyboardView';
 import type { Sampler } from '../Sampler';
 import type { Keyboard } from '../Keyboard';
+import { store, selectCurrentInstrument } from '../store';
 
 declare global {
   interface Window {
@@ -144,6 +145,18 @@ export class SamplerView {
 
     this.initEvent();
     this.initCanvas();
+    this.subscribeStore();
+  }
+
+  subscribeStore() {
+    // Subscribe to currentInstrument changes
+    store.subscribe(selectCurrentInstrument, (currentInstrument) => {
+      if (currentInstrument === this.id) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
   }
 
   initCanvas() {

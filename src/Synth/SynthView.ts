@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { KeyboardView } from './KeyboardView';
 import type { Synth } from '../Synth';
 import type { Keyboard } from '../Keyboard';
+import { store, selectCurrentInstrument } from '../store';
 
 declare global {
   interface Window {
@@ -174,6 +175,18 @@ export class SynthView {
     this.offset = { x: this.rect.left, y: this.rect.top };
 
     this.initEvent();
+    this.subscribeStore();
+  }
+
+  subscribeStore() {
+    // Subscribe to currentInstrument changes
+    store.subscribe(selectCurrentInstrument, (currentInstrument) => {
+      if (currentInstrument === this.id) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
   }
 
   initCanvas() {

@@ -255,18 +255,16 @@ export class Player {
       this.session.play();
     }
 
-    this.instruments[this.current_instrument].deactivate();
     this.current_instrument = next_idx;
     store.getState().setCurrentInstrument(next_idx);
-    this.instruments[this.current_instrument].activate();
+    // activate/deactivate now triggered by store subscription in SynthView/SamplerView
     window.keyboard.setMode('SYNTH');
   }
 
   moveLeft(next_idx: number) {
-    this.instruments[this.current_instrument].deactivate();
     this.current_instrument = next_idx;
     store.getState().setCurrentInstrument(next_idx);
-    this.instruments[this.current_instrument].activate();
+    // activate/deactivate now triggered by store subscription in SynthView/SamplerView
     window.keyboard.setMode('SYNTH');
   }
 
