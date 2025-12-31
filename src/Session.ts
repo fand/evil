@@ -61,6 +61,13 @@ class Session {
     this.view = new SessionView(this);
   }
 
+  // Sync current song state to store (for React components to read)
+  syncSongToStore() {
+    // Deep clone to ensure immutability
+    const songCopy: Song = JSON.parse(JSON.stringify(this.song));
+    store.getState().setSong(songCopy);
+  }
+
   toggleLoop(): boolean {
     return (this.is_loop = !this.is_loop);
   }
@@ -188,6 +195,7 @@ class Session {
 
     this.song.tracks.push(s_obj);
     this.current_cells.push(pos);
+    this.syncSongToStore();
 
     this.view.addInstrument();
   }
@@ -221,6 +229,7 @@ class Session {
       }
     }
 
+    this.syncSongToStore();
     return this.song.tracks.length - 1;
   }
 
@@ -239,6 +248,7 @@ class Session {
     if (instrument && this.current_cells[idx] === pat_num && pat) {
       instrument.setPattern(pat);
     }
+    this.syncSongToStore();
   }
 
   loadMaster(pat: Scene, pat_num: number) {
@@ -246,6 +256,7 @@ class Session {
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
     }
+    this.syncSongToStore();
   }
 
   editPattern(idx: number, pat_num: number): [number, number, PatternObject] {
@@ -294,6 +305,7 @@ class Session {
     this.view.loadSong(this.current_cells);
     this.player.moveTo(track_idx);
 
+    this.syncSongToStore();
     return [track_idx, pat_num, this.song.tracks[track_idx].patterns[pat_num]!];
   }
 
@@ -328,6 +340,7 @@ class Session {
   // Save master track into @song.
   saveMaster(y: number, obj: Scene) {
     this.song.master[y] = obj;
+    this.syncSongToStore();
     this.view.loadSong(this.current_cells);
     if (y === this.scene_pos) {
       this.player.loadScene(obj);
@@ -351,6 +364,7 @@ class Session {
     this.saveTracks();
     this.saveMasters();
     this.saveMixer();
+    this.syncSongToStore();
     const song_json = JSON.stringify(this.song);
 
     // Save the song via ajax.
@@ -402,6 +416,7 @@ class Session {
   // called by Synth, Sampler
   setTrackName(idx: number, name: string) {
     this.song.tracks[idx].name = name;
+    this.syncSongToStore();
     this.view.drawTrackName(idx, name, this.song.tracks[idx].type);
   }
 
@@ -416,6 +431,7 @@ class Session {
     } else {
       this.song.tracks[track_idx].patterns[pat_num] = { name, pattern: [] };
     }
+    this.syncSongToStore();
 
     this.view.drawPatternName(
       track_idx,
@@ -456,6 +472,7 @@ class Session {
       ];
     }
 
+    this.syncSongToStore();
     this.view.addInstrument();
   }
 
@@ -493,6 +510,7 @@ class Session {
         this.player.instruments[p.x].clearPattern();
         this.current_cells[p.x] = undefined;
       }
+      this.syncSongToStore();
       this.view.loadSong(this.current_cells);
     } else if (p.type === 'master') {
       // clear bpm, key, scale (except name)
@@ -500,6 +518,7 @@ class Session {
         ...DEFAULT_SCENE,
         name: this.song.master[p.y].name,
       };
+      this.syncSongToStore();
       this.view.loadSong(this.current_cells);
     }
   }

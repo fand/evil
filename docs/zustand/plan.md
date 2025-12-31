@@ -129,14 +129,23 @@ View → controller.action() → Player/Session/Model
 **Remaining Tasks Status**: 保留 - 以下の理由で後回し:
 - play/stop/redraw: アニメーション系で高頻度、React化時にcomponentで置き換え予定
 
-### Step 6: Song完全Store管理
+### 🔶 Step 6: Song完全Store管理 (部分完了)
 **Goal**: Song全体をStoreで管理、JSON.stringify可能に
 
-**Tasks**:
-- [ ] Store: `song` stateをimmutableに管理
-- [ ] Session: `this.song` → `store.getState().song`
-- [ ] 保存/読込: store経由
+**Completed Tasks**:
+- [x] `syncSongToStore()` メソッド追加 - Session.song を store.song に同期
+- [x] 主要な変更箇所で sync 呼び出し追加:
+  - addInstrument, editPattern, loadPattern, loadMaster, loadTrack
+  - saveMaster, saveSong, setTrackName, setPatternName
+  - changeInstrument, deleteCell
+
+**Remaining Tasks** (React化時に対応):
+- [ ] Session: `this.song` → `store.getState().song` (読み取り)
+- [ ] 全mutations を store actions経由に
 - [ ] Undo/Redo基盤 (optional)
+
+**Note**: 現在は Session.song が runtime working copy、store.song が React読み取り用の同期コピー。
+React化時に store.song を single source of truth に移行予定。
 
 ---
 
@@ -147,12 +156,13 @@ View → controller.action() → Player/Session/Model
 | 3 | this.model参照削除 | Medium | ✅ 完了 (controller経由) |
 | 4 | Pattern action化 | High | 保留 (React化後) |
 | 5 | 残りのpush削除 | Medium | 🔶 部分完了 (主要部分完了) |
-| 6 | Song完全Store管理 | High | 未着手 |
+| 6 | Song Store同期 | Medium | 🔶 部分完了 (syncSongToStore) |
 | 7 | React化 | High | 未着手 |
 
 **Current Status**:
 - Controller layer完成、主要なView→Model参照をcontroller経由に
 - Store購読によるactivate/deactivate/drawScene自動化完了
+- Song変更時に store.song へ自動同期
 - 残りのview pushは保留（React化時にcomponentで置き換え）
 
 **Goal**: React化時にstoreをそのまま使用可能な状態にする。
