@@ -130,6 +130,8 @@ class AppController {
   // ========================================
 
   showSidebar(pos: { x: number; y: number; type: string }) {
+    // Guard: controller may not be ready during view construction
+    if (!this._player) return;
     this.player.sidebar.show(pos);
   }
 
