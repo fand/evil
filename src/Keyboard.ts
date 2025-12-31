@@ -1,4 +1,6 @@
 import { Player } from './Player';
+import { store } from './store';
+import { controller } from './controller';
 
 const CODE_TO_NOTE: Record<string, number> = {
   KeyZ: 1,
@@ -109,20 +111,20 @@ class Keyboard {
 
     switch (code) {
       case 'ArrowLeft':
-        this.player.view.moveLeft();
+        this.handleMoveLeft();
         break;
       case 'ArrowUp':
-        this.player.view.moveTop();
+        this.handleMoveTop();
         break;
       case 'ArrowRight':
-        this.player.view.moveRight();
+        this.handleMoveRight();
         break;
       case 'ArrowDown':
-        this.player.view.moveBottom();
+        this.handleMoveBottom();
         break;
       case 'Space':
       case 'Enter':
-        this.player.view.viewPlay();
+        this.handlePlayPause();
         break;
       default:
         if (this.mode === 'SYNTH') {
@@ -134,6 +136,59 @@ class Keyboard {
     }
 
     this.last_key = code;
+  }
+
+  private handleMoveLeft() {
+    if (this.mode === 'MIXER') return;
+    const currentIdx = store.getState().ui.currentInstrument;
+    if (currentIdx > 0) {
+      const nextIdx = currentIdx - 1;
+      controller.moveLeft(nextIdx);
+      // Update instruments DOM position
+      const instrumentsEl = document.getElementById('instruments');
+      if (instrumentsEl) {
+        instrumentsEl.style.webkitTransform = `translate3d(${-1110 * nextIdx}px, 0px, 0px)`;
+      }
+    }
+  }
+
+  private handleMoveRight() {
+    if (this.mode === 'MIXER') return;
+    const currentIdx = store.getState().ui.currentInstrument;
+    const nextIdx = currentIdx + 1;
+    controller.moveRight(nextIdx);
+    // Update instruments DOM position
+    const instrumentsEl = document.getElementById('instruments');
+    if (instrumentsEl) {
+      instrumentsEl.style.webkitTransform = `translate3d(${-1110 * nextIdx}px, 0px, 0px)`;
+    }
+  }
+
+  private handleMoveTop() {
+    controller.moveTop();
+    const wrapperEl = document.getElementById('wrapper');
+    if (wrapperEl) {
+      wrapperEl.style.webkitTransform = 'translate3d(0px, 700px, 0px)';
+    }
+    this.mode = 'MIXER';
+  }
+
+  private handleMoveBottom() {
+    controller.moveBottom();
+    const wrapperEl = document.getElementById('wrapper');
+    if (wrapperEl) {
+      wrapperEl.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
+    }
+    this.mode = 'SYNTH';
+  }
+
+  private handlePlayPause() {
+    const isPlaying = store.getState().playback.isPlaying;
+    if (isPlaying) {
+      controller.pause();
+    } else {
+      controller.play();
+    }
   }
 
   onPlayer(code: string) {

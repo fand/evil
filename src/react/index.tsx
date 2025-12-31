@@ -1,37 +1,81 @@
 import { createRoot, type Root } from 'react-dom/client';
-import { App } from '../components/App';
+import { SceneParams } from '../components/player/SceneParams';
+import { TransportButtons } from '../components/player/TransportButtons';
+import { NavigationButtons } from '../components/player/NavigationButtons';
+import { useResizeHandler } from '../components/player/useResizeHandler';
 
-let root: Root | null = null;
+// Store roots for cleanup
+const roots: Root[] = [];
 
 /**
- * Mount the React application.
- * Currently mounts an empty App - will be populated as views are migrated.
- *
- * Strategy: React components will be mounted into existing DOM elements
- * as jQuery views are replaced (e.g., #control for PlayerControls).
+ * Wrapper component that includes resize handler
  */
-export function mountReactApp() {
-  // For now, create a temporary container for the App
-  // This will be replaced with actual component mounts during Phase 2+
-  const container = document.createElement('div');
-  container.id = 'react-root';
-  container.style.display = 'none'; // Hidden until we have real components
-  document.body.appendChild(container);
-
-  root = createRoot(container);
-  root.render(<App />);
+function NavigationButtonsWithResize() {
+  useResizeHandler();
+  return <NavigationButtons />;
 }
 
 /**
- * Unmount the React application (for cleanup/testing).
+ * Mount the React application.
+ * Mounts React components into specific DOM locations,
+ * replacing the jQuery PlayerView functionality.
+ */
+export function mountReactApp() {
+  // Mount SceneParams into #control
+  const controlContainer = document.getElementById('control');
+  if (controlContainer) {
+    // Clear existing content
+    controlContainer.innerHTML = '';
+    const root = createRoot(controlContainer);
+    root.render(<SceneParams />);
+    roots.push(root);
+  }
+
+  // Create container for TransportButtons in footer
+  const footer = document.querySelector('footer');
+  if (footer) {
+    // Remove existing transport buttons from HTML
+    const existingButtons = footer.querySelectorAll(
+      '#control-play, #control-forward, #control-backward, #control-loop'
+    );
+    existingButtons.forEach((btn) => btn.remove());
+
+    // Create container for React transport buttons
+    const transportContainer = document.createElement('div');
+    transportContainer.id = 'react-transport';
+    transportContainer.style.display = 'contents'; // Don't affect layout
+    footer.appendChild(transportContainer);
+
+    const root = createRoot(transportContainer);
+    root.render(<TransportButtons />);
+    roots.push(root);
+  }
+
+  // Create container for NavigationButtons at body level
+  // Remove existing navigation buttons from HTML
+  const existingNavButtons = document.querySelectorAll(
+    '#btn-left, #btn-right, #btn-top, #btn-bottom'
+  );
+  existingNavButtons.forEach((btn) => btn.remove());
+
+  const navContainer = document.createElement('div');
+  navContainer.id = 'react-navigation';
+  navContainer.style.display = 'contents'; // Don't affect layout
+  document.body.appendChild(navContainer);
+
+  const navRoot = createRoot(navContainer);
+  navRoot.render(<NavigationButtonsWithResize />);
+  roots.push(navRoot);
+}
+
+/**
+ * Unmount all React roots (for cleanup/testing).
  */
 export function unmountReactApp() {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-  const container = document.getElementById('react-root');
-  if (container) {
-    container.remove();
-  }
+  roots.forEach((root) => root.unmount());
+  roots.length = 0;
+
+  // Remove containers
+  document.getElementById('react-transport')?.remove();
+  document.getElementById('react-navigation')?.remove();
 }
