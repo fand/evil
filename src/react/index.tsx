@@ -77,18 +77,11 @@ export function mountReactApp() {
     if (mixerTracks) mixerTracks.remove();
     if (mixerMaster) mixerMaster.remove();
 
-    // Create container - use a fragment-like container that doesn't affect layout
-    // Place it before the sidebar
-    const sidebar = document.getElementById('mixer-sidebar');
+    // Create container with display:contents so it doesn't affect layout
     const sessionContainer = document.createElement('div');
     sessionContainer.id = 'react-session';
-    // Use display:contents so the container doesn't create a new box
     sessionContainer.style.cssText = 'display: contents;';
-    if (sidebar) {
-      mixerBody.insertBefore(sessionContainer, sidebar);
-    } else {
-      mixerBody.appendChild(sessionContainer);
-    }
+    mixerBody.appendChild(sessionContainer);
 
     const sessionRoot = createRoot(sessionContainer);
     sessionRoot.render(<SessionGrid />);
