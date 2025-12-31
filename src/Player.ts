@@ -140,7 +140,7 @@ export class Player {
     }
     this.is_playing = false;
     store.getState().setPlaying(false);
-    this.view.viewStop();
+    // UI update is handled by PlayerView's store subscription
     this.time = 0;
   }
 
