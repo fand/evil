@@ -4,6 +4,7 @@ import { TransportButtons } from '../components/player/TransportButtons';
 import { NavigationButtons } from '../components/player/NavigationButtons';
 import { useResizeHandler } from '../components/player/useResizeHandler';
 import { SessionGrid } from '../components/session';
+import { InstrumentsContainer } from '../components/instruments';
 
 // Store roots for cleanup
 const roots: Root[] = [];
@@ -86,6 +87,20 @@ export function mountReactApp() {
     const sessionRoot = createRoot(sessionContainer);
     sessionRoot.render(<SessionGrid />);
     roots.push(sessionRoot);
+  }
+
+  // Mount InstrumentsContainer into #instruments (replaces SynthView/SamplerView)
+  const instrumentsContainer = document.getElementById('instruments');
+  if (instrumentsContainer) {
+    // Create container with display:contents so it doesn't affect layout
+    const reactInstruments = document.createElement('div');
+    reactInstruments.id = 'react-instruments';
+    reactInstruments.style.cssText = 'display: contents;';
+    instrumentsContainer.appendChild(reactInstruments);
+
+    const instrumentsRoot = createRoot(reactInstruments);
+    instrumentsRoot.render(<InstrumentsContainer />);
+    roots.push(instrumentsRoot);
   }
 }
 
