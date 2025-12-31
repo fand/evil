@@ -56,7 +56,7 @@ class Session {
 
     this.cue_queue = [];
 
-    this.song = DEFAULT_SONG;
+    this.song = { ...DEFAULT_SONG, tracks: [], master: [...DEFAULT_SONG.master] };
 
     this.view = new SessionView(this);
   }

@@ -107,8 +107,8 @@ const initialScene: Scene = {
 
 export const store = createStore<Store>()(
   subscribeWithSelector((set, get) => ({
-    // Initial state
-    song: DEFAULT_SONG,
+    // Initial state (clone DEFAULT_SONG to avoid mutation)
+    song: { ...DEFAULT_SONG, tracks: [], master: [...DEFAULT_SONG.master] },
     scene: initialScene,
     playback: initialPlayback,
     ui: initialUI,
@@ -221,7 +221,7 @@ export const store = createStore<Store>()(
     // Utility
     reset: () =>
       set({
-        song: DEFAULT_SONG,
+        song: { ...DEFAULT_SONG, tracks: [], master: [...DEFAULT_SONG.master] },
         scene: initialScene,
         playback: initialPlayback,
         ui: initialUI,
