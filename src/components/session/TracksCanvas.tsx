@@ -70,6 +70,8 @@ export function TracksCanvas({
   const width = Math.max(song.tracks.length, 8) * CELL_WIDTH + 1;
   const height = Math.max(song.length + 2, 11) * CELL_HEIGHT + 10;
 
+  console.log('TracksCanvas render:', { width, height, imgPlay: !!imgPlay });
+
   // Initialize track colors
   useEffect(() => {
     const colors = song.tracks.map((track) =>

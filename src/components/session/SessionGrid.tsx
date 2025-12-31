@@ -13,6 +13,8 @@ import { OFFSET_Y, type CellPos } from './types';
 export function SessionGrid() {
   const song = useAppStore((state) => state.song);
 
+  console.log('SessionGrid render:', { tracksCount: song.tracks.length, songLength: song.length });
+
   const tracksWrapperRef = useRef<HTMLDivElement>(null);
   const masterWrapperRef = useRef<HTMLDivElement>(null);
   const [mixerScrollLeft, setMixerScrollLeft] = useState(0);
