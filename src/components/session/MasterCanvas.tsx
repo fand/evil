@@ -256,7 +256,11 @@ export function MasterCanvas({
       <canvas
         id="session-master-hover"
         ref={canvasHoverRef}
-        style={{ height: height + 'px' }}
+        style={{
+          height: height + 'px',
+          pointerEvents: 'auto',
+          zIndex: 10,
+        }}
         onMouseMove={handleMouseMove}
         onMouseOut={handleMouseOut}
         onMouseDown={handleMouseDown}

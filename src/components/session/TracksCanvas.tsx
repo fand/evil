@@ -84,6 +84,16 @@ export function TracksCanvas({
 
   // Initialize canvases
   useEffect(() => {
+    console.log('TracksCanvas init:', {
+      canvasRef: !!canvasRef.current,
+      canvasOnRef: !!canvasOnRef.current,
+      canvasHoverRef: !!canvasHoverRef.current,
+      imgPlay: !!imgPlay,
+      width,
+      height,
+      tracksCount: song.tracks.length
+    });
+
     if (!canvasRef.current || !canvasOnRef.current || !canvasHoverRef.current || !imgPlay) {
       return;
     }
@@ -92,6 +102,7 @@ export function TracksCanvas({
     ctxOnRef.current = initCanvas(canvasOnRef.current, width, height);
     ctxHoverRef.current = initCanvas(canvasHoverRef.current, width, height);
 
+    console.log('TracksCanvas: canvases initialized, drawing cells');
     // Draw all cells
     drawAllCells();
   }, [imgPlay, width, height, song]);
@@ -191,9 +202,13 @@ export function TracksCanvas({
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       const ctxHover = ctxHoverRef.current;
-      if (!ctxHover) return;
+      if (!ctxHover) {
+        console.log('TracksCanvas: no ctxHover');
+        return;
+      }
 
       const pos = getCellPos(e);
+      console.log('TracksCanvas mouseMove:', pos);
 
       if (isClicked) {
         // Drag mode - show preview of dragged cell
@@ -223,6 +238,7 @@ export function TracksCanvas({
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       const pos = getCellPos(e);
+      console.log('TracksCanvas mouseDown:', pos);
 
       // Check if clicking play button
       if (isPlayButton(e, pos)) {
@@ -314,7 +330,12 @@ export function TracksCanvas({
         <canvas
           id="session-tracks-hover"
           ref={canvasHoverRef}
-          style={{ width: width + 'px', height: height + 'px' }}
+          style={{
+            width: width + 'px',
+            height: height + 'px',
+            pointerEvents: 'auto',
+            zIndex: 10,
+          }}
           onMouseMove={handleMouseMove}
           onMouseOut={handleMouseOut}
           onMouseDown={handleMouseDown}

@@ -71,17 +71,24 @@ export function mountReactApp() {
   // Mount SessionGrid into #mixer-body (replaces SessionView)
   const mixerBody = document.getElementById('mixer-body');
   if (mixerBody) {
-    // Clear existing session canvases - React will render them
+    // Remove original session elements - React will recreate them
     const mixerTracks = document.getElementById('mixer-tracks');
     const mixerMaster = document.getElementById('mixer-master');
-    if (mixerTracks) mixerTracks.innerHTML = '';
-    if (mixerMaster) mixerMaster.innerHTML = '';
+    if (mixerTracks) mixerTracks.remove();
+    if (mixerMaster) mixerMaster.remove();
 
-    // Create container for React session components
+    // Create container - use a fragment-like container that doesn't affect layout
+    // Place it before the sidebar
+    const sidebar = document.getElementById('mixer-sidebar');
     const sessionContainer = document.createElement('div');
     sessionContainer.id = 'react-session';
-    sessionContainer.style.display = 'contents';
-    mixerBody.prepend(sessionContainer);
+    // Use display:contents so the container doesn't create a new box
+    sessionContainer.style.cssText = 'display: contents;';
+    if (sidebar) {
+      mixerBody.insertBefore(sessionContainer, sidebar);
+    } else {
+      mixerBody.appendChild(sessionContainer);
+    }
 
     const sessionRoot = createRoot(sessionContainer);
     sessionRoot.render(<SessionGrid />);
