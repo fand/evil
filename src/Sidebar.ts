@@ -46,9 +46,11 @@ class Sidebar {
       ) {
         return;
       }
-      this.saveTracksEffect(this.sidebar_pos.x);
+      this.saveTracksEffect();
       this.sidebar_pos = this.select_pos;
-      return this.view.showTracks(this.player.instruments[this.select_pos.x]);
+      const instrument = this.player.instruments[this.select_pos.x];
+      if (!instrument) return;
+      return this.view.showTracks(instrument);
     } else {
       if (
         this.sidebar_pos.y === this.select_pos.y &&

@@ -2,6 +2,12 @@ import $ from 'jquery';
 import { SamplerKeyboardView } from './SamplerKeyboardView';
 import type { Sampler } from '../Sampler';
 import type { Keyboard } from '../Keyboard';
+import {
+  store,
+  selectCurrentInstrument,
+  selectPatternVersions,
+} from '../store';
+import { controller } from '../controller';
 
 declare global {
   interface Window {
@@ -144,6 +150,25 @@ export class SamplerView {
 
     this.initEvent();
     this.initCanvas();
+    this.subscribeStore();
+  }
+
+  subscribeStore() {
+    // Subscribe to currentInstrument changes
+    store.subscribe(selectCurrentInstrument, (currentInstrument) => {
+      if (currentInstrument === this.id) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+
+    // Subscribe to pattern changes for this instrument
+    store.subscribe(selectPatternVersions, (versions) => {
+      if (versions[this.id] !== undefined) {
+        this.refreshPattern();
+      }
+    });
   }
 
   initCanvas() {
@@ -173,7 +198,7 @@ export class SamplerView {
         );
       }
     }
-    this.setPattern(this.pattern_obj);
+    this.refreshPattern();
   }
 
   getPos(e: JQuery.MouseMoveEvent | JQuery.MouseDownEvent): SamplerPos {
@@ -263,23 +288,26 @@ export class SamplerView {
 
     // Headers
     this.inst_type.on('change', () =>
-      this.model.changeInstrument(this.inst_type.val() as string)
+      controller.changeInstrumentType(this.id, this.inst_type.val() as string)
     );
     this.inst_name
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
       .on('change', () =>
-        this.model.setInstrumentName(this.inst_name.val() as string)
+        controller.setInstrumentName(this.id, this.inst_name.val() as string)
       );
     this.pattern_name
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
       .on('change', () =>
-        this.model.setPatternName(this.pattern_name.val() as string)
+        controller.setInstrumentPatternName(
+          this.id,
+          this.pattern_name.val() as string
+        )
       );
 
-    this.marker_prev.on('click', () => this.model.player.backward(true));
-    this.marker_next.on('click', () => this.model.player.forward());
+    this.marker_prev.on('click', () => controller.backward(true));
+    this.marker_next.on('click', () => controller.forward());
 
     this.nosync.on('click', () => this.toggleNoSync());
     this.plus.on('click', () => this.plusPattern());
@@ -357,7 +385,7 @@ export class SamplerView {
     this.last_time = this.time;
   }
 
-  setPattern() {
+  refreshPattern() {
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);
@@ -395,7 +423,7 @@ export class SamplerView {
     if (this.page_total === 8) {
       return;
     }
-    this.model.plusPattern();
+    controller.plusPattern(this.id);
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern();
     this.minus.removeClass('btn-false').addClass('btn-true');
@@ -408,7 +436,7 @@ export class SamplerView {
     if (this.page_total === 1) {
       return;
     }
-    this.model.minusPattern();
+    controller.minusPattern(this.id);
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern();
     this.plus.removeClass('btn-false').addClass('btn-true');
@@ -437,12 +465,12 @@ export class SamplerView {
         this.pos_markers.eq(i).on('mousedown', () => {
           if (this.page < i) {
             while (this.page !== i) {
-              this.model.player.forward();
+              controller.forward();
             }
           }
           if (i < this.page) {
             while (this.page !== i) {
-              this.model.player.backward(true);
+              controller.backward(true);
             }
           } // force
         });
@@ -512,6 +540,6 @@ export class SamplerView {
   selectSample(sample_now: number) {
     this.sample_now = sample_now;
     this.keyboard.selectSample(this.sample_now);
-    this.model.selectSample(this.sample_now);
+    controller.selectSample(this.id, this.sample_now);
   }
 }

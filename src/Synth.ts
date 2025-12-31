@@ -8,7 +8,7 @@ import { Delay } from './FX/Delay';
 import { Reverb } from './FX/Reverb';
 import { Compressor } from './FX/Compressor';
 import { Double } from './FX/Double';
-import { SCALE_LIST, NoteKey } from './Constant';
+import { SCALE_LIST, NoteKey, isNoteKey } from './Constant';
 import type { Player } from './Player';
 import type { FX } from './FX/FX';
 import type { Instrument, InstrumentType } from './Instrument';
@@ -19,6 +19,10 @@ import type {
   SynthParam,
   EffectParam,
 } from './Song';
+import { store, selectKey, selectScale } from './store';
+
+// Note: this.view.setPattern() is replaced by store.triggerPatternRefresh()
+// SynthView subscribes to patternVersions and calls its own setPattern()
 
 const T2 = new MutekiTimer();
 
@@ -96,6 +100,26 @@ class Synth implements Instrument {
     this.send.connect(this.return);
 
     this.effects = [];
+
+    this.subscribeStore();
+  }
+
+  subscribeStore() {
+    // Subscribe to Key changes from store
+    store.subscribe(selectKey, (key) => {
+      if (isNoteKey(key)) {
+        this.core.setKey(key);
+      }
+    });
+
+    // Subscribe to Scale changes from store
+    store.subscribe(selectScale, (scale) => {
+      if (scale in SCALE_LIST) {
+        this.scale_name = scale;
+        this.scale = SCALE_LIST[scale as keyof typeof SCALE_LIST];
+        this.view.changeScale(this.scale);
+      }
+    });
   }
 
   connect(dst: AudioNode) {
@@ -205,7 +229,7 @@ class Synth implements Instrument {
 
   setPattern(pattern_obj: SynthPatternObject) {
     this.pattern_obj = JSON.parse(JSON.stringify(pattern_obj));
-    this.view.setPattern(this.pattern_obj);
+    store.getState().triggerPatternRefresh(this.id);
   }
 
   getPattern(): SynthPatternObject {
@@ -217,7 +241,7 @@ class Synth implements Instrument {
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0,
     ];
-    this.view.setPattern(this.pattern_obj);
+    store.getState().triggerPatternRefresh(this.id);
   }
 
   // Changes the length of @pattern.

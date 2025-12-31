@@ -69,7 +69,7 @@ export class Reverb extends FX {
     this.view.setParam(p);
   }
 
-  getParam() {
+  getParam(): { effect: 'Reverb'; name: string; wet: number } {
     return {
       effect: 'Reverb',
       name: this.name,

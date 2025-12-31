@@ -2,6 +2,8 @@ import $ from 'jquery';
 import type { Session } from './Session';
 import type { Song } from './Song';
 import type { Keyboard } from './Keyboard';
+import { store, selectScenePos, selectCurrentCells, selectBeat } from './store';
+import { controller } from './controller';
 
 declare global {
   interface Window {
@@ -10,10 +12,10 @@ declare global {
 }
 
 export class SessionView {
-  model: Session;
+  private _session: Session;
 
   get song(): Song {
-    return this.model.song;
+    return this._session.song;
   }
   wrapper_mixer: JQuery;
   wrapper_master: JQuery;
@@ -70,8 +72,10 @@ export class SessionView {
   scene_pos: number = 0;
 
   constructor(model: Session) {
+    // Keep session reference for song getter (controller not available at construction)
+    this._session = model;
+
     // DOMs for session view.
-    this.model = model;
     this.wrapper_mixer = $('#mixer-tracks');
     this.wrapper_master = $('#session-master-wrapper');
     this.wrapper_tracks = $('#session-tracks-wrapper');
@@ -162,6 +166,29 @@ export class SessionView {
     this.social_twitter = $('#twitter');
     this.social_facebook = $('#facebook');
     this.social_hatena = $('#hatena');
+
+    this.subscribeStore();
+  }
+
+  subscribeStore() {
+    // Subscribe to scenePos changes
+    store.subscribe(selectScenePos, (scenePos) => {
+      const currentCells = store.getState().playback.currentCells;
+      this.drawScene(scenePos, currentCells);
+    });
+
+    // Subscribe to currentCells changes
+    store.subscribe(selectCurrentCells, (currentCells) => {
+      const scenePos = store.getState().playback.scenePos;
+      this.drawScene(scenePos, currentCells);
+    });
+
+    // Subscribe to beat changes for cue visualization
+    store.subscribe(selectBeat, (beatInfo) => {
+      if (beatInfo.trigger > 0) {
+        this.beat(beatInfo.isMaster, beatInfo.cells);
+      }
+    });
   }
 
   initCanvas() {
@@ -425,7 +452,7 @@ export class SessionView {
     );
 
     // for Other view
-    this.btn_save.on('click', () => this.model.saveSong());
+    this.btn_save.on('click', () => controller.saveSong());
     this.dialog.on('mousedown', (e) => {
       if (
         !this.dialog_wrapper.is(e.target) &&
@@ -658,8 +685,9 @@ export class SessionView {
     }
 
     for (let i = 0; i < this.current_cells.length; i++) {
-      if (this.current_cells[i] != null) {
-        this.drawActive(i, this.current_cells[i]);
+      const cell = this.current_cells[i];
+      if (cell != null) {
+        this.drawActive(i, cell);
       }
     }
 
@@ -837,7 +865,7 @@ export class SessionView {
       this.song.tracks[x] != null &&
       this.song.tracks[x].patterns[y] != null
     ) {
-      this.model.cuePattern(x, y);
+      controller.cuePattern(x, y);
       this.ctx_tracks_on.drawImage(
         this.img_play,
         36,
@@ -859,7 +887,7 @@ export class SessionView {
 
   cueMaster(x: number, y: number) {
     if (this.song.master[y] != null) {
-      this.model.cueScene(y);
+      controller.cueScene(y);
       this.ctx_master_on.drawImage(
         this.img_play,
         36,
@@ -882,6 +910,8 @@ export class SessionView {
   beat(is_master: boolean, cells: [number, number | undefined] | [number, number][]) {
     if (is_master) {
       const c = cells as [number, number | undefined];
+      if (c[1] === undefined) return;
+      const y = c[1];
       this.ctx_master_on.drawImage(
         this.img_play,
         36,
@@ -889,7 +919,7 @@ export class SessionView {
         18,
         18,
         c[0] * this.w + 3,
-        c[1] * this.h + 3,
+        y * this.h + 3,
         16,
         15
       );
@@ -897,7 +927,7 @@ export class SessionView {
         () =>
           this.ctx_master_on.clearRect(
             c[0] * this.w + 3,
-            c[1] * this.h + 3,
+            y * this.h + 3,
             16,
             15
           ),
@@ -932,7 +962,7 @@ export class SessionView {
   }
 
   editPattern(pos: { x: number; y: number }) {
-    const pat = this.model.editPattern(pos.x, pos.y);
+    const pat = controller.editPattern(pos.x, pos.y);
     return this.drawCellTracks(pat[2], pat[0], pat[1]);
   }
 
@@ -1036,11 +1066,11 @@ export class SessionView {
       return;
     }
 
-    this.model.savePattern(src.x, src.y);
+    controller.savePattern(src.x, src.y);
 
     // addSynth when tracks[dst.x] is empty.
     if (this.song.tracks[dst.x] == null) {
-      dst.x = this.model.loadTrack(this.song, src, dst);
+      dst.x = controller.loadTrack(this.song, src, dst);
       this.current_cells.length = dst.x + 1;
       this.song.tracks[dst.x].type = this.song.tracks[src.x].type;
     }
@@ -1060,7 +1090,7 @@ export class SessionView {
       this.drawCellTracks(pattern, dst.x, dst.y);
     }
 
-    this.model.loadPattern(
+    controller.loadPattern(
       this.song.tracks[dst.x].patterns[dst.y],
       dst.x,
       dst.y
@@ -1081,7 +1111,7 @@ export class SessionView {
     this.drawCellMaster(this.song.master[dst.x], 0, dst.y);
 
     // save @song.master to @session.song.master
-    return this.model.loadMaster(this.song.master[dst.y], dst.y);
+    return controller.loadMaster(this.song.master[dst.y], dst.y);
   }
 
   // Select cell on click.
@@ -1145,7 +1175,7 @@ export class SessionView {
     this.select_pos = pos;
     this.select_pos.type = 'tracks';
 
-    return this.model.player.sidebar.show(this.select_pos);
+    return controller.showSidebar(this.select_pos);
   }
 
   selectCellMaster(pos: { x: number; y: number; type: string }) {
@@ -1197,7 +1227,7 @@ export class SessionView {
     this.select_pos = pos;
     this.select_pos.type = 'master';
 
-    return this.model.player.sidebar.show(this.select_pos);
+    return controller.showSidebar(this.select_pos);
   }
 
   getSelectPos() {

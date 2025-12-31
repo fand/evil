@@ -12,6 +12,7 @@ import type {
   SamplerParam,
   EffectParam,
 } from './Song';
+import { store } from './store';
 
 class Sampler implements Instrument {
   ctx: AudioContext;
@@ -168,7 +169,7 @@ class Sampler implements Instrument {
 
   setPattern(_pattern_obj: SamplerPatternObject) {
     this.pattern_obj = $.extend(true, {}, _pattern_obj);
-    this.view.setPattern(this.pattern_obj);
+    store.getState().triggerPatternRefresh(this.id);
   }
 
   getPattern(): SamplerPatternObject {
@@ -210,7 +211,7 @@ class Sampler implements Instrument {
       [],
       [],
     ];
-    this.view.setPattern(this.pattern_obj);
+    store.getState().triggerPatternRefresh(this.id);
   }
 
   plusPattern() {

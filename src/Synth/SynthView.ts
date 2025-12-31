@@ -2,6 +2,8 @@ import $ from 'jquery';
 import { KeyboardView } from './KeyboardView';
 import type { Synth } from '../Synth';
 import type { Keyboard } from '../Keyboard';
+import { store, selectCurrentInstrument, selectPatternVersions } from '../store';
+import { controller } from '../controller';
 
 declare global {
   interface Window {
@@ -174,6 +176,25 @@ export class SynthView {
     this.offset = { x: this.rect.left, y: this.rect.top };
 
     this.initEvent();
+    this.subscribeStore();
+  }
+
+  subscribeStore() {
+    // Subscribe to currentInstrument changes
+    store.subscribe(selectCurrentInstrument, (currentInstrument) => {
+      if (currentInstrument === this.id) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+
+    // Subscribe to pattern changes for this instrument
+    store.subscribe(selectPatternVersions, (versions) => {
+      if (versions[this.id] !== undefined) {
+        this.refreshPattern();
+      }
+    });
   }
 
   initCanvas() {
@@ -195,7 +216,7 @@ export class SynthView {
         this.drawCellOff(CellType.Empty, x, y);
       }
     }
-    this.setPattern(this.pattern_obj);
+    this.refreshPattern();
   }
 
   // ========================================
@@ -373,25 +394,25 @@ export class SynthView {
 
     // Headers
     this.synth_type.on('change', () =>
-      this.model.changeSynth(this.synth_type.val() as string)
+      controller.changeInstrumentType(this.id, this.synth_type.val() as string)
     );
     this.synth_name
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
       .on('change', () =>
-        this.model.setSynthName(this.synth_name.val() as string)
+        controller.setSynthName(this.id, this.synth_name.val() as string)
       );
     this.pattern_name
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
       .on('change', () =>
-        this.model.inputPatternName(this.pattern_name.val() as string)
+        controller.inputPatternName(this.id, this.pattern_name.val() as string)
       );
     this.pencil.on('click', () => this.pencilMode());
     this.step.on('click', () => this.stepMode());
 
-    this.marker_prev.on('click', () => this.model.player.backward(true));
-    this.marker_next.on('click', () => this.model.player.forward());
+    this.marker_prev.on('click', () => controller.backward(true));
+    this.marker_next.on('click', () => controller.forward());
 
     this.nosync.on('click', () => this.toggleNoSync());
     this.plus.on('click', () => this.plusPattern());
@@ -579,8 +600,7 @@ export class SynthView {
     this.last_time = this.time;
   }
 
-  setPattern() {
-    // pattern_obj is now accessed via getter from model
+  refreshPattern() {
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);
@@ -620,8 +640,8 @@ export class SynthView {
     if (this.page_total === 8) {
       return;
     }
-    // model.plusPattern modifies model.pattern (accessed via getter)
-    this.model.plusPattern();
+    // controller.plusPattern modifies model.pattern (accessed via getter)
+    controller.plusPattern(this.id);
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern();
     this.minus.removeClass('btn-false').addClass('btn-true');
@@ -636,8 +656,8 @@ export class SynthView {
       return;
     }
 
-    // model.minusPattern modifies model.pattern (accessed via getter)
-    this.model.minusPattern();
+    // controller.minusPattern modifies model.pattern (accessed via getter)
+    controller.minusPattern(this.id);
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern();
     this.plus.removeClass('btn-false').addClass('btn-true');
@@ -667,12 +687,12 @@ export class SynthView {
         this.pos_markers.eq(i).on('mousedown', () => {
           if (this.page < i) {
             while (this.page !== i) {
-              this.model.player.forward();
+              controller.forward();
             }
           }
           if (i < this.page) {
             while (this.page !== i) {
-              this.model.player.backward(true);
+              controller.backward(true);
             }
           } // force
         });

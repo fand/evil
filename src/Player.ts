@@ -14,6 +14,8 @@ import {
 import type { Instrument, InstrumentType } from './Instrument';
 import { Song, Scene } from './Song';
 import type { Keyboard } from './Keyboard';
+import { store } from './store';
+import { controller } from './controller';
 
 declare global {
   interface Window {
@@ -67,11 +69,18 @@ export class Player {
 
     this.addSynth(0);
 
-    this.view = new PlayerView(this);
+    // Initialize BPM (sets duration and syncs to store/sidebar)
+    this.setBPM(this.scene.bpm);
+
+    // Register with controller for Views to access
+    controller.registerPlayer(this);
+
+    this.view = new PlayerView();
   }
 
   setBPM(bpm: number) {
     this.scene.bpm = bpm;
+    store.getState().setBPM(bpm);
 
     // @duration = (60000.0 / @bpm) / 8.0
     this.duration = 7500.0 / this.bpm;
@@ -88,6 +97,7 @@ export class Player {
     }
 
     this.scene.key = key;
+    store.getState().setKey(key);
     for (const s of this.instruments) {
       s.setKey(this.key);
     }
@@ -101,6 +111,7 @@ export class Player {
     }
 
     this.scene.scale = scale;
+    store.getState().setScale(scale);
 
     for (const s of this.instruments) {
       s.setScale(this.scale);
@@ -115,6 +126,7 @@ export class Player {
 
   play() {
     this.is_playing = true;
+    store.getState().setPlaying(true);
     this.session.play();
 
     T.setTimeout(() => {
@@ -130,7 +142,8 @@ export class Player {
       s.stop();
     }
     this.is_playing = false;
-    this.view.viewStop();
+    store.getState().setPlaying(false);
+    // UI update is handled by PlayerView's store subscription
     this.time = 0;
   }
 
@@ -139,6 +152,7 @@ export class Player {
       s.pause(this.time);
     }
     this.is_playing = false;
+    store.getState().setPlaying(false);
   }
 
   forward() {
@@ -165,14 +179,18 @@ export class Player {
   }
 
   toggleLoop(): boolean {
-    return this.session.toggleLoop();
+    const isLoop = this.session.toggleLoop();
+    store.getState().toggleLoop(); // sync with store
+    return isLoop;
   }
 
   noteOn(note: number, force: boolean) {
-    this.instruments[this.current_instrument].noteOn(note, force);
+    const inst = this.instruments[this.current_instrument];
+    if (inst) inst.noteOn(note, force);
   }
   noteOff(force: boolean) {
-    this.instruments[this.current_instrument].noteOff(force);
+    const inst = this.instruments[this.current_instrument];
+    if (inst) inst.noteOff(force);
   }
 
   playNext() {
@@ -234,7 +252,7 @@ export class Player {
 
     this.mixer.changeInstrument(idx, inst);
     this.session.changeInstrument(idx, type, inst);
-    this.view.changeInstrument(idx, type);
+    this.view.changeInstrument();
 
     return inst;
   }
@@ -246,16 +264,16 @@ export class Player {
       this.session.play();
     }
 
-    this.instruments[this.current_instrument].deactivate();
     this.current_instrument = next_idx;
-    this.instruments[this.current_instrument].activate();
+    store.getState().setCurrentInstrument(next_idx);
+    // activate/deactivate now triggered by store subscription in SynthView/SamplerView
     window.keyboard.setMode('SYNTH');
   }
 
   moveLeft(next_idx: number) {
-    this.instruments[this.current_instrument].deactivate();
     this.current_instrument = next_idx;
-    this.instruments[this.current_instrument].activate();
+    store.getState().setCurrentInstrument(next_idx);
+    // activate/deactivate now triggered by store subscription in SynthView/SamplerView
     window.keyboard.setMode('SYNTH');
   }
 
@@ -304,8 +322,9 @@ export class Player {
     this.session.empty();
     this.view.empty();
 
-    // Set song to Session (single source of truth)
+    // Set song to Session and Store
     this.session.song = song;
+    store.getState().setSong(song);
 
     // Cache track count to avoid infinite loop (addSynth modifies song.tracks)
     const trackCount = this.song.tracks.length;
@@ -320,7 +339,7 @@ export class Player {
 
     this.loadScene(this.song.master[0]);
     this.setSceneLength(this.song.master.length);
-    for (let i = 0; i < this.song.tracks.length; i++) {
+    for (let i = 0; i < trackCount; i++) {
       this.instruments[i].setParam(this.song.tracks[i]);
     }
 

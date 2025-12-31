@@ -10,6 +10,7 @@ import {
 import $ from 'jquery';
 import type { Player } from './Player';
 import type { Instrument, InstrumentType } from './Instrument';
+import { store } from './store';
 
 // Control the patterns for tracks.
 class Session {
@@ -55,9 +56,16 @@ class Session {
 
     this.cue_queue = [];
 
-    this.song = DEFAULT_SONG;
+    this.song = { ...DEFAULT_SONG, tracks: [], master: [...DEFAULT_SONG.master] };
 
     this.view = new SessionView(this);
+  }
+
+  // Sync current song state to store (for React components to read)
+  syncSongToStore() {
+    // Deep clone to ensure immutability
+    const songCopy: Song = JSON.parse(JSON.stringify(this.song));
+    store.getState().setSong(songCopy);
   }
 
   toggleLoop(): boolean {
@@ -90,7 +98,8 @@ class Session {
       }
       this.current_cells[q[0]] = q[1];
     }
-    this.view.drawScene(this.scene_pos, this.current_cells);
+    store.getState().setCurrentCells(this.current_cells);
+    // drawScene is now triggered by store subscription in SessionView
     this.next_pattern_pos = [];
     this.cue_queue = [];
   }
@@ -112,6 +121,8 @@ class Session {
       this.view.clearAllActive();
       this.scene_pos = this.next_scene_pos = 0;
       this.current_cells = this.song.tracks.map(() => 0);
+      store.getState().setScenePos(0);
+      store.getState().setCurrentCells(this.current_cells);
       return;
     }
 
@@ -132,7 +143,9 @@ class Session {
       this.player.loadScene(this.song.master[this.scene_pos]);
     }
     this.view.loadSong(this.current_cells);
-    this.view.drawScene(this.scene_pos, this.current_cells);
+    // drawScene is now triggered by store subscription in SessionView
+    store.getState().setScenePos(this.scene_pos);
+    store.getState().setCurrentCells(this.current_cells);
     this.next_pattern_pos = [];
     this.next_scene_pos = undefined;
     this.cue_queue = [];
@@ -145,9 +158,9 @@ class Session {
 
   beat() {
     if (this.is_waiting_next_scene) {
-      this.view.beat(true, [0, this.next_scene_pos]);
+      store.getState().triggerBeat(true, [0, this.next_scene_pos]);
     } else {
-      this.view.beat(false, this.cue_queue);
+      store.getState().triggerBeat(false, this.cue_queue);
     }
   }
 
@@ -182,6 +195,7 @@ class Session {
 
     this.song.tracks.push(s_obj);
     this.current_cells.push(pos);
+    this.syncSongToStore();
 
     this.view.addInstrument();
   }
@@ -215,6 +229,7 @@ class Session {
       }
     }
 
+    this.syncSongToStore();
     return this.song.tracks.length - 1;
   }
 
@@ -229,9 +244,11 @@ class Session {
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
     }
-    if (this.current_cells[idx] === pat_num) {
-      this.player.instruments[idx].setPattern(pat);
+    const instrument = this.player.instruments[idx];
+    if (instrument && this.current_cells[idx] === pat_num && pat) {
+      instrument.setPattern(pat);
     }
+    this.syncSongToStore();
   }
 
   loadMaster(pat: Scene, pat_num: number) {
@@ -239,6 +256,7 @@ class Session {
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
     }
+    this.syncSongToStore();
   }
 
   editPattern(idx: number, pat_num: number): [number, number, PatternObject] {
@@ -260,20 +278,26 @@ class Session {
       this.player.addSynth(pat_num);
     }
 
+    const instrument = this.player.instruments[track_idx];
+    if (!instrument) {
+      // Instrument not yet created, return empty pattern
+      return [track_idx, pat_num, { name: '', pattern: [] }];
+    }
+
     // Save old pattern (for old @current_cells)
     this.savePattern(track_idx, this.current_cells[track_idx]);
 
     if (this.song.tracks[track_idx].patterns[pat_num]) {
-      this.player.instruments[track_idx].setPattern(
+      instrument.setPattern(
         this.song.tracks[track_idx].patterns[pat_num]!
       );
     } else {
       // set new pattern
       const pat_name = track_idx + '-' + pat_num;
-      this.player.instruments[track_idx].clearPattern();
-      this.player.instruments[track_idx].setPatternName(pat_name);
+      instrument.clearPattern();
+      instrument.setPatternName(pat_name);
       this.song.tracks[track_idx].patterns[pat_num] =
-        this.player.instruments[track_idx].getPattern();
+        instrument.getPattern();
     }
 
     // draw
@@ -281,6 +305,7 @@ class Session {
     this.view.loadSong(this.current_cells);
     this.player.moveTo(track_idx);
 
+    this.syncSongToStore();
     return [track_idx, pat_num, this.song.tracks[track_idx].patterns[pat_num]!];
   }
 
@@ -291,7 +316,8 @@ class Session {
     }
   }
 
-  savePattern(x: number, y: number) {
+  savePattern(x: number, y: number | undefined) {
+    if (y === undefined) return;
     this.song.tracks[x].patterns[y] = this.player.instruments[x].getPattern();
   }
 
@@ -314,6 +340,7 @@ class Session {
   // Save master track into @song.
   saveMaster(y: number, obj: Scene) {
     this.song.master[y] = obj;
+    this.syncSongToStore();
     this.view.loadSong(this.current_cells);
     if (y === this.scene_pos) {
       this.player.loadScene(obj);
@@ -337,6 +364,7 @@ class Session {
     this.saveTracks();
     this.saveMasters();
     this.saveMixer();
+    this.syncSongToStore();
     const song_json = JSON.stringify(this.song);
 
     // Save the song via ajax.
@@ -357,8 +385,8 @@ class Session {
           this.song.creator ?? ''
         );
       })
-      .fail((err) => {
-        return this.view.showError(err);
+      .fail(() => {
+        return this.view.showError();
       });
   }
 
@@ -367,8 +395,9 @@ class Session {
     this.scene_pos = 0;
     this.scene_length = 0;
 
-    for (let i = 0; i < this.song.tracks.length; i++) {
-      const pat = this.song.tracks[i].patterns[0];
+    // Use instruments.length since song.tracks may have grown during addSynth
+    for (let i = 0; i < this.instruments.length; i++) {
+      const pat = this.song.tracks[i]?.patterns[0];
       if (pat) {
         this.instruments[i].setPattern(pat);
         this.current_cells[i] = 0;
@@ -378,6 +407,8 @@ class Session {
       }
     }
 
+    store.getState().setScenePos(this.scene_pos);
+    store.getState().setCurrentCells(this.current_cells);
     this.view.loadSong(this.current_cells);
   }
 
@@ -385,6 +416,7 @@ class Session {
   // called by Synth, Sampler
   setTrackName(idx: number, name: string) {
     this.song.tracks[idx].name = name;
+    this.syncSongToStore();
     this.view.drawTrackName(idx, name, this.song.tracks[idx].type);
   }
 
@@ -392,12 +424,14 @@ class Session {
   // called by Synth, Sampler
   setPatternName(track_idx: number, name: string) {
     const pat_num = this.current_cells[track_idx];
+    if (pat_num === undefined) return;
 
     if (this.song.tracks[track_idx].patterns[pat_num]) {
       this.song.tracks[track_idx].patterns[pat_num]!.name = name;
     } else {
       this.song.tracks[track_idx].patterns[pat_num] = { name, pattern: [] };
     }
+    this.syncSongToStore();
 
     this.view.drawPatternName(
       track_idx,
@@ -412,7 +446,8 @@ class Session {
     inst.setPatternName(pat_name);
 
     const patterns: (PatternObject | undefined)[] = [];
-    patterns[this.scene_pos] = { name: pat_name, pattern: inst.pattern };
+    const newPattern = { name: pat_name, pattern: inst.pattern };
+    patterns[this.scene_pos] = newPattern;
 
     const s_params: Track = {
       id,
@@ -423,18 +458,22 @@ class Session {
       pan: 0.0,
     };
     this.song.tracks[id] = s_params;
-    inst.setPattern(patterns[this.scene_pos]);
+    inst.setPattern(newPattern);
 
     // Swap patterns[0] and current patterns.
-    [
-      this.song.tracks[id].patterns[0],
-      this.song.tracks[id].patterns[this.current_cells[id]],
-    ] = [
-      this.song.tracks[id].patterns[this.current_cells[id]],
-      this.song.tracks[id].patterns[0],
-    ];
+    const currentCell = this.current_cells[id];
+    if (currentCell !== undefined) {
+      [
+        this.song.tracks[id].patterns[0],
+        this.song.tracks[id].patterns[currentCell],
+      ] = [
+        this.song.tracks[id].patterns[currentCell],
+        this.song.tracks[id].patterns[0],
+      ];
+    }
 
-    this.view.addInstrument([id, this.scene_pos]);
+    this.syncSongToStore();
+    this.view.addInstrument();
   }
 
   empty() {
@@ -455,6 +494,9 @@ class Session {
     this.cue_queue = [];
 
     this.song = { tracks: [], master: [], length: 0, mixer: null };
+
+    store.getState().setScenePos(0);
+    store.getState().setCurrentCells([]);
   }
 
   deleteCell() {
@@ -468,6 +510,7 @@ class Session {
         this.player.instruments[p.x].clearPattern();
         this.current_cells[p.x] = undefined;
       }
+      this.syncSongToStore();
       this.view.loadSong(this.current_cells);
     } else if (p.type === 'master') {
       // clear bpm, key, scale (except name)
@@ -475,6 +518,7 @@ class Session {
         ...DEFAULT_SCENE,
         name: this.song.master[p.y].name,
       };
+      this.syncSongToStore();
       this.view.loadSong(this.current_cells);
     }
   }

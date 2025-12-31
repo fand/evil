@@ -56,7 +56,7 @@ export class Double extends FX {
     this.view.setParam(p);
   }
 
-  getParam() {
+  getParam(): { effect: 'Double'; delay: number; width: number } {
     return {
       effect: 'Double',
       delay: this.delay.delayTime.value,
