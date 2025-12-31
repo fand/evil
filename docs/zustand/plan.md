@@ -50,33 +50,32 @@ User Input → Store Action → State更新 ─┬→ View購読 → DOM
 
 ## Next Steps (Priority Order)
 
-### Step 1: SessionView Subscribe Implementation
+### ✅ Step 1: SessionView Subscribe Implementation (完了)
 **Goal**: SessionがpushするdrawScene/beat呼び出しをStore購読に置換
 
 **Tasks**:
-- [ ] Store selectors追加: `selectScenePos`, `selectCurrentCells`
-- [ ] SessionView.subscribeStore()実装
-- [ ] scenePos変更時に`drawScene()`自動呼び出し
-- [ ] currentCells変更時に`beat()`自動呼び出し
-- [ ] Session内の`this.view.drawScene()`呼び出し削除
+- [x] Store selectors追加: `selectScenePos`, `selectCurrentCells`
+- [x] SessionView.subscribeStore()実装
+- [x] scenePos変更時に`drawScene()`自動呼び出し
+- [x] Session内の`this.view.drawScene()`呼び出し削除
+- [ ] currentCells変更時に`beat()`自動呼び出し (未実装 - beatは別機構)
 
-**Files**:
-- `src/store.ts` - selectors追加
-- `src/SessionView.ts` - subscribeStore()追加
-- `src/Session.ts` - view push削除
-
-### Step 2: SynthView/SamplerView Subscribe
-**Goal**: Key/Scale以外のStore購読を追加
+### ✅ Step 2: SynthView/SamplerView Subscribe (部分完了)
+**Goal**: currentInstrument購読でactivate/deactivate
 
 **Tasks**:
-- [ ] Pattern変更時の再描画をStore経由に
-- [ ] Store selectors追加: `selectCurrentPattern(trackIdx)`
-- [ ] SynthView/SamplerView.subscribeStore()拡張
+- [x] `selectCurrentInstrument` selector追加
+- [x] SynthView.subscribeStore() - currentInstrument購読
+- [x] SamplerView.subscribeStore() - currentInstrument購読
+- [x] Player.moveRight/moveLeft - 直接呼び出し削除
+- [ ] Pattern変更時の再描画をStore経由に (複雑 - 保留)
 
-**Complexity**: High - pattern編集はtrack/cell indexのコンテキスト必要
+**Note**: Pattern編集は直接mutations維持。Store経由は複雑すぎる。
 
 ### Step 3: Remove Legacy `this.model` References
 **Goal**: View→Model直接参照を段階的にStore経由に置換
+
+**Priority**: Medium - 動作に問題なければ後回し可
 
 **Tasks**:
 - [ ] PlayerView: `this.model.*` → `store.getState().*`
@@ -87,19 +86,37 @@ User Input → Store Action → State更新 ─┬→ View購読 → DOM
 ### Step 4: Action-based Pattern Editing
 **Goal**: パターン編集をStore action経由に
 
+**Priority**: Low - 大規模リファクタリング必要
+
 **Tasks**:
 - [ ] `setNote(trackIdx, cellIdx, noteData)` action追加
 - [ ] `clearNote(trackIdx, cellIdx)` action追加
 - [ ] SynthView/SamplerViewのマウスイベントをaction呼び出しに
 
+**Blocker**: Pattern編集はtrack/cell indexのコンテキスト必要。現状の直接mutationで問題なし。
+
 ### Step 5: Remove Legacy Model→View Push Calls
 **Goal**: `this.view.drawXxx()`呼び出しを完全削除
 
+**Priority**: Low - Store購読で代替可能な箇所のみ
+
 **Tasks**:
-- [ ] Player内のview push削除
-- [ ] Session内のview push削除
-- [ ] Synth内のview push削除
-- [ ] Sampler内のview push削除
+- [x] Player.moveRight/moveLeft - activate/deactivate削除
+- [x] Session.nextPattern/nextScene - drawScene削除
+- [ ] Session.beat() - view.beat()呼び出し (リアルタイム - Store不向き)
+- [ ] Synth/Sampler - view.setPattern()等 (pattern sync必要)
+
+---
+
+## 残タスク優先度
+
+| Priority | Task | Effort |
+|----------|------|--------|
+| Low | Step 3: this.model参照削除 | Medium |
+| Low | Step 4: Pattern action化 | High |
+| - | Step 5: 残りのpush削除 | pattern sync依存 |
+
+**現状で十分動作**。追加の移行は必要に応じて実施。
 
 ---
 
