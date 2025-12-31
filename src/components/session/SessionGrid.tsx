@@ -4,9 +4,7 @@ import { controller } from '../../controller';
 import { TracksCanvas } from './TracksCanvas';
 import { MasterCanvas } from './MasterCanvas';
 import { SongInfo } from './SongInfo';
-import type { CellPos } from './types';
-
-const OFFSET_TRANSLATE = 720;
+import { OFFSET_Y, type CellPos } from './types';
 
 /**
  * SessionGrid - Main session view container.
@@ -62,7 +60,7 @@ export function SessionGrid() {
           song={song}
           wrapperRef={tracksWrapperRef}
           mixerScrollLeft={mixerScrollLeft}
-          offsetTranslate={OFFSET_TRANSLATE}
+          offsetTranslate={OFFSET_Y}
           onCellSelect={handleCellSelect}
           selectedPos={selectedPos}
         />
@@ -74,7 +72,7 @@ export function SessionGrid() {
         <MasterCanvas
           song={song}
           wrapperRef={masterWrapperRef}
-          offsetTranslate={OFFSET_TRANSLATE}
+          offsetTranslate={OFFSET_Y}
           onCellSelect={handleCellSelect}
           selectedPos={selectedPos}
           onSyncScroll={handleMasterScroll}
