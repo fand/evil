@@ -15,57 +15,77 @@ User Input → Store Action → State更新 ─┬→ View購読 → DOM
 
 ---
 
-## Current Status
+## Phase 1: Vanilla JS Integration ✅ Complete
+
+### Summary
+Zustand storeを作成し、既存のjQuery ViewがStore経由で状態を購読する形に移行完了。
+
+### Completed Steps
 
 | Step | Task | Status |
 |------|------|:------:|
 | 1-2 | Store作成 & Player/Session sync | ✅ |
 | 3 | Controller layer (this.model削除) | ✅ |
-| 4 | Pattern action化 | 保留 |
-| 5 | Model→View push削除 | 🔶 主要部分完了 |
-| 6 | Song Store同期 | 🔶 syncSongToStore完了 |
-| 7 | React化 | 未着手 |
+| 4 | Pattern action化 | 保留 (React化時) |
+| 5 | Model→View push削除 | ✅ |
+| 6 | Song Store同期 | ✅ |
 
-### Component Status
+### Component Status (All Complete)
 
-| Component | Store Sync | Store Subscribe | Status |
-|-----------|:----------:|:---------------:|:------:|
-| Player | ✅ BPM/Key/Scale/isPlaying | - | ✅ |
-| PlayerView | - | ✅ isPlaying/BPM | ✅ |
-| Session | ✅ scenePos/cells + syncSong | - | ✅ |
-| SessionView | - | ✅ scenePos/cells/beat | ✅ |
-| Synth | ✅ patternRefresh | ✅ Key/Scale | 🔶 |
-| SynthView | - | ✅ currentInstrument/pattern | ✅ |
-| Sampler | ✅ patternRefresh | - | 🔶 |
-| SamplerView | - | ✅ currentInstrument/pattern | ✅ |
+| Component | Store Sync | Store Subscribe |
+|-----------|:----------:|:---------------:|
+| Player | BPM/Key/Scale/isPlaying | - |
+| PlayerView | - | isPlaying/BPM/Key/Scale/isLoop |
+| Session | scenePos/cells + syncSongToStore | - |
+| SessionView | - | scenePos/cells/beat |
+| Synth | patternRefresh | Key/Scale |
+| SynthView | - | currentInstrument/patternVersions |
+| Sampler | patternRefresh | - (不要) |
+| SamplerView | - | currentInstrument/patternVersions |
+
+### Current Data Flow
+```
+Session.song (runtime source of truth)
+    │
+    ├─→ Instrument.pattern (working copy)
+    │       │
+    │       └─→ store.triggerPatternRefresh() → View re-render
+    │
+    └─→ syncSongToStore() → store.song (React読み取り用)
+```
 
 ---
 
-## Remaining Tasks
+## Phase 2: React Migration (Next)
 
-### 保留中 (React化時に対応)
+### Goal
+jQuery ViewをReact componentに置き換え、store.songをsingle source of truthに。
 
-1. **Pattern action化** - 高頻度mutation、React化後にlocal state + sync で対応
-2. **残りのview push** - play/stop/redraw等はReact componentで置き換え
-3. **Song完全Store管理** - `store.song`をsingle source of truthに
+### Approach
+1. React infrastructure setup (entry point, useStore hook)
+2. 小さいcomponentから順次React化
+3. Pattern編集はReact component内でlocal state + debounce sync
+4. Pattern action化は不要（local stateで対応）
 
-### React化に向けて
-
-現在の設計:
+### Target Data Flow (Post-React)
 ```
-Session.song (runtime) ──sync──→ store.song (React読み取り用)
+store.song (single source of truth)
+    │
+    ├─→ React components (useStore購読)
+    │
+    └─→ Audio engine (vanilla subscribe)
 ```
 
-React化後:
-```
-store.song (single source of truth) ←→ React components
-```
+### Migration Order (Proposed)
+1. PlayerView (controls) - 最もシンプル
+2. SessionView (grid) - Canvas描画あり
+3. SynthView/SamplerView - Pattern編集、最も複雑
 
 ---
 
 ## Architecture
 
-### Store Structure
+### Store Structure (`src/store.ts`)
 
 ```typescript
 interface AppState {
@@ -77,9 +97,9 @@ interface AppState {
 ```
 
 ### Keep Outside Store
-- VU meter (real-time audio)
-- Canvas hover/click (view-local)
-- Synth/Sampler time (audio callback)
+- VU meter (real-time audio callback)
+- Canvas hover/click (view-local state)
+- Synth/Sampler time (audio callback timing)
 
 ---
 
@@ -87,7 +107,7 @@ interface AppState {
 
 | File | Role |
 |------|------|
-| `src/store.ts` | Central store |
+| `src/store.ts` | Central Zustand store |
 | `src/controller.ts` | View→Model bridge |
 | `src/Session.ts` | Song管理 + syncSongToStore |
-| `src/*View.ts` | Store subscribe |
+| `src/*View.ts` | Store subscribe (jQuery) |
