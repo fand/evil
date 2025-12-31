@@ -72,18 +72,25 @@ User Input → Store Action → State更新 ─┬→ View購読 → DOM
 
 **Note**: Pattern編集は直接mutations維持。Store経由は複雑すぎる。
 
-### Step 3: Remove Legacy `this.model` References
-**Goal**: View→Model直接参照を段階的にStore経由に置換
+### ✅ Step 3: Remove Legacy `this.model` References (完了)
+**Goal**: View→Model直接参照をcontroller経由に置換
 
 **Tasks**:
-- [ ] PlayerView: `this.model.*` → `store.getState().*`
-- [ ] SessionView: `this.model.*` → `store.getState().*`
-- [ ] SynthView: `this.model.*` → `store.getState().*`
-- [ ] SamplerView: `this.model.*` → `store.getState().*`
+- [x] Controller layer作成 (`src/controller.ts`)
+- [x] PlayerView: `this.model.*` → `controller.*`
+- [x] SessionView: `this.model.*` → `controller.*`
+- [x] SynthView: `this.model.*` → `controller.*` (pattern getters維持)
+- [x] SamplerView: `this.model.*` → `controller.*` (pattern getters維持)
+- [x] Instrument interface更新 (plusPattern/minusPattern追加)
 
-**Approach**:
-1. 読み取りのみの参照をstore経由に
-2. メソッド呼び出しはstore actionに
+**Architecture**:
+```
+View → controller.action() → Player/Session/Model
+                          ↓
+                    store.getState().action() → state更新
+```
+
+**Note**: Pattern gettersはdirect mutation用に維持。Step 4で対応。
 
 ### Step 4: Action-based Pattern Editing
 **Goal**: パターン編集をStore action経由に
