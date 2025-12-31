@@ -12,8 +12,10 @@ declare global {
 }
 
 export class SessionView {
+  private _session: Session;
+
   get song(): Song {
-    return controller.session.song;
+    return this._session.song;
   }
   wrapper_mixer: JQuery;
   wrapper_master: JQuery;
@@ -69,7 +71,10 @@ export class SessionView {
   is_clicked: boolean = false;
   scene_pos: number = 0;
 
-  constructor(_model: Session) {
+  constructor(model: Session) {
+    // Keep session reference for song getter (controller not available at construction)
+    this._session = model;
+
     // DOMs for session view.
     this.wrapper_mixer = $('#mixer-tracks');
     this.wrapper_master = $('#session-master-wrapper');
