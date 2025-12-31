@@ -15,6 +15,7 @@ import type { Instrument, InstrumentType } from './Instrument';
 import { Song, Scene } from './Song';
 import type { Keyboard } from './Keyboard';
 import { store } from './store';
+import { controller } from './controller';
 
 declare global {
   interface Window {
@@ -67,6 +68,9 @@ export class Player {
     this.sidebar = new Sidebar(this.context, this, this.session, this.mixer);
 
     this.addSynth(0);
+
+    // Register with controller for Views to access
+    controller.registerPlayer(this);
 
     this.view = new PlayerView(this);
   }

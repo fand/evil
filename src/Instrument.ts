@@ -9,6 +9,7 @@ import type {
 
 export interface InstrumentView {
   dom: JQuery;
+  setPatternName(name: string): void;
 }
 
 export interface Instrument {
@@ -44,6 +45,8 @@ export interface Instrument {
   getPattern(): PatternObject;
   clearPattern(): void;
   setPatternName(pattern_name: string): void;
+  plusPattern(): void;
+  minusPattern(): void;
   insertEffect(fx: FX): void;
   removeEffect(fx: FX): void;
   getEffectsParam(): EffectParam[];

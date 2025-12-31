@@ -3,6 +3,7 @@ import { KEY_LIST } from './Constant';
 import type { Player } from './Player';
 import type { Keyboard } from './Keyboard';
 import { store, selectIsPlaying, selectBPM, selectKey, selectScale, selectIsLoop } from './store';
+import { controller } from './controller';
 
 declare global {
   interface Window {
@@ -11,7 +12,6 @@ declare global {
 }
 
 export class PlayerView {
-  model: Player;
   dom: JQuery;
   bpm: JQuery;
   key: JQuery;
@@ -33,8 +33,7 @@ export class PlayerView {
   current_instrument: number;
   instruments_count: number;
 
-  constructor(model: Player) {
-    this.model = model;
+  constructor(_model: Player) {
     this.dom = $('#control');
 
     this.bpm = this.dom.find('[name=bpm]');
@@ -52,7 +51,7 @@ export class PlayerView {
     this.wrapper = $('#wrapper');
     this.instruments = $('#instruments');
     this.mixer = $('#mixer');
-    this.is_mixer = false; // seeing mixer?
+    this.is_mixer = false;
 
     this.btn_left = $('#btn-left');
     this.btn_right = $('#btn-right');
@@ -68,16 +67,13 @@ export class PlayerView {
 
   subscribeStore() {
     // Subscribe to isPlaying changes
-    store.subscribe(
-      selectIsPlaying,
-      (isPlaying) => {
-        if (isPlaying) {
-          this.play.removeClass('fa-play').addClass('fa-pause');
-        } else {
-          this.play.removeClass('fa-pause').addClass('fa-play');
-        }
+    store.subscribe(selectIsPlaying, (isPlaying) => {
+      if (isPlaying) {
+        this.play.removeClass('fa-play').addClass('fa-pause');
+      } else {
+        this.play.removeClass('fa-pause').addClass('fa-play');
       }
-    );
+    });
 
     // Subscribe to BPM changes
     store.subscribe(selectBPM, (bpm) => {
@@ -112,9 +108,9 @@ export class PlayerView {
 
   initEvent() {
     this.dom.on('change', () => {
-      this.model.setBPM(parseInt(this.bpm.val() as string));
-      this.model.setKey(this.key.val() as string);
-      return this.model.setScale(this.scale.val() as string);
+      controller.setBPM(parseInt(this.bpm.val() as string));
+      controller.setKey(this.key.val() as string);
+      controller.setScale(this.scale.val() as string);
     });
 
     this.bpm
@@ -128,13 +124,10 @@ export class PlayerView {
       .on('blur', () => window.keyboard.endInput());
 
     this.play.on('mousedown', () => this.viewPlay());
-    this.stop.on('mousedown', () => this.viewStop(this.model));
-    this.forward.on('mousedown', () => this.model.forward());
-    this.backward.on('mousedown', () => this.model.backward(false));
-    this.loop.on('mousedown', () => {
-      // UI update is handled by store subscription
-      this.model.toggleLoop();
-    });
+    this.stop.on('mousedown', () => this.viewStop());
+    this.forward.on('mousedown', () => controller.forward());
+    this.backward.on('mousedown', () => controller.backward(false));
+    this.loop.on('mousedown', () => controller.toggleLoop());
 
     this.btn_left.on('mousedown', () => this.moveLeft());
     this.btn_right.on('mousedown', () => this.moveRight());
@@ -145,19 +138,15 @@ export class PlayerView {
   }
 
   viewPlay() {
-    // Icon update is handled by store subscription
     if (store.getState().playback.isPlaying) {
-      this.model.pause();
+      controller.pause();
     } else {
-      this.model.play();
+      controller.play();
     }
   }
 
-  viewStop(receiver?: Player) {
-    if (receiver != null) {
-      receiver.stop();
-    }
-    return this.play.removeClass('fa-pause').addClass('fa-play');
+  viewStop() {
+    controller.stop();
   }
 
   setBPM(bpm: number) {
@@ -190,8 +179,8 @@ export class PlayerView {
     }
 
     this.current_instrument++;
-    this.model.moveRight(this.current_instrument);
-    this.instruments_count = this.model.instruments.length;
+    controller.moveRight(this.current_instrument);
+    this.instruments_count = controller.instrumentsCount;
 
     this.instruments.css(
       '-webkit-transform',
@@ -207,7 +196,7 @@ export class PlayerView {
     if (this.is_mixer) {
       return;
     }
-    this.instruments_count = this.model.instruments.length;
+    this.instruments_count = controller.instrumentsCount;
     this.btn_right.attr('data-line1', 'next');
     if (this.current_instrument !== 0) {
       this.current_instrument--;
@@ -215,7 +204,7 @@ export class PlayerView {
         '-webkit-transform',
         'translate3d(' + -1110 * this.current_instrument + 'px, 0px, 0px)'
       );
-      this.model.moveLeft(this.current_instrument);
+      controller.moveLeft(this.current_instrument);
     }
     if (this.current_instrument === 0) {
       this.btn_left.hide();
@@ -229,7 +218,7 @@ export class PlayerView {
     this.btn_top.hide();
     this.btn_bottom.show();
     this.wrapper.css('-webkit-transform', 'translate3d(0px, 700px, 0px)');
-    this.model.moveTop();
+    controller.moveTop();
   }
 
   moveBottom() {
@@ -241,7 +230,7 @@ export class PlayerView {
     this.btn_top.show();
     this.btn_bottom.hide();
     this.wrapper.css('-webkit-transform', 'translate3d(0px, 0px, 0px)');
-    this.model.moveBottom();
+    controller.moveBottom();
   }
 
   setInstrumentCount(total: number, now: number) {
