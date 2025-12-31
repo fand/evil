@@ -235,8 +235,9 @@ class Session {
     if (pat_num + 1 > this.song.length) {
       this.song.length = pat_num + 1;
     }
-    if (this.current_cells[idx] === pat_num && pat) {
-      this.player.instruments[idx].setPattern(pat);
+    const instrument = this.player.instruments[idx];
+    if (instrument && this.current_cells[idx] === pat_num && pat) {
+      instrument.setPattern(pat);
     }
   }
 
