@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { Player } from './Player';
 import { Keyboard } from './Keyboard';
-import { DEFAULT_SONG, Song } from './Song';
+import { Song } from './Song';
 
 declare global {
   interface Window {
@@ -40,15 +40,11 @@ const initEvil = function () {
   $('footer').css('height', footer_size + 'px');
 
   // Read song
-  const song: Song = (() => {
-    if (window.song_loaded) {
-      return JSON.parse(window.song_loaded.json);
-    } else {
-      return DEFAULT_SONG;
-    }
-  })();
-
-  player.loadSong(song);
+  if (window.song_loaded) {
+    const song: Song = JSON.parse(window.song_loaded.json);
+    player.loadSong(song);
+  }
+  // If no song is loaded, Player constructor already set up default state
 };
 
 // ------------------------------------------------------------------------------

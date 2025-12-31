@@ -182,10 +182,12 @@ export class Player {
   }
 
   noteOn(note: number, force: boolean) {
-    this.instruments[this.current_instrument].noteOn(note, force);
+    const inst = this.instruments[this.current_instrument];
+    if (inst) inst.noteOn(note, force);
   }
   noteOff(force: boolean) {
-    this.instruments[this.current_instrument].noteOff(force);
+    const inst = this.instruments[this.current_instrument];
+    if (inst) inst.noteOff(force);
   }
 
   playNext() {
