@@ -69,6 +69,9 @@ export class Player {
 
     this.addSynth(0);
 
+    // Initialize BPM (sets duration and syncs to store/sidebar)
+    this.setBPM(this.scene.bpm);
+
     // Register with controller for Views to access
     controller.registerPlayer(this);
 
