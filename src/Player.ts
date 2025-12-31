@@ -75,7 +75,7 @@ export class Player {
     // Register with controller for Views to access
     controller.registerPlayer(this);
 
-    this.view = new PlayerView(this);
+    this.view = new PlayerView();
   }
 
   setBPM(bpm: number) {
@@ -252,7 +252,7 @@ export class Player {
 
     this.mixer.changeInstrument(idx, inst);
     this.session.changeInstrument(idx, type, inst);
-    this.view.changeInstrument(idx, type);
+    this.view.changeInstrument();
 
     return inst;
   }

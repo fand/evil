@@ -2,7 +2,11 @@ import $ from 'jquery';
 import { SamplerKeyboardView } from './SamplerKeyboardView';
 import type { Sampler } from '../Sampler';
 import type { Keyboard } from '../Keyboard';
-import { store, selectCurrentInstrument, selectPatternVersions } from '../store';
+import {
+  store,
+  selectCurrentInstrument,
+  selectPatternVersions,
+} from '../store';
 import { controller } from '../controller';
 
 declare global {
@@ -162,7 +166,7 @@ export class SamplerView {
     // Subscribe to pattern changes for this instrument
     store.subscribe(selectPatternVersions, (versions) => {
       if (versions[this.id] !== undefined) {
-        this.setPattern();
+        this.refreshPattern();
       }
     });
   }
@@ -194,7 +198,7 @@ export class SamplerView {
         );
       }
     }
-    this.setPattern(this.pattern_obj);
+    this.refreshPattern();
   }
 
   getPos(e: JQuery.MouseMoveEvent | JQuery.MouseDownEvent): SamplerPos {
@@ -296,7 +300,10 @@ export class SamplerView {
       .on('focus', () => window.keyboard.beginInput())
       .on('blur', () => window.keyboard.endInput())
       .on('change', () =>
-        controller.setInstrumentPatternName(this.id, this.pattern_name.val() as string)
+        controller.setInstrumentPatternName(
+          this.id,
+          this.pattern_name.val() as string
+        )
       );
 
     this.marker_prev.on('click', () => controller.backward(true));
@@ -378,7 +385,7 @@ export class SamplerView {
     this.last_time = this.time;
   }
 
-  setPattern(_pattern_obj?: unknown) {
+  refreshPattern() {
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);

@@ -1,8 +1,14 @@
 import $ from 'jquery';
 import { KEY_LIST } from './Constant';
-import type { Player } from './Player';
 import type { Keyboard } from './Keyboard';
-import { store, selectIsPlaying, selectBPM, selectKey, selectScale, selectIsLoop } from './store';
+import {
+  store,
+  selectIsPlaying,
+  selectBPM,
+  selectKey,
+  selectScale,
+  selectIsLoop,
+} from './store';
 import { controller } from './controller';
 
 declare global {
@@ -33,7 +39,7 @@ export class PlayerView {
   current_instrument: number;
   instruments_count: number;
 
-  constructor(_model: Player) {
+  constructor() {
     this.dom = $('#control');
 
     this.bpm = this.dom.find('[name=bpm]');
@@ -266,7 +272,7 @@ export class PlayerView {
     });
   }
 
-  changeInstrument(_idx?: number, _type?: string) {
+  changeInstrument() {
     if (this.current_instrument === 0) {
       this.btn_left.hide();
     }

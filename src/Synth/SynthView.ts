@@ -192,7 +192,7 @@ export class SynthView {
     // Subscribe to pattern changes for this instrument
     store.subscribe(selectPatternVersions, (versions) => {
       if (versions[this.id] !== undefined) {
-        this.setPattern();
+        this.refreshPattern();
       }
     });
   }
@@ -216,7 +216,7 @@ export class SynthView {
         this.drawCellOff(CellType.Empty, x, y);
       }
     }
-    this.setPattern(this.pattern_obj);
+    this.refreshPattern();
   }
 
   // ========================================
@@ -600,8 +600,7 @@ export class SynthView {
     this.last_time = this.time;
   }
 
-  setPattern(_pattern_obj?: unknown) {
-    // pattern_obj is now accessed via getter from model
+  refreshPattern() {
     this.page = 0;
     this.page_total = this.pattern.length / this.cells_x;
     this.drawPattern(0);
