@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { Player } from './Player';
 import { Keyboard } from './Keyboard';
 import { Song } from './Song';
+import { mountReactApp } from './react';
 
 declare global {
   interface Window {
@@ -45,6 +46,9 @@ const initEvil = function () {
     player.loadSong(song);
   }
   // If no song is loaded, Player constructor already set up default state
+
+  // Mount React app (currently empty, will be populated as views are migrated)
+  mountReactApp();
 };
 
 // ------------------------------------------------------------------------------
