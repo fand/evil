@@ -39,8 +39,8 @@ User Input → Store Action → State更新 ─┬→ View購読 → DOM
 |-----------|:----------:|:---------------:|:-----------:|:------:|
 | Player | ✅ | - | ✅ removed | ✅ |
 | PlayerView | - | ✅ | - | ✅ |
-| Session | ✅ | - | ✅ drawScene removed | ✅ |
-| SessionView | - | ✅ scenePos/cells | beat残存 | 🔶 |
+| Session | ✅ | - | ✅ removed | ✅ |
+| SessionView | - | ✅ scenePos/cells/beat | - | ✅ |
 | Synth | - | ✅ Key/Scale | setPattern残存 | 🔶 |
 | SynthView | - | ✅ currentInstrument | - | ✅ |
 | Sampler | - | - | setPattern残存 | 🔶 |
@@ -118,14 +118,15 @@ View → controller.action() → Player/Session/Model
 - [x] Session.nextPattern/nextScene - drawScene削除 (store購読に移行)
 - [x] SynthView/SamplerView - currentInstrument購読でactivate/deactivate自動化
 
+**Completed Tasks** (continued):
+- [x] Session.beat() - store.triggerBeat()経由に移行
+
 **Remaining Tasks (保留)**:
-- [ ] Session.beat() - view.beat()呼び出し
 - [ ] Synth.setPattern() - view.setPattern()呼び出し
 - [ ] Sampler.setPattern() - view.setPattern()呼び出し
 - [ ] Synth/Sampler - その他view push
 
 **Remaining Tasks Status**: 保留 - 以下の理由で後回し:
-- Session.beat(): ビート時の視覚フィードバック。cue_queue/next_scene_pos依存で複雑
 - setPattern(): Pattern直接mutationと連動。React化時にlocal state + sync方式が適切
 - 現行のView pushは動作に問題なし。React化時にcomponentで置き換え予定
 

@@ -151,9 +151,9 @@ class Session {
 
   beat() {
     if (this.is_waiting_next_scene) {
-      this.view.beat(true, [0, this.next_scene_pos]);
+      store.getState().triggerBeat(true, [0, this.next_scene_pos]);
     } else {
-      this.view.beat(false, this.cue_queue);
+      store.getState().triggerBeat(false, this.cue_queue);
     }
   }
 

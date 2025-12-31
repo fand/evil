@@ -2,7 +2,7 @@ import $ from 'jquery';
 import type { Session } from './Session';
 import type { Song } from './Song';
 import type { Keyboard } from './Keyboard';
-import { store, selectScenePos, selectCurrentCells } from './store';
+import { store, selectScenePos, selectCurrentCells, selectBeat } from './store';
 import { controller } from './controller';
 
 declare global {
@@ -181,6 +181,13 @@ export class SessionView {
     store.subscribe(selectCurrentCells, (currentCells) => {
       const scenePos = store.getState().playback.scenePos;
       this.drawScene(scenePos, currentCells);
+    });
+
+    // Subscribe to beat changes for cue visualization
+    store.subscribe(selectBeat, (beatInfo) => {
+      if (beatInfo.trigger > 0) {
+        this.beat(beatInfo.isMaster, beatInfo.cells);
+      }
     });
   }
 

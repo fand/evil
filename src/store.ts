@@ -2,6 +2,13 @@ import { createStore } from 'zustand/vanilla';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { DEFAULT_SONG, type Song, type Scene } from './Song';
 
+// Beat info for cue visualization
+export type BeatInfo = {
+  trigger: number; // Incremented on each beat to trigger re-render
+  isMaster: boolean;
+  cells: [number, number | undefined] | [number, number][];
+};
+
 // Playback state
 export type PlaybackState = {
   isPlaying: boolean;
@@ -10,6 +17,7 @@ export type PlaybackState = {
   currentCells: (number | undefined)[];
   isLoop: boolean;
   sceneLength: number;
+  beat: BeatInfo;
 };
 
 // UI state
@@ -54,6 +62,10 @@ export type AppActions = {
   setCurrentCell: (trackIdx: number, cellIdx: number | undefined) => void;
   toggleLoop: () => boolean;
   setSceneLength: (length: number) => void;
+  triggerBeat: (
+    isMaster: boolean,
+    cells: [number, number | undefined] | [number, number][]
+  ) => void;
 
   // UI actions
   setCurrentInstrument: (idx: number) => void;
@@ -71,6 +83,11 @@ const initialPlayback: PlaybackState = {
   currentCells: [],
   isLoop: true,
   sceneLength: 32,
+  beat: {
+    trigger: 0,
+    isMaster: false,
+    cells: [],
+  },
 };
 
 const initialUI: UIState = {
@@ -168,6 +185,18 @@ export const store = createStore<Store>()(
         playback: { ...state.playback, sceneLength },
       })),
 
+    triggerBeat: (isMaster, cells) =>
+      set((state) => ({
+        playback: {
+          ...state.playback,
+          beat: {
+            trigger: state.playback.beat.trigger + 1,
+            isMaster,
+            cells,
+          },
+        },
+      })),
+
     // UI actions
     setCurrentInstrument: (currentInstrument) =>
       set((state) => ({
@@ -199,3 +228,4 @@ export const selectCurrentCells = (state: Store) => state.playback.currentCells;
 export const selectScenePos = (state: Store) => state.playback.scenePos;
 export const selectIsLoop = (state: Store) => state.playback.isLoop;
 export const selectCurrentInstrument = (state: Store) => state.ui.currentInstrument;
+export const selectBeat = (state: Store) => state.playback.beat;
