@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { KEY_LIST } from './Constant';
 import type { Player } from './Player';
 import type { Keyboard } from './Keyboard';
-import { store, selectIsPlaying, selectBPM, selectKey, selectScale } from './store';
+import { store, selectIsPlaying, selectBPM, selectKey, selectScale, selectIsLoop } from './store';
 
 declare global {
   interface Window {
@@ -99,6 +99,15 @@ export class PlayerView {
     store.subscribe(selectScale, (scale) => {
       this.scale.val(scale);
     });
+
+    // Subscribe to isLoop changes
+    store.subscribe(selectIsLoop, (isLoop) => {
+      if (isLoop) {
+        this.loop.removeClass('control-off').addClass('control-on');
+      } else {
+        this.loop.removeClass('control-on').addClass('control-off');
+      }
+    });
   }
 
   initEvent() {
@@ -123,11 +132,8 @@ export class PlayerView {
     this.forward.on('mousedown', () => this.model.forward());
     this.backward.on('mousedown', () => this.model.backward(false));
     this.loop.on('mousedown', () => {
-      if (this.model.toggleLoop()) {
-        return this.loop.removeClass('control-off').addClass('control-on');
-      } else {
-        return this.loop.removeClass('control-on').addClass('control-off');
-      }
+      // UI update is handled by store subscription
+      this.model.toggleLoop();
     });
 
     this.btn_left.on('mousedown', () => this.moveLeft());
@@ -139,12 +145,11 @@ export class PlayerView {
   }
 
   viewPlay() {
-    if (this.model.isPlaying()) {
+    // Icon update is handled by store subscription
+    if (store.getState().playback.isPlaying) {
       this.model.pause();
-      return this.play.removeClass('fa-pause').addClass('fa-play');
     } else {
       this.model.play();
-      return this.play.removeClass('fa-play').addClass('fa-pause');
     }
   }
 

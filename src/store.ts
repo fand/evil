@@ -197,4 +197,5 @@ export const selectIsPlaying = (state: Store) => state.playback.isPlaying;
 export const selectTime = (state: Store) => state.playback.time;
 export const selectCurrentCells = (state: Store) => state.playback.currentCells;
 export const selectScenePos = (state: Store) => state.playback.scenePos;
+export const selectIsLoop = (state: Store) => state.playback.isLoop;
 export const selectCurrentInstrument = (state: Store) => state.ui.currentInstrument;
