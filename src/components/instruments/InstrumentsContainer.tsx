@@ -44,10 +44,10 @@ export function InstrumentsContainer() {
     <>
       {instruments.map((inst, id) => {
         // Check instrument type and render appropriate editor
-        if ('core' in inst && 'synth_type' in inst.core) {
+        if (inst.type === 'REZ') {
           // It's a Synth
           return <SynthEditor key={id} model={inst as Synth} id={id} />;
-        } else if ('sample_now' in inst) {
+        } else if (inst.type === 'SAMPLER') {
           // It's a Sampler
           return <SamplerEditor key={id} model={inst as Sampler} id={id} />;
         }

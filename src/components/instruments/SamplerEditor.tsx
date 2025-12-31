@@ -50,8 +50,8 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
   const [lastTime, setLastTime] = useState(0);
 
   // Store state
-  const currentInstrument = useAppStore((state) => state.currentInstrument);
-  const patternVersions = useAppStore((state) => state.patternVersions);
+  const currentInstrument = useAppStore((state) => state.ui.currentInstrument);
+  const patternVersions = useAppStore((state) => state.ui.patternVersions);
   const playbackTime = useAppStore((state) => state.playback.time);
   const isActive = currentInstrument === id;
 

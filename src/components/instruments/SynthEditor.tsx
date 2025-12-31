@@ -57,8 +57,8 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
   const [lastTime, setLastTime] = useState(0);
 
   // Store state
-  const currentInstrument = useAppStore((state) => state.currentInstrument);
-  const patternVersions = useAppStore((state) => state.patternVersions);
+  const currentInstrument = useAppStore((state) => state.ui.currentInstrument);
+  const patternVersions = useAppStore((state) => state.ui.patternVersions);
   const playbackTime = useAppStore((state) => state.playback.time);
   const isActive = currentInstrument === id;
 
@@ -420,10 +420,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           value={model.name}
           onChange={handleSynthNameChange}
         />
-        <select className="synth-type" value={model.core.name} onChange={handleTypeChange}>
-          <option value="lead">Lead</option>
-          <option value="bass">Bass</option>
-          <option value="chip">Chip</option>
+        <select className="synth-type" value={model.type} onChange={handleTypeChange}>
+          <option value="REZ">REZ</option>
+          <option value="SAMPLER">SAMPLER</option>
         </select>
         <input
           className="pattern-name"
