@@ -307,12 +307,12 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
     }
   };
 
-  if (!isActive) {
-    return null;
-  }
-
   return (
-    <div className="sampler" id={`sampler${id}`}>
+    <div
+      className="sampler"
+      id={`sampler${id}`}
+      style={{ display: isActive ? 'block' : 'none' }}
+    >
       <div className="header">
         <input
           className="synth-name"

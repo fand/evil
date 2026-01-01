@@ -105,6 +105,19 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     ctxHoverRef.current = initCanvas(canvasHoverRef.current, width, height);
   }, []);
 
+  // Refresh canvas when becoming active
+  useEffect(() => {
+    if (isActive && isImageLoaded && ctxOffRef.current && cellImageRef.current) {
+      // Redraw all off cells
+      for (let y = 0; y < SYNTH_CELLS_Y; y++) {
+        for (let x = 0; x < SYNTH_CELLS_X; x++) {
+          drawCell(ctxOffRef.current, cellImageRef.current, CellType.Empty, x, y);
+        }
+      }
+      refreshPattern();
+    }
+  }, [isActive, isImageLoaded, refreshPattern]);
+
   // Draw all off cells when image loads
   useEffect(() => {
     if (!isImageLoaded || !ctxOffRef.current || !cellImageRef.current) {
@@ -119,7 +132,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     }
 
     refreshPattern();
-  }, [isImageLoaded]);
+  }, [isImageLoaded, refreshPattern]);
 
   // Refresh pattern when version changes
   useEffect(() => {
@@ -424,12 +437,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     setIsPanelOpened(!isPanelOpened);
   };
 
-  if (!isActive) {
-    return null;
-  }
-
   return (
-    <div className="instrument synth clearfix" id={`synth${id}`}>
+    <div
+      className="instrument synth clearfix"
+      id={`synth${id}`}
+      style={{ display: isActive ? 'block' : 'none' }}
+    >
       <div className="sequencer">
         <div className="header">
           <select className="synth-type" value={model.type} onChange={handleTypeChange}>
@@ -775,7 +788,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="attack"
               type="range"
               min="0"
-              max="50000"
+              max="2000"
               value={coreParams.eg.adsr[0] || 0}
               onChange={(e) => {
                 const newAdsr = [...coreParams.eg.adsr];
@@ -790,7 +803,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="decay"
               type="range"
               min="0"
-              max="50000"
+              max="2000"
               value={coreParams.eg.adsr[1] || 18000}
               onChange={(e) => {
                 const newAdsr = [...coreParams.eg.adsr];
@@ -820,7 +833,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="release"
               type="range"
               min="0"
-              max="50000"
+              max="2000"
               value={coreParams.eg.adsr[3] || 10000}
               onChange={(e) => {
                 const newAdsr = [...coreParams.eg.adsr];
@@ -874,7 +887,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="attack"
               type="range"
               min="0"
-              max="50000"
+              max="2000"
               value={coreParams.feg.adsr[0] || 0}
               onChange={(e) => {
                 const newAdsr = [...coreParams.feg.adsr];
@@ -889,7 +902,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="decay"
               type="range"
               min="0"
-              max="50000"
+              max="2000"
               value={coreParams.feg.adsr[1] || 0}
               onChange={(e) => {
                 const newAdsr = [...coreParams.feg.adsr];
@@ -919,7 +932,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="release"
               type="range"
               min="0"
-              max="50000"
+              max="2000"
               value={coreParams.feg.adsr[3] || 10000}
               onChange={(e) => {
                 const newAdsr = [...coreParams.feg.adsr];
