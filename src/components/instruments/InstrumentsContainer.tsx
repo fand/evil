@@ -26,6 +26,14 @@ export function InstrumentsContainer() {
 
     loadInstruments();
 
+    // Hide jQuery-based instrument views
+    const jqueryInstruments = document.querySelectorAll('.instrument.synth, .instrument.sampler');
+    jqueryInstruments.forEach((el) => {
+      if (el instanceof HTMLElement) {
+        el.style.display = 'none';
+      }
+    });
+
     // Poll for instrument changes (simple approach)
     // TODO: Replace with proper event system
     const interval = setInterval(() => {

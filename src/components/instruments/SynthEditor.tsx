@@ -65,6 +65,22 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
   // Get pattern from model
   const pattern = model.pattern;
 
+  // Core parameters state
+  const [coreParams, setCoreParams] = useState(() => model.core.getParam());
+
+  // Load core parameters when component mounts or becomes active
+  useEffect(() => {
+    if (isActive) {
+      setCoreParams(model.core.getParam());
+    }
+  }, [isActive, model.core]);
+
+  // Update core parameter
+  const updateCoreParam = useCallback((param: Partial<typeof coreParams>) => {
+    model.core.setParam(param);
+    setCoreParams(model.core.getParam());
+  }, [model.core]);
+
   // Load cell image
   useEffect(() => {
     const img = new Image();
@@ -506,7 +522,15 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           <legend>OSC1</legend>
           <div className="clearfix">
             <label>WAVE</label>
-            <select className="shape" defaultValue="RECT">
+            <select
+              className="shape"
+              value={coreParams.vcos[0]?.shape || 'RECT'}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[0] = { ...newVcos[0], shape: e.target.value };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            >
               <option>SINE</option>
               <option>TRIANGLE</option>
               <option>SAW</option>
@@ -515,12 +539,46 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               <option>SUPERRECT</option>
             </select>
           </div>
-          <div className="clearfix"><label>OCT</label><input className="octave" type="number" min="0" max="5" defaultValue="0" /></div>
-          <div className="clearfix"><label>TUNE</label><input className="fine" type="number" min="-50" max="50" defaultValue="0" /></div>
-          <input className="interval" type="hidden" defaultValue="0" />
+          <div className="clearfix">
+            <label>OCT</label>
+            <input
+              className="octave"
+              type="number"
+              min="0"
+              max="5"
+              value={coreParams.vcos[0]?.octave || 0}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[0] = { ...newVcos[0], octave: parseInt(e.target.value) };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>TUNE</label>
+            <input
+              className="fine"
+              type="number"
+              min="-50"
+              max="50"
+              value={coreParams.vcos[0]?.fine || 0}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[0] = { ...newVcos[0], fine: parseInt(e.target.value) };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            />
+          </div>
+          <input className="interval" type="hidden" value={coreParams.vcos[0]?.interval || 0} />
           <div className="clearfix">
             <label>SHIFT</label>
-            <select className="harmony" defaultValue="harmony">
+            <select
+              className="harmony"
+              value={coreParams.harmony ? 'harmony' : 'chromatic'}
+              onChange={(e) => {
+                updateCoreParam({ harmony: e.target.value === 'harmony' });
+              }}
+            >
               <option>harmony</option>
               <option>chromatic</option>
             </select>
@@ -531,7 +589,15 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           <legend>OSC2</legend>
           <div className="clearfix">
             <label>WAVE</label>
-            <select className="shape" defaultValue="SAW">
+            <select
+              className="shape"
+              value={coreParams.vcos[1]?.shape || 'SAW'}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[1] = { ...newVcos[1], shape: e.target.value };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            >
               <option>SINE</option>
               <option>TRIANGLE</option>
               <option>SAW</option>
@@ -540,16 +606,66 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               <option>SUPERRECT</option>
             </select>
           </div>
-          <div className="clearfix"><label>OCT</label><input className="octave" type="number" min="0" max="5" defaultValue="0" /></div>
-          <div className="clearfix"><label>TUNE</label><input className="fine" type="number" min="-50" max="50" defaultValue="1" /></div>
-          <div className="clearfix"><label>SHIFT</label><input className="interval" type="number" min="-12" max="12" defaultValue="3" /></div>
+          <div className="clearfix">
+            <label>OCT</label>
+            <input
+              className="octave"
+              type="number"
+              min="0"
+              max="5"
+              value={coreParams.vcos[1]?.octave || 0}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[1] = { ...newVcos[1], octave: parseInt(e.target.value) };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>TUNE</label>
+            <input
+              className="fine"
+              type="number"
+              min="-50"
+              max="50"
+              value={coreParams.vcos[1]?.fine || 1}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[1] = { ...newVcos[1], fine: parseInt(e.target.value) };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>SHIFT</label>
+            <input
+              className="interval"
+              type="number"
+              min="-12"
+              max="12"
+              value={coreParams.vcos[1]?.interval || 3}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[1] = { ...newVcos[1], interval: parseInt(e.target.value) };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            />
+          </div>
         </fieldset>
 
         <fieldset className="RS_module RS_vco2 RS_VCO">
           <legend>OSC3</legend>
           <div className="clearfix">
             <label>WAVE</label>
-            <select className="shape" defaultValue="NOISE">
+            <select
+              className="shape"
+              value={coreParams.vcos[2]?.shape || 'NOISE'}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[2] = { ...newVcos[2], shape: e.target.value };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            >
               <option>SINE</option>
               <option>TRIANGLE</option>
               <option>SAW</option>
@@ -557,44 +673,261 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               <option>NOISE</option>
             </select>
           </div>
-          <div className="clearfix"><label>OCT</label><input className="octave" type="number" min="0" max="5" defaultValue="3" /></div>
-          <div className="clearfix"><label>SHIFT</label><input className="interval" type="number" min="-12" max="12" defaultValue="0" /></div>
-          <div className="clearfix"><label>TUNE</label><input className="fine" type="number" min="-50" max="50" defaultValue="0" /></div>
+          <div className="clearfix">
+            <label>OCT</label>
+            <input
+              className="octave"
+              type="number"
+              min="0"
+              max="5"
+              value={coreParams.vcos[2]?.octave || 3}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[2] = { ...newVcos[2], octave: parseInt(e.target.value) };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>SHIFT</label>
+            <input
+              className="interval"
+              type="number"
+              min="-12"
+              max="12"
+              value={coreParams.vcos[2]?.interval || 0}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[2] = { ...newVcos[2], interval: parseInt(e.target.value) };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>TUNE</label>
+            <input
+              className="fine"
+              type="number"
+              min="-50"
+              max="50"
+              value={coreParams.vcos[2]?.fine || 0}
+              onChange={(e) => {
+                const newVcos = [...coreParams.vcos];
+                newVcos[2] = { ...newVcos[2], fine: parseInt(e.target.value) };
+                updateCoreParam({ vcos: newVcos });
+              }}
+            />
+          </div>
         </fieldset>
 
         <fieldset className="RS_module RS_mixer gain">
           <legend>Mixer</legend>
-          <div className="clearfix"><label>OSC1</label><input type="range" min="0" max="99" defaultValue="50" /></div>
-          <div className="clearfix"><label>OSC2</label><input type="range" min="0" max="99" defaultValue="40" /></div>
-          <div className="clearfix"><label>NOISE</label><input type="range" min="0" max="99" defaultValue="1" /></div>
+          <div className="clearfix">
+            <label>OSC1</label>
+            <input
+              type="range"
+              min="0"
+              max="99"
+              value={Math.round((coreParams.gains[0] || 0.5) * 99)}
+              onChange={(e) => {
+                const newGains = [...coreParams.gains];
+                newGains[0] = parseInt(e.target.value) / 99;
+                updateCoreParam({ gains: newGains });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>OSC2</label>
+            <input
+              type="range"
+              min="0"
+              max="99"
+              value={Math.round((coreParams.gains[1] || 0.4) * 99)}
+              onChange={(e) => {
+                const newGains = [...coreParams.gains];
+                newGains[1] = parseInt(e.target.value) / 99;
+                updateCoreParam({ gains: newGains });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>NOISE</label>
+            <input
+              type="range"
+              min="0"
+              max="99"
+              value={Math.round((coreParams.gains[2] || 0.01) * 99)}
+              onChange={(e) => {
+                const newGains = [...coreParams.gains];
+                newGains[2] = parseInt(e.target.value) / 99;
+                updateCoreParam({ gains: newGains });
+              }}
+            />
+          </div>
         </fieldset>
 
         <fieldset className="RS_module RS_EG EG">
           <legend>Envelope</legend>
           <canvas className="canvasEG"></canvas>
-          <div className="clearfix"><label>ATTACK</label><input name="attack" type="range" min="0" max="50000" defaultValue="0" /></div>
-          <div className="clearfix"><label>DECAY</label><input name="decay" type="range" min="0" max="50000" defaultValue="18000" /></div>
-          <div className="clearfix"><label>SUSTAIN</label><input name="sustain" type="range" min="0" max="100" defaultValue="40" /></div>
-          <div className="clearfix"><label>RELEASE</label><input name="release" type="range" min="0" max="50000" defaultValue="10000" /></div>
+          <div className="clearfix">
+            <label>ATTACK</label>
+            <input
+              name="attack"
+              type="range"
+              min="0"
+              max="50000"
+              value={coreParams.eg.adsr[0] || 0}
+              onChange={(e) => {
+                const newAdsr = [...coreParams.eg.adsr];
+                newAdsr[0] = parseInt(e.target.value);
+                updateCoreParam({ eg: { ...coreParams.eg, adsr: newAdsr as [number, number, number, number] } });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>DECAY</label>
+            <input
+              name="decay"
+              type="range"
+              min="0"
+              max="50000"
+              value={coreParams.eg.adsr[1] || 18000}
+              onChange={(e) => {
+                const newAdsr = [...coreParams.eg.adsr];
+                newAdsr[1] = parseInt(e.target.value);
+                updateCoreParam({ eg: { ...coreParams.eg, adsr: newAdsr as [number, number, number, number] } });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>SUSTAIN</label>
+            <input
+              name="sustain"
+              type="range"
+              min="0"
+              max="100"
+              value={coreParams.eg.adsr[2] || 40}
+              onChange={(e) => {
+                const newAdsr = [...coreParams.eg.adsr];
+                newAdsr[2] = parseInt(e.target.value);
+                updateCoreParam({ eg: { ...coreParams.eg, adsr: newAdsr as [number, number, number, number] } });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>RELEASE</label>
+            <input
+              name="release"
+              type="range"
+              min="0"
+              max="50000"
+              value={coreParams.eg.adsr[3] || 10000}
+              onChange={(e) => {
+                const newAdsr = [...coreParams.eg.adsr];
+                newAdsr[3] = parseInt(e.target.value);
+                updateCoreParam({ eg: { ...coreParams.eg, adsr: newAdsr as [number, number, number, number] } });
+              }}
+            />
+          </div>
         </fieldset>
 
         <fieldset className="RS_module RS_filter filter clearfix">
           <legend>Filter</legend>
           <div className="RS_filter_freq">
-            <label>FREQ</label><input className="filter_slider freq" type="range" min="10" max="1000" defaultValue="400" />
+            <label>FREQ</label>
+            <input
+              className="filter_slider freq"
+              type="range"
+              min="10"
+              max="1000"
+              value={coreParams.filter[0] || 400}
+              onChange={(e) => {
+                const newFilter = [...coreParams.filter];
+                newFilter[0] = parseInt(e.target.value);
+                updateCoreParam({ filter: newFilter as [number, number] });
+              }}
+            />
           </div>
           <div className="RS_filter_Q">
-            <label>REZ</label><input className="filter_slider q" type="range" min="0" max="40" defaultValue="6" />
+            <label>REZ</label>
+            <input
+              className="filter_slider q"
+              type="range"
+              min="0"
+              max="40"
+              value={coreParams.filter[1] || 6}
+              onChange={(e) => {
+                const newFilter = [...coreParams.filter];
+                newFilter[1] = parseInt(e.target.value);
+                updateCoreParam({ filter: newFilter as [number, number] });
+              }}
+            />
           </div>
         </fieldset>
 
         <fieldset className="RS_module RS_FEG FEG">
           <legend>FilterEnvelope</legend>
           <canvas className="canvasFEG"></canvas>
-          <div className="clearfix"><label>ATTACK</label><input name="attack" type="range" min="0" max="50000" defaultValue="0" /></div>
-          <div className="clearfix"><label>DECAY</label><input name="decay" type="range" min="0" max="50000" defaultValue="0" /></div>
-          <div className="clearfix"><label>SUSTAIN</label><input name="sustain" type="range" min="0" max="100" defaultValue="100" /></div>
-          <div className="clearfix"><label>RELEASE</label><input name="release" type="range" min="0" max="50000" defaultValue="10000" /></div>
+          <div className="clearfix">
+            <label>ATTACK</label>
+            <input
+              name="attack"
+              type="range"
+              min="0"
+              max="50000"
+              value={coreParams.feg.adsr[0] || 0}
+              onChange={(e) => {
+                const newAdsr = [...coreParams.feg.adsr];
+                newAdsr[0] = parseInt(e.target.value);
+                updateCoreParam({ feg: { ...coreParams.feg, adsr: newAdsr as [number, number, number, number] } });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>DECAY</label>
+            <input
+              name="decay"
+              type="range"
+              min="0"
+              max="50000"
+              value={coreParams.feg.adsr[1] || 0}
+              onChange={(e) => {
+                const newAdsr = [...coreParams.feg.adsr];
+                newAdsr[1] = parseInt(e.target.value);
+                updateCoreParam({ feg: { ...coreParams.feg, adsr: newAdsr as [number, number, number, number] } });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>SUSTAIN</label>
+            <input
+              name="sustain"
+              type="range"
+              min="0"
+              max="100"
+              value={coreParams.feg.adsr[2] || 100}
+              onChange={(e) => {
+                const newAdsr = [...coreParams.feg.adsr];
+                newAdsr[2] = parseInt(e.target.value);
+                updateCoreParam({ feg: { ...coreParams.feg, adsr: newAdsr as [number, number, number, number] } });
+              }}
+            />
+          </div>
+          <div className="clearfix">
+            <label>RELEASE</label>
+            <input
+              name="release"
+              type="range"
+              min="0"
+              max="50000"
+              value={coreParams.feg.adsr[3] || 10000}
+              onChange={(e) => {
+                const newAdsr = [...coreParams.feg.adsr];
+                newAdsr[3] = parseInt(e.target.value);
+                updateCoreParam({ feg: { ...coreParams.feg, adsr: newAdsr as [number, number, number, number] } });
+              }}
+            />
+          </div>
         </fieldset>
       </div>
     </div>
