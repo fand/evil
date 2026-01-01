@@ -427,9 +427,8 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
 
   return (
     <div
-      className="instrument synth clearfix"
+      className={`instrument synth clearfix ${isActive ? 'active' : ''}`}
       id={`synth${id}`}
-      style={{ display: isActive ? 'block' : 'none' }}
     >
       <div className="sequencer">
         <div className="header">

@@ -309,9 +309,8 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
 
   return (
     <div
-      className="sampler"
+      className={`instrument sampler clearfix ${isActive ? 'active' : ''}`}
       id={`sampler${id}`}
-      style={{ display: isActive ? 'block' : 'none' }}
     >
       <div className="header">
         <input
