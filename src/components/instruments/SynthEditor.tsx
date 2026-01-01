@@ -105,19 +105,6 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     ctxHoverRef.current = initCanvas(canvasHoverRef.current, width, height);
   }, []);
 
-  // Refresh canvas when becoming active
-  useEffect(() => {
-    if (isActive && isImageLoaded && ctxOffRef.current && cellImageRef.current) {
-      // Redraw all off cells
-      for (let y = 0; y < SYNTH_CELLS_Y; y++) {
-        for (let x = 0; x < SYNTH_CELLS_X; x++) {
-          drawCell(ctxOffRef.current, cellImageRef.current, CellType.Empty, x, y);
-        }
-      }
-      refreshPattern();
-    }
-  }, [isActive, isImageLoaded, refreshPattern]);
-
   // Draw all off cells when image loads
   useEffect(() => {
     if (!isImageLoaded || !ctxOffRef.current || !cellImageRef.current) {
@@ -132,7 +119,8 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     }
 
     refreshPattern();
-  }, [isImageLoaded, refreshPattern]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isImageLoaded]);
 
   // Refresh pattern when version changes
   useEffect(() => {
