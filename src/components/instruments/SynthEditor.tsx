@@ -27,6 +27,10 @@ interface SynthEditorProps {
 }
 
 export function SynthEditor({ model, id }: SynthEditorProps) {
+  // Canvas refs for ADSR
+  const canvasEGRef = useRef<HTMLCanvasElement>(null);
+  const canvasFEGRef = useRef<HTMLCanvasElement>(null);
+
   // Canvas refs
   const canvasOffRef = useRef<HTMLCanvasElement>(null);
   const canvasOnRef = useRef<HTMLCanvasElement>(null);
@@ -80,6 +84,39 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     model.core.setParam(param);
     setCoreParams(model.core.getParam());
   }, [model.core]);
+
+  // Draw ADSR canvas
+  const drawADSRCanvas = useCallback((canvasRef: React.RefObject<HTMLCanvasElement>, adsr: number[]) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const w = (canvas.width = 180);
+    const h = (canvas.height = 50);
+    const w4 = w / 4;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.beginPath();
+    ctx.moveTo(w4 * (1.0 - adsr[0]), h);
+    ctx.lineTo(w / 4, 0); // attack
+    ctx.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2])); // decay
+    ctx.lineTo(w4 * 3, h * (1.0 - adsr[2])); // sustain
+    ctx.lineTo(w4 * (adsr[3] + 3), h); // release
+    ctx.strokeStyle = 'rgb(0, 220, 255)';
+    ctx.stroke();
+  }, []);
+
+  // Update ADSR canvases when params change
+  useEffect(() => {
+    if (coreParams.eg?.adsr) {
+      drawADSRCanvas(canvasEGRef, coreParams.eg.adsr);
+    }
+    if (coreParams.feg?.adsr) {
+      drawADSRCanvas(canvasFEGRef, coreParams.feg.adsr);
+    }
+  }, [coreParams.eg?.adsr, coreParams.feg?.adsr, drawADSRCanvas]);
 
   // Load cell image
   useEffect(() => {
@@ -768,19 +805,19 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
 
         <fieldset className="RS_module RS_EG EG">
           <legend>Envelope</legend>
-          <canvas className="canvasEG"></canvas>
+          <canvas ref={canvasEGRef} className="canvasEG"></canvas>
           <div className="clearfix">
             <label>ATTACK</label>
             <input
               name="attack"
               type="range"
               min="0"
-              max="2000"
-              value={coreParams.eg.adsr[0] || 0}
+              max="50000"
+              value={Math.round((coreParams.eg.adsr[0] || 0) * 50000)}
               onChange={(e) => {
-                const newAdsr = [...coreParams.eg.adsr];
-                newAdsr[0] = parseInt(e.target.value);
-                updateCoreParam({ eg: { ...coreParams.eg, adsr: newAdsr as [number, number, number, number] } });
+                const value = parseInt(e.target.value);
+                model.core.setEGParam(value, coreParams.eg.adsr[1] * 50000, coreParams.eg.adsr[2] * 100, coreParams.eg.adsr[3] * 50000);
+                setCoreParams(model.core.getParam());
               }}
             />
           </div>
@@ -790,12 +827,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="decay"
               type="range"
               min="0"
-              max="2000"
-              value={coreParams.eg.adsr[1] || 18000}
+              max="50000"
+              value={Math.round((coreParams.eg.adsr[1] || 0.36) * 50000)}
               onChange={(e) => {
-                const newAdsr = [...coreParams.eg.adsr];
-                newAdsr[1] = parseInt(e.target.value);
-                updateCoreParam({ eg: { ...coreParams.eg, adsr: newAdsr as [number, number, number, number] } });
+                const value = parseInt(e.target.value);
+                model.core.setEGParam(coreParams.eg.adsr[0] * 50000, value, coreParams.eg.adsr[2] * 100, coreParams.eg.adsr[3] * 50000);
+                setCoreParams(model.core.getParam());
               }}
             />
           </div>
@@ -806,11 +843,11 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="100"
-              value={coreParams.eg.adsr[2] || 40}
+              value={Math.round((coreParams.eg.adsr[2] || 0.4) * 100)}
               onChange={(e) => {
-                const newAdsr = [...coreParams.eg.adsr];
-                newAdsr[2] = parseInt(e.target.value);
-                updateCoreParam({ eg: { ...coreParams.eg, adsr: newAdsr as [number, number, number, number] } });
+                const value = parseInt(e.target.value);
+                model.core.setEGParam(coreParams.eg.adsr[0] * 50000, coreParams.eg.adsr[1] * 50000, value, coreParams.eg.adsr[3] * 50000);
+                setCoreParams(model.core.getParam());
               }}
             />
           </div>
@@ -820,12 +857,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="release"
               type="range"
               min="0"
-              max="2000"
-              value={coreParams.eg.adsr[3] || 10000}
+              max="50000"
+              value={Math.round((coreParams.eg.adsr[3] || 0.2) * 50000)}
               onChange={(e) => {
-                const newAdsr = [...coreParams.eg.adsr];
-                newAdsr[3] = parseInt(e.target.value);
-                updateCoreParam({ eg: { ...coreParams.eg, adsr: newAdsr as [number, number, number, number] } });
+                const value = parseInt(e.target.value);
+                model.core.setEGParam(coreParams.eg.adsr[0] * 50000, coreParams.eg.adsr[1] * 50000, coreParams.eg.adsr[2] * 100, value);
+                setCoreParams(model.core.getParam());
               }}
             />
           </div>
@@ -867,19 +904,19 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
 
         <fieldset className="RS_module RS_FEG FEG">
           <legend>FilterEnvelope</legend>
-          <canvas className="canvasFEG"></canvas>
+          <canvas ref={canvasFEGRef} className="canvasFEG"></canvas>
           <div className="clearfix">
             <label>ATTACK</label>
             <input
               name="attack"
               type="range"
               min="0"
-              max="2000"
-              value={coreParams.feg.adsr[0] || 0}
+              max="50000"
+              value={Math.round((coreParams.feg.adsr[0] || 0) * 50000)}
               onChange={(e) => {
-                const newAdsr = [...coreParams.feg.adsr];
-                newAdsr[0] = parseInt(e.target.value);
-                updateCoreParam({ feg: { ...coreParams.feg, adsr: newAdsr as [number, number, number, number] } });
+                const value = parseInt(e.target.value);
+                model.core.setFEGParam(value, coreParams.feg.adsr[1] * 50000, coreParams.feg.adsr[2] * 100, coreParams.feg.adsr[3] * 50000);
+                setCoreParams(model.core.getParam());
               }}
             />
           </div>
@@ -889,12 +926,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="decay"
               type="range"
               min="0"
-              max="2000"
-              value={coreParams.feg.adsr[1] || 0}
+              max="50000"
+              value={Math.round((coreParams.feg.adsr[1] || 0) * 50000)}
               onChange={(e) => {
-                const newAdsr = [...coreParams.feg.adsr];
-                newAdsr[1] = parseInt(e.target.value);
-                updateCoreParam({ feg: { ...coreParams.feg, adsr: newAdsr as [number, number, number, number] } });
+                const value = parseInt(e.target.value);
+                model.core.setFEGParam(coreParams.feg.adsr[0] * 50000, value, coreParams.feg.adsr[2] * 100, coreParams.feg.adsr[3] * 50000);
+                setCoreParams(model.core.getParam());
               }}
             />
           </div>
@@ -905,11 +942,11 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="100"
-              value={coreParams.feg.adsr[2] || 100}
+              value={Math.round((coreParams.feg.adsr[2] || 1) * 100)}
               onChange={(e) => {
-                const newAdsr = [...coreParams.feg.adsr];
-                newAdsr[2] = parseInt(e.target.value);
-                updateCoreParam({ feg: { ...coreParams.feg, adsr: newAdsr as [number, number, number, number] } });
+                const value = parseInt(e.target.value);
+                model.core.setFEGParam(coreParams.feg.adsr[0] * 50000, coreParams.feg.adsr[1] * 50000, value, coreParams.feg.adsr[3] * 50000);
+                setCoreParams(model.core.getParam());
               }}
             />
           </div>
@@ -919,12 +956,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               name="release"
               type="range"
               min="0"
-              max="2000"
-              value={coreParams.feg.adsr[3] || 10000}
+              max="50000"
+              value={Math.round((coreParams.feg.adsr[3] || 0.2) * 50000)}
               onChange={(e) => {
-                const newAdsr = [...coreParams.feg.adsr];
-                newAdsr[3] = parseInt(e.target.value);
-                updateCoreParam({ feg: { ...coreParams.feg, adsr: newAdsr as [number, number, number, number] } });
+                const value = parseInt(e.target.value);
+                model.core.setFEGParam(coreParams.feg.adsr[0] * 50000, coreParams.feg.adsr[1] * 50000, coreParams.feg.adsr[2] * 100, value);
+                setCoreParams(model.core.getParam());
               }}
             />
           </div>
