@@ -413,76 +413,189 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
   }
 
   return (
-    <div className="synth" id={`synth${id}`}>
-      <div className="header">
-        <input
-          className="synth-name"
-          value={model.name}
-          onChange={handleSynthNameChange}
-        />
-        <select className="synth-type" value={model.type} onChange={handleTypeChange}>
-          <option value="REZ">REZ</option>
-          <option value="SAMPLER">SAMPLER</option>
-        </select>
-        <input
-          className="pattern-name"
-          value={model.pattern_name}
-          onChange={handlePatternNameChange}
-        />
-        <div className="pattern-controls">
-          <button
-            className={`sequencer-pencil ${!isStep ? 'btn-true' : 'btn-false'}`}
-            onClick={() => setIsStep(false)}
-          >
-            ✎
-          </button>
-          <button
-            className={`sequencer-step ${isStep ? 'btn-true' : 'btn-false'}`}
-            onClick={() => setIsStep(true)}
-          >
-            ◼
-          </button>
-          <button
-            className={`pattern-nosync ${isNoSync ? 'btn-true' : 'btn-false'}`}
-            onClick={toggleNoSync}
-          >
-            ⊗
-          </button>
-          <button className="pattern-plus btn-true" onClick={handlePlusPattern}>
-            +
-          </button>
-          <button
-            className={`pattern-minus ${pattern.length > SYNTH_CELLS_X ? 'btn-true' : 'btn-false'}`}
-            onClick={handleMinusPattern}
-          >
-            -
-          </button>
-        </div>
-        <div className="markers">
-          <span className="marker-pos">{page + 1}</span>
-          <span>/</span>
-          <span className="marker-total">{pageTotal}</span>
-        </div>
-      </div>
+    <div className="instrument synth clearfix" id={`synth${id}`}>
+      <div className="sequencer">
+        <div className="header">
+          <select className="synth-type" value={model.type} onChange={handleTypeChange}>
+            <option value="REZ">REZ</option>
+            <option value="SAMPLER">SAMPLER</option>
+          </select>
 
-      <div className="sequencer-table" style={{ height: isPanelOpened ? '262px' : '524px' }}>
-        <canvas ref={canvasOffRef} className="table-off" />
-        <canvas ref={canvasOnRef} className="table-on" />
-        <canvas
-          ref={canvasHoverRef}
-          className="table-hover"
-          onMouseMove={handleMouseMove}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseOut={handleMouseOut}
-        />
+          <div className="names clearfix">
+            <input
+              type="text"
+              className="synth-name"
+              value={model.name}
+              onChange={handleSynthNameChange}
+              onFocus={() => window.keyboard.beginInput()}
+              onBlur={() => window.keyboard.endInput()}
+            />
+            <span>&gt;</span>
+            <input
+              type="text"
+              className="pattern-name"
+              value={model.pattern_name}
+              onChange={handlePatternNameChange}
+              onFocus={() => window.keyboard.beginInput()}
+              onBlur={() => window.keyboard.endInput()}
+            />
+          </div>
+
+          <div className="sequencer-mode clearfix">
+            <span>input:</span>
+            <i
+              className={`fa fa-pencil sequencer-pencil ${!isStep ? 'btn-true' : 'btn-false'}`}
+              onClick={() => setIsStep(false)}
+            />
+            <i
+              className={`fa fa-ellipsis-h sequencer-step ${isStep ? 'btn-true' : 'btn-false'}`}
+              onClick={() => setIsStep(true)}
+            />
+          </div>
+
+          <div className="markers clearfix">
+            <i className="fa fa-angle-left marker-prev" onClick={() => controller.backward(true)} />
+            {[...Array(8)].map((_, i) => (
+              <i
+                key={i}
+                className={`fa fa-circle marker ${i < pageTotal ? 'marker-active' : ''} ${i === page ? 'marker-now' : ''}`}
+              />
+            ))}
+            <i className="fa fa-angle-right marker-next" onClick={() => controller.forward()} />
+
+            <span className="marker-pos">{page + 1}</span>
+            <span className="marker-divide">/</span>
+            <span className="marker-total">{pageTotal}</span>
+          </div>
+
+          <i
+            className={`fa fa-thumb-tack pattern-nosync btn ${isNoSync ? 'btn-true' : 'btn-false'}`}
+            onClick={toggleNoSync}
+          />
+          <i
+            className={`fa fa-minus pattern-minus btn ${pattern.length > SYNTH_CELLS_X ? 'btn-true' : 'btn-false'}`}
+            onClick={handleMinusPattern}
+          />
+          <i
+            className="fa fa-plus pattern-plus btn btn-true"
+            onClick={handlePlusPattern}
+          />
+        </div>
+
+        <div className="sequencer-table">
+          <canvas ref={canvasOffRef} className="table table-off" />
+          <canvas ref={canvasOnRef} className="table table-on" />
+          <canvas
+            ref={canvasHoverRef}
+            className="table table-hover"
+            onMouseMove={handleMouseMove}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseOut={handleMouseOut}
+          />
+        </div>
       </div>
 
       <div className="synth-core" style={{ height: isPanelOpened ? '280px' : '0px' }}>
-        <button className="btn-fold-core" onClick={togglePanelFold}>
-          <i className={`fa ${isPanelOpened ? 'fa-angle-down' : 'fa-angle-up'}`} />
-        </button>
-        {/* Core view will be rendered here */}
+        <i
+          className={`fa ${isPanelOpened ? 'fa-angle-down' : 'fa-angle-up'} btn-fold-core`}
+          onClick={togglePanelFold}
+        />
+
+        <fieldset className="RS_module RS_vco0 RS_VCO">
+          <legend>OSC1</legend>
+          <div className="clearfix">
+            <label>WAVE</label>
+            <select className="shape" defaultValue="RECT">
+              <option>SINE</option>
+              <option>TRIANGLE</option>
+              <option>SAW</option>
+              <option>RECT</option>
+              <option>SUPERSAW</option>
+              <option>SUPERRECT</option>
+            </select>
+          </div>
+          <div className="clearfix"><label>OCT</label><input className="octave" type="number" min="0" max="5" defaultValue="0" /></div>
+          <div className="clearfix"><label>TUNE</label><input className="fine" type="number" min="-50" max="50" defaultValue="0" /></div>
+          <input className="interval" type="hidden" defaultValue="0" />
+          <div className="clearfix">
+            <label>SHIFT</label>
+            <select className="harmony" defaultValue="harmony">
+              <option>harmony</option>
+              <option>chromatic</option>
+            </select>
+          </div>
+        </fieldset>
+
+        <fieldset className="RS_module RS_vco1 RS_VCO">
+          <legend>OSC2</legend>
+          <div className="clearfix">
+            <label>WAVE</label>
+            <select className="shape" defaultValue="SAW">
+              <option>SINE</option>
+              <option>TRIANGLE</option>
+              <option>SAW</option>
+              <option>RECT</option>
+              <option>SUPERSAW</option>
+              <option>SUPERRECT</option>
+            </select>
+          </div>
+          <div className="clearfix"><label>OCT</label><input className="octave" type="number" min="0" max="5" defaultValue="0" /></div>
+          <div className="clearfix"><label>TUNE</label><input className="fine" type="number" min="-50" max="50" defaultValue="1" /></div>
+          <div className="clearfix"><label>SHIFT</label><input className="interval" type="number" min="-12" max="12" defaultValue="3" /></div>
+        </fieldset>
+
+        <fieldset className="RS_module RS_vco2 RS_VCO">
+          <legend>OSC3</legend>
+          <div className="clearfix">
+            <label>WAVE</label>
+            <select className="shape" defaultValue="NOISE">
+              <option>SINE</option>
+              <option>TRIANGLE</option>
+              <option>SAW</option>
+              <option>RECT</option>
+              <option>NOISE</option>
+            </select>
+          </div>
+          <div className="clearfix"><label>OCT</label><input className="octave" type="number" min="0" max="5" defaultValue="3" /></div>
+          <div className="clearfix"><label>SHIFT</label><input className="interval" type="number" min="-12" max="12" defaultValue="0" /></div>
+          <div className="clearfix"><label>TUNE</label><input className="fine" type="number" min="-50" max="50" defaultValue="0" /></div>
+        </fieldset>
+
+        <fieldset className="RS_module RS_mixer gain">
+          <legend>Mixer</legend>
+          <div className="clearfix"><label>OSC1</label><input type="range" min="0" max="99" defaultValue="50" /></div>
+          <div className="clearfix"><label>OSC2</label><input type="range" min="0" max="99" defaultValue="40" /></div>
+          <div className="clearfix"><label>NOISE</label><input type="range" min="0" max="99" defaultValue="1" /></div>
+        </fieldset>
+
+        <fieldset className="RS_module RS_EG EG">
+          <legend>Envelope</legend>
+          <canvas className="canvasEG"></canvas>
+          <div className="clearfix"><label>ATTACK</label><input name="attack" type="range" min="0" max="50000" defaultValue="0" /></div>
+          <div className="clearfix"><label>DECAY</label><input name="decay" type="range" min="0" max="50000" defaultValue="18000" /></div>
+          <div className="clearfix"><label>SUSTAIN</label><input name="sustain" type="range" min="0" max="100" defaultValue="40" /></div>
+          <div className="clearfix"><label>RELEASE</label><input name="release" type="range" min="0" max="50000" defaultValue="10000" /></div>
+        </fieldset>
+
+        <fieldset className="RS_module RS_filter filter clearfix">
+          <legend>Filter</legend>
+          <div className="RS_filter_freq">
+            <label>FREQ</label><input className="filter_slider freq" type="range" min="10" max="1000" defaultValue="400" />
+          </div>
+          <div className="RS_filter_Q">
+            <label>REZ</label><input className="filter_slider q" type="range" min="0" max="40" defaultValue="6" />
+          </div>
+        </fieldset>
+
+        <fieldset className="RS_module RS_FEG FEG">
+          <legend>FilterEnvelope</legend>
+          <canvas className="canvasFEG"></canvas>
+          <div className="clearfix"><label>ATTACK</label><input name="attack" type="range" min="0" max="50000" defaultValue="0" /></div>
+          <div className="clearfix"><label>DECAY</label><input name="decay" type="range" min="0" max="50000" defaultValue="0" /></div>
+          <div className="clearfix"><label>SUSTAIN</label><input name="sustain" type="range" min="0" max="100" defaultValue="100" /></div>
+          <div className="clearfix"><label>RELEASE</label><input name="release" type="range" min="0" max="50000" defaultValue="10000" /></div>
+        </fieldset>
       </div>
     </div>
   );
