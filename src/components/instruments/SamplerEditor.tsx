@@ -47,6 +47,8 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
   const [clickPos, setClickPos] = useState({ x: -1, y: -1 });
   const [isAdding, setIsAdding] = useState(false);
   const [lastTime, setLastTime] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [sampleNow, _setSampleNow] = useState(0); // Currently selected sample index
 
   // Store state
   const currentInstrument = useAppStore((state) => state.ui.currentInstrument);
@@ -306,6 +308,43 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
     }
   };
 
+  // Sampler core parameter handlers
+  const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const speed = Math.pow(10, parseFloat(e.target.value) / 100.0 - 1.0);
+    const timeParam = model.core.getSampleTimeParam(sampleNow);
+    model.core.setSampleTimeParam(sampleNow, timeParam[0], timeParam[1], speed);
+  };
+
+  const handleEQChange = (param: 'lo' | 'mid' | 'hi', value: string) => {
+    const eqParam = model.core.getSampleEQParam(sampleNow);
+    const newValue = parseFloat(value) - 100.0;
+
+    if (param === 'lo') {
+      model.core.setSampleEQParam(sampleNow, newValue, eqParam[1], eqParam[2]);
+    } else if (param === 'mid') {
+      model.core.setSampleEQParam(sampleNow, eqParam[0], newValue, eqParam[2]);
+    } else if (param === 'hi') {
+      model.core.setSampleEQParam(sampleNow, eqParam[0], eqParam[1], newValue);
+    }
+
+    // Update EQ canvas if view exists
+    if (model.core.view) {
+      model.core.view.updateEQCanvas();
+    }
+  };
+
+  const handlePanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const pan = 1.0 - parseFloat(e.target.value) / 200.0;
+    const outputParam = model.core.getSampleOutputParam(sampleNow);
+    model.core.setSampleOutputParam(sampleNow, pan, outputParam[1]);
+  };
+
+  const handleGainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const gain = parseFloat(e.target.value) / 100.0;
+    const outputParam = model.core.getSampleOutputParam(sampleNow);
+    model.core.setSampleOutputParam(sampleNow, outputParam[0], gain);
+  };
+
   return (
     <div
       className={`instrument sampler clearfix ${isActive ? 'active' : ''}`}
@@ -400,7 +439,14 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
 
           <div className="clearfix param">
             <label>SPEED</label>
-            <input className="speed" type="range" min="0" max="200" defaultValue="100" />
+            <input
+              className="speed"
+              type="range"
+              min="0"
+              max="200"
+              defaultValue="100"
+              onChange={handleSpeedChange}
+            />
           </div>
         </fieldset>
 
@@ -410,23 +456,60 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
           <div className="clearfix EQ-sliders">
             <div className="EQ-slider">
               <label>LO</label>
-              <input className="gain-slider EQ_lo" type="range" min="0" max="200" defaultValue="100" />
+              <input
+                className="gain-slider EQ_lo"
+                type="range"
+                min="0"
+                max="200"
+                defaultValue="100"
+                onChange={(e) => handleEQChange('lo', e.target.value)}
+              />
             </div>
             <div className="EQ-slider">
               <label>MID</label>
-              <input className="gain-slider EQ_mid" type="range" min="0" max="200" defaultValue="100" />
+              <input
+                className="gain-slider EQ_mid"
+                type="range"
+                min="0"
+                max="200"
+                defaultValue="100"
+                onChange={(e) => handleEQChange('mid', e.target.value)}
+              />
             </div>
             <div className="EQ-slider">
               <label>HI</label>
-              <input className="gain-slider EQ_hi" type="range" min="0" max="200" defaultValue="100" />
+              <input
+                className="gain-slider EQ_hi"
+                type="range"
+                min="0"
+                max="200"
+                defaultValue="100"
+                onChange={(e) => handleEQChange('hi', e.target.value)}
+              />
             </div>
           </div>
         </fieldset>
 
         <fieldset className="Sampler_module Sampler_output">
           <legend>output</legend>
-          L <input className="pan-slider" type="range" min="0" max="200" defaultValue="100" /> R
-          <input className="gain-slider" type="range" min="0" max="100" defaultValue="100" />
+          L{' '}
+          <input
+            className="pan-slider"
+            type="range"
+            min="0"
+            max="200"
+            defaultValue="100"
+            onChange={handlePanChange}
+          />{' '}
+          R
+          <input
+            className="gain-slider"
+            type="range"
+            min="0"
+            max="100"
+            defaultValue="100"
+            onChange={handleGainChange}
+          />
         </fieldset>
       </div>
     </div>
