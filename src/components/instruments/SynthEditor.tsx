@@ -764,7 +764,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="99"
-              value={Math.round((coreParams.gains[0] || 0.5) * 99)}
+              value={Math.round((coreParams.gains[0] ?? 0.5) * 99)}
               onChange={(e) => {
                 const newGains = [...coreParams.gains];
                 newGains[0] = parseInt(e.target.value) / 99;
@@ -778,7 +778,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="99"
-              value={Math.round((coreParams.gains[1] || 0.4) * 99)}
+              value={Math.round((coreParams.gains[1] ?? 0.4) * 99)}
               onChange={(e) => {
                 const newGains = [...coreParams.gains];
                 newGains[1] = parseInt(e.target.value) / 99;
@@ -792,7 +792,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="99"
-              value={Math.round((coreParams.gains[2] || 0.01) * 99)}
+              value={Math.round((coreParams.gains[2] ?? 0.01) * 99)}
               onChange={(e) => {
                 const newGains = [...coreParams.gains];
                 newGains[2] = parseInt(e.target.value) / 99;
@@ -812,7 +812,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="50000"
-              value={Math.round((coreParams.eg.adsr[0] || 0) * 50000)}
+              value={Math.round((coreParams.eg.adsr[0] ?? 0) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
                 model.core.setEGParam(value, coreParams.eg.adsr[1] * 50000, coreParams.eg.adsr[2] * 100, coreParams.eg.adsr[3] * 50000);
@@ -827,7 +827,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="50000"
-              value={Math.round((coreParams.eg.adsr[1] || 0.36) * 50000)}
+              value={Math.round((coreParams.eg.adsr[1] ?? 0.36) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
                 model.core.setEGParam(coreParams.eg.adsr[0] * 50000, value, coreParams.eg.adsr[2] * 100, coreParams.eg.adsr[3] * 50000);
@@ -842,7 +842,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="100"
-              value={Math.round((coreParams.eg.adsr[2] || 0.4) * 100)}
+              value={Math.round((coreParams.eg.adsr[2] ?? 0.4) * 100)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
                 model.core.setEGParam(coreParams.eg.adsr[0] * 50000, coreParams.eg.adsr[1] * 50000, value, coreParams.eg.adsr[3] * 50000);
@@ -857,7 +857,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="50000"
-              value={Math.round((coreParams.eg.adsr[3] || 0.2) * 50000)}
+              value={Math.round((coreParams.eg.adsr[3] ?? 0.2) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
                 model.core.setEGParam(coreParams.eg.adsr[0] * 50000, coreParams.eg.adsr[1] * 50000, coreParams.eg.adsr[2] * 100, value);
@@ -911,7 +911,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="50000"
-              value={Math.round((coreParams.feg.adsr[0] || 0) * 50000)}
+              value={Math.round((coreParams.feg.adsr[0] ?? 0) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
                 model.core.setFEGParam(value, coreParams.feg.adsr[1] * 50000, coreParams.feg.adsr[2] * 100, coreParams.feg.adsr[3] * 50000);
@@ -926,7 +926,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="50000"
-              value={Math.round((coreParams.feg.adsr[1] || 0) * 50000)}
+              value={Math.round((coreParams.feg.adsr[1] ?? 0) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
                 model.core.setFEGParam(coreParams.feg.adsr[0] * 50000, value, coreParams.feg.adsr[2] * 100, coreParams.feg.adsr[3] * 50000);
@@ -941,7 +941,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="100"
-              value={Math.round((coreParams.feg.adsr[2] || 1) * 100)}
+              value={Math.round((coreParams.feg.adsr[2] ?? 1) * 100)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
                 model.core.setFEGParam(coreParams.feg.adsr[0] * 50000, coreParams.feg.adsr[1] * 50000, value, coreParams.feg.adsr[3] * 50000);
@@ -956,7 +956,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               type="range"
               min="0"
               max="50000"
-              value={Math.round((coreParams.feg.adsr[3] || 0.2) * 50000)}
+              value={Math.round((coreParams.feg.adsr[3] ?? 0.2) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
                 model.core.setFEGParam(coreParams.feg.adsr[0] * 50000, coreParams.feg.adsr[1] * 50000, coreParams.feg.adsr[2] * 100, value);

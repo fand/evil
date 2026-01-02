@@ -28,11 +28,15 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
   const canvasOffRef = useRef<HTMLCanvasElement>(null);
   const canvasOnRef = useRef<HTMLCanvasElement>(null);
   const canvasHoverRef = useRef<HTMLCanvasElement>(null);
+  const canvasWaveformRef = useRef<HTMLCanvasElement>(null);
+  const canvasEQRef = useRef<HTMLCanvasElement>(null);
 
   // Context refs
   const ctxOffRef = useRef<CanvasRenderingContext2D | null>(null);
   const ctxOnRef = useRef<CanvasRenderingContext2D | null>(null);
   const ctxHoverRef = useRef<CanvasRenderingContext2D | null>(null);
+  const ctxWaveformRef = useRef<CanvasRenderingContext2D | null>(null);
+  const ctxEQRef = useRef<CanvasRenderingContext2D | null>(null);
 
   // Cell image ref
   const cellImageRef = useRef<HTMLImageElement | null>(null);
@@ -327,11 +331,105 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
       model.core.setSampleEQParam(sampleNow, eqParam[0], eqParam[1], newValue);
     }
 
-    // Update EQ canvas if view exists
-    if (model.core.view) {
-      model.core.view.updateEQCanvas();
-    }
+    // Update EQ canvas
+    updateEQCanvas();
   };
+
+  // Draw waveform canvas
+  const updateWaveformCanvas = useCallback(() => {
+    if (!canvasWaveformRef.current || !ctxWaveformRef.current) return;
+
+    const canvas = canvasWaveformRef.current;
+    const ctx = ctxWaveformRef.current;
+    const w = 300;
+    const h = 170;
+
+    canvas.width = w;
+    canvas.height = h;
+    ctx.clearRect(0, 0, w, h);
+    ctx.translate(0, 10);
+
+    const hts = model.core.getSampleTimeParam(sampleNow);
+    const _data = model.core.getSampleData(sampleNow);
+
+    if (_data) {
+      const wave = _data.getChannelData(0);
+
+      // Draw waveform
+      ctx.translate(0, (h - 10) / 2);
+      ctx.beginPath();
+
+      const d = wave.length / w;
+      for (let x = 0; x < w; x++) {
+        ctx.lineTo(x, wave[Math.floor(x * d)] * (h - 10) * 0.45);
+      }
+
+      ctx.closePath();
+      ctx.strokeStyle = 'rgb(255, 0, 220)';
+      ctx.stroke();
+      ctx.translate(0, -(h - 10) / 2);
+    }
+
+    // Draw params (head/tail)
+    const left = hts[0] * w;
+    const right = hts[1] * w;
+    if (left < right) {
+      ctx.fillStyle = 'rgba(255, 0, 160, 0.2)';
+      ctx.fillRect(left, 0, right - left, h - 10);
+    }
+
+    ctx.strokeStyle = 'rgb(255, 0, 220)';
+    ctx.beginPath();
+    ctx.arc(left, -5, 5, 0, 2 * Math.PI, false);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(right, -5, 5, 0, 2 * Math.PI, false);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.translate(0, -10);
+  }, [model, sampleNow]);
+
+  // Draw EQ canvas
+  const updateEQCanvas = useCallback(() => {
+    if (!canvasEQRef.current || !ctxEQRef.current) return;
+
+    const canvas = canvasEQRef.current;
+    const ctx = ctxEQRef.current;
+    const w = 270;
+    const h = 100;
+
+    canvas.width = w;
+    canvas.height = h;
+
+    const eq = model.core.getSampleEQParam(sampleNow);
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.translate(0, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(0, -(eq[0] / 100.0) * (h / 2));
+    ctx.lineTo(w / 3, -(eq[1] / 100.0) * (h / 2));
+    ctx.lineTo((w / 3) * 2, -(eq[1] / 100.0) * (h / 2));
+    ctx.lineTo(w, -(eq[2] / 100.0) * (h / 2));
+    ctx.strokeStyle = 'rgb(255, 0, 220)';
+    ctx.stroke();
+    ctx.closePath();
+    ctx.translate(0, -h / 2);
+  }, [model, sampleNow]);
+
+  // Initialize waveform and EQ canvases
+  useEffect(() => {
+    if (canvasWaveformRef.current) {
+      ctxWaveformRef.current = canvasWaveformRef.current.getContext('2d');
+    }
+    if (canvasEQRef.current) {
+      ctxEQRef.current = canvasEQRef.current.getContext('2d');
+    }
+    updateWaveformCanvas();
+    updateEQCanvas();
+  }, [isActive, sampleNow, updateWaveformCanvas, updateEQCanvas]);
 
   const handlePanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const pan = 1.0 - parseFloat(e.target.value) / 200.0;
@@ -434,7 +532,7 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
               <div className="sample-error"></div>
             </div>
 
-            <canvas className="waveform"></canvas>
+            <canvas ref={canvasWaveformRef} className="waveform"></canvas>
           </div>
 
           <div className="clearfix param">
@@ -452,7 +550,7 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
 
         <fieldset className="Sampler_module Sampler_EQ">
           <legend>EQ</legend>
-          <canvas className="canvasEQ"></canvas>
+          <canvas ref={canvasEQRef} className="canvasEQ"></canvas>
           <div className="clearfix EQ-sliders">
             <div className="EQ-slider">
               <label>LO</label>

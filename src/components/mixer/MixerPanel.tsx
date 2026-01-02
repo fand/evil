@@ -3,12 +3,12 @@ import { useAppStore, useShallow } from '../../hooks/useStore';
 import { store } from '../../store';
 
 // Format pan value for display
+// pan value: 0 = Right, 0.5 = Center, 1 = Left
 function formatPan(value: number): string {
-  // value is 0-1, where 0.5 is center
-  const percent = Math.round((value - 0.5) * 200);
-  if (percent === 0) return 'C';
-  if (percent < 0) return `${-percent}% L`;
-  return `${percent}% R`;
+  const l = Math.round((value * 200 - 100) * -1);
+  if (l === 0) return 'C';
+  if (l < 0) return `${-l}% L`;
+  return `${l}% R`;
 }
 
 // Convert slider value (0-200) to pan value (0-1)
