@@ -60,7 +60,6 @@ export class SequencerCanvas {
   is_adding: boolean = false;
   is_step: boolean = false;
   is_nosync: boolean = false;
-  isInitialized: boolean = false;
 
   unsubscribe?: () => void;
 
@@ -107,7 +106,6 @@ export class SequencerCanvas {
         this.initCanvas();
         this.initEvents();
         this.subscribeStore();
-        this.isInitialized = true;
         resolve();
       };
     });
@@ -401,10 +399,6 @@ export class SequencerCanvas {
 
   // Playback position
   playAt(time: number) {
-    if (!this.isInitialized) {
-      return;
-    }
-
     this.time = time;
     if (this.is_nosync) {
       return;
