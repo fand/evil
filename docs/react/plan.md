@@ -213,12 +213,23 @@ useEffect(() => {
 }, [localPattern])
 ```
 
+### Implementation Details
+- Canvas-based pattern editing (SYNTH_CELLS_X=32, SAMPLER_CELLS_X=32)
+- React event handlers for all parameter updates
+- Store subscription for playback position updates
+- Coexistence with jQuery views during migration
+
 ### Checklist
-- [ ] Create PatternGrid.tsx (shared)
-- [ ] Create SynthEditor.tsx
-- [ ] Create SamplerEditor.tsx
-- [ ] Remove SynthView.ts
-- [ ] Remove SamplerView.ts
+- [x] Create SynthEditor.tsx (header, sequencer, synth-core)
+- [x] Create SamplerEditor.tsx (header, sequencer, sampler-core)
+- [x] Implement canvas-based pattern editing
+- [x] Add React event handlers for synth-core parameters (VCO, EG, FEG, Filter, Gain)
+- [x] Add React event handlers for sampler-core parameters (EQ/output/pan/speed)
+- [x] Fix playback position bar updates
+- [x] Fix playback time wrapping issue (prevent store from seeing out-of-bounds values)
+- [ ] Remove SynthView.ts (still used by Synth constructor)
+- [ ] Remove SamplerView.ts (still used by Sampler constructor)
+- [ ] Update Synth/Sampler constructors to not create jQuery views
 
 ---
 
@@ -310,12 +321,19 @@ Option B: Add React root alongside
 |-------|-----------|--------|
 | 1 | Infrastructure | ✅ Complete |
 | 2 | PlayerControls | ✅ Complete |
-| 3 | SessionGrid | ✅ Complete |
-| 4 | SynthEditor | 🔲 Not started |
-| 4 | SamplerEditor | 🔲 Not started |
+| 3 | SessionGrid | ✅ Complete (SaveDialog pending) |
+| 4 | SynthEditor | ✅ Complete (cleanup pending) |
+| 4 | SamplerEditor | ✅ Complete (cleanup pending) |
+| 5 | SaveDialog | 🔲 Not started |
 | 5 | MixerPanel | 🔲 Not started |
 | 5 | Sidebar | 🔲 Not started |
 | 5 | FX Views | 🔲 Not started |
+
+### Recent Commits
+- `3984b87` - Add React event handlers for sampler-core parameter updates
+- `065b77f` - Update SamplerEditor header structure and implement sampler-core section
+- `3f99162` - Fix playback time wrapping issue in store
+- `f63f7d2` - Fix position bar updates by syncing playback time to store
 
 ---
 
