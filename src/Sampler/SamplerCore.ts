@@ -1,5 +1,4 @@
 import { SampleNode as SamplerNode } from './SampleNode';
-import { SamplerCoreView } from './CoreView';
 import type { Sampler } from '../Sampler';
 import type { SamplerParam } from '../Song';
 
@@ -11,7 +10,6 @@ export class SamplerCore {
   gain: number;
   is_mute: boolean;
   samples: SamplerNode[];
-  view: SamplerCoreView;
 
   constructor(parent: Sampler, ctx: AudioContext, id: number) {
     this.parent = parent;
@@ -29,12 +27,7 @@ export class SamplerCore {
       sample.connect(this.node);
       this.samples.push(sample);
     }
-
-    this.view = new SamplerCoreView(
-      this,
-      this.id,
-      this.parent.view.dom.find('.sampler-core')
-    );
+    // React SamplerEditor handles the sampler-core UI
   }
 
   noteOn(notes: [number, number][] | number) {
@@ -102,15 +95,12 @@ export class SamplerCore {
     return this.samples[i].getOutputParam();
   }
 
-  sampleLoaded(id: number) {
-    this.view.updateWaveformCanvas(id);
+  sampleLoaded(_id: number) {
+    // React SamplerEditor handles waveform display via getParam()
   }
 
-  bindSample(sample_now: number) {
-    this.view.bindSample(sample_now, this.samples[sample_now].getParam());
-    this.view.setSampleTimeParam(this.getSampleTimeParam(sample_now));
-    this.view.setSampleEQParam(this.getSampleEQParam(sample_now));
-    this.view.setSampleOutputParam(this.getSampleOutputParam(sample_now));
+  bindSample(_sample_now: number) {
+    // React SamplerEditor handles sample binding via state
   }
 
   getParam(): SamplerParam {

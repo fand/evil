@@ -5,6 +5,7 @@ import { NavigationButtons } from '../components/player/NavigationButtons';
 import { useResizeHandler } from '../components/player/useResizeHandler';
 import { SessionGrid } from '../components/session';
 import { InstrumentsContainer } from '../components/instruments';
+import { SaveDialog } from '../components/session/SaveDialog';
 
 // Store roots for cleanup
 const roots: Root[] = [];
@@ -102,6 +103,20 @@ export function mountReactApp() {
     instrumentsRoot.render(<InstrumentsContainer />);
     roots.push(instrumentsRoot);
   }
+
+  // Mount SaveDialog (replaces jQuery dialog handling)
+  const existingDialog = document.getElementById('dialog');
+  if (existingDialog) {
+    existingDialog.remove();
+  }
+  const dialogContainer = document.createElement('div');
+  dialogContainer.id = 'react-dialog';
+  dialogContainer.style.cssText = 'display: contents;';
+  document.body.appendChild(dialogContainer);
+
+  const dialogRoot = createRoot(dialogContainer);
+  dialogRoot.render(<SaveDialog />);
+  roots.push(dialogRoot);
 }
 
 /**

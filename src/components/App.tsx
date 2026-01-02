@@ -1,7 +1,12 @@
 /**
  * Root React component.
- * Currently a placeholder - will be populated as views are migrated.
  */
+import { SaveDialog } from './session/SaveDialog';
+
 export function App() {
-  return null;
+  return (
+    <>
+      <SaveDialog />
+    </>
+  );
 }

@@ -1,4 +1,3 @@
-import { SynthCoreView } from './CoreView';
 import { KEY_LIST, NoteKey, SEMITONE, STREAM_LENGTH } from '../Constant';
 import type { Synth } from '../Synth';
 import type { SynthParam, VCOParam, EGParam } from '../Song';
@@ -343,7 +342,6 @@ export class SynthCore {
   eg: EG;
   feg: EG;
   gain_res: GainNode;
-  view: SynthCoreView;
   note: number = 0;
 
   constructor(parent: Synth, ctx: AudioContext, id: number) {
@@ -379,12 +377,7 @@ export class SynthCore {
     this.gain_res.gain.value = 0;
     this.vcos[2].connect(this.gain_res);
     this.gain_res.connect(this.node);
-
-    this.view = new SynthCoreView(
-      this,
-      this.id,
-      this.parent.view.dom.find('.synth-core')
-    );
+    // React SynthEditor handles the synth-core UI
   }
 
   getParam(): SynthParam {
@@ -420,7 +413,7 @@ export class SynthCore {
       this.feg.setRange(this.feg.getRange()[0], p.filter[0]);
       this.filter.setQ(p.filter[1]);
     }
-    this.view.setParam(p);
+    // React SynthEditor reads params via getParam()
   }
 
   setVCOParam(

@@ -175,7 +175,7 @@ useEffect(() => {
 - [x] Create SongInfo.tsx
 - [x] Create SessionViewAdapter.ts (handles dialogs, syncs store)
 - [x] Handle mouse events (hover, click, drag, double-click)
-- [ ] Create SaveDialog.tsx (dialogs still in SessionViewAdapter)
+- [x] Create SaveDialog.tsx with dialog state in store
 - [x] Remove SessionView.ts
 
 ---
@@ -227,9 +227,10 @@ useEffect(() => {
 - [x] Add React event handlers for sampler-core parameters (EQ/output/pan/speed)
 - [x] Fix playback position bar updates
 - [x] Fix playback time wrapping issue (prevent store from seeing out-of-bounds values)
-- [ ] Remove SynthView.ts (still used by Synth constructor)
-- [ ] Remove SamplerView.ts (still used by Sampler constructor)
-- [ ] Update Synth/Sampler constructors to not create jQuery views
+- [x] Implement Keyboard component for sequencer-table
+- [x] Remove SynthView.ts and update Synth constructor
+- [x] Remove SamplerView.ts and update Sampler constructor
+- [x] Remove view property from Instrument interface
 
 ---
 
@@ -321,22 +322,24 @@ Option B: Add React root alongside
 |-------|-----------|--------|
 | 1 | Infrastructure | ✅ Complete |
 | 2 | PlayerControls | ✅ Complete |
-| 3 | SessionGrid | ✅ Complete (SaveDialog pending) |
-| 4 | SynthEditor | ✅ Complete (cleanup pending) |
-| 4 | SamplerEditor | ✅ Complete (cleanup pending) |
-| 5 | SaveDialog | 🔲 Not started |
+| 3 | SessionGrid | ✅ Complete |
+| 4 | SynthEditor | ✅ Complete |
+| 4 | SamplerEditor | ✅ Complete |
+| 5 | SaveDialog | ✅ Complete |
 | 5 | MixerPanel | ✅ Complete |
 | 5 | Sidebar | ✅ Complete |
 | 5 | FX Views | ✅ Complete |
+| 5 | Keyboard | ✅ Complete |
+| Cleanup | Remove SynthView.ts | ✅ Complete |
+| Cleanup | Remove SamplerView.ts | ✅ Complete |
 
 ### Recent Commits
+- Remove SynthView.ts, SamplerView.ts and view dependencies from Synth/Sampler classes
+- Implement SaveDialog.tsx with dialog state in store
+- Implement Keyboard React component for sequencer-table
 - Phase 5: Implement MixerPanel, Sidebar, and FXPanel React components
 - Add mixer state to store (trackGains, masterGain, trackPans, masterPan)
 - Add mixer actions to controller (setMixerGains, setMixerPans, getTrackGains)
-- `3984b87` - Add React event handlers for sampler-core parameter updates
-- `065b77f` - Update SamplerEditor header structure and implement sampler-core section
-- `3f99162` - Fix playback time wrapping issue in store
-- `f63f7d2` - Fix position bar updates by syncing playback time to store
 
 ---
 

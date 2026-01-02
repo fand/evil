@@ -1,6 +1,5 @@
 import { Panner } from './Panner';
 import { SamplerCore } from './Sampler/SamplerCore';
-import { SamplerView } from './Sampler/SamplerView';
 import $ from 'jquery';
 import type { Player } from './Player';
 import type { Session } from './Session';
@@ -38,7 +37,6 @@ class Sampler implements Instrument {
     this.pattern_obj.pattern = value;
   }
   time: number;
-  view: SamplerView;
   core: SamplerCore;
   is_sustaining: boolean;
   session: Session;
@@ -93,7 +91,6 @@ class Sampler implements Instrument {
     };
 
     this.time = 0;
-    this.view = new SamplerView(this, this.id);
     this.core = new SamplerCore(this, this.ctx, this.id);
 
     this.is_sustaining = false;
@@ -147,7 +144,7 @@ class Sampler implements Instrument {
   playAt(time: number) {
     this.time = time;
     const mytime = this.time % this.pattern.length;
-    this.view.playAt(mytime);
+    // React SamplerEditor handles playback position via store
     if (this.pattern[mytime].length > 0) {
       const notes = this.pattern[mytime];
       this.core.noteOn(notes);
@@ -155,12 +152,12 @@ class Sampler implements Instrument {
   }
 
   play() {
-    this.view.play();
+    // React SamplerEditor handles playback state via store
   }
 
   stop() {
     this.core.noteOff();
-    this.view.stop();
+    // React SamplerEditor handles playback state via store
   }
 
   pause() {
@@ -280,22 +277,22 @@ class Sampler implements Instrument {
   }
 
   activate() {
-    this.view.activate();
+    // React SamplerEditor handles activation via store.ui.currentInstrument
   }
 
   deactivate() {
-    this.view.deactivate();
+    // React SamplerEditor handles activation via store.ui.currentInstrument
   }
 
   redraw(time: number) {
     this.time = time;
-    this.view.drawPattern(this.time);
+    // React SamplerEditor redraws via playback.time subscription
   }
 
   setInstrumentName(name: string) {
     this.name = name;
     this.session.setTrackName(this.id, this.name);
-    this.view.setInstrumentName(this.name);
+    // React SamplerEditor reads name from model
   }
 
   // called by SamplerView.
@@ -306,7 +303,7 @@ class Sampler implements Instrument {
 
   setPatternName(pattern_name: string) {
     this.pattern_name = pattern_name;
-    this.view.setPatternName(this.pattern_name);
+    // React SamplerEditor reads pattern_name from model
   }
 
   selectSample(sample_now: number) {
@@ -318,8 +315,8 @@ class Sampler implements Instrument {
       throw new TypeError(`Invalid instrument type: ${type}`);
     }
 
-    const s_new = this.player.changeInstrument(this.id, type);
-    this.view.dom.replaceWith(s_new.view.dom);
+    this.player.changeInstrument(this.id, type);
+    // React InstrumentsContainer re-renders based on player.synths changes
     this.noteOff();
     this.disconnect();
   }

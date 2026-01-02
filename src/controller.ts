@@ -154,8 +154,7 @@ class AppController {
     const oldInst = this.player.instruments[id];
     const newInst = this.player.changeInstrument(id, type);
 
-    // DOM replacement and cleanup (previously in Synth.changeSynth)
-    oldInst.view.dom.replaceWith(newInst.view.dom);
+    // React InstrumentsContainer re-renders based on player.synths changes
     oldInst.noteOff(true);
     oldInst.disconnect();
 
@@ -208,9 +207,7 @@ class AppController {
     if (inst) {
       inst.name = name;
       this.session.setTrackName(id, name);
-      if ('setInstrumentName' in inst.view) {
-        (inst.view as { setInstrumentName: (name: string) => void }).setInstrumentName(name);
-      }
+      // React SynthEditor/SamplerEditor reads name from model
     }
   }
 
@@ -218,7 +215,7 @@ class AppController {
     const inst = this.player.instruments[id];
     if (inst) {
       inst.pattern_name = name;
-      inst.view.setPatternName(name);
+      // React SynthEditor/SamplerEditor reads pattern_name from model
     }
   }
 

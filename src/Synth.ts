@@ -1,5 +1,4 @@
 import { MutekiTimer } from './MutekiTimer';
-import { SynthView } from './Synth/SynthView';
 import { SynthCore } from './Synth/SynthCore';
 import { Panner } from './Panner';
 import $ from 'jquery';
@@ -21,12 +20,9 @@ import type {
 } from './Song';
 import { store, selectKey, selectScale } from './store';
 
-// Note: this.view.setPattern() is replaced by store.triggerPatternRefresh()
-// SynthView subscribes to patternVersions and calls its own setPattern()
-
 const T2 = new MutekiTimer();
 
-// Manages SynthCore, SynthView.
+// Manages SynthCore. React SynthEditor handles the view.
 class Synth implements Instrument {
   ctx: AudioContext;
   id: number;
@@ -37,7 +33,6 @@ class Synth implements Instrument {
   time: number;
   scale_name: string;
   scale: number[];
-  view: SynthView;
   core: SynthCore;
   is_on: boolean;
   is_sustaining: boolean;
@@ -84,7 +79,6 @@ class Synth implements Instrument {
     this.time = 0;
     this.scale_name = 'Major';
     this.scale = SCALE_LIST[this.scale_name as keyof typeof SCALE_LIST];
-    this.view = new SynthView(this, this.id);
     this.core = new SynthCore(this, this.ctx, this.id);
 
     this.is_on = false;
@@ -113,11 +107,11 @@ class Synth implements Instrument {
     });
 
     // Subscribe to Scale changes from store
+    // React SynthEditor subscribes to scene.scale for keyboard display
     store.subscribe(selectScale, (scale) => {
       if (scale in SCALE_LIST) {
         this.scale_name = scale;
         this.scale = SCALE_LIST[scale as keyof typeof SCALE_LIST];
-        this.view.changeScale(this.scale);
       }
     });
   }
@@ -149,7 +143,7 @@ class Synth implements Instrument {
   setScale(scale_name: string) {
     this.scale_name = scale_name;
     this.scale = SCALE_LIST[this.scale_name as keyof typeof SCALE_LIST];
-    this.view.changeScale(this.scale);
+    // React SynthEditor subscribes to scene.scale for keyboard display
   }
 
   setGain(gain: number) {
@@ -182,7 +176,7 @@ class Synth implements Instrument {
   playAt(time: number) {
     this.time = time;
     const mytime = this.time % this.pattern.length;
-    this.view.playAt(mytime);
+    // React SynthEditor subscribes to playback.time for position bar
     if (this.is_performing) {
       return;
     }
@@ -215,12 +209,12 @@ class Synth implements Instrument {
   }
 
   play() {
-    this.view.play();
+    // React SynthEditor handles playback state via store
   }
 
   stop() {
     this.core.noteOff();
-    this.view.stop();
+    // React SynthEditor handles playback state via store
   }
 
   pause() {
@@ -279,16 +273,16 @@ class Synth implements Instrument {
   }
 
   activate() {
-    this.view.activate();
+    // React SynthEditor handles activation via store.ui.currentInstrument
   }
 
   deactivate() {
-    this.view.deactivate();
+    // React SynthEditor handles activation via store.ui.currentInstrument
   }
 
   redraw(time: number) {
     this.time = time;
-    this.view.drawPattern(this.time);
+    // React SynthEditor redraws via playback.time subscription
   }
 
   // called by SynthView.
@@ -299,24 +293,24 @@ class Synth implements Instrument {
 
   setPatternName(pattern_name: string) {
     this.pattern_name = pattern_name;
-    this.view.setPatternName(this.pattern_name);
+    // React SynthEditor reads pattern_name from model
   }
 
   setSynthName(name: string) {
     this.name = name;
     this.session.setTrackName(this.id, this.name);
-    this.view.setSynthName(this.name);
+    // React SynthEditor reads name from model
   }
 
   // Get new Synth and replace.
-  // called by SynthView.
+  // called by controller.changeInstrumentType
   changeSynth(type: string) {
     if (type !== 'REZ' && type !== 'SAMPLER') {
       throw new TypeError(`Invalid instrument type: ${type}`);
     }
 
-    const s_new = this.player.changeInstrument(this.id, type);
-    this.view.dom.replaceWith(s_new.view.dom);
+    this.player.changeInstrument(this.id, type);
+    // React InstrumentsContainer re-renders based on player.synths changes
     this.noteOff(true);
     this.disconnect();
   }

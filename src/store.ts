@@ -25,6 +25,14 @@ export type UIState = {
   currentInstrument: number;
   // Pattern version per instrument - incremented when pattern changes
   patternVersions: Record<number, number>;
+  // Dialog state
+  dialog: {
+    isOpen: boolean;
+    type: 'success' | 'error' | null;
+    url: string;
+    songTitle: string;
+    userName: string;
+  };
 };
 
 // Mixer state
@@ -83,6 +91,9 @@ export type AppActions = {
   // UI actions
   setCurrentInstrument: (idx: number) => void;
   triggerPatternRefresh: (instrumentId: number) => void;
+  showSuccessDialog: (url: string, songTitle: string, userName: string) => void;
+  showErrorDialog: () => void;
+  closeDialog: () => void;
 
   // Mixer actions
   setTrackGain: (trackIdx: number, gain: number) => void;
@@ -116,6 +127,13 @@ const initialPlayback: PlaybackState = {
 const initialUI: UIState = {
   currentInstrument: 0,
   patternVersions: {},
+  dialog: {
+    isOpen: false,
+    type: null,
+    url: '',
+    songTitle: '',
+    userName: '',
+  },
 };
 
 const initialMixer: MixerState = {
@@ -246,6 +264,43 @@ export const store = createStore<Store>()(
         },
       })),
 
+    showSuccessDialog: (url, songTitle, userName) =>
+      set((state) => ({
+        ui: {
+          ...state.ui,
+          dialog: {
+            isOpen: true,
+            type: 'success',
+            url,
+            songTitle,
+            userName,
+          },
+        },
+      })),
+
+    showErrorDialog: () =>
+      set((state) => ({
+        ui: {
+          ...state.ui,
+          dialog: {
+            ...state.ui.dialog,
+            isOpen: true,
+            type: 'error',
+          },
+        },
+      })),
+
+    closeDialog: () =>
+      set((state) => ({
+        ui: {
+          ...state.ui,
+          dialog: {
+            ...state.ui.dialog,
+            isOpen: false,
+          },
+        },
+      })),
+
     // Mixer actions
     setTrackGain: (trackIdx, gain) =>
       set((state) => {
@@ -319,3 +374,4 @@ export const selectTrackGains = (state: Store) => state.mixer.trackGains;
 export const selectMasterGain = (state: Store) => state.mixer.masterGain;
 export const selectTrackPans = (state: Store) => state.mixer.trackPans;
 export const selectMasterPan = (state: Store) => state.mixer.masterPan;
+export const selectDialog = (state: Store) => state.ui.dialog;

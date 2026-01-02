@@ -7,18 +7,12 @@ import type {
   EffectParam,
 } from './Song';
 
-export interface InstrumentView {
-  dom: JQuery;
-  setPatternName(name: string): void;
-}
-
 export interface Instrument {
   id: number;
   name: string;
   type: InstrumentType;
   pattern: Pattern;
   pattern_name: string;
-  view: InstrumentView;
   effects: FX[];
 
   setDuration(duration: number): void;
