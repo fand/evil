@@ -7,6 +7,7 @@ import { Double } from './FX/Double';
 import { Reverb } from './FX/Reverb';
 import { Compressor } from './FX/Compressor';
 import { FX } from './FX/FX';
+import { store } from './store';
 import type { Player } from './Player';
 import type { Instrument } from './Instrument';
 
@@ -100,6 +101,8 @@ export class Mixer {
     this.gain_tracks = [];
     this.panners = [];
     this.analysers = [];
+    // Reset store mixer state
+    store.getState().resetMixer();
     return this.view.empty();
   }
 
@@ -113,6 +116,9 @@ export class Mixer {
     const a = this.ctx.createAnalyser();
     instrument.connect(a);
     this.analysers.push(a);
+
+    // Add track to store for React mixer panel
+    store.getState().addMixerTrack();
 
     this.view.addInstrument();
   }
@@ -176,6 +182,13 @@ export class Mixer {
     }
     this.loadGains(p.gain_tracks, p.gain_master);
     this.loadPans(p.pan_tracks, p.pan_master);
+    // Sync to store for React mixer panel
+    store.getState().loadMixerState({
+      trackGains: p.gain_tracks,
+      masterGain: p.gain_master,
+      trackPans: p.pan_tracks,
+      masterPan: p.pan_master,
+    });
   }
 
   changeInstrument(idx: number, instrument: Instrument) {
