@@ -311,59 +311,123 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
       className={`instrument sampler clearfix ${isActive ? 'active' : ''}`}
       id={`sampler${id}`}
     >
-      <div className="header">
-        <input
-          className="synth-name"
-          value={model.name}
-          onChange={handleInstNameChange}
-        />
-        <select className="synth-type" value="sampler" onChange={handleTypeChange}>
-          <option value="sampler">Sampler</option>
-        </select>
-        <input
-          className="pattern-name"
-          value={model.pattern_name}
-          onChange={handlePatternNameChange}
-        />
-        <div className="pattern-controls">
-          <button
-            className={`pattern-nosync ${isNoSync ? 'btn-true' : 'btn-false'}`}
-            onClick={toggleNoSync}
-          >
-            ⊗
-          </button>
-          <button className="pattern-plus btn-true" onClick={handlePlusPattern}>
-            +
-          </button>
-          <button
-            className={`pattern-minus ${pattern.length > SAMPLER_CELLS_X ? 'btn-true' : 'btn-false'}`}
-            onClick={handleMinusPattern}
-          >
-            -
-          </button>
-        </div>
-        <div className="markers">
-          <span className="marker-pos">{page + 1}</span>
-          <span>/</span>
-          <span className="marker-total">{pageTotal}</span>
-        </div>
-      </div>
+      <div className="sequencer">
+        <div className="header">
+          <select className="synth-type" value={model.type} onChange={handleTypeChange}>
+            <option value="REZ">REZ</option>
+            <option value="SAMPLER">SAMPLER</option>
+          </select>
 
-      <div className="sequencer-table">
-        <canvas ref={canvasOffRef} className="table-off" />
-        <canvas ref={canvasOnRef} className="table-on" />
-        <canvas
-          ref={canvasHoverRef}
-          className="table-hover"
-          onMouseMove={handleMouseMove}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseOut={handleMouseOut}
-        />
+          <div className="names clearfix">
+            <input
+              type="text"
+              className="synth-name"
+              value={model.name}
+              onChange={handleInstNameChange}
+              onFocus={() => window.keyboard.beginInput()}
+              onBlur={() => window.keyboard.endInput()}
+            />
+            <span>&gt;</span>
+            <input
+              type="text"
+              className="pattern-name"
+              value={model.pattern_name}
+              onChange={handlePatternNameChange}
+              onFocus={() => window.keyboard.beginInput()}
+              onBlur={() => window.keyboard.endInput()}
+            />
+          </div>
+
+          <div className="markers clearfix">
+            <i className="fa fa-angle-left marker-prev" onClick={() => controller.backward(true)} />
+            {[...Array(8)].map((_, i) => (
+              <i
+                key={i}
+                className={`fa fa-circle marker ${i < pageTotal ? 'marker-active' : ''} ${i === page ? 'marker-now' : ''}`}
+              />
+            ))}
+            <i className="fa fa-angle-right marker-next" onClick={() => controller.forward()} />
+
+            <span className="marker-pos">{page + 1}</span>
+            <span className="marker-divide">/</span>
+            <span className="marker-total">{pageTotal}</span>
+          </div>
+
+          <i
+            className={`fa fa-thumb-tack pattern-nosync btn ${isNoSync ? 'btn-true' : 'btn-false'}`}
+            onClick={toggleNoSync}
+          />
+          <i
+            className={`fa fa-minus pattern-minus btn ${pattern.length > SAMPLER_CELLS_X ? 'btn-true' : 'btn-false'}`}
+            onClick={handleMinusPattern}
+          />
+          <i
+            className="fa fa-plus pattern-plus btn btn-true"
+            onClick={handlePlusPattern}
+          />
+        </div>
+
+        <div className="sequencer-table">
+          <canvas ref={canvasOffRef} className="table table-off" />
+          <canvas ref={canvasOnRef} className="table table-on" />
+          <canvas
+            ref={canvasHoverRef}
+            className="table table-hover"
+            onMouseMove={handleMouseMove}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseOut={handleMouseOut}
+          />
+        </div>
       </div>
 
       <div className="sampler-core">
-        {/* Core view will be rendered here */}
+        <fieldset className="Sampler_module Sampler_sample">
+          <legend>Sample</legend>
+
+          <div className="wave">
+            <div className="file-select clearfix">
+              <label>SAMPLE</label>
+              <div className="sample-name">
+                <span>hello</span>
+                <i className="fa fa-angle-down"></i>
+              </div>
+              <div className="sample-error"></div>
+            </div>
+
+            <canvas className="waveform"></canvas>
+          </div>
+
+          <div className="clearfix param">
+            <label>SPEED</label>
+            <input className="speed" type="range" min="0" max="200" defaultValue="100" />
+          </div>
+        </fieldset>
+
+        <fieldset className="Sampler_module Sampler_EQ">
+          <legend>EQ</legend>
+          <canvas className="canvasEQ"></canvas>
+          <div className="clearfix EQ-sliders">
+            <div className="EQ-slider">
+              <label>LO</label>
+              <input className="gain-slider EQ_lo" type="range" min="0" max="200" defaultValue="100" />
+            </div>
+            <div className="EQ-slider">
+              <label>MID</label>
+              <input className="gain-slider EQ_mid" type="range" min="0" max="200" defaultValue="100" />
+            </div>
+            <div className="EQ-slider">
+              <label>HI</label>
+              <input className="gain-slider EQ_hi" type="range" min="0" max="200" defaultValue="100" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset className="Sampler_module Sampler_output">
+          <legend>output</legend>
+          L <input className="pan-slider" type="range" min="0" max="200" defaultValue="100" /> R
+          <input className="gain-slider" type="range" min="0" max="100" defaultValue="100" />
+        </fieldset>
       </div>
     </div>
   );
