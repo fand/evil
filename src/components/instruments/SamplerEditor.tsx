@@ -16,6 +16,7 @@ import {
   clearAll,
   getPosFromEvent,
 } from './canvasUtils';
+import { Keyboard, SAMPLER_KEYBOARD_COLORS } from './Keyboard';
 import type { Sampler } from '../../Sampler';
 
 interface SamplerEditorProps {
@@ -51,8 +52,7 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
   const [clickPos, setClickPos] = useState({ x: -1, y: -1 });
   const [isAdding, setIsAdding] = useState(false);
   const [lastTime, setLastTime] = useState(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sampleNow, _setSampleNow] = useState(0); // Currently selected sample index
+  const [sampleNow, setSampleNow] = useState(0); // Currently selected sample index
 
   // Store state
   const currentInstrument = useAppStore((state) => state.ui.currentInstrument);
@@ -443,6 +443,23 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
     model.core.setSampleOutputParam(sampleNow, outputParam[0], gain);
   };
 
+  // Keyboard callbacks
+  const handleKeyboardNoteOn = useCallback((note: number) => {
+    model.noteOn(note);
+  }, [model]);
+
+  const handleKeyboardNoteOff = useCallback(() => {
+    model.noteOff();
+  }, [model]);
+
+  const handleKeyboardSelectSample = useCallback((sample: number) => {
+    setSampleNow(sample);
+    controller.selectSample(id, sample);
+  }, [id]);
+
+  // Default scale for sampler (7 notes per octave display)
+  const samplerScale = [0, 1, 2, 3, 4, 5, 6];
+
   return (
     <div
       className={`instrument sampler clearfix ${isActive ? 'active' : ''}`}
@@ -505,6 +522,16 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
         </div>
 
         <div className="sequencer-table">
+          <Keyboard
+            numKeys={SAMPLER_CELLS_Y}
+            scale={samplerScale}
+            width={64}
+            height={SAMPLER_CELLS_Y * 26}
+            colors={SAMPLER_KEYBOARD_COLORS}
+            onNoteOn={handleKeyboardNoteOn}
+            onNoteOff={handleKeyboardNoteOff}
+            onSelectSample={handleKeyboardSelectSample}
+          />
           <canvas ref={canvasOffRef} className="table table-off" />
           <canvas ref={canvasOnRef} className="table table-on" />
           <canvas

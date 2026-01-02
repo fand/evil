@@ -18,6 +18,8 @@ import {
   clearAll,
   getPosFromEvent,
 } from './canvasUtils';
+import { Keyboard, SYNTH_KEYBOARD_COLORS } from './Keyboard';
+import { SCALE_LIST } from '../../Constant';
 import type { Synth } from '../../Synth';
 
 interface SynthEditorProps {
@@ -63,7 +65,11 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
   const currentInstrument = useAppStore((state) => state.ui.currentInstrument);
   const patternVersions = useAppStore((state) => state.ui.patternVersions);
   const playbackTime = useAppStore((state) => state.playback.time);
+  const scaleName = useAppStore((state) => state.scene.scale);
   const isActive = currentInstrument === id;
+
+  // Get scale array from scale name
+  const scale = SCALE_LIST[scaleName as keyof typeof SCALE_LIST] || SCALE_LIST.Major;
 
   // Get pattern from model
   const pattern = model.pattern;
@@ -461,6 +467,15 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     setIsPanelOpened(!isPanelOpened);
   };
 
+  // Keyboard callbacks
+  const handleKeyboardNoteOn = useCallback((note: number) => {
+    model.noteOn(note, true);
+  }, [model]);
+
+  const handleKeyboardNoteOff = useCallback(() => {
+    model.noteOff(true);
+  }, [model]);
+
   return (
     <div
       className={`instrument synth clearfix ${isActive ? 'active' : ''}`}
@@ -535,6 +550,15 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
         </div>
 
         <div className="sequencer-table">
+          <Keyboard
+            numKeys={SYNTH_CELLS_Y}
+            scale={scale}
+            width={48}
+            height={SYNTH_CELLS_Y * 26}
+            colors={SYNTH_KEYBOARD_COLORS}
+            onNoteOn={handleKeyboardNoteOn}
+            onNoteOff={handleKeyboardNoteOff}
+          />
           <canvas ref={canvasOffRef} className="table table-off" />
           <canvas ref={canvasOnRef} className="table table-on" />
           <canvas
