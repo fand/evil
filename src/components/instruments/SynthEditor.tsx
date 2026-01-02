@@ -167,7 +167,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
 
   // Update playback position
   useEffect(() => {
-    if (!isActive || !isImageLoaded || !ctxOffRef.current || !cellImageRef.current || isNoSync) {
+    if (!isImageLoaded || !ctxOffRef.current || !cellImageRef.current || isNoSync) {
       return;
     }
 
@@ -186,7 +186,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     }
 
     setLastTime(time);
-  }, [playbackTime, isActive, isImageLoaded, isNoSync]);
+  }, [playbackTime, isImageLoaded, isNoSync]);
 
   // Draw pattern on canvas
   const drawPattern = useCallback(
