@@ -4,6 +4,7 @@ import { controller } from '../../controller';
 import { TracksCanvas } from './TracksCanvas';
 import { MasterCanvas } from './MasterCanvas';
 import { SongInfo } from './SongInfo';
+import { TracksMixer, MasterMixer } from '../mixer/MixerPanel';
 import { OFFSET_Y, type CellPos } from './types';
 
 /**
@@ -19,6 +20,22 @@ export function SessionGrid() {
   const masterWrapperRef = useRef<HTMLDivElement>(null);
   const [mixerScrollLeft, setMixerScrollLeft] = useState(0);
   const [selectedPos, setSelectedPos] = useState<CellPos | null>({ x: 0, y: 0, type: 'master' });
+
+  // Handle mixer gain changes - sync to audio engine
+  const handleGainsChange = useCallback((trackGains: number[], masterGain: number) => {
+    controller.setMixerGains?.(trackGains, masterGain);
+  }, []);
+
+  // Handle mixer pan changes - sync to audio engine
+  const handlePansChange = useCallback((trackPans: number[], masterPan: number) => {
+    controller.setMixerPans?.(trackPans, masterPan);
+  }, []);
+
+  // Handle master gain changes
+  const handleMasterGainChange = useCallback((masterGain: number) => {
+    const trackGains = controller.getTrackGains?.() || [];
+    controller.setMixerGains?.(trackGains, masterGain);
+  }, []);
 
   // Sync scroll between tracks and master
   const handleTracksScroll = useCallback(() => {
@@ -67,7 +84,10 @@ export function SessionGrid() {
           selectedPos={selectedPos}
         />
         <div id="effects-tracks" className="clearfix" />
-        <div id="console-tracks" className="clearfix" />
+        <TracksMixer
+          onGainsChange={handleGainsChange}
+          onPansChange={handlePansChange}
+        />
       </div>
 
       <div id="mixer-master">
@@ -79,13 +99,9 @@ export function SessionGrid() {
           selectedPos={selectedPos}
           onSyncScroll={handleMasterScroll}
         />
-        <div id="console-master" className="clearfix">
-          <div className="console-track">
-            <div>MASTER</div>
-            <input className="gain-slider" type="range" min="0" max="100" defaultValue="100" />
-            <canvas className="vu-meter" />
-          </div>
-        </div>
+        <MasterMixer
+          onGainChange={handleMasterGainChange}
+        />
       </div>
 
       <SongInfo

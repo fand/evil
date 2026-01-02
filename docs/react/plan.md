@@ -325,11 +325,14 @@ Option B: Add React root alongside
 | 4 | SynthEditor | ✅ Complete (cleanup pending) |
 | 4 | SamplerEditor | ✅ Complete (cleanup pending) |
 | 5 | SaveDialog | 🔲 Not started |
-| 5 | MixerPanel | 🔲 Not started |
-| 5 | Sidebar | 🔲 Not started |
-| 5 | FX Views | 🔲 Not started |
+| 5 | MixerPanel | ✅ Complete |
+| 5 | Sidebar | ✅ Complete |
+| 5 | FX Views | ✅ Complete |
 
 ### Recent Commits
+- Phase 5: Implement MixerPanel, Sidebar, and FXPanel React components
+- Add mixer state to store (trackGains, masterGain, trackPans, masterPan)
+- Add mixer actions to controller (setMixerGains, setMixerPans, getTrackGains)
 - `3984b87` - Add React event handlers for sampler-core parameter updates
 - `065b77f` - Update SamplerEditor header structure and implement sampler-core section
 - `3f99162` - Fix playback time wrapping issue in store

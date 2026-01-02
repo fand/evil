@@ -221,6 +221,30 @@ class AppController {
       inst.view.setPatternName(name);
     }
   }
+
+  // ========================================
+  // Mixer Actions
+  // ========================================
+
+  setMixerGains(trackGains: number[], masterGain: number) {
+    if (!this._player) return;
+    this.player.mixer.setGains(trackGains, masterGain);
+  }
+
+  setMixerPans(trackPans: number[], masterPan: number) {
+    if (!this._player) return;
+    this.player.mixer.setPans(trackPans, masterPan);
+  }
+
+  getTrackGains(): number[] {
+    if (!this._player) return [];
+    return this.player.mixer.gain_tracks;
+  }
+
+  getMasterGain(): number {
+    if (!this._player) return 1.0;
+    return this.player.mixer.gain_master;
+  }
 }
 
 export const controller = new AppController();

@@ -27,6 +27,14 @@ export type UIState = {
   patternVersions: Record<number, number>;
 };
 
+// Mixer state
+export type MixerState = {
+  trackGains: number[];
+  masterGain: number;
+  trackPans: number[];
+  masterPan: number;
+};
+
 // Full app state
 export type AppState = {
   // Data
@@ -38,6 +46,9 @@ export type AppState = {
 
   // UI
   ui: UIState;
+
+  // Mixer
+  mixer: MixerState;
 };
 
 // Actions
@@ -73,6 +84,15 @@ export type AppActions = {
   setCurrentInstrument: (idx: number) => void;
   triggerPatternRefresh: (instrumentId: number) => void;
 
+  // Mixer actions
+  setTrackGain: (trackIdx: number, gain: number) => void;
+  setMasterGain: (gain: number) => void;
+  setTrackPan: (trackIdx: number, pan: number) => void;
+  setMasterPan: (pan: number) => void;
+  addMixerTrack: () => void;
+  resetMixer: () => void;
+  loadMixerState: (state: MixerState) => void;
+
   // Utility
   reset: () => void;
 };
@@ -98,6 +118,13 @@ const initialUI: UIState = {
   patternVersions: {},
 };
 
+const initialMixer: MixerState = {
+  trackGains: [],
+  masterGain: 1.0,
+  trackPans: [],
+  masterPan: 0.5,
+};
+
 const initialScene: Scene = {
   name: '',
   bpm: 120,
@@ -112,6 +139,7 @@ export const store = createStore<Store>()(
     scene: initialScene,
     playback: initialPlayback,
     ui: initialUI,
+    mixer: initialMixer,
 
     // Song actions
     setSong: (song) => set({ song }),
@@ -218,6 +246,46 @@ export const store = createStore<Store>()(
         },
       })),
 
+    // Mixer actions
+    setTrackGain: (trackIdx, gain) =>
+      set((state) => {
+        const trackGains = [...state.mixer.trackGains];
+        trackGains[trackIdx] = gain;
+        return { mixer: { ...state.mixer, trackGains } };
+      }),
+
+    setMasterGain: (gain) =>
+      set((state) => ({
+        mixer: { ...state.mixer, masterGain: gain },
+      })),
+
+    setTrackPan: (trackIdx, pan) =>
+      set((state) => {
+        const trackPans = [...state.mixer.trackPans];
+        trackPans[trackIdx] = pan;
+        return { mixer: { ...state.mixer, trackPans } };
+      }),
+
+    setMasterPan: (pan) =>
+      set((state) => ({
+        mixer: { ...state.mixer, masterPan: pan },
+      })),
+
+    addMixerTrack: () =>
+      set((state) => ({
+        mixer: {
+          ...state.mixer,
+          trackGains: [...state.mixer.trackGains, 1.0],
+          trackPans: [...state.mixer.trackPans, 0.5],
+        },
+      })),
+
+    resetMixer: () =>
+      set({ mixer: initialMixer }),
+
+    loadMixerState: (mixerState) =>
+      set({ mixer: mixerState }),
+
     // Utility
     reset: () =>
       set({
@@ -225,6 +293,7 @@ export const store = createStore<Store>()(
         scene: initialScene,
         playback: initialPlayback,
         ui: initialUI,
+        mixer: initialMixer,
       }),
   }))
 );
@@ -245,3 +314,8 @@ export const selectIsLoop = (state: Store) => state.playback.isLoop;
 export const selectCurrentInstrument = (state: Store) => state.ui.currentInstrument;
 export const selectBeat = (state: Store) => state.playback.beat;
 export const selectPatternVersions = (state: Store) => state.ui.patternVersions;
+export const selectMixer = (state: Store) => state.mixer;
+export const selectTrackGains = (state: Store) => state.mixer.trackGains;
+export const selectMasterGain = (state: Store) => state.mixer.masterGain;
+export const selectTrackPans = (state: Store) => state.mixer.trackPans;
+export const selectMasterPan = (state: Store) => state.mixer.masterPan;
