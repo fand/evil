@@ -210,6 +210,10 @@ export class Player {
       }
 
       this.time++;
+      // Reset time before syncing to store to prevent React components from seeing out-of-bounds values
+      if (this.time >= this.scene_length) {
+        this.time = 0;
+      }
       store.getState().setTime(this.time);
       T.setTimeout(() => this.playNext(), this.duration);
     } else {
