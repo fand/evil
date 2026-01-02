@@ -1,9 +1,9 @@
+import $ from 'jquery';
 import { Mixer } from './Mixer';
 import { Session } from './Session';
 import { Sidebar } from './Sidebar';
 import { Synth } from './Synth';
 import { Sampler } from './Sampler';
-import { PlayerView } from './PlayerView';
 import { MutekiTimer } from './MutekiTimer';
 import {
   isNoteKey,
@@ -38,7 +38,6 @@ export class Player {
   session: Session;
   sidebar: Sidebar;
   scene_length: number = 32;
-  view: PlayerView;
 
   // scene is the single source of truth for bpm/key/scale
   get bpm(): number {
@@ -74,8 +73,6 @@ export class Player {
 
     // Register with controller for Views to access
     controller.registerPlayer(this);
-
-    this.view = new PlayerView();
   }
 
   setBPM(bpm: number) {
@@ -145,6 +142,7 @@ export class Player {
     store.getState().setPlaying(false);
     // UI update is handled by PlayerView's store subscription
     this.time = 0;
+    store.getState().setTime(0);
   }
 
   pause() {
@@ -212,6 +210,11 @@ export class Player {
       }
 
       this.time++;
+      // Reset time before syncing to store to prevent React components from seeing out-of-bounds values
+      if (this.time >= this.scene_length) {
+        this.time = 0;
+      }
+      store.getState().setTime(this.time);
       T.setTimeout(() => this.playNext(), this.duration);
     } else {
       this.stop();
@@ -252,7 +255,7 @@ export class Player {
 
     this.mixer.changeInstrument(idx, inst);
     this.session.changeInstrument(idx, type, inst);
-    this.view.changeInstrument();
+    // React NavigationButtons handles visibility via state
 
     return inst;
   }
@@ -286,15 +289,24 @@ export class Player {
   }
 
   moveTo(inst_idx: number) {
-    this.view.moveBottom();
-    if (inst_idx < this.current_instrument) {
-      while (inst_idx !== this.current_instrument) {
-        this.view.moveLeft();
-      }
-    } else {
-      while (inst_idx !== this.current_instrument) {
-        this.view.moveRight();
-      }
+    // Navigate to a specific instrument
+    // This is called by Session when double-clicking a cell
+    // React NavigationButtons handles the visual navigation
+    const instrumentsEl = document.getElementById('instruments');
+    const wrapperEl = document.getElementById('wrapper');
+
+    // Move to instruments view (bottom)
+    if (wrapperEl) {
+      wrapperEl.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
+    }
+    window.keyboard.setMode('SYNTH');
+
+    // Navigate to the target instrument
+    this.current_instrument = inst_idx;
+    store.getState().setCurrentInstrument(inst_idx);
+
+    if (instrumentsEl) {
+      instrumentsEl.style.webkitTransform = `translate3d(${-1110 * inst_idx}px, 0px, 0px)`;
     }
   }
 
@@ -320,7 +332,7 @@ export class Player {
     this.num_id = 0;
     this.mixer.empty();
     this.session.empty();
-    this.view.empty();
+    $('#instruments').empty(); // Clear instruments DOM
 
     // Set song to Session and Store
     this.session.song = song;
@@ -347,27 +359,21 @@ export class Player {
     this.session.loadSong();
     this.mixer.loadParam(this.song.mixer);
 
-    this.view.setInstrumentCount(
-      this.instruments.length,
-      this.current_instrument
-    );
+    // React NavigationButtons handles instrument count via controller.instrumentsCount
     this.resetSceneLength();
   }
 
   loadScene(scene: Partial<Scene>) {
+    // setBPM/setKey/setScale update the store, React will react
     if (scene.bpm) {
       this.setBPM(scene.bpm);
-      this.view.setBPM(scene.bpm);
     }
     if (scene.key) {
       this.setKey(scene.key);
-      this.view.setKey(scene.key);
     }
     if (scene.scale) {
       this.setScale(scene.scale);
-      this.view.setScale(scene.scale);
     }
-    this.view.setParam(scene.bpm, scene.key, scene.scale);
   }
 
   getScene() {
