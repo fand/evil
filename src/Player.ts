@@ -142,6 +142,7 @@ export class Player {
     store.getState().setPlaying(false);
     // UI update is handled by PlayerView's store subscription
     this.time = 0;
+    store.getState().setTime(0);
   }
 
   pause() {
@@ -209,6 +210,7 @@ export class Player {
       }
 
       this.time++;
+      store.getState().setTime(this.time);
       T.setTimeout(() => this.playNext(), this.duration);
     } else {
       this.stop();
