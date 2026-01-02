@@ -86,7 +86,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
   }, [model.core]);
 
   // Draw ADSR canvas
-  const drawADSRCanvas = useCallback((canvasRef: React.RefObject<HTMLCanvasElement>, adsr: number[]) => {
+  const drawADSRCanvas = useCallback((canvasRef: React.RefObject<HTMLCanvasElement | null>, adsr: number[]) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
