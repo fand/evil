@@ -7,7 +7,6 @@ import {
   SYNTH_CELLS_X,
   SYNTH_CELLS_Y,
   MAX_PAGES,
-  type SynthPattern,
   type SynthPos,
 } from './types';
 import {
@@ -156,8 +155,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     }
 
     refreshPattern();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isImageLoaded]);
+  }, [isImageLoaded, refreshPattern]);
 
   // Refresh pattern when version changes
   useEffect(() => {

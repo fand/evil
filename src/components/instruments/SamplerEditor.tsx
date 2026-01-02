@@ -7,7 +7,6 @@ import {
   SAMPLER_CELLS_X,
   SAMPLER_CELLS_Y,
   MAX_PAGES,
-  type SamplerPattern,
   type SamplerPos,
 } from './types';
 import {
@@ -140,7 +139,7 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
 
       for (let x = 0; x < SAMPLER_CELLS_X; x++) {
         const notes = pattern[currentPage * SAMPLER_CELLS_X + x];
-        for (const [note, velocity] of notes) {
+        for (const [note] of notes) {
           const y = SAMPLER_CELLS_Y - note;
           drawCell(ctxOnRef.current, cellImageRef.current, CellType.Note, x, y);
         }
