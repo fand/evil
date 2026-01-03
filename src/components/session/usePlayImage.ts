@@ -11,7 +11,6 @@ export function usePlayImage(): HTMLImageElement | null {
     const imgPath = import.meta.env.BASE_URL + 'img/play.png';
     img.src = imgPath;
     img.onload = () => {
-      console.log('usePlayImage: loaded', imgPath);
       setImgPlay(img);
     };
     img.onerror = (e) => {
