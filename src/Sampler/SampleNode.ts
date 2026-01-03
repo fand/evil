@@ -96,8 +96,7 @@ export class SampleNode {
             this.parent.sampleLoaded(this.id);
           },
           (err) => {
-            console.log('Failed to fetch ' + sample.url);
-            console.log(err);
+            console.error('Failed to fetch ' + sample.url, err);
           }
         );
         sample.data = this.buffer;

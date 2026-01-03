@@ -58,8 +58,6 @@ const initEvil = function () {
 // Main
 
 (function () {
-  console.log('Welcome to evil!');
-
   const ua = window.navigator.userAgent.toLowerCase();
   if (ua.match(/chrome/g)) {
     initEvil();

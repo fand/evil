@@ -51,8 +51,7 @@ export class Reverb extends FX {
           IR_LOADED[this.name] = buffer;
         },
         (err) => {
-          console.log('ajax error');
-          console.log(err);
+          console.error('Failed to load IR:', err);
         }
       );
     };
