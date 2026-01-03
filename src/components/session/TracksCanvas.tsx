@@ -140,8 +140,6 @@ export function TracksCanvas({
         drawActiveIndicator(ctxOn, trackIdx, cellY, imgPlay);
       }
     });
-
-    setLastActive([...currentCells] as number[]);
   }, [currentCells, scenePos, imgPlay, width, height]);
 
   // Handle beat animation

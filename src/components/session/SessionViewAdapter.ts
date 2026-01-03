@@ -22,16 +22,19 @@ export class SessionViewAdapter {
   // No-op methods - React handles rendering via store
   // ========================================
 
-  loadSong() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  loadSong(_currentCells?: (number | undefined)[]) {
     // React components subscribe to store.song for updates
     this._session.syncSongToStore();
   }
 
-  drawScene() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  drawScene(_pos?: number, _cells?: (number | undefined)[]) {
     // React subscribes to playback.scenePos and playback.currentCells
   }
 
-  drawTrackName(idx: number, name: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  drawTrackName(idx: number, name: string, _type?: string) {
     // Sync to store so React can pick it up
     if (this.song.tracks[idx]) {
       this.song.tracks[idx].name = name;
@@ -39,7 +42,8 @@ export class SessionViewAdapter {
     }
   }
 
-  drawPatternName() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  drawPatternName(_x?: number, _y?: number, _p?: { name: string }) {
     // React re-renders from store.song
     this._session.syncSongToStore();
   }

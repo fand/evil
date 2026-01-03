@@ -95,11 +95,13 @@ export class SamplerCore {
     return this.samples[i].getOutputParam();
   }
 
-  sampleLoaded() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  sampleLoaded(_id?: number) {
     // React SamplerEditor handles waveform display via getParam()
   }
 
-  bindSample() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  bindSample(_sample_now?: number) {
     // React SamplerEditor handles sample binding via state
   }
 
