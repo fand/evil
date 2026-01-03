@@ -95,11 +95,11 @@ export class SamplerCore {
     return this.samples[i].getOutputParam();
   }
 
-  sampleLoaded(_id: number) {
+  sampleLoaded() {
     // React SamplerEditor handles waveform display via getParam()
   }
 
-  bindSample(_sample_now: number) {
+  bindSample() {
     // React SamplerEditor handles sample binding via state
   }
 

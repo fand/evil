@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useAppStore } from '../../hooks/useStore';
 import type { Song } from '../../Song';
 
 interface SongInfoProps {

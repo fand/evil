@@ -161,7 +161,6 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     }
 
     refreshPattern();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isImageLoaded]);
 
   // Refresh pattern when version changes

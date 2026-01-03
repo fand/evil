@@ -22,16 +22,16 @@ export class SessionViewAdapter {
   // No-op methods - React handles rendering via store
   // ========================================
 
-  loadSong(_currentCells: (number | undefined)[]) {
+  loadSong() {
     // React components subscribe to store.song for updates
     this._session.syncSongToStore();
   }
 
-  drawScene(_pos: number, _cells: (number | undefined)[]) {
+  drawScene() {
     // React subscribes to playback.scenePos and playback.currentCells
   }
 
-  drawTrackName(idx: number, name: string, _type?: string) {
+  drawTrackName(idx: number, name: string) {
     // Sync to store so React can pick it up
     if (this.song.tracks[idx]) {
       this.song.tracks[idx].name = name;
@@ -39,7 +39,7 @@ export class SessionViewAdapter {
     }
   }
 
-  drawPatternName(_x: number, _y: number, _p: { name: string }) {
+  drawPatternName() {
     // React re-renders from store.song
     this._session.syncSongToStore();
   }

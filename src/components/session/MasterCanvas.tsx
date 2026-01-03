@@ -3,7 +3,6 @@ import { useAppStore, useShallow } from '../../hooks/useStore';
 import { controller } from '../../controller';
 import { usePlayImage } from './usePlayImage';
 import {
-  CELL_WIDTH,
   CELL_HEIGHT,
   MASTER_WIDTH,
   OFFSET_Y,

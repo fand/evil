@@ -142,12 +142,10 @@ export function TracksMixer({
   onGainsChange,
   onPansChange,
 }: TracksMixerProps) {
-  const { trackGains, masterGain, trackPans, masterPan } = useAppStore(
+  const { trackGains, trackPans } = useAppStore(
     useShallow((state) => ({
       trackGains: state.mixer.trackGains,
-      masterGain: state.mixer.masterGain,
       trackPans: state.mixer.trackPans,
-      masterPan: state.mixer.masterPan,
     }))
   );
 

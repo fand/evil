@@ -6,7 +6,6 @@ import {
   CELL_WIDTH,
   CELL_HEIGHT,
   OFFSET_Y,
-  COLOR_SCHEMES,
   DEFAULT_COLOR,
   type CellPos,
   type ColorScheme,
@@ -55,7 +54,6 @@ export function TracksCanvas({
   const [isClicked, setIsClicked] = useState(false);
   const [lastClicked, setLastClicked] = useState(0);
   const [trackColors, setTrackColors] = useState<ColorScheme[]>([]);
-  const [lastActive, setLastActive] = useState<number[]>([]);
 
   // Store subscriptions
   const { scenePos, currentCells, beat } = useAppStore(

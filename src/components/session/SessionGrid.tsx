@@ -37,13 +37,6 @@ export function SessionGrid() {
     controller.setMixerGains?.(trackGains, masterGain);
   }, []);
 
-  // Sync scroll between tracks and master
-  const handleTracksScroll = useCallback(() => {
-    if (tracksWrapperRef.current && masterWrapperRef.current) {
-      masterWrapperRef.current.scrollTop = tracksWrapperRef.current.scrollTop;
-    }
-  }, []);
-
   const handleMasterScroll = useCallback((scrollTop: number) => {
     if (tracksWrapperRef.current) {
       tracksWrapperRef.current.scrollTop = scrollTop;
@@ -62,14 +55,12 @@ export function SessionGrid() {
   }, []);
 
   // Handle song info changes
-  const handleTitleChange = useCallback((title: string) => {
+  const handleTitleChange = useCallback(() => {
     // Update song title - would need to add action to store
-    // For now, this is a placeholder
   }, []);
 
-  const handleCreatorChange = useCallback((creator: string) => {
+  const handleCreatorChange = useCallback(() => {
     // Update song creator - would need to add action to store
-    // For now, this is a placeholder
   }, []);
 
   return (

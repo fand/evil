@@ -16,10 +16,6 @@ export function TransportButtons() {
     }
   };
 
-  const handleStop = () => {
-    controller.stop();
-  };
-
   const handleForward = () => {
     controller.forward();
   };
