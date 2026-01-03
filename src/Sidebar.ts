@@ -73,9 +73,7 @@ class Sidebar {
   saveTracksEffect() {
     if (this.sidebar_pos.type === 'master') {
       return;
-    } // TODO: make sure this is impossible / delete this line
-    //obj = @view.saveTracksEffect()
-    //@session.saveTracksEffect(@sidebar_pos, obj)
+    }
     return this.session.saveTracksEffect(this.sidebar_pos);
   }
 

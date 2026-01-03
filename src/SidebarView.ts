@@ -87,12 +87,6 @@ class SidebarView {
     });
     this.master_edit.addEventListener('click', () => this.showMasterControl());
 
-    this.tracks.querySelectorAll('.sidebar-effect').forEach((el) => {
-      el.addEventListener('change', () => {
-        // change i-th effect
-        // this.model.readTracksEffect(i);
-      });
-    });
 
     this.add_master_btn.addEventListener('click', () => {
       return this.addMasterEffect(this.add_master.value);

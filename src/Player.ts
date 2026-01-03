@@ -78,7 +78,6 @@ export class Player {
     this.scene.bpm = bpm;
     store.getState().setBPM(bpm);
 
-    // @duration = (60000.0 / @bpm) / 8.0
     this.duration = 7500.0 / this.bpm;
     for (const s of this.instruments) {
       s.setDuration(this.duration);
