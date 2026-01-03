@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { Mixer } from './Mixer';
 import { Session } from './Session';
 import { Sidebar } from './Sidebar';
@@ -332,7 +331,7 @@ export class Player {
     this.num_id = 0;
     this.mixer.empty();
     this.session.empty();
-    $('#instruments').empty(); // Clear instruments DOM
+    document.getElementById('instruments')?.replaceChildren(); // Clear instruments DOM
 
     // Set song to Session and Store
     this.session.song = song;

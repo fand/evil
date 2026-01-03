@@ -1,28 +1,30 @@
 import { FXView } from './FXView';
-import $ from 'jquery';
 import type { Compressor, CompressorParams } from './Compressor';
 
 export class CompressorView extends FXView {
-  attack: JQuery;
-  release: JQuery;
-  threshold: JQuery;
-  ratio: JQuery;
-  knee: JQuery;
-  input: JQuery;
-  output: JQuery;
+  attack: HTMLInputElement;
+  release: HTMLInputElement;
+  threshold: HTMLInputElement;
+  ratio: HTMLInputElement;
+  knee: HTMLInputElement;
+  input: HTMLInputElement;
+  output: HTMLInputElement;
 
   constructor(model: Compressor) {
-    const dom = $('#tmpl_fx_compressor').clone();
-    dom.removeAttr('id');
+    const template = document.getElementById('tmpl_fx_compressor')!;
+    const dom = template.cloneNode(true) as HTMLElement;
+    dom.removeAttribute('id');
     super(model, dom);
 
-    this.attack = this.dom.find('[name=attack]');
-    this.release = this.dom.find('[name=release]');
-    this.threshold = this.dom.find('[name=threshold]');
-    this.ratio = this.dom.find('[name=ratio]');
-    this.knee = this.dom.find('[name=knee]');
-    this.input = this.dom.find('[name=input]');
-    this.output = this.dom.find('[name=output]');
+    this.attack = this.dom.querySelector('[name=attack]') as HTMLInputElement;
+    this.release = this.dom.querySelector('[name=release]') as HTMLInputElement;
+    this.threshold = this.dom.querySelector(
+      '[name=threshold]'
+    ) as HTMLInputElement;
+    this.ratio = this.dom.querySelector('[name=ratio]') as HTMLInputElement;
+    this.knee = this.dom.querySelector('[name=knee]') as HTMLInputElement;
+    this.input = this.dom.querySelector('[name=input]') as HTMLInputElement;
+    this.output = this.dom.querySelector('[name=output]') as HTMLInputElement;
 
     this.initEvent();
   }
@@ -30,64 +32,64 @@ export class CompressorView extends FXView {
   initEvent() {
     super.initEvent();
 
-    this.input.on('change', () => {
+    this.input.addEventListener('change', () => {
       this.model.setParam({
-        input: parseFloat(this.input.val() as string) / 100.0,
+        input: parseFloat(this.input.value) / 100.0,
       });
     });
-    this.output.on('change', () => {
+    this.output.addEventListener('change', () => {
       this.model.setParam({
-        output: parseFloat(this.output.val() as string) / 100.0,
+        output: parseFloat(this.output.value) / 100.0,
       });
     });
-    this.attack.on('change', () => {
+    this.attack.addEventListener('change', () => {
       this.model.setParam({
-        attack: parseFloat(this.attack.val() as string) / 1000.0,
+        attack: parseFloat(this.attack.value) / 1000.0,
       });
     });
-    this.release.on('change', () => {
+    this.release.addEventListener('change', () => {
       this.model.setParam({
-        release: parseFloat(this.release.val() as string) / 1000.0,
+        release: parseFloat(this.release.value) / 1000.0,
       });
     });
-    this.threshold.on('change', () => {
+    this.threshold.addEventListener('change', () => {
       this.model.setParam({
-        threshold: parseFloat(this.threshold.val() as string) / -10.0,
+        threshold: parseFloat(this.threshold.value) / -10.0,
       }); // [0, 100]
     });
-    this.ratio.on('change', () => {
+    this.ratio.addEventListener('change', () => {
       this.model.setParam({
-        ratio: parseInt(this.ratio.val() as string),
+        ratio: parseInt(this.ratio.value),
       });
     });
-    this.knee.on('change', () => {
+    this.knee.addEventListener('change', () => {
       this.model.setParam({
-        knee: parseFloat(this.knee.val() as string) / 1000.0,
+        knee: parseFloat(this.knee.value) / 1000.0,
       });
     });
   }
 
   setParam(p: Partial<CompressorParams>) {
     if (p.input !== undefined) {
-      this.input.val(p.input * 100);
+      this.input.value = String(p.input * 100);
     }
     if (p.output !== undefined) {
-      this.output.val(p.output * 100);
+      this.output.value = String(p.output * 100);
     }
     if (p.attack !== undefined) {
-      this.attack.val(p.attack * 1000);
+      this.attack.value = String(p.attack * 1000);
     }
     if (p.release !== undefined) {
-      this.release.val(p.release * 1000);
+      this.release.value = String(p.release * 1000);
     }
     if (p.threshold !== undefined) {
-      this.threshold.val(p.threshold * -10);
+      this.threshold.value = String(p.threshold * -10);
     }
     if (p.ratio !== undefined) {
-      this.ratio.val(p.ratio);
+      this.ratio.value = String(p.ratio);
     }
     if (p.knee !== undefined) {
-      this.knee.val(p.knee * 1000);
+      this.knee.value = String(p.knee * 1000);
     }
   }
 }
