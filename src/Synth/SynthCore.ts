@@ -1,4 +1,3 @@
-import { SynthCoreView } from './CoreView';
 import { KEY_LIST, NoteKey, SEMITONE, STREAM_LENGTH } from '../Constant';
 import type { Synth } from '../Synth';
 import type { SynthParam, VCOParam, EGParam } from '../Song';
@@ -343,7 +342,6 @@ export class SynthCore {
   eg: EG;
   feg: EG;
   gain_res: GainNode;
-  view: SynthCoreView;
   note: number = 0;
 
   constructor(parent: Synth, ctx: AudioContext, id: number) {
@@ -380,11 +378,32 @@ export class SynthCore {
     this.vcos[2].connect(this.gain_res);
     this.gain_res.connect(this.node);
 
-    this.view = new SynthCoreView(
-      this,
-      this.id,
-      this.parent.view.dom.find('.synth-core')
-    );
+    // Initialize with default values (previously done by SynthCoreView.fetchParam)
+    this.initDefaults();
+  }
+
+  // Initialize default parameter values
+  private initDefaults() {
+    // VCO0: RECT, oct=0, fine=0, interval=0, harmony
+    this.setVCOParam(0, 'RECT', 0, 0, 0, 'harmony');
+    // VCO1: SAW, oct=0, fine=1, interval=3
+    this.setVCOParam(1, 'SAW', 0, 3, 1, 'harmony');
+    // VCO2: NOISE, oct=3, fine=0, interval=0
+    this.setVCOParam(2, 'NOISE', 3, 0, 0, 'harmony');
+
+    // Mixer gains: OSC1=50, OSC2=40, NOISE=1
+    this.setVCOGain(0, 50);
+    this.setVCOGain(1, 40);
+    this.setVCOGain(2, 1);
+
+    // EG: attack=0, decay=18000, sustain=40, release=10000
+    this.setEGParam(0, 18000, 40, 10000);
+
+    // FEG: attack=0, decay=0, sustain=100, release=10000
+    this.setFEGParam(0, 0, 100, 10000);
+
+    // Filter: freq=400, Q=6
+    this.setFilterParam(400, 6);
   }
 
   getParam(): SynthParam {
@@ -420,7 +439,7 @@ export class SynthCore {
       this.feg.setRange(this.feg.getRange()[0], p.filter[0]);
       this.filter.setQ(p.filter[1]);
     }
-    this.view.setParam(p);
+    // React SynthEditor reads params via getParam()
   }
 
   setVCOParam(
