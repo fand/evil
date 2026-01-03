@@ -23,7 +23,7 @@ export class Double extends FX {
     this.pan_l = new Panner(this.ctx);
     this.pan_r = new Panner(this.ctx);
     this.pan_l.setPosition(this.pos);
-    this.pan_r.setPosition(-this.pos);
+    this.pan_r.setPosition(1 - this.pos);
 
     this.in.connect(this.pan_l.in);
     this.in.connect(this.delay);
@@ -31,7 +31,7 @@ export class Double extends FX {
     this.pan_l.connect(this.out);
     this.pan_r.connect(this.out);
 
-    this.out.gain.value = 0.6;
+    this.out.gain.value = 0.7;
 
     this.view = new DoubleView(this);
   }
@@ -42,8 +42,12 @@ export class Double extends FX {
 
   setWidth(pos: number) {
     this.pos = pos;
+
     this.pan_l.setPosition(this.pos);
-    this.pan_r.setPosition(-this.pos);
+    this.pan_r.setPosition(1 - this.pos);
+
+    const centerness = (1 - pos) * 2;
+    this.out.gain.value = 0.7 + centerness * 0.3;
   }
 
   setParam(p: Partial<DoubleParams>) {
