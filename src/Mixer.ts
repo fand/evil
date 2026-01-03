@@ -1,4 +1,4 @@
-import { MixerView } from './MixerView';
+import { MixerAdapter } from './components/mixer/MixerAdapter';
 import { Panner } from './Panner';
 import { Limiter } from './FX/Limiter';
 import { Fuzz } from './FX/Fuzz';
@@ -25,7 +25,7 @@ export class Mixer {
   analyser_master: AnalyserNode[];
   limiter: Limiter;
   effects_master: FX[];
-  view: MixerView;
+  adapter: MixerAdapter;
   pan_tracks: number[] = [];
   pan_master: number = 0;
 
@@ -74,27 +74,8 @@ export class Mixer {
 
     this.out.connect(this.ctx.destination);
 
-    this.view = new MixerView(this);
-
-    setInterval(() => {
-      return this.drawGains();
-    }, 30);
-  }
-
-  drawGains() {
-    // Tracks
-    for (let i = 0; i < this.analysers.length; i++) {
-      const data = new Uint8Array(this.analysers[i].frequencyBinCount);
-      this.analysers[i].getByteTimeDomainData(data);
-      this.view.drawGainTracks(i, data);
-    }
-
-    // Master
-    const data_l = new Uint8Array(this.analyser_master[0].frequencyBinCount);
-    const data_r = new Uint8Array(this.analyser_master[1].frequencyBinCount);
-    this.analyser_master[0].getByteTimeDomainData(data_l);
-    this.analyser_master[1].getByteTimeDomainData(data_r);
-    return this.view.drawGainMaster(data_l, data_r);
+    this.adapter = new MixerAdapter(this);
+    // VU meter updates will start when React panel is connected via adapter.setPanelRef()
   }
 
   empty() {
@@ -103,7 +84,6 @@ export class Mixer {
     this.analysers = [];
     // Reset store mixer state
     store.getState().resetMixer();
-    return this.view.empty();
   }
 
   addInstrument(instrument: Instrument) {
@@ -119,8 +99,6 @@ export class Mixer {
 
     // Add track to store for React mixer panel
     store.getState().addMixerTrack();
-
-    this.view.addInstrument();
   }
 
   setGains(gain_tracks: number[], gain_master: number) {
@@ -147,14 +125,12 @@ export class Mixer {
     this.gain_tracks = gain_tracks;
     this.gain_master = gain_master;
     this.setGains(this.gain_tracks, this.gain_master);
-    return this.view.loadGains(this.gain_tracks, this.gain_master);
   }
 
   loadPans(pan_tracks: number[], pan_master: number) {
     this.pan_tracks = pan_tracks;
     this.pan_master = pan_master;
     this.setPans(this.pan_tracks, this.pan_master);
-    this.view.loadPans(this.pan_tracks, this.pan_master);
   }
 
   getParam() {
