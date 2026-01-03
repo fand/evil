@@ -1,63 +1,65 @@
 import { FXView } from './FXView';
-import $ from 'jquery';
 
 import type { Delay, DelayParams } from './Delay';
 
 export class DelayView extends FXView {
-  delay: JQuery;
-  feedback: JQuery;
-  lofi: JQuery;
-  wet: JQuery;
+  delay: HTMLInputElement;
+  feedback: HTMLInputElement;
+  lofi: HTMLInputElement;
+  wet: HTMLInputElement;
 
   constructor(model: Delay) {
-    const dom = $('#tmpl_fx_delay').clone();
-    dom.removeAttr('id');
+    const template = document.getElementById('tmpl_fx_delay')!;
+    const dom = template.cloneNode(true) as HTMLElement;
+    dom.removeAttribute('id');
     super(model, dom);
 
-    this.delay = this.dom.find('[name=delay]');
-    this.feedback = this.dom.find('[name=feedback]');
-    this.lofi = this.dom.find('[name=lofi]');
-    this.wet = this.dom.find('[name=wet]');
+    this.delay = this.dom.querySelector('[name=delay]') as HTMLInputElement;
+    this.feedback = this.dom.querySelector(
+      '[name=feedback]'
+    ) as HTMLInputElement;
+    this.lofi = this.dom.querySelector('[name=lofi]') as HTMLInputElement;
+    this.wet = this.dom.querySelector('[name=wet]') as HTMLInputElement;
 
     this.initEvent();
   }
 
   initEvent() {
     super.initEvent();
-    this.wet.on('change', () => {
+    this.wet.addEventListener('change', () => {
       this.model.setParam({
-        wet: parseFloat(this.wet.val() as string) / 100.0,
+        wet: parseFloat(this.wet.value) / 100.0,
       });
     });
-    this.delay.on('change', () => {
+    this.delay.addEventListener('change', () => {
       this.model.setParam({
-        delay: parseFloat(this.delay.val() as string) / 1000.0,
+        delay: parseFloat(this.delay.value) / 1000.0,
       });
     });
-    this.feedback.on('change', () => {
+    this.feedback.addEventListener('change', () => {
       this.model.setParam({
-        feedback: parseFloat(this.feedback.val() as string) / 100.0,
+        feedback: parseFloat(this.feedback.value) / 100.0,
       });
     });
-    this.lofi.on('change', () => {
+    this.lofi.addEventListener('change', () => {
       this.model.setParam({
-        lofi: (parseFloat(this.lofi.val() as string) * 5.0) / 100.0,
+        lofi: (parseFloat(this.lofi.value) * 5.0) / 100.0,
       });
     });
   }
 
   setParam(p: Partial<DelayParams>) {
     if (p.delay !== undefined) {
-      this.delay.val(p.delay * 1000);
+      this.delay.value = String(p.delay * 1000);
     }
     if (p.feedback !== undefined) {
-      this.feedback.val(p.feedback * 100);
+      this.feedback.value = String(p.feedback * 100);
     }
     if (p.lofi !== undefined) {
-      this.lofi.val(p.lofi * 20);
+      this.lofi.value = String(p.lofi * 20);
     }
     if (p.wet !== undefined) {
-      this.wet.val(p.wet * 100);
+      this.wet.value = String(p.wet * 100);
     }
   }
 }

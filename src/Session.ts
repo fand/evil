@@ -7,7 +7,6 @@ import {
   Song,
   Track,
 } from './Song';
-import $ from 'jquery';
 import type { Player } from './Player';
 import type { Instrument, InstrumentType } from './Instrument';
 import { store } from './store';
@@ -367,25 +366,25 @@ class Session {
     this.syncSongToStore();
     const song_json = JSON.stringify(this.song);
 
-    // Save the song via ajax.
-    $.ajax({
-      url: '/api/songs/',
-      type: 'POST',
-      dataType: 'text',
-      data: {
-        title: this.song.title,
-        creator: this.song.creator,
-        json: song_json,
-      },
+    // Save the song via fetch.
+    const formData = new FormData();
+    formData.append('title', this.song.title ?? '');
+    formData.append('creator', this.song.creator ?? '');
+    formData.append('json', song_json);
+
+    fetch('/api/songs/', {
+      method: 'POST',
+      body: formData,
     })
-      .done((d) => {
+      .then((response) => response.text())
+      .then((d) => {
         return this.view.showSuccess(
           d,
           this.song.title ?? '',
           this.song.creator ?? ''
         );
       })
-      .fail(() => {
+      .catch(() => {
         return this.view.showError();
       });
   }

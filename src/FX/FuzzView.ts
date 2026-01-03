@@ -1,60 +1,60 @@
 import type { Fuzz, FuzzParams } from './Fuzz';
 import { FXView } from './FXView';
-import $ from 'jquery';
 
 export class FuzzView extends FXView {
-  type: JQuery;
-  gain: JQuery;
-  input: JQuery;
-  output: JQuery;
+  type: HTMLSelectElement;
+  gain: HTMLInputElement;
+  input: HTMLInputElement;
+  output: HTMLInputElement;
 
   constructor(model: Fuzz) {
-    const dom = $('#tmpl_fx_fuzz').clone();
-    dom.removeAttr('id');
+    const template = document.getElementById('tmpl_fx_fuzz')!;
+    const dom = template.cloneNode(true) as HTMLElement;
+    dom.removeAttribute('id');
     super(model, dom);
 
-    this.type = this.dom.find('[name=type]');
-    this.gain = this.dom.find('[name=gain]');
-    this.input = this.dom.find('[name=input]');
-    this.output = this.dom.find('[name=output]');
+    this.type = this.dom.querySelector('[name=type]') as HTMLSelectElement;
+    this.gain = this.dom.querySelector('[name=gain]') as HTMLInputElement;
+    this.input = this.dom.querySelector('[name=input]') as HTMLInputElement;
+    this.output = this.dom.querySelector('[name=output]') as HTMLInputElement;
 
     this.initEvent();
   }
 
   initEvent() {
     super.initEvent();
-    this.input.on('change', () => {
+    this.input.addEventListener('change', () => {
       this.model.setParam({
-        input: parseFloat(this.input.val() as string) / 100.0,
+        input: parseFloat(this.input.value) / 100.0,
       });
     });
-    this.output.on('change', () => {
+    this.output.addEventListener('change', () => {
       this.model.setParam({
-        output: parseFloat(this.output.val() as string) / 100.0,
+        output: parseFloat(this.output.value) / 100.0,
       });
     });
-    this.type.on('change', () => {
-      this.model.setParam({ type: this.type.val() as string });
+    this.type.addEventListener('change', () => {
+      this.model.setParam({ type: this.type.value });
     });
-    this.gain.on('change', () => {
+    this.gain.addEventListener('change', () => {
       this.model.setParam({
-        gain: parseFloat(this.gain.val() as string) / 100.0,
+        gain: parseFloat(this.gain.value) / 100.0,
       });
     });
   }
 
   setParam(p: Partial<FuzzParams>) {
     if (p.input !== undefined) {
-      this.input.val(p.input * 100);
+      this.input.value = String(p.input * 100);
     }
     if (p.output !== undefined) {
-      this.output.val(p.output * 100);
+      this.output.value = String(p.output * 100);
     }
     if (p.type !== undefined) {
-      this.type.val(p.type);
+      this.type.value = p.type;
     }
     if (p.gain !== undefined) {
-      this.gain.val(p.gain * 100);
+      this.gain.value = String(p.gain * 100);
     }
   }
 }

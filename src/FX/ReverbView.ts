@@ -1,41 +1,41 @@
 import { FXView } from './FXView';
-import $ from 'jquery';
 
 import type { Reverb, ReverbParams } from './Reverb';
 
 export class ReverbView extends FXView {
-  name: JQuery;
-  wet: JQuery;
+  name: HTMLSelectElement;
+  wet: HTMLInputElement;
 
   constructor(model: Reverb) {
-    const dom = $('#tmpl_fx_reverb').clone();
-    dom.removeAttr('id');
+    const template = document.getElementById('tmpl_fx_reverb')!;
+    const dom = template.cloneNode(true) as HTMLElement;
+    dom.removeAttribute('id');
     super(model, dom);
 
-    this.name = this.dom.find('[name=name]');
-    this.wet = this.dom.find('[name=wet]');
+    this.name = this.dom.querySelector('[name=name]') as HTMLSelectElement;
+    this.wet = this.dom.querySelector('[name=wet]') as HTMLInputElement;
 
     this.initEvent();
   }
 
   initEvent() {
     super.initEvent();
-    this.name.on('change', () => {
-      (this.model as Reverb).setIR(this.name.val() as string);
+    this.name.addEventListener('change', () => {
+      (this.model as Reverb).setIR(this.name.value);
     });
-    this.wet.on('change', () => {
+    this.wet.addEventListener('change', () => {
       this.model.setParam({
-        wet: parseFloat(this.wet.val() as string) / 100.0,
+        wet: parseFloat(this.wet.value) / 100.0,
       });
     });
   }
 
   setParam(p: Partial<ReverbParams>) {
     if (p.name !== undefined) {
-      this.name.val(p.name);
+      this.name.value = p.name;
     }
     if (p.wet !== undefined) {
-      this.wet.val(p.wet * 100);
+      this.wet.value = String(p.wet * 100);
     }
   }
 }

@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { Player } from './Player';
 import { Keyboard } from './Keyboard';
 import { Song } from './Song';
@@ -12,24 +11,27 @@ declare global {
 }
 
 const sorry = function () {
-  $('#top-sorry').show();
-  $('#top-logo-wrapper').addClass('logo-sorry');
+  const topSorry = document.getElementById('top-sorry');
+  if (topSorry) topSorry.style.display = 'block';
+  document.getElementById('top-logo-wrapper')?.classList.add('logo-sorry');
 };
 
 const initEvil = function () {
   // Don't use MutekiTimer here!!
   // (it causes freeze)
   setTimeout(() => {
-    $('#top')
-      .css({
-        opacity: '0',
-      })
-      .delay(500)
-      .css('z-index', '-1');
-    $('#top-logo').css({
-      '-webkit-transform': 'translate3d(0px, -100px, 0px)',
-      opacity: '0',
-    });
+    const top = document.getElementById('top');
+    const topLogo = document.getElementById('top-logo');
+    if (top) {
+      top.style.opacity = '0';
+      setTimeout(() => {
+        top.style.zIndex = '-1';
+      }, 500);
+    }
+    if (topLogo) {
+      topLogo.style.webkitTransform = 'translate3d(0px, -100px, 0px)';
+      topLogo.style.opacity = '0';
+    }
   }, 1500);
 
   const ctx = new AudioContext();
@@ -38,7 +40,8 @@ const initEvil = function () {
   window.keyboard = keyboard;
 
   const footer_size = window.innerHeight / 2 - 300;
-  $('footer').css('height', footer_size + 'px');
+  const footer = document.querySelector('footer');
+  if (footer) footer.style.height = footer_size + 'px';
 
   // Read song
   if (window.song_loaded) {

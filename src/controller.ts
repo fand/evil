@@ -242,6 +242,11 @@ class AppController {
     if (!this._player) return 1.0;
     return this.player.mixer.gain_master;
   }
+
+  getMixerAdapter() {
+    if (!this._player) return null;
+    return this.player.mixer.adapter;
+  }
 }
 
 export const controller = new AppController();

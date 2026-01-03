@@ -354,24 +354,6 @@ export const store = createStore<Store>()(
 );
 
 // Selector helpers for subscribeWithSelector
-export const selectSong = (state: Store) => state.song;
-export const selectScene = (state: Store) => state.scene;
-export const selectPlayback = (state: Store) => state.playback;
-export const selectUI = (state: Store) => state.ui;
-export const selectBPM = (state: Store) => state.scene.bpm;
 export const selectKey = (state: Store) => state.scene.key;
 export const selectScale = (state: Store) => state.scene.scale;
-export const selectIsPlaying = (state: Store) => state.playback.isPlaying;
-export const selectTime = (state: Store) => state.playback.time;
-export const selectCurrentCells = (state: Store) => state.playback.currentCells;
-export const selectScenePos = (state: Store) => state.playback.scenePos;
-export const selectIsLoop = (state: Store) => state.playback.isLoop;
-export const selectCurrentInstrument = (state: Store) => state.ui.currentInstrument;
-export const selectBeat = (state: Store) => state.playback.beat;
-export const selectPatternVersions = (state: Store) => state.ui.patternVersions;
-export const selectMixer = (state: Store) => state.mixer;
-export const selectTrackGains = (state: Store) => state.mixer.trackGains;
-export const selectMasterGain = (state: Store) => state.mixer.masterGain;
-export const selectTrackPans = (state: Store) => state.mixer.trackPans;
-export const selectMasterPan = (state: Store) => state.mixer.masterPan;
-export const selectDialog = (state: Store) => state.ui.dialog;
+

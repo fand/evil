@@ -1,6 +1,5 @@
 import { Panner } from './Panner';
 import { SamplerCore } from './Sampler/SamplerCore';
-import $ from 'jquery';
 import type { Player } from './Player';
 import type { Session } from './Session';
 import type { Instrument, InstrumentType } from './Instrument';
@@ -165,12 +164,12 @@ class Sampler implements Instrument {
   }
 
   setPattern(_pattern_obj: SamplerPatternObject) {
-    this.pattern_obj = $.extend(true, {}, _pattern_obj);
+    this.pattern_obj = JSON.parse(JSON.stringify(_pattern_obj));
     store.getState().triggerPatternRefresh(this.id);
   }
 
   getPattern(): SamplerPatternObject {
-    return $.extend(true, {}, this.pattern_obj);
+    return JSON.parse(JSON.stringify(this.pattern_obj));
   }
 
   clearPattern() {

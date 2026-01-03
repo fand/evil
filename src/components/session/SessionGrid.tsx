@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { useAppStore } from '../../hooks/useStore';
 import { controller } from '../../controller';
 import { TracksCanvas } from './TracksCanvas';
@@ -6,6 +6,7 @@ import { MasterCanvas } from './MasterCanvas';
 import { SongInfo } from './SongInfo';
 import { TracksMixer, MasterMixer } from '../mixer/MixerPanel';
 import { OFFSET_Y, type CellPos } from './types';
+import type { MixerPanelRef } from '../mixer/MixerPanel';
 
 /**
  * SessionGrid - Main session view container.
@@ -20,6 +21,37 @@ export function SessionGrid() {
   const masterWrapperRef = useRef<HTMLDivElement>(null);
   const [mixerScrollLeft, setMixerScrollLeft] = useState(0);
   const [selectedPos, setSelectedPos] = useState<CellPos | null>({ x: 0, y: 0, type: 'master' });
+
+  // Store canvas getter functions for MixerAdapter
+  const getTrackCanvasesRef = useRef<(() => HTMLCanvasElement[]) | null>(null);
+  const getMasterCanvasRef = useRef<(() => HTMLCanvasElement | null) | null>(null);
+
+  // Connect MixerAdapter to canvas refs and start VU meters
+  useEffect(() => {
+    const adapter = controller.getMixerAdapter();
+    if (!adapter) return;
+
+    const panelRef: MixerPanelRef = {
+      getTrackCanvases: () => getTrackCanvasesRef.current?.() ?? [],
+      getMasterCanvas: () => getMasterCanvasRef.current?.() ?? null,
+    };
+
+    adapter.setPanelRef(panelRef);
+    adapter.start();
+
+    return () => {
+      adapter.stop();
+    };
+  }, []);
+
+  // Callbacks to receive canvas getter functions from child components
+  const handleTrackCanvasesRef = useCallback((getCanvases: () => HTMLCanvasElement[]) => {
+    getTrackCanvasesRef.current = getCanvases;
+  }, []);
+
+  const handleMasterCanvasRef = useCallback((getCanvas: () => HTMLCanvasElement | null) => {
+    getMasterCanvasRef.current = getCanvas;
+  }, []);
 
   // Handle mixer gain changes - sync to audio engine
   const handleGainsChange = useCallback((trackGains: number[], masterGain: number) => {
@@ -78,6 +110,7 @@ export function SessionGrid() {
         <TracksMixer
           onGainsChange={handleGainsChange}
           onPansChange={handlePansChange}
+          onTrackCanvasesRef={handleTrackCanvasesRef}
         />
       </div>
 
@@ -92,6 +125,7 @@ export function SessionGrid() {
         />
         <MasterMixer
           onGainChange={handleMasterGainChange}
+          onMasterCanvasRef={handleMasterCanvasRef}
         />
       </div>
 

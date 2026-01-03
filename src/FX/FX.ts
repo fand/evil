@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import type { FXView } from './FXView';
 import type { EffectParam } from '../Song';
 import type { Instrument } from '../Instrument';
@@ -49,7 +48,7 @@ export abstract class FX {
   }
 
   appendTo(dst: HTMLElement) {
-    $(dst).append(this.view.dom);
+    dst.appendChild(this.view.dom);
     this.view.initEvent();
   }
 

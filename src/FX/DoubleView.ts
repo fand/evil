@@ -1,43 +1,43 @@
 import { FXView } from './FXView';
-import $ from 'jquery';
 
 import type { Double, DoubleParams } from './Double';
 
 export class DoubleView extends FXView {
-  delay: JQuery;
-  width: JQuery;
+  delay: HTMLInputElement;
+  width: HTMLInputElement;
 
   constructor(model: Double) {
-    const dom = $('#tmpl_fx_double').clone();
-    dom.removeAttr('id');
+    const template = document.getElementById('tmpl_fx_double')!;
+    const dom = template.cloneNode(true) as HTMLElement;
+    dom.removeAttribute('id');
     super(model, dom);
 
-    this.delay = this.dom.find('[name=delay]');
-    this.width = this.dom.find('[name=width]');
+    this.delay = this.dom.querySelector('[name=delay]') as HTMLInputElement;
+    this.width = this.dom.querySelector('[name=width]') as HTMLInputElement;
 
     this.initEvent();
   }
 
   initEvent() {
     super.initEvent();
-    this.delay.on('change', () => {
+    this.delay.addEventListener('change', () => {
       this.model.setParam({
-        delay: parseFloat(this.delay.val() as string) / 1000.0,
+        delay: parseFloat(this.delay.value) / 1000.0,
       });
     });
-    this.width.on('change', () => {
+    this.width.addEventListener('change', () => {
       this.model.setParam({
-        width: parseFloat(this.width.val() as string) / 200.0 + 0.5,
+        width: parseFloat(this.width.value) / 200.0 + 0.5,
       }); // [0.5, 1.0]
     });
   }
 
   setParam(p: Partial<DoubleParams>) {
     if (p.delay !== undefined) {
-      this.delay.val(p.delay * 1000);
+      this.delay.value = String(p.delay * 1000);
     }
     if (p.width !== undefined) {
-      this.width.val((p.width - 0.5) * 200);
+      this.width.value = String((p.width - 0.5) * 200);
     }
   }
 }

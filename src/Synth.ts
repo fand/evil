@@ -1,7 +1,6 @@
 import { MutekiTimer } from './MutekiTimer';
 import { SynthCore } from './Synth/SynthCore';
 import { Panner } from './Panner';
-import $ from 'jquery';
 import { Fuzz } from './FX/Fuzz';
 import { Delay } from './FX/Delay';
 import { Reverb } from './FX/Reverb';
@@ -227,7 +226,7 @@ class Synth implements Instrument {
   }
 
   getPattern(): SynthPatternObject {
-    return $.extend(true, {}, this.pattern_obj);
+    return JSON.parse(JSON.stringify(this.pattern_obj));
   }
 
   clearPattern() {
