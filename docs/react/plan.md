@@ -78,12 +78,12 @@ export function mountReactApp() {
 ```
 
 ### Checklist
-- [ ] Install React dependencies
-- [ ] Configure Vite plugin
-- [ ] Update tsconfig.json
-- [ ] Create useStore hook
-- [ ] Create React entry point
-- [ ] Add `#react-root` to index.html (or mount into existing DOM)
+- [x] Install React dependencies
+- [x] Configure Vite plugin
+- [x] Update tsconfig.json
+- [x] Create useStore hook
+- [x] Create React entry point
+- [x] Add `#react-root` to index.html (or mount into existing DOM)
 
 ---
 
@@ -121,13 +121,13 @@ src/components/
 4. Delete `PlayerView.ts` once React version is stable
 
 ### Checklist
-- [ ] Create PlayerControls.tsx
-- [ ] Create TransportButtons.tsx
-- [ ] Create SceneParams.tsx
-- [ ] Create NavigationButtons.tsx
-- [ ] Mount into DOM
-- [ ] Remove PlayerView.ts
-- [ ] Update main.ts
+- [x] Create PlayerControls.tsx
+- [x] Create TransportButtons.tsx
+- [x] Create SceneParams.tsx
+- [x] Create NavigationButtons.tsx
+- [x] Mount into DOM
+- [x] Remove PlayerView.ts
+- [x] Update main.ts
 
 ---
 
@@ -333,13 +333,17 @@ Option B: Add React root alongside
 | Cleanup | Remove SynthView.ts | ✅ Complete |
 | Cleanup | Remove SamplerView.ts | ✅ Complete |
 
-### Recent Commits
-- Remove SynthView.ts, SamplerView.ts and view dependencies from Synth/Sampler classes
-- Implement SaveDialog.tsx with dialog state in store
-- Implement Keyboard React component for sequencer-table
-- Phase 5: Implement MixerPanel, Sidebar, and FXPanel React components
-- Add mixer state to store (trackGains, masterGain, trackPans, masterPan)
-- Add mixer actions to controller (setMixerGains, setMixerPans, getTrackGains)
+### Summary
+
+**React移行が完了しました。** 全てのjQuery Viewコンポーネントがreactに置き換えられ、バンドルサイズが446KB→413KBに削減されました。
+
+### Key Changes
+- **Phase 1**: React/Vite infrastructure setup, useStore hook
+- **Phase 2**: PlayerControls (transport, scene params, navigation)
+- **Phase 3**: SessionGrid (tracks/master canvas, save dialog)
+- **Phase 4**: SynthEditor/SamplerEditor (pattern editing, synth-core/sampler-core params)
+- **Phase 5**: MixerPanel, Sidebar, FXPanel, Keyboard component
+- **Cleanup**: Removed SynthView.ts, SamplerView.ts, view dependencies from instrument classes
 
 ---
 
