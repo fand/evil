@@ -26,7 +26,6 @@ export class Fuzz extends FX {
     this.in.gain.value = 1.0;
     this.out.gain.value = 1.0;
 
-    this.fuzz.curve = new Float32Array(this.samples);
     this.setGain(0.08);
 
     this.view = new FuzzView(this);
@@ -34,6 +33,7 @@ export class Fuzz extends FX {
 
   setType(type: FuzzType) {
     this.type = type;
+    this.setGain(this.gain); // Recalculate curve with new type
   }
 
   setGain(gain: number) {
@@ -42,18 +42,20 @@ export class Fuzz extends FX {
     const sigmax = 2.0 / (1 + Math.exp(-this.gain * 1.0)) - 1.0;
     const ratio = 1.0 / sigmax;
 
+    const curve = new Float32Array(this.samples);
     for (let i = 0; i < this.samples; i++) {
       const x = (i * 2.0) / this.samples - 1.0;
       if (this.type === 'Sigmoid') {
         const sigmoid =
           2.0 / (1 + Math.exp(-Math.pow(this.gain, 3) * 1000 * x)) - 1.0;
-        this.fuzz.curve![i] = sigmoid * ratio;
+        curve[i] = sigmoid * ratio;
       } else if (this.type === 'Octavia') {
         const sigmoid =
           2.0 / (1 + Math.exp(-Math.pow(this.gain, 2) * 10 * x)) - 1.0;
-        this.fuzz.curve![i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0;
+        curve[i] = Math.abs(sigmoid * ratio) * 2.0 - 1.0;
       }
     }
+    this.fuzz.curve = curve;
   }
 
   setParam(p: Partial<FuzzParams>) {
