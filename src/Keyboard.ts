@@ -167,21 +167,19 @@ class Keyboard {
   }
 
   private handleMoveTop() {
-    controller.moveTop();
+    store.getState().setViewMode('MIXER');
     const wrapperEl = document.getElementById('wrapper');
     if (wrapperEl) {
       wrapperEl.style.webkitTransform = 'translate3d(0px, 700px, 0px)';
     }
-    store.getState().setViewMode('MIXER');
   }
 
   private handleMoveBottom() {
-    controller.moveBottom();
+    store.getState().setViewMode('SYNTH');
     const wrapperEl = document.getElementById('wrapper');
     if (wrapperEl) {
       wrapperEl.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
     }
-    store.getState().setViewMode('SYNTH');
   }
 
   private handlePlayPause() {

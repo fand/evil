@@ -57,7 +57,6 @@ export function NavigationButtons() {
     if (wrapperRef.current) {
       wrapperRef.current.style.webkitTransform = 'translate3d(0px, 700px, 0px)';
     }
-    controller.moveTop();
   }, []);
 
   const moveBottom = useCallback(() => {
@@ -65,7 +64,6 @@ export function NavigationButtons() {
     if (wrapperRef.current) {
       wrapperRef.current.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
     }
-    controller.moveBottom();
   }, []);
 
   // Determine button visibility and labels

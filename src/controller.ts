@@ -83,14 +83,6 @@ class AppController {
     this.player.moveLeft(idx);
   }
 
-  moveTop() {
-    this.player.moveTop();
-  }
-
-  moveBottom() {
-    this.player.moveBottom();
-  }
-
   // ========================================
   // Session Actions
   // ========================================

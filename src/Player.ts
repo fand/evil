@@ -267,23 +267,11 @@ export class Player {
 
     this.current_instrument = next_idx;
     store.getState().setCurrentInstrument(next_idx);
-    // activate/deactivate now triggered by store subscription in SynthView/SamplerView
-    window.keyboard.setMode('SYNTH');
   }
 
   moveLeft(next_idx: number) {
     this.current_instrument = next_idx;
     store.getState().setCurrentInstrument(next_idx);
-    // activate/deactivate now triggered by store subscription in SynthView/SamplerView
-    window.keyboard.setMode('SYNTH');
-  }
-
-  moveTop() {
-    window.keyboard.setMode('MIXER');
-  }
-
-  moveBottom() {
-    window.keyboard.setMode('SYNTH');
   }
 
   moveTo(inst_idx: number) {
