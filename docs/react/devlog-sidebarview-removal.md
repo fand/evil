@@ -1,5 +1,7 @@
 # SidebarView.ts 削除計画
 
+**Status: DONE**
+
 ## 概要
 vanilla JS の `SidebarView.ts` を削除し、React版 `Sidebar.tsx` に完全移行
 
