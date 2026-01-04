@@ -49,7 +49,9 @@ export function App() {
 
       {/* Footer */}
       <footer ref={footerRef}>
-        <SceneParams />
+        <div id="control">
+          <SceneParams />
+        </div>
         <TransportButtons />
         <div id="song-info">
           <div>
