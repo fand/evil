@@ -20,9 +20,13 @@ export type PlaybackState = {
   beat: BeatInfo;
 };
 
+// View mode
+export type ViewMode = 'SYNTH' | 'MIXER';
+
 // UI state
 export type UIState = {
   currentInstrument: number;
+  viewMode: ViewMode;
   // Pattern version per instrument - incremented when pattern changes
   patternVersions: Record<number, number>;
   // Dialog state
@@ -100,6 +104,7 @@ export type AppActions = {
 
   // UI actions
   setCurrentInstrument: (idx: number) => void;
+  setViewMode: (mode: ViewMode) => void;
   triggerPatternRefresh: (instrumentId: number) => void;
   showSuccessDialog: (url: string, songTitle: string, userName: string) => void;
   showErrorDialog: () => void;
@@ -143,6 +148,7 @@ const initialPlayback: PlaybackState = {
 
 const initialUI: UIState = {
   currentInstrument: 0,
+  viewMode: 'SYNTH',
   patternVersions: {},
   dialog: {
     isOpen: false,
@@ -275,6 +281,11 @@ export const store = createStore<Store>()(
     setCurrentInstrument: (currentInstrument) =>
       set((state) => ({
         ui: { ...state.ui, currentInstrument },
+      })),
+
+    setViewMode: (viewMode) =>
+      set((state) => ({
+        ui: { ...state.ui, viewMode },
       })),
 
     triggerPatternRefresh: (instrumentId) =>

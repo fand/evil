@@ -1,14 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { controller } from '../../controller';
+import { useAppStore } from '../../hooks/useStore';
+import { store } from '../../store';
 
 /**
  * Navigation buttons for instrument/mixer switching.
  * These buttons control the CSS transforms for sliding between views.
  */
 export function NavigationButtons() {
-  const [currentInstrument, setCurrentInstrument] = useState(0);
   const [instrumentsCount, setInstrumentsCount] = useState(1);
-  const [isMixer, setIsMixer] = useState(false);
+
+  // Subscribe to store state
+  const currentInstrument = useAppStore((s) => s.ui.currentInstrument);
+  const viewMode = useAppStore((s) => s.ui.viewMode);
+  const isMixer = viewMode === 'MIXER';
 
   // DOM refs for direct manipulation (matching jQuery behavior)
   const instrumentsRef = useRef<HTMLElement | null>(null);
@@ -24,7 +29,6 @@ export function NavigationButtons() {
     if (isMixer) return;
 
     const newIdx = currentInstrument + 1;
-    setCurrentInstrument(newIdx);
     controller.moveRight(newIdx);
     setInstrumentsCount(controller.instrumentsCount);
 
@@ -40,7 +44,6 @@ export function NavigationButtons() {
 
     if (currentInstrument !== 0) {
       const newIdx = currentInstrument - 1;
-      setCurrentInstrument(newIdx);
 
       if (instrumentsRef.current) {
         instrumentsRef.current.style.webkitTransform = `translate3d(${-1110 * newIdx}px, 0px, 0px)`;
@@ -50,7 +53,7 @@ export function NavigationButtons() {
   }, [isMixer, currentInstrument]);
 
   const moveTop = useCallback(() => {
-    setIsMixer(true);
+    store.getState().setViewMode('MIXER');
     if (wrapperRef.current) {
       wrapperRef.current.style.webkitTransform = 'translate3d(0px, 700px, 0px)';
     }
@@ -58,7 +61,7 @@ export function NavigationButtons() {
   }, []);
 
   const moveBottom = useCallback(() => {
-    setIsMixer(false);
+    store.getState().setViewMode('SYNTH');
     if (wrapperRef.current) {
       wrapperRef.current.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
     }

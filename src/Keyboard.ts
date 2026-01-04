@@ -60,7 +60,6 @@ const CODE_TO_NUM: Record<string, number> = {
 
 class Keyboard {
   player: Player;
-  mode: string;
   is_writing: boolean;
   is_pressed: boolean;
   last_key: string;
@@ -68,7 +67,6 @@ class Keyboard {
 
   constructor(player: Player) {
     this.player = player;
-    this.mode = 'SYNTH';
     this.is_writing = false;
     this.is_pressed = false;
 
@@ -100,8 +98,12 @@ class Keyboard {
     this.is_writing = false;
   }
 
-  setMode(mode: string) {
-    this.mode = mode;
+  setMode(mode: 'SYNTH' | 'MIXER') {
+    store.getState().setViewMode(mode);
+  }
+
+  private get mode() {
+    return store.getState().ui.viewMode;
   }
 
   noteOn(code: string) {
@@ -170,7 +172,7 @@ class Keyboard {
     if (wrapperEl) {
       wrapperEl.style.webkitTransform = 'translate3d(0px, 700px, 0px)';
     }
-    this.mode = 'MIXER';
+    store.getState().setViewMode('MIXER');
   }
 
   private handleMoveBottom() {
@@ -179,7 +181,7 @@ class Keyboard {
     if (wrapperEl) {
       wrapperEl.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
     }
-    this.mode = 'SYNTH';
+    store.getState().setViewMode('SYNTH');
   }
 
   private handlePlayPause() {
