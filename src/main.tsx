@@ -40,10 +40,6 @@ const initEvil = function () {
   const keyboard = new Keyboard(player);
   window.keyboard = keyboard;
 
-  const footer_size = window.innerHeight / 2 - 300;
-  const footer = document.querySelector('footer');
-  if (footer) footer.style.height = footer_size + 'px';
-
   // Read song
   if (window.song_loaded) {
     const song: Song = JSON.parse(window.song_loaded.json);

@@ -2,6 +2,7 @@
  * Root React component.
  * Unified layout containing all UI components.
  */
+import { useEffect, useRef } from 'react';
 import { SceneParams } from './player/SceneParams';
 import { TransportButtons } from './player/TransportButtons';
 import { NavigationButtons } from './player/NavigationButtons';
@@ -13,6 +14,15 @@ import { SidebarContainer } from './sidebar/SidebarContainer';
 
 export function App() {
   useResizeHandler();
+  const footerRef = useRef<HTMLElement>(null);
+
+  // Set footer height based on window size
+  useEffect(() => {
+    if (footerRef.current) {
+      const footerSize = window.innerHeight / 2 - 300;
+      footerRef.current.style.height = footerSize + 'px';
+    }
+  }, []);
 
   return (
     <>
@@ -38,7 +48,7 @@ export function App() {
       </div>
 
       {/* Footer */}
-      <footer>
+      <footer ref={footerRef}>
         <SceneParams />
         <TransportButtons />
         <div id="song-info">
