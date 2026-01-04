@@ -1,7 +1,8 @@
+import { createRoot } from 'react-dom/client';
 import { Player } from './Player';
 import { Keyboard } from './Keyboard';
 import { Song } from './Song';
-import { mountReactApp } from './react';
+import { App } from './components/App';
 
 declare global {
   interface Window {
@@ -50,8 +51,11 @@ const initEvil = function () {
   }
   // If no song is loaded, Player constructor already set up default state
 
-  // Mount React app (currently empty, will be populated as views are migrated)
-  mountReactApp();
+  // Mount React app
+  const appRoot = document.getElementById('app');
+  if (appRoot) {
+    createRoot(appRoot).render(<App />);
+  }
 };
 
 // ------------------------------------------------------------------------------
