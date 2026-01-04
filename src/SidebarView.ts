@@ -1,6 +1,5 @@
 import type { Sidebar } from './Sidebar';
 import type { Keyboard } from './Keyboard';
-import type { Instrument } from './Instrument';
 import type { Scene } from './Song';
 import { store } from './store';
 
@@ -126,7 +125,7 @@ class SidebarView {
     );
   }
 
-  showTracks(_track: Instrument) {
+  showTracks() {
     store.getState().triggerEffectsUpdate();
     return (this.wrapper.style.left = '0px');
   }
