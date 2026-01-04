@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useAppStore, useShallow } from '../../hooks/useStore';
 import { store } from '../../store';
+import { FXContainer } from '../fx';
+import type { FX } from '../../FX/FX';
 
 // Available keys
 const KEYS = ['A', 'D', 'G', 'C', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'B', 'E'];
@@ -23,9 +25,11 @@ const EFFECT_TYPES = ['Fuzz', 'Double', 'Comp', 'Delay', 'Reverb'];
 
 interface MasterControlProps {
   onAddEffect?: (name: string) => void;
+  effects?: FX[];
+  onRemoveEffect?: (fx: FX) => void;
 }
 
-function MasterControl({ onAddEffect }: MasterControlProps) {
+function MasterControl({ onAddEffect, effects = [], onRemoveEffect }: MasterControlProps) {
   const { name, bpm, key, scale } = useAppStore(
     useShallow((state) => ({
       name: state.scene.name,
@@ -66,6 +70,13 @@ function MasterControl({ onAddEffect }: MasterControlProps) {
 
   // Display string for current settings
   const displayText = `${bpm} BPM  ${key}  ${scale}`;
+
+  const handleRemoveEffect = useCallback(
+    (fx: FX) => {
+      onRemoveEffect?.(fx);
+    },
+    [onRemoveEffect]
+  );
 
   return (
     <div id="sidebar-master">
@@ -132,6 +143,7 @@ function MasterControl({ onAddEffect }: MasterControlProps) {
             </div>
           )}
         </fieldset>
+        <FXContainer effects={effects} onRemove={handleRemoveEffect} />
       </div>
 
       <fieldset className="sidebar-module sidebar-add-effect clearfix">
@@ -154,20 +166,29 @@ interface TracksControlProps {
   trackName: string;
   onNameChange?: (name: string) => void;
   onAddEffect?: (name: string) => void;
-  effectsContainer?: React.ReactNode;
+  effects?: FX[];
+  onRemoveEffect?: (fx: FX) => void;
 }
 
 function TracksControl({
   trackName,
   onNameChange,
   onAddEffect,
-  effectsContainer,
+  effects = [],
+  onRemoveEffect,
 }: TracksControlProps) {
   const [selectedEffect, setSelectedEffect] = useState(EFFECT_TYPES[0]);
 
   const handleAddEffect = useCallback(() => {
     onAddEffect?.(selectedEffect);
   }, [onAddEffect, selectedEffect]);
+
+  const handleRemoveEffect = useCallback(
+    (fx: FX) => {
+      onRemoveEffect?.(fx);
+    },
+    [onRemoveEffect]
+  );
 
   return (
     <div id="sidebar-tracks">
@@ -182,7 +203,7 @@ function TracksControl({
             />
           </legend>
         </fieldset>
-        {effectsContainer}
+        <FXContainer effects={effects} onRemove={handleRemoveEffect} />
       </div>
 
       <fieldset className="sidebar-module sidebar-add-effect clearfix">
@@ -208,7 +229,10 @@ export interface SidebarProps {
   onTrackNameChange?: (name: string) => void;
   onAddMasterEffect?: (name: string) => void;
   onAddTracksEffect?: (name: string) => void;
-  tracksEffectsContainer?: React.ReactNode;
+  masterEffects?: FX[];
+  trackEffects?: FX[];
+  onRemoveMasterEffect?: (fx: FX) => void;
+  onRemoveTrackEffect?: (fx: FX) => void;
 }
 
 export function Sidebar({
@@ -217,7 +241,10 @@ export function Sidebar({
   onTrackNameChange,
   onAddMasterEffect,
   onAddTracksEffect,
-  tracksEffectsContainer,
+  masterEffects = [],
+  trackEffects = [],
+  onRemoveMasterEffect,
+  onRemoveTrackEffect,
 }: SidebarProps) {
   // Calculate sidebar position based on mode
   const sidebarLeft = mode === 'tracks' ? '0px' : '-223px';
@@ -229,12 +256,17 @@ export function Sidebar({
           trackName={trackName}
           onNameChange={onTrackNameChange}
           onAddEffect={onAddTracksEffect}
-          effectsContainer={tracksEffectsContainer}
+          effects={trackEffects}
+          onRemoveEffect={onRemoveTrackEffect}
         />
       </div>
 
       <div id="sidebar-master-wrapper" className="sidebar">
-        <MasterControl onAddEffect={onAddMasterEffect} />
+        <MasterControl
+          onAddEffect={onAddMasterEffect}
+          effects={masterEffects}
+          onRemoveEffect={onRemoveMasterEffect}
+        />
       </div>
     </div>
   );

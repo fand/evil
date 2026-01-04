@@ -43,6 +43,13 @@ export type MixerState = {
   masterPan: number;
 };
 
+// Effects state
+export type EffectsState = {
+  masterEffects: string[]; // Array of effect IDs
+  trackEffects: Record<number, string[]>; // trackIndex -> array of effect IDs
+  version: number; // Increment to trigger re-render
+};
+
 // Full app state
 export type AppState = {
   // Data
@@ -57,6 +64,9 @@ export type AppState = {
 
   // Mixer
   mixer: MixerState;
+
+  // Effects
+  effects: EffectsState;
 };
 
 // Actions
@@ -104,6 +114,13 @@ export type AppActions = {
   resetMixer: () => void;
   loadMixerState: (state: MixerState) => void;
 
+  // Effects actions
+  addMasterEffect: (id: string) => void;
+  removeMasterEffect: (id: string) => void;
+  addTrackEffect: (trackIdx: number, id: string) => void;
+  removeTrackEffect: (trackIdx: number, id: string) => void;
+  triggerEffectsUpdate: () => void;
+
   // Utility
   reset: () => void;
 };
@@ -143,6 +160,12 @@ const initialMixer: MixerState = {
   masterPan: 0.5,
 };
 
+const initialEffects: EffectsState = {
+  masterEffects: [],
+  trackEffects: {},
+  version: 0,
+};
+
 const initialScene: Scene = {
   name: '',
   bpm: 120,
@@ -158,6 +181,7 @@ export const store = createStore<Store>()(
     playback: initialPlayback,
     ui: initialUI,
     mixer: initialMixer,
+    effects: initialEffects,
 
     // Song actions
     setSong: (song) => set({ song }),
@@ -341,6 +365,59 @@ export const store = createStore<Store>()(
     loadMixerState: (mixerState) =>
       set({ mixer: mixerState }),
 
+    // Effects actions
+    addMasterEffect: (id) =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          masterEffects: [...state.effects.masterEffects, id],
+          version: state.effects.version + 1,
+        },
+      })),
+
+    removeMasterEffect: (id) =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          masterEffects: state.effects.masterEffects.filter((i) => i !== id),
+          version: state.effects.version + 1,
+        },
+      })),
+
+    addTrackEffect: (trackIdx, id) =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          trackEffects: {
+            ...state.effects.trackEffects,
+            [trackIdx]: [...(state.effects.trackEffects[trackIdx] || []), id],
+          },
+          version: state.effects.version + 1,
+        },
+      })),
+
+    removeTrackEffect: (trackIdx, id) =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          trackEffects: {
+            ...state.effects.trackEffects,
+            [trackIdx]: (state.effects.trackEffects[trackIdx] || []).filter(
+              (i) => i !== id
+            ),
+          },
+          version: state.effects.version + 1,
+        },
+      })),
+
+    triggerEffectsUpdate: () =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          version: state.effects.version + 1,
+        },
+      })),
+
     // Utility
     reset: () =>
       set({
@@ -349,6 +426,7 @@ export const store = createStore<Store>()(
         playback: initialPlayback,
         ui: initialUI,
         mixer: initialMixer,
+        effects: initialEffects,
       }),
   }))
 );

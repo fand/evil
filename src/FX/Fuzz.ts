@@ -1,5 +1,4 @@
 import { FX } from './FX';
-import { FuzzView } from './FuzzView';
 
 type FuzzType = 'Sigmoid' | 'Octavia';
 
@@ -16,8 +15,6 @@ export class Fuzz extends FX {
   samples: number = 2048;
   gain: number = 0.08;
 
-  override view: FuzzView;
-
   constructor(ctx: AudioContext) {
     super(ctx);
     this.fuzz = this.ctx.createWaveShaper();
@@ -27,8 +24,6 @@ export class Fuzz extends FX {
     this.out.gain.value = 1.0;
 
     this.setGain(0.08);
-
-    this.view = new FuzzView(this);
   }
 
   setType(type: FuzzType) {
@@ -71,7 +66,6 @@ export class Fuzz extends FX {
     if (p.output !== undefined) {
       this.setOutput(p.output);
     }
-    this.view.setParam(p);
   }
 
   getParam(): { effect: 'Fuzz'; type: string; gain: number; input: number; output: number } {

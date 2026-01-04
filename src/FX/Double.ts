@@ -1,5 +1,4 @@
 import { FX } from './FX';
-import { DoubleView } from './DoubleView';
 import { Panner } from '../Panner';
 
 export type DoubleParams = {
@@ -12,8 +11,6 @@ export class Double extends FX {
   pan_l: Panner;
   pan_r: Panner;
   pos: number = 1;
-
-  override view: DoubleView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -32,8 +29,6 @@ export class Double extends FX {
     this.pan_r.connect(this.out);
 
     this.out.gain.value = 0.7;
-
-    this.view = new DoubleView(this);
   }
 
   setDelay(d: number) {
@@ -57,7 +52,6 @@ export class Double extends FX {
     if (p.width !== undefined) {
       this.setWidth(p.width);
     }
-    this.view.setParam(p);
   }
 
   getParam(): { effect: 'Double'; delay: number; width: number } {

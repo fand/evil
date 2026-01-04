@@ -1,5 +1,4 @@
 import { FX } from './FX';
-import { ReverbView } from './ReverbView';
 
 const IR_LOADED: Record<string, AudioBuffer> = {};
 
@@ -12,8 +11,6 @@ export class Reverb extends FX {
   reverb: ConvolverNode;
   name: string = 'BIG_SNARE';
 
-  override view: ReverbView;
-
   constructor(ctx: AudioContext) {
     super(ctx);
     this.reverb = this.ctx.createConvolver();
@@ -23,8 +20,6 @@ export class Reverb extends FX {
     this.in.connect(this.out);
 
     this.setIR(this.name);
-
-    this.view = new ReverbView(this);
   }
 
   setIR(name: string) {
@@ -65,7 +60,6 @@ export class Reverb extends FX {
     if (p.wet !== undefined) {
       this.setWet(p.wet);
     }
-    this.view.setParam(p);
   }
 
   getParam(): { effect: 'Reverb'; name: string; wet: number } {

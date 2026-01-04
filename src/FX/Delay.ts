@@ -1,5 +1,4 @@
 import { FX } from './FX';
-import { DelayView } from './DelayView';
 
 export type DelayParams = {
   delay: number;
@@ -12,8 +11,6 @@ export class Delay extends FX {
   delay: DelayNode;
   lofi: BiquadFilterNode;
   feedback: GainNode;
-
-  override view: DelayView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -37,8 +34,6 @@ export class Delay extends FX {
 
     this.wet.connect(this.out);
     this.in.connect(this.out);
-
-    this.view = new DelayView(this);
   }
 
   setDelay(d: number) {
@@ -66,7 +61,6 @@ export class Delay extends FX {
     if (p.wet !== undefined) {
       this.setWet(p.wet);
     }
-    this.view.setParam(p);
   }
 
   getParam(): { effect: 'Delay' } & DelayParams {

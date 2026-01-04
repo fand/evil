@@ -2,6 +2,7 @@ import type { Sidebar } from './Sidebar';
 import type { Keyboard } from './Keyboard';
 import type { Instrument } from './Instrument';
 import type { Scene } from './Song';
+import { store } from './store';
 
 declare global {
   interface Window {
@@ -125,13 +126,8 @@ class SidebarView {
     );
   }
 
-  showTracks(track: Instrument) {
-    this.tracks_effects
-      .querySelectorAll('.sidebar-effect')
-      .forEach((el) => el.remove());
-    for (const f of track.effects) {
-      f.appendTo(this.tracks_effects);
-    }
+  showTracks(_track: Instrument) {
+    store.getState().triggerEffectsUpdate();
     return (this.wrapper.style.left = '0px');
   }
 
@@ -167,13 +163,13 @@ class SidebarView {
   }
 
   addMasterEffect(name: string) {
-    const fx = this.model.addMasterEffect(name);
-    return fx.appendTo(this.master_effects);
+    this.model.addMasterEffect(name);
+    store.getState().triggerEffectsUpdate();
   }
 
   addTracksEffect(name: string) {
-    const fx = this.model.addTracksEffect(name);
-    return fx.appendTo(this.tracks_effects);
+    this.model.addTracksEffect(name);
+    store.getState().triggerEffectsUpdate();
   }
 
   setBPM(bpm: number) {
