@@ -50,7 +50,7 @@ class Sidebar {
       this.sidebar_pos = this.select_pos;
       const instrument = this.player.instruments[this.select_pos.x];
       if (!instrument) return;
-      return this.view.showTracks(instrument);
+      return this.view.showTracks();
     } else {
       if (
         this.sidebar_pos.y === this.select_pos.y &&

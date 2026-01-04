@@ -6,7 +6,8 @@
       "Bash(npx tsc:*)",
       "Bash(cat:*)",
       "Bash(git mv:*)",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "Bash(npm run typecheck:*)"
     ]
   }
 }
