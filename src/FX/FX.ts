@@ -1,10 +1,8 @@
-import type { FXView } from './FXView';
 import type { EffectParam } from '../Song';
 import type { Instrument } from '../Instrument';
 import type { Mixer } from '../Mixer';
 
 export abstract class FX {
-  abstract view: FXView;
   protected ctx: AudioContext;
   in: GainNode;
   protected dry: GainNode;
@@ -45,11 +43,6 @@ export abstract class FX {
 
   setWet(d: number) {
     this.wet.gain.value = d;
-  }
-
-  appendTo(dst: HTMLElement) {
-    dst.appendChild(this.view.dom);
-    this.view.initEvent();
   }
 
   remove() {

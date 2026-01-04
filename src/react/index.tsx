@@ -6,6 +6,7 @@ import { useResizeHandler } from '../components/player/useResizeHandler';
 import { SessionGrid } from '../components/session';
 import { InstrumentsContainer } from '../components/instruments';
 import { SaveDialog } from '../components/session/SaveDialog';
+import { SidebarContainer } from '../components/sidebar/SidebarContainer';
 
 // Store roots for cleanup
 const roots: Root[] = [];
@@ -117,6 +118,17 @@ export function mountReactApp() {
   const dialogRoot = createRoot(dialogContainer);
   dialogRoot.render(<SaveDialog />);
   roots.push(dialogRoot);
+
+  // Mount SidebarContainer (replaces vanilla SidebarView for effects)
+  const sidebarWrapper = document.getElementById('sidebar-wrapper');
+  if (sidebarWrapper) {
+    // Clear existing sidebar content
+    sidebarWrapper.innerHTML = '';
+
+    const sidebarRoot = createRoot(sidebarWrapper);
+    sidebarRoot.render(<SidebarContainer />);
+    roots.push(sidebarRoot);
+  }
 }
 
 /**

@@ -6,6 +6,8 @@
 
 import type { Player } from './Player';
 import type { Session } from './Session';
+import type { FX } from './FX/FX';
+import { store } from './store';
 
 class AppController {
   private _player: Player | null = null;
@@ -246,6 +248,47 @@ class AppController {
   getMixerAdapter() {
     if (!this._player) return null;
     return this.player.mixer.adapter;
+  }
+
+  // ========================================
+  // Effects Actions
+  // ========================================
+
+  getMasterEffects(): FX[] {
+    if (!this._player) return [];
+    return this.player.mixer.effects_master;
+  }
+
+  getTrackEffects(trackIdx: number): FX[] {
+    if (!this._player) return [];
+    const instrument = this.player.instruments[trackIdx];
+    return instrument?.effects || [];
+  }
+
+  addMasterEffect(name: string): FX | null {
+    if (!this._player) return null;
+    const fx = this.player.mixer.addMasterEffect(name);
+    store.getState().triggerEffectsUpdate();
+    return fx;
+  }
+
+  addTrackEffect(trackIdx: number, name: string): FX | null {
+    if (!this._player) return null;
+    const fx = this.player.mixer.addTracksEffect(trackIdx, name);
+    store.getState().triggerEffectsUpdate();
+    return fx;
+  }
+
+  removeMasterEffect(fx: FX) {
+    if (!this._player) return;
+    this.player.mixer.removeEffect(fx);
+    store.getState().triggerEffectsUpdate();
+  }
+
+  removeTrackEffect(fx: FX) {
+    if (!this._player) return;
+    fx.remove();
+    store.getState().triggerEffectsUpdate();
   }
 }
 

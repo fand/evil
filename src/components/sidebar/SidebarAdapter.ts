@@ -1,6 +1,7 @@
 import type { Sidebar } from '../../Sidebar';
 import type { Player } from '../../Player';
 import type { Mixer } from '../../Mixer';
+import type { FX } from '../../FX/FX';
 import { store } from '../../store';
 
 export type SidebarMode = 'master' | 'tracks';
@@ -116,10 +117,35 @@ export class SidebarAdapter {
   /**
    * Get effects for current track
    */
-  getTrackEffects() {
+  getTrackEffects(): FX[] {
     if (this.state.trackIndex < 0) return [];
     const instrument = this.player.instruments[this.state.trackIndex];
     return instrument?.effects || [];
+  }
+
+  /**
+   * Get master effects
+   */
+  getMasterEffects(): FX[] {
+    return this.mixer.effects_master;
+  }
+
+  /**
+   * Remove effect from master chain
+   */
+  removeMasterEffect(fx: FX) {
+    this.mixer.removeEffect(fx);
+    store.getState().triggerEffectsUpdate();
+  }
+
+  /**
+   * Remove effect from current track
+   */
+  removeTrackEffect(fx: FX) {
+    if (this.state.trackIndex < 0) return;
+    const instrument = this.player.instruments[this.state.trackIndex];
+    instrument?.removeEffect(fx);
+    store.getState().triggerEffectsUpdate();
   }
 
   /**
