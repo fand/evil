@@ -37,6 +37,9 @@ export function SidebarContainer() {
           trackName: instrument.name || `Synth #${currentInstrument}`,
         });
       }
+    } else {
+      // Master mode when currentInstrument is -1
+      setState((s) => ({ ...s, mode: 'master' }));
     }
   }, [currentInstrument]);
 

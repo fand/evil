@@ -1,8 +1,8 @@
 import type { Mixer } from './Mixer';
 import type { Player } from './Player';
 import type { Session } from './Session';
-import { SidebarView } from './SidebarView';
 import type { Scene, Song } from './Song';
+import { store } from './store';
 
 class Sidebar {
   ctx: AudioContext;
@@ -10,7 +10,6 @@ class Sidebar {
   session: Session;
   mixer: Mixer;
   sidebar_pos: { x: number; y: number; type: string };
-  view: SidebarView;
   select_pos: { x: number; y: number; type: string } = {
     x: -1,
     y: -1,
@@ -34,7 +33,6 @@ class Sidebar {
     this.session = session;
     this.mixer = mixer;
     this.sidebar_pos = { x: 0, y: 1, type: 'master' };
-    this.view = new SidebarView(this);
   }
 
   show(select_pos: { x: number; y: number; type: string }) {
@@ -50,7 +48,8 @@ class Sidebar {
       this.sidebar_pos = this.select_pos;
       const instrument = this.player.instruments[this.select_pos.x];
       if (!instrument) return;
-      return this.view.showTracks();
+      store.getState().setCurrentInstrument(this.select_pos.x);
+      store.getState().triggerEffectsUpdate();
     } else {
       if (
         this.sidebar_pos.y === this.select_pos.y &&
@@ -59,7 +58,9 @@ class Sidebar {
         return;
       }
       this.sidebar_pos = this.select_pos;
-      return this.view.showMaster(this.song.master[this.select_pos.y]);
+      const scene = this.song.master[this.select_pos.y];
+      store.getState().setCurrentInstrument(-1);
+      store.getState().setScene(scene);
     }
   }
 
@@ -86,15 +87,15 @@ class Sidebar {
   }
 
   setBPM(bpm: number) {
-    return this.view.setBPM(bpm);
+    store.getState().setBPM(bpm);
   }
 
   setKey(key: string) {
-    return this.view.setKey(key);
+    store.getState().setKey(key);
   }
 
   setScale(scale: string) {
-    return this.view.setScale(scale);
+    store.getState().setScale(scale);
   }
 }
 
