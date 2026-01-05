@@ -55,3 +55,31 @@
 - ID→クラス変換 (`#mixer` → `styles.mixer`)
 - camelCase変換 (`synth-core` → `synthCore` or `['synth-core']`)
 - 非React部分 (`#top`, `#dialog`) はグローバルに残す
+
+## 未完了コンポーネントについて
+
+### SynthEditor / SamplerEditor
+**着手しなかった理由:**
+- JSX内のクラス名が100個以上あり、置換作業が膨大
+- `.RS_*`, `.Sampler_*`, `.instrument`, `.sequencer`, `.header`, `.markers` など多数のネストしたセレクタ
+- SynthとSamplerで色違いのスタイル（cyan `#0df` vs pink `#f3e`）があり、条件分岐が必要
+
+**移行時の注意:**
+- `Instruments.module.css` に共通スタイルは作成済み
+- JSX側で `className="instrument synth"` → `className={styles.instrument}` のように置換が必要
+- Sampler用にカラーバリエーションの対応が必要（CSS変数 or 別module）
+
+### Sidebar / FXViews
+**着手しなかった理由:**
+- SidebarContainer, Sidebar, 各FXView（Compressor, Delay, Reverb等）で同様のスタイルを共有
+- `.sidebar-module`, `.sidebar-effects`, `.sidebar-name` など共通クラスが多い
+- エフェクトパラメータのUIが統一されているため、共通コンポーネント化を先にした方が効率的
+
+**移行時の注意:**
+- FXViewsは構造が似ているので、共通の `FXModule.module.css` を作成すると良い
+- `fieldset`, `legend` のスタイリングに注意
+
+### 移行の優先度
+1. **低**: SynthEditor/SamplerEditor - 動作に影響なし、見た目も変わらない
+2. **低**: Sidebar/FX - 同上
+3. **高**: 旧CSSの削除 - 全コンポーネント移行後に実施
