@@ -1,0 +1,329 @@
+/* Global styles - reset, scrollbar, non-React elements */
+
+* {
+  font-size: 10px;
+  -webkit-user-select: none;
+  text-shadow: 0px 0px 1px #cde;
+}
+input,
+select {
+  text-shadow: none;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  overflow: hidden;
+}
+
+canvas:active {
+  cursor: default;
+}
+
+/* ScrollBar */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background-color: #8df;
+  border-radius: 5px;
+}
+*::-webkit-scrollbar-button {
+  height: 0px;
+}
+*::-webkit-scrollbar-track {
+  width: 10px;
+  background-color: #eee;
+  border-radius: 5px;
+}
+*::-webkit-scrollbar-thumb {
+  width: 10px;
+  background-color: #8df;
+  border-radius: 5px;
+}
+
+/* Top splash screen (non-React) */
+#top {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  z-index: 10000;
+  transition: all 1.3s ease 0s;
+}
+#top-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  margin-top: -170px;
+  margin-left: -170px;
+  opacity: 0.2;
+  transition: all 0.5s ease 0s;
+  overflow: hidden;
+}
+#top-logo-wrapper {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 300px;
+  height: 600px;
+  transition: all 0.3s ease 0s;
+}
+#top-logo-wrapper img {
+  width: 300px;
+  height: 300px;
+}
+#evil-logo {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+#chrome-logo {
+  position: absolute;
+  top: 300px;
+  left: 0px;
+  border: none;
+}
+.logo-sorry:hover {
+  margin-top: -300px;
+}
+#top-sorry {
+  display: none;
+  visibility: none;
+  position: absolute;
+  width: 400px;
+  height: 40px;
+  top: 50%;
+  left: 50%;
+  margin-top: 150px;
+  margin-left: -215px;
+  text-align: center;
+  font-size: 30px;
+  color: #ccc;
+}
+#top-sorry > a {
+  text-decoration: none;
+  font-size: 30px;
+  color: #ccc;
+}
+#top-sorry > a:hover {
+  color: #def;
+}
+
+/* Dialog (non-React) */
+#dialog {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: -10000;
+  opacity: 0;
+}
+#dialog-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -160px;
+  margin-left: -240px;
+  width: 480px;
+  height: 300px;
+  background-color: #fff;
+  border: 1px solid #8df;
+  border-radius: 3px;
+}
+.dialog-message {
+  position: absolute;
+  width: 400px;
+  height: 200px;
+  text-align: center;
+}
+.dialog-icon {
+  width: 100px;
+  height: 100px;
+  font-size: 100px;
+  text-align: center;
+}
+.dialog-message-main {
+  display: block;
+  width: 100%;
+  height: 36px;
+  font-size: 36px;
+  font-family: sans-serif;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: none;
+  color: #444;
+}
+.dialog-message-sub {
+  display: block;
+  width: 100%;
+  height: 24px;
+  margin-top: 12px;
+  font-size: 24px;
+  font-family: sans-serif;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: none;
+  -webkit-user-select: text;
+  color: #444;
+}
+.dialog-message i {
+  font-size: 100px;
+  width: 100px;
+  height: 100px;
+}
+#dialog-success {
+  left: 40px;
+}
+#dialog-error {
+  top: 45px;
+  left: 40px;
+  color: #ccc;
+}
+#dialog-success i {
+  color: #8f8;
+}
+#dialog-error i {
+  color: #ccc;
+  margin-bottom: 20px;
+}
+#dialog-socials {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: 60px;
+  margin-left: -140px;
+  width: 280px;
+  height: 80px;
+}
+.dialog-social {
+  display: block;
+  width: 64px;
+  height: 64px;
+  font-size: 64px;
+  text-align: center;
+  text-decoration: none;
+  color: #ddd;
+}
+.dialog-twitter {
+  position: absolute;
+  left: 0px;
+}
+.dialog-twitter:hover {
+  color: #0df;
+  cursor: pointer;
+}
+.dialog-facebook {
+  position: absolute;
+  right: 0px;
+}
+.dialog-facebook:hover {
+  color: #049;
+  cursor: pointer;
+}
+.dialog-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 16px;
+  color: #eee;
+}
+.dialog-close:hover {
+  color: #666;
+  cursor: pointer;
+}
+
+/* Top left buttons (non-React) */
+#btn-save {
+  position: fixed;
+  top: 15px;
+  left: 20px;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: #ccc;
+  text-align: center;
+  text-shadow: none;
+  z-index: 101;
+}
+#btn-save:hover {
+  cursor: pointer;
+  color: #999;
+}
+#btn-clear {
+  position: fixed;
+  top: 15px;
+  left: 35px;
+  width: 20px;
+  height: 20px;
+  font-size: 18px;
+  padding-left: 20px;
+  color: #ccc;
+  text-align: center;
+  text-shadow: none;
+  z-index: 200;
+}
+#btn-clear:hover {
+  cursor: pointer;
+  color: #999;
+}
+
+/* Top right social buttons (non-React) */
+#social {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  min-width: 100px;
+  text-align: right;
+  height: 20px;
+  z-index: 200;
+}
+.social {
+  float: right;
+  height: 20px;
+  margin-left: 20px;
+  font-size: 18px;
+  color: #000;
+  text-align: center;
+  text-shadow: none;
+  opacity: 0.2;
+  z-index: 200;
+}
+.social:hover {
+  opacity: 0.6;
+  color: #0df;
+  cursor: pointer;
+}
+#hatena {
+  width: 18px;
+  background-image: url('../img/hatebu_18.png');
+  background-position: left;
+}
+#hatena:hover {
+  background-position: right;
+}
+
+/* Legend */
+legend {
+  font-size: 12px;
+}
+
+/* Clearfix */
+.clearfix :after {
+  display: block;
+  clear: both;
+  height: 0px;
+  visibility: hidden;
+  content: '.';
+}
+
+/* Templates (hidden) */
+#templates {
+  display: none;
+}

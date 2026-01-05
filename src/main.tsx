@@ -3,6 +3,7 @@ import { Player } from './Player';
 import { Keyboard } from './Keyboard';
 import { Song } from './Song';
 import { App } from './components/App';
+import './styles/global.css';
 
 declare global {
   interface Window {
