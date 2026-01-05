@@ -1,68 +1,41 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { controller } from '../../controller';
+import { useAppStore } from '../../hooks/useStore';
+import { store } from '../../store';
 
 /**
  * Navigation buttons for instrument/mixer switching.
- * These buttons control the CSS transforms for sliding between views.
+ * View transitions are handled by App.tsx via store subscription.
  */
 export function NavigationButtons() {
-  const [currentInstrument, setCurrentInstrument] = useState(0);
   const [instrumentsCount, setInstrumentsCount] = useState(1);
-  const [isMixer, setIsMixer] = useState(false);
 
-  // DOM refs for direct manipulation (matching jQuery behavior)
-  const instrumentsRef = useRef<HTMLElement | null>(null);
-  const wrapperRef = useRef<HTMLElement | null>(null);
-
-  // Initialize DOM refs
-  useEffect(() => {
-    instrumentsRef.current = document.getElementById('instruments');
-    wrapperRef.current = document.getElementById('wrapper');
-  }, []);
+  // Subscribe to store state
+  const currentInstrument = useAppStore((s) => s.ui.currentInstrument);
+  const viewMode = useAppStore((s) => s.ui.viewMode);
+  const isMixer = viewMode === 'MIXER';
 
   const moveRight = useCallback(() => {
     if (isMixer) return;
-
     const newIdx = currentInstrument + 1;
-    setCurrentInstrument(newIdx);
     controller.moveRight(newIdx);
     setInstrumentsCount(controller.instrumentsCount);
-
-    if (instrumentsRef.current) {
-      instrumentsRef.current.style.webkitTransform = `translate3d(${-1110 * newIdx}px, 0px, 0px)`;
-    }
   }, [isMixer, currentInstrument]);
 
   const moveLeft = useCallback(() => {
     if (isMixer) return;
-
     setInstrumentsCount(controller.instrumentsCount);
-
     if (currentInstrument !== 0) {
-      const newIdx = currentInstrument - 1;
-      setCurrentInstrument(newIdx);
-
-      if (instrumentsRef.current) {
-        instrumentsRef.current.style.webkitTransform = `translate3d(${-1110 * newIdx}px, 0px, 0px)`;
-      }
-      controller.moveLeft(newIdx);
+      controller.moveLeft(currentInstrument - 1);
     }
   }, [isMixer, currentInstrument]);
 
   const moveTop = useCallback(() => {
-    setIsMixer(true);
-    if (wrapperRef.current) {
-      wrapperRef.current.style.webkitTransform = 'translate3d(0px, 700px, 0px)';
-    }
-    controller.moveTop();
+    store.getState().setViewMode('MIXER');
   }, []);
 
   const moveBottom = useCallback(() => {
-    setIsMixer(false);
-    if (wrapperRef.current) {
-      wrapperRef.current.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
-    }
-    controller.moveBottom();
+    store.getState().setViewMode('SYNTH');
   }, []);
 
   // Determine button visibility and labels
@@ -80,7 +53,7 @@ export function NavigationButtons() {
         data-line1="prev"
         data-line2="synth"
         style={{ display: showLeftBtn ? undefined : 'none' }}
-        onMouseDown={moveLeft}
+        onClick={moveLeft}
       />
       <i
         id="btn-right"
@@ -88,21 +61,21 @@ export function NavigationButtons() {
         data-line1={rightLabel}
         data-line2="synth"
         style={{ display: showRightBtn ? undefined : 'none' }}
-        onMouseDown={moveRight}
+        onClick={moveRight}
       />
       <i
         id="btn-top"
         className="btn fa fa-angle-up"
         data-line1="mixer"
         style={{ display: showTopBtn ? undefined : 'none' }}
-        onMouseDown={moveTop}
+        onClick={moveTop}
       />
       <i
         id="btn-bottom"
         className="btn fa fa-angle-down"
         data-line1="synths"
         style={{ display: showBottomBtn ? undefined : 'none' }}
-        onMouseDown={moveBottom}
+        onClick={moveBottom}
       />
     </>
   );

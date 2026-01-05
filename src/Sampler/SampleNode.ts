@@ -75,7 +75,10 @@ export class SampleNode {
   setSample(name: string) {
     this.name = name;
 
-    const sample = SAMPLE.DATA[this.name as keyof typeof SAMPLE.DATA] as { url: string; data?: AudioBuffer };
+    const sample = SAMPLE.DATA[this.name as keyof typeof SAMPLE.DATA] as {
+      url: string;
+      data?: AudioBuffer;
+    };
     if (!sample) {
       return;
     }

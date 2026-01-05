@@ -8,7 +8,11 @@ import type { Song } from '../../Song';
 
 export class SessionViewAdapter {
   private _session: Session;
-  private select_pos: { x: number; y: number; type: string } = { x: 0, y: 0, type: 'master' };
+  private select_pos: { x: number; y: number; type: string } = {
+    x: 0,
+    y: 0,
+    type: 'master',
+  };
 
   get song(): Song {
     return this._session.song;

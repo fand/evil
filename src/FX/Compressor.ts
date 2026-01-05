@@ -1,5 +1,4 @@
 import { FX } from './FX';
-import { CompressorView } from './CompressorView';
 
 export type CompressorParams = {
   input: number;
@@ -13,7 +12,6 @@ export type CompressorParams = {
 
 export class Compressor extends FX {
   comp: DynamicsCompressorNode;
-  override view: CompressorView;
 
   constructor(ctx: AudioContext) {
     super(ctx);
@@ -22,8 +20,6 @@ export class Compressor extends FX {
     this.comp.connect(this.out);
     this.in.gain.value = 1.0;
     this.out.gain.value = 1.0;
-
-    this.view = new CompressorView(this);
   }
 
   setAttack(d: number) {
@@ -68,10 +64,18 @@ export class Compressor extends FX {
     if (p.output !== undefined) {
       this.setOutput(p.output);
     }
-    this.view.setParam(p);
   }
 
-  getParam(): { effect: 'Compressor'; attack: number; release: number; threshold: number; ratio: number; knee: number; input: number; output: number } {
+  getParam(): {
+    effect: 'Compressor';
+    attack: number;
+    release: number;
+    threshold: number;
+    ratio: number;
+    knee: number;
+    input: number;
+    output: number;
+  } {
     return {
       effect: 'Compressor',
       attack: this.comp.attack.value,

@@ -65,7 +65,12 @@ export function MasterCanvas({
 
   // Initialize canvases
   useEffect(() => {
-    if (!canvasRef.current || !canvasOnRef.current || !canvasHoverRef.current || !imgPlay) {
+    if (
+      !canvasRef.current ||
+      !canvasOnRef.current ||
+      !canvasHoverRef.current ||
+      !imgPlay
+    ) {
       return;
     }
 
@@ -134,7 +139,9 @@ export function MasterCanvas({
       if (!rect) return { x: -1, y: -1, type: 'master' };
 
       const x = 0; // Master only has one column
-      const y = Math.floor((e.clientY - rect.top + scrollTop - offsetTranslate) / CELL_HEIGHT);
+      const y = Math.floor(
+        (e.clientY - rect.top + scrollTop - offsetTranslate) / CELL_HEIGHT
+      );
       return { x, y, type: 'master' };
     },
     [offsetTranslate, wrapperRef]
@@ -148,7 +155,12 @@ export function MasterCanvas({
       if (!rect) return false;
 
       const relX = e.clientX - rect.left;
-      const relY = e.clientY - rect.top + scrollTop - offsetTranslate - pos.y * CELL_HEIGHT;
+      const relY =
+        e.clientY -
+        rect.top +
+        scrollTop -
+        offsetTranslate -
+        pos.y * CELL_HEIGHT;
       return relX < 20 && relY < 20 && pos.y >= 0;
     },
     [offsetTranslate, wrapperRef]
@@ -237,11 +249,7 @@ export function MasterCanvas({
   }, [selectedPos, song]);
 
   return (
-    <div
-      id="session-master-wrapper"
-      ref={wrapperRef}
-      onScroll={handleScroll}
-    >
+    <div id="session-master-wrapper" ref={wrapperRef} onScroll={handleScroll}>
       <canvas
         id="session-master"
         ref={canvasRef}

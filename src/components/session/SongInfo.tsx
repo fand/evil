@@ -7,7 +7,11 @@ interface SongInfoProps {
   onCreatorChange: (creator: string) => void;
 }
 
-export function SongInfo({ song, onTitleChange, onCreatorChange }: SongInfoProps) {
+export function SongInfo({
+  song,
+  onTitleChange,
+  onCreatorChange,
+}: SongInfoProps) {
   const handleFocus = useCallback(() => {
     window.keyboard?.beginInput();
   }, []);

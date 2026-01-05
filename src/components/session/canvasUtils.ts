@@ -188,9 +188,19 @@ export function drawHover(
 ): void {
   ctx.fillStyle = 'rgba(255,255,255,0.6)';
   if (isMaster) {
-    ctx.fillRect(pos.x * CELL_WIDTH, pos.y * CELL_HEIGHT, MASTER_WIDTH, CELL_HEIGHT);
+    ctx.fillRect(
+      pos.x * CELL_WIDTH,
+      pos.y * CELL_HEIGHT,
+      MASTER_WIDTH,
+      CELL_HEIGHT
+    );
   } else {
-    ctx.fillRect(pos.x * CELL_WIDTH, pos.y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
+    ctx.fillRect(
+      pos.x * CELL_WIDTH,
+      pos.y * CELL_HEIGHT,
+      CELL_WIDTH,
+      CELL_HEIGHT
+    );
   }
 }
 
@@ -229,7 +239,11 @@ export function drawSelection(
     ctx.fillRect(2, pos.y * CELL_HEIGHT + 2, MASTER_WIDTH - 2, CELL_HEIGHT - 2);
     if (pattern) {
       ctx.fillStyle = color[1];
-      ctx.fillText(pattern.name, pos.x * MASTER_WIDTH + 24, (pos.y + 1) * CELL_HEIGHT - 6);
+      ctx.fillText(
+        pattern.name,
+        pos.x * MASTER_WIDTH + 24,
+        (pos.y + 1) * CELL_HEIGHT - 6
+      );
     }
   } else {
     ctx.fillStyle = color[5];
@@ -241,7 +255,11 @@ export function drawSelection(
     );
     if (pattern) {
       ctx.fillStyle = color[1];
-      ctx.fillText(pattern.name, pos.x * CELL_WIDTH + 24, (pos.y + 1) * CELL_HEIGHT - 6);
+      ctx.fillText(
+        pattern.name,
+        pos.x * CELL_WIDTH + 24,
+        (pos.y + 1) * CELL_HEIGHT - 6
+      );
     }
   }
 }
@@ -265,7 +283,9 @@ export function getCellFromEvent(
   isMaster: boolean = false
 ): CellPos {
   const x = Math.floor((e.clientX - rect.left + scrollLeft) / CELL_WIDTH);
-  const y = Math.floor((e.clientY - rect.top + scrollTop - offsetTranslate) / CELL_HEIGHT);
+  const y = Math.floor(
+    (e.clientY - rect.top + scrollTop - offsetTranslate) / CELL_HEIGHT
+  );
   return { x, y, type: isMaster ? 'master' : 'tracks' };
 }
 
@@ -280,10 +300,13 @@ export function isPlayButtonClick(
   offsetTranslate: number
 ): boolean {
   const x = Math.floor((e.clientX - rect.left + scrollLeft) / CELL_WIDTH);
-  const y = Math.floor((e.clientY - rect.top + scrollTop - offsetTranslate) / CELL_HEIGHT);
+  const y = Math.floor(
+    (e.clientY - rect.top + scrollTop - offsetTranslate) / CELL_HEIGHT
+  );
 
   const relX = e.clientX - rect.left + scrollLeft - x * CELL_WIDTH;
-  const relY = e.clientY - rect.top + scrollTop - offsetTranslate - y * CELL_HEIGHT;
+  const relY =
+    e.clientY - rect.top + scrollTop - offsetTranslate - y * CELL_HEIGHT;
 
   return relX < 20 && relY < 20;
 }

@@ -75,7 +75,11 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
 
   // Initialize canvases
   useEffect(() => {
-    if (!canvasOffRef.current || !canvasOnRef.current || !canvasHoverRef.current) {
+    if (
+      !canvasOffRef.current ||
+      !canvasOnRef.current ||
+      !canvasHoverRef.current
+    ) {
       return;
     }
 
@@ -112,7 +116,13 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
 
   // Update playback position
   useEffect(() => {
-    if (!isActive || !isImageLoaded || !ctxOffRef.current || !cellImageRef.current || isNoSync) {
+    if (
+      !isActive ||
+      !isImageLoaded ||
+      !ctxOffRef.current ||
+      !cellImageRef.current ||
+      isNoSync
+    ) {
       return;
     }
 
@@ -126,8 +136,20 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
     const currX = time % SAMPLER_CELLS_X;
 
     for (let y = 0; y < SAMPLER_CELLS_Y; y++) {
-      drawCell(ctxOffRef.current, cellImageRef.current, CellType.Empty, lastX, y);
-      drawCell(ctxOffRef.current, cellImageRef.current, CellType.Playhead, currX, y);
+      drawCell(
+        ctxOffRef.current,
+        cellImageRef.current,
+        CellType.Empty,
+        lastX,
+        y
+      );
+      drawCell(
+        ctxOffRef.current,
+        cellImageRef.current,
+        CellType.Playhead,
+        currX,
+        y
+      );
     }
 
     setLastTime(time);
@@ -138,7 +160,8 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
     (time?: number) => {
       if (!ctxOnRef.current || !cellImageRef.current) return;
 
-      const currentPage = time !== undefined ? Math.floor(time / SAMPLER_CELLS_X) : page;
+      const currentPage =
+        time !== undefined ? Math.floor(time / SAMPLER_CELLS_X) : page;
       setPage(currentPage);
 
       clearAll(ctxOnRef.current, SAMPLER_CELLS_X, SAMPLER_CELLS_Y);
@@ -177,7 +200,13 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
       // Add new note
       notes.push([pos.note, gain]);
 
-      drawCell(ctxOnRef.current, cellImageRef.current, CellType.Note, pos.x, pos.y);
+      drawCell(
+        ctxOnRef.current,
+        cellImageRef.current,
+        CellType.Note,
+        pos.x,
+        pos.y
+      );
     },
     [pattern]
   );
@@ -202,9 +231,20 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
   // Mouse event handlers
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!canvasHoverRef.current || !ctxHoverRef.current || !cellImageRef.current) return;
+      if (
+        !canvasHoverRef.current ||
+        !ctxHoverRef.current ||
+        !cellImageRef.current
+      )
+        return;
 
-      const pos = getPosFromEvent(e, canvasHoverRef.current, page, SAMPLER_CELLS_X, SAMPLER_CELLS_Y) as SamplerPos;
+      const pos = getPosFromEvent(
+        e,
+        canvasHoverRef.current,
+        page,
+        SAMPLER_CELLS_X,
+        SAMPLER_CELLS_Y
+      ) as SamplerPos;
       // Clamp y to prevent note 0
       if (pos.y >= SAMPLER_CELLS_Y) {
         pos.y = SAMPLER_CELLS_Y - 1;
@@ -214,7 +254,13 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
       // Show hover
       if (pos.x !== hoverPos.x || pos.y !== hoverPos.y) {
         clearCell(ctxHoverRef.current, hoverPos.x, hoverPos.y);
-        drawCell(ctxHoverRef.current, cellImageRef.current, CellType.Hover, pos.x, pos.y);
+        drawCell(
+          ctxHoverRef.current,
+          cellImageRef.current,
+          CellType.Hover,
+          pos.x,
+          pos.y
+        );
         setHoverPos(pos);
       }
 
@@ -236,7 +282,13 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
       if (!canvasHoverRef.current) return;
 
       setIsClicked(true);
-      const pos = getPosFromEvent(e, canvasHoverRef.current, page, SAMPLER_CELLS_X, SAMPLER_CELLS_Y) as SamplerPos;
+      const pos = getPosFromEvent(
+        e,
+        canvasHoverRef.current,
+        page,
+        SAMPLER_CELLS_X,
+        SAMPLER_CELLS_Y
+      ) as SamplerPos;
       // Clamp y
       if (pos.y >= SAMPLER_CELLS_Y) {
         pos.y = SAMPLER_CELLS_Y - 1;
@@ -444,18 +496,24 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
   };
 
   // Keyboard callbacks
-  const handleKeyboardNoteOn = useCallback((note: number) => {
-    model.noteOn(note);
-  }, [model]);
+  const handleKeyboardNoteOn = useCallback(
+    (note: number) => {
+      model.noteOn(note);
+    },
+    [model]
+  );
 
   const handleKeyboardNoteOff = useCallback(() => {
     model.noteOff();
   }, [model]);
 
-  const handleKeyboardSelectSample = useCallback((sample: number) => {
-    setSampleNow(sample);
-    controller.selectSample(id, sample);
-  }, [id]);
+  const handleKeyboardSelectSample = useCallback(
+    (sample: number) => {
+      setSampleNow(sample);
+      controller.selectSample(id, sample);
+    },
+    [id]
+  );
 
   // Default scale for sampler (7 notes per octave display)
   const samplerScale = [0, 1, 2, 3, 4, 5, 6];
@@ -467,7 +525,11 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
     >
       <div className="sequencer">
         <div className="header">
-          <select className="synth-type" value={model.type} onChange={handleTypeChange}>
+          <select
+            className="synth-type"
+            value={model.type}
+            onChange={handleTypeChange}
+          >
             <option value="REZ">REZ</option>
             <option value="SAMPLER">SAMPLER</option>
           </select>
@@ -493,14 +555,20 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
           </div>
 
           <div className="markers clearfix">
-            <i className="fa fa-angle-left marker-prev" onClick={() => controller.backward(true)} />
+            <i
+              className="fa fa-angle-left marker-prev"
+              onClick={() => controller.backward(true)}
+            />
             {[...Array(8)].map((_, i) => (
               <i
                 key={i}
                 className={`fa fa-circle marker ${i < pageTotal ? 'marker-active' : ''} ${i === page ? 'marker-now' : ''}`}
               />
             ))}
-            <i className="fa fa-angle-right marker-next" onClick={() => controller.forward()} />
+            <i
+              className="fa fa-angle-right marker-next"
+              onClick={() => controller.forward()}
+            />
 
             <span className="marker-pos">{page + 1}</span>
             <span className="marker-divide">/</span>
@@ -616,8 +684,7 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
         </fieldset>
 
         <fieldset className="Sampler_module Sampler_output">
-          <legend>output</legend>
-          L{' '}
+          <legend>output</legend>L{' '}
           <input
             className="pan-slider"
             type="range"

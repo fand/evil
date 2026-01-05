@@ -4,7 +4,20 @@ import { controller } from '../../controller';
 import { type NoteKey } from '../../Constant';
 
 // Key names in display order
-const KEY_NAMES: NoteKey[] = ['A', 'D', 'G', 'C', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'B', 'E'];
+const KEY_NAMES: NoteKey[] = [
+  'A',
+  'D',
+  'G',
+  'C',
+  'F',
+  'Bb',
+  'Eb',
+  'Ab',
+  'Db',
+  'Gb',
+  'B',
+  'E',
+];
 
 // Scale names
 const SCALE_NAMES = [
@@ -31,17 +44,26 @@ export function SceneParams() {
     }))
   );
 
-  const handleBpmChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    controller.setBPM(parseInt(e.target.value, 10));
-  }, []);
+  const handleBpmChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      controller.setBPM(parseInt(e.target.value, 10));
+    },
+    []
+  );
 
-  const handleKeyChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    controller.setKey(e.target.value);
-  }, []);
+  const handleKeyChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      controller.setKey(e.target.value);
+    },
+    []
+  );
 
-  const handleScaleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    controller.setScale(e.target.value);
-  }, []);
+  const handleScaleChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      controller.setScale(e.target.value);
+    },
+    []
+  );
 
   const handleFocus = useCallback(() => {
     window.keyboard?.beginInput();

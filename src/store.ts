@@ -20,9 +20,13 @@ export type PlaybackState = {
   beat: BeatInfo;
 };
 
+// View mode
+export type ViewMode = 'SYNTH' | 'MIXER';
+
 // UI state
 export type UIState = {
   currentInstrument: number;
+  viewMode: ViewMode;
   // Pattern version per instrument - incremented when pattern changes
   patternVersions: Record<number, number>;
   // Dialog state
@@ -43,6 +47,13 @@ export type MixerState = {
   masterPan: number;
 };
 
+// Effects state
+export type EffectsState = {
+  masterEffects: string[]; // Array of effect IDs
+  trackEffects: Record<number, string[]>; // trackIndex -> array of effect IDs
+  version: number; // Increment to trigger re-render
+};
+
 // Full app state
 export type AppState = {
   // Data
@@ -57,6 +68,9 @@ export type AppState = {
 
   // Mixer
   mixer: MixerState;
+
+  // Effects
+  effects: EffectsState;
 };
 
 // Actions
@@ -90,6 +104,7 @@ export type AppActions = {
 
   // UI actions
   setCurrentInstrument: (idx: number) => void;
+  setViewMode: (mode: ViewMode) => void;
   triggerPatternRefresh: (instrumentId: number) => void;
   showSuccessDialog: (url: string, songTitle: string, userName: string) => void;
   showErrorDialog: () => void;
@@ -103,6 +118,13 @@ export type AppActions = {
   addMixerTrack: () => void;
   resetMixer: () => void;
   loadMixerState: (state: MixerState) => void;
+
+  // Effects actions
+  addMasterEffect: (id: string) => void;
+  removeMasterEffect: (id: string) => void;
+  addTrackEffect: (trackIdx: number, id: string) => void;
+  removeTrackEffect: (trackIdx: number, id: string) => void;
+  triggerEffectsUpdate: () => void;
 
   // Utility
   reset: () => void;
@@ -126,6 +148,7 @@ const initialPlayback: PlaybackState = {
 
 const initialUI: UIState = {
   currentInstrument: 0,
+  viewMode: 'SYNTH',
   patternVersions: {},
   dialog: {
     isOpen: false,
@@ -143,6 +166,12 @@ const initialMixer: MixerState = {
   masterPan: 0.5,
 };
 
+const initialEffects: EffectsState = {
+  masterEffects: [],
+  trackEffects: {},
+  version: 0,
+};
+
 const initialScene: Scene = {
   name: '',
   bpm: 120,
@@ -158,6 +187,7 @@ export const store = createStore<Store>()(
     playback: initialPlayback,
     ui: initialUI,
     mixer: initialMixer,
+    effects: initialEffects,
 
     // Song actions
     setSong: (song) => set({ song }),
@@ -253,6 +283,11 @@ export const store = createStore<Store>()(
         ui: { ...state.ui, currentInstrument },
       })),
 
+    setViewMode: (viewMode) =>
+      set((state) => ({
+        ui: { ...state.ui, viewMode },
+      })),
+
     triggerPatternRefresh: (instrumentId) =>
       set((state) => ({
         ui: {
@@ -335,11 +370,62 @@ export const store = createStore<Store>()(
         },
       })),
 
-    resetMixer: () =>
-      set({ mixer: initialMixer }),
+    resetMixer: () => set({ mixer: initialMixer }),
 
-    loadMixerState: (mixerState) =>
-      set({ mixer: mixerState }),
+    loadMixerState: (mixerState) => set({ mixer: mixerState }),
+
+    // Effects actions
+    addMasterEffect: (id) =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          masterEffects: [...state.effects.masterEffects, id],
+          version: state.effects.version + 1,
+        },
+      })),
+
+    removeMasterEffect: (id) =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          masterEffects: state.effects.masterEffects.filter((i) => i !== id),
+          version: state.effects.version + 1,
+        },
+      })),
+
+    addTrackEffect: (trackIdx, id) =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          trackEffects: {
+            ...state.effects.trackEffects,
+            [trackIdx]: [...(state.effects.trackEffects[trackIdx] || []), id],
+          },
+          version: state.effects.version + 1,
+        },
+      })),
+
+    removeTrackEffect: (trackIdx, id) =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          trackEffects: {
+            ...state.effects.trackEffects,
+            [trackIdx]: (state.effects.trackEffects[trackIdx] || []).filter(
+              (i) => i !== id
+            ),
+          },
+          version: state.effects.version + 1,
+        },
+      })),
+
+    triggerEffectsUpdate: () =>
+      set((state) => ({
+        effects: {
+          ...state.effects,
+          version: state.effects.version + 1,
+        },
+      })),
 
     // Utility
     reset: () =>
@@ -349,6 +435,7 @@ export const store = createStore<Store>()(
         playback: initialPlayback,
         ui: initialUI,
         mixer: initialMixer,
+        effects: initialEffects,
       }),
   }))
 );
@@ -356,4 +443,3 @@ export const store = createStore<Store>()(
 // Selector helpers for subscribeWithSelector
 export const selectKey = (state: Store) => state.scene.key;
 export const selectScale = (state: Store) => state.scene.scale;
-

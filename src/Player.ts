@@ -267,45 +267,19 @@ export class Player {
 
     this.current_instrument = next_idx;
     store.getState().setCurrentInstrument(next_idx);
-    // activate/deactivate now triggered by store subscription in SynthView/SamplerView
-    window.keyboard.setMode('SYNTH');
   }
 
   moveLeft(next_idx: number) {
     this.current_instrument = next_idx;
     store.getState().setCurrentInstrument(next_idx);
-    // activate/deactivate now triggered by store subscription in SynthView/SamplerView
-    window.keyboard.setMode('SYNTH');
-  }
-
-  moveTop() {
-    window.keyboard.setMode('MIXER');
-  }
-
-  moveBottom() {
-    window.keyboard.setMode('SYNTH');
   }
 
   moveTo(inst_idx: number) {
-    // Navigate to a specific instrument
-    // This is called by Session when double-clicking a cell
-    // React NavigationButtons handles the visual navigation
-    const instrumentsEl = document.getElementById('instruments');
-    const wrapperEl = document.getElementById('wrapper');
-
-    // Move to instruments view (bottom)
-    if (wrapperEl) {
-      wrapperEl.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
-    }
-    window.keyboard.setMode('SYNTH');
-
-    // Navigate to the target instrument
+    // Navigate to a specific instrument (called by Session on double-click)
+    // View transitions handled by React (App.tsx) via store subscription
+    store.getState().setViewMode('SYNTH');
     this.current_instrument = inst_idx;
     store.getState().setCurrentInstrument(inst_idx);
-
-    if (instrumentsEl) {
-      instrumentsEl.style.webkitTransform = `translate3d(${-1110 * inst_idx}px, 0px, 0px)`;
-    }
   }
 
   solo(solos: number[]) {

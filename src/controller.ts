@@ -6,13 +6,17 @@
 
 import type { Player } from './Player';
 import type { Session } from './Session';
+import type { FX } from './FX/FX';
+import { store } from './store';
 
 class AppController {
   private _player: Player | null = null;
 
   get player(): Player {
     if (!this._player) {
-      throw new Error('Player not registered. Call controller.registerPlayer() first.');
+      throw new Error(
+        'Player not registered. Call controller.registerPlayer() first.'
+      );
     }
     return this._player;
   }
@@ -81,14 +85,6 @@ class AppController {
     this.player.moveLeft(idx);
   }
 
-  moveTop() {
-    this.player.moveTop();
-  }
-
-  moveBottom() {
-    this.player.moveBottom();
-  }
-
   // ========================================
   // Session Actions
   // ========================================
@@ -114,15 +110,30 @@ class AppController {
   }
 
   loadPattern(pat: unknown, idx: number, patNum: number) {
-    this.session.loadPattern(pat as Parameters<Session['loadPattern']>[0], idx, patNum);
+    this.session.loadPattern(
+      pat as Parameters<Session['loadPattern']>[0],
+      idx,
+      patNum
+    );
   }
 
-  loadTrack(song: unknown, src: { x: number; y: number }, dst: { x: number; y: number }) {
-    return this.session.loadTrack(song as Parameters<Session['loadTrack']>[0], src, dst);
+  loadTrack(
+    song: unknown,
+    src: { x: number; y: number },
+    dst: { x: number; y: number }
+  ) {
+    return this.session.loadTrack(
+      song as Parameters<Session['loadTrack']>[0],
+      src,
+      dst
+    );
   }
 
   loadMaster(pat: unknown, patNum: number) {
-    this.session.loadMaster(pat as Parameters<Session['loadMaster']>[0], patNum);
+    this.session.loadMaster(
+      pat as Parameters<Session['loadMaster']>[0],
+      patNum
+    );
   }
 
   // ========================================
@@ -246,6 +257,47 @@ class AppController {
   getMixerAdapter() {
     if (!this._player) return null;
     return this.player.mixer.adapter;
+  }
+
+  // ========================================
+  // Effects Actions
+  // ========================================
+
+  getMasterEffects(): FX[] {
+    if (!this._player) return [];
+    return this.player.mixer.effects_master;
+  }
+
+  getTrackEffects(trackIdx: number): FX[] {
+    if (!this._player) return [];
+    const instrument = this.player.instruments[trackIdx];
+    return instrument?.effects || [];
+  }
+
+  addMasterEffect(name: string): FX | null {
+    if (!this._player) return null;
+    const fx = this.player.mixer.addMasterEffect(name);
+    store.getState().triggerEffectsUpdate();
+    return fx;
+  }
+
+  addTrackEffect(trackIdx: number, name: string): FX | null {
+    if (!this._player) return null;
+    const fx = this.player.mixer.addTracksEffect(trackIdx, name);
+    store.getState().triggerEffectsUpdate();
+    return fx;
+  }
+
+  removeMasterEffect(fx: FX) {
+    if (!this._player) return;
+    this.player.mixer.removeEffect(fx);
+    store.getState().triggerEffectsUpdate();
+  }
+
+  removeTrackEffect(fx: FX) {
+    if (!this._player) return;
+    fx.remove();
+    store.getState().triggerEffectsUpdate();
   }
 }
 

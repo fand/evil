@@ -5,6 +5,7 @@
 jQuery ViewをReact componentに段階的に置き換える。Zustand storeは既存のものを活用し、`zustand/react`のhooksを追加。
 
 ### Target Architecture
+
 ```
 store.song (single source of truth)
     │
@@ -28,11 +29,11 @@ npm install -D @types/react @types/react-dom @vitejs/plugin-react
 
 ```typescript
 // vite.config.ts
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react(), legacy()],
-})
+});
 ```
 
 ### 1.3 TypeScript Configuration
@@ -50,15 +51,15 @@ export default defineConfig({
 
 ```typescript
 // src/hooks/useStore.ts
-import { useStore } from 'zustand'
-import { useShallow } from 'zustand/react/shallow'
-import { store, type Store } from '../store'
+import { useStore } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
+import { store, type Store } from '../store';
 
 export const useAppStore = <T>(selector: (state: Store) => T): T => {
-  return useStore(store, selector)
-}
+  return useStore(store, selector);
+};
 
-export { useShallow }
+export { useShallow };
 ```
 
 ### 1.5 React Entry Point
@@ -78,6 +79,7 @@ export function mountReactApp() {
 ```
 
 ### Checklist
+
 - [x] Install React dependencies
 - [x] Configure Vite plugin
 - [x] Update tsconfig.json
@@ -90,21 +92,24 @@ export function mountReactApp() {
 ## Phase 2: PlayerView → PlayerControls
 
 ### Target
+
 `PlayerView.ts` (287行) → `PlayerControls.tsx`
 
 ### Current PlayerView Responsibilities
-| Feature | Store State | Action |
-|---------|-------------|--------|
-| Play/Pause | `playback.isPlaying` | `controller.play/pause` |
-| Stop | - | `controller.stop` |
-| Forward/Backward | - | `controller.forward/backward` |
-| Loop toggle | `playback.isLoop` | `controller.toggleLoop` |
-| BPM input | `scene.bpm` | `controller.setBPM` |
-| Key select | `scene.key` | `controller.setKey` |
-| Scale select | `scene.scale` | `controller.setScale` |
-| Navigation (←→↑↓) | - | `controller.moveLeft/Right/Top/Bottom` |
+
+| Feature           | Store State          | Action                                 |
+| ----------------- | -------------------- | -------------------------------------- |
+| Play/Pause        | `playback.isPlaying` | `controller.play/pause`                |
+| Stop              | -                    | `controller.stop`                      |
+| Forward/Backward  | -                    | `controller.forward/backward`          |
+| Loop toggle       | `playback.isLoop`    | `controller.toggleLoop`                |
+| BPM input         | `scene.bpm`          | `controller.setBPM`                    |
+| Key select        | `scene.key`          | `controller.setKey`                    |
+| Scale select      | `scene.scale`        | `controller.setScale`                  |
+| Navigation (←→↑↓) | -                    | `controller.moveLeft/Right/Top/Bottom` |
 
 ### Component Structure
+
 ```
 src/components/
 ├── player/
@@ -115,12 +120,14 @@ src/components/
 ```
 
 ### Migration Steps
+
 1. Create `PlayerControls.tsx` with store subscription
 2. Mount React component into `#control` element
 3. Remove jQuery event bindings from `PlayerView.ts`
 4. Delete `PlayerView.ts` once React version is stable
 
 ### Checklist
+
 - [x] Create PlayerControls.tsx
 - [x] Create TransportButtons.tsx
 - [x] Create SceneParams.tsx
@@ -134,14 +141,17 @@ src/components/
 ## Phase 3: SessionView → SessionGrid
 
 ### Target
+
 `SessionView.ts` (1239行) → `SessionGrid.tsx`
 
 ### Challenges
+
 - 6つのCanvasレイヤー (tracks, master, on, hover)
 - マウスイベント処理 (hover, click, drag)
 - ダイアログ表示
 
 ### Component Structure
+
 ```
 src/components/
 ├── session/
@@ -153,19 +163,21 @@ src/components/
 ```
 
 ### Canvas Strategy
+
 ```tsx
 // useRef + useEffect for canvas rendering
-const canvasRef = useRef<HTMLCanvasElement>(null)
+const canvasRef = useRef<HTMLCanvasElement>(null);
 
 useEffect(() => {
-  const ctx = canvasRef.current?.getContext('2d')
+  const ctx = canvasRef.current?.getContext('2d');
   if (ctx) {
-    drawTracks(ctx, song.tracks, currentCells)
+    drawTracks(ctx, song.tracks, currentCells);
   }
-}, [song.tracks, currentCells])
+}, [song.tracks, currentCells]);
 ```
 
 ### Checklist
+
 - [x] Create SessionGrid.tsx
 - [x] Create TracksCanvas.tsx with canvas drawing hooks
 - [x] Create MasterCanvas.tsx with canvas drawing hooks
@@ -183,10 +195,12 @@ useEffect(() => {
 ## Phase 4: SynthView / SamplerView
 
 ### Target
+
 - `SynthView.ts` → `SynthEditor.tsx`
 - `SamplerView.ts` → `SamplerEditor.tsx`
 
 ### Shared Components
+
 ```
 src/components/
 ├── instruments/
@@ -197,29 +211,32 @@ src/components/
 ```
 
 ### Pattern Editing Strategy
+
 - Local state for real-time editing
 - Debounced sync to store
 - `patternVersions` for optimistic updates
 
 ```tsx
-const [localPattern, setLocalPattern] = useState(pattern)
+const [localPattern, setLocalPattern] = useState(pattern);
 
 // Debounced sync
 useEffect(() => {
   const timer = setTimeout(() => {
-    store.getState().updateTrackPattern(trackIdx, patternIdx, localPattern)
-  }, 300)
-  return () => clearTimeout(timer)
-}, [localPattern])
+    store.getState().updateTrackPattern(trackIdx, patternIdx, localPattern);
+  }, 300);
+  return () => clearTimeout(timer);
+}, [localPattern]);
 ```
 
 ### Implementation Details
+
 - Canvas-based pattern editing (SYNTH_CELLS_X=32, SAMPLER_CELLS_X=32)
 - React event handlers for all parameter updates
 - Store subscription for playback position updates
 - Coexistence with jQuery views during migration
 
 ### Checklist
+
 - [x] Create SynthEditor.tsx (header, sequencer, synth-core)
 - [x] Create SamplerEditor.tsx (header, sequencer, sampler-core)
 - [x] Implement canvas-based pattern editing
@@ -237,14 +254,17 @@ useEffect(() => {
 ## Phase 5: Remaining Views
 
 ### MixerView → MixerPanel
+
 - Volume/Pan sliders
 - Mute/Solo buttons
 
 ### SidebarView → Sidebar
+
 - Pattern info display
 - Scene length control
 
 ### FX Views
+
 - FXView → FXPanel
 - Individual effect controls
 
@@ -286,20 +306,23 @@ src/
 ## Migration Strategy
 
 ### Coexistence Period
+
 During migration, jQuery and React will coexist:
 
 ```typescript
 // main.ts
-const player = new Player(ctx)
+const player = new Player(ctx);
 
 // Mount React components into existing DOM
-mountReactApp()
+mountReactApp();
 
 // Gradually remove jQuery views as React versions are ready
 ```
 
 ### DOM Mount Points
+
 Option A: Replace existing elements
+
 ```html
 <!-- Before: jQuery renders into #control -->
 <!-- After: React mounts into #control -->
@@ -307,6 +330,7 @@ Option A: Replace existing elements
 ```
 
 Option B: Add React root alongside
+
 ```html
 <div id="control"><!-- jQuery --></div>
 <div id="react-player"><!-- React --></div>
@@ -318,19 +342,19 @@ Option B: Add React root alongside
 
 ## Progress Tracking
 
-| Phase | Component | Status |
-|-------|-----------|--------|
-| 1 | Infrastructure | ✅ Complete |
-| 2 | PlayerControls | ✅ Complete |
-| 3 | SessionGrid | ✅ Complete |
-| 4 | SynthEditor | ✅ Complete |
-| 4 | SamplerEditor | ✅ Complete |
-| 5 | SaveDialog | ✅ Complete |
-| 5 | MixerPanel | ✅ Complete |
-| 5 | Sidebar | ✅ Complete |
-| 5 | FX Views | ✅ Complete |
-| 5 | Keyboard | ✅ Complete |
-| Cleanup | Remove SynthView.ts | ✅ Complete |
+| Phase   | Component             | Status      |
+| ------- | --------------------- | ----------- |
+| 1       | Infrastructure        | ✅ Complete |
+| 2       | PlayerControls        | ✅ Complete |
+| 3       | SessionGrid           | ✅ Complete |
+| 4       | SynthEditor           | ✅ Complete |
+| 4       | SamplerEditor         | ✅ Complete |
+| 5       | SaveDialog            | ✅ Complete |
+| 5       | MixerPanel            | ✅ Complete |
+| 5       | Sidebar               | ✅ Complete |
+| 5       | FX Views              | ✅ Complete |
+| 5       | Keyboard              | ✅ Complete |
+| Cleanup | Remove SynthView.ts   | ✅ Complete |
 | Cleanup | Remove SamplerView.ts | ✅ Complete |
 
 ### Summary
@@ -338,6 +362,7 @@ Option B: Add React root alongside
 **React移行が完了しました。** 全てのjQuery Viewコンポーネントがreactに置き換えられ、バンドルサイズが446KB→413KBに削減されました。
 
 ### Key Changes
+
 - **Phase 1**: React/Vite infrastructure setup, useStore hook
 - **Phase 2**: PlayerControls (transport, scene params, navigation)
 - **Phase 3**: SessionGrid (tracks/master canvas, save dialog)
@@ -350,11 +375,13 @@ Option B: Add React root alongside
 ## Notes
 
 ### Keep Outside React
+
 - Audio engine (WebAudio callbacks)
 - `MutekiTimer` (timing critical)
 - `controller.ts` (bridge layer)
 
 ### Testing Strategy
+
 - Manual testing after each component migration
 - Verify store subscription works correctly
 - Check audio playback is not affected

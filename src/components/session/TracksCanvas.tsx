@@ -70,8 +70,8 @@ export function TracksCanvas({
 
   // Initialize track colors
   useEffect(() => {
-    const colors = song.tracks.map((track) =>
-      getColorScheme(track.type) || DEFAULT_COLOR
+    const colors = song.tracks.map(
+      (track) => getColorScheme(track.type) || DEFAULT_COLOR
     );
     // Pad with default colors for empty tracks
     while (colors.length < 8) {
@@ -82,7 +82,12 @@ export function TracksCanvas({
 
   // Initialize canvases
   useEffect(() => {
-    if (!canvasRef.current || !canvasOnRef.current || !canvasHoverRef.current || !imgPlay) {
+    if (
+      !canvasRef.current ||
+      !canvasOnRef.current ||
+      !canvasHoverRef.current ||
+      !imgPlay
+    ) {
       return;
     }
 
@@ -162,8 +167,12 @@ export function TracksCanvas({
       const scrollTop = wrapperRef.current?.scrollTop || 0;
       if (!rect) return { x: -1, y: -1, type: 'tracks' };
 
-      const x = Math.floor((e.clientX - rect.left + mixerScrollLeft) / CELL_WIDTH);
-      const y = Math.floor((e.clientY - rect.top + scrollTop - offsetTranslate) / CELL_HEIGHT);
+      const x = Math.floor(
+        (e.clientX - rect.left + mixerScrollLeft) / CELL_WIDTH
+      );
+      const y = Math.floor(
+        (e.clientY - rect.top + scrollTop - offsetTranslate) / CELL_HEIGHT
+      );
       return { x, y, type: 'tracks' };
     },
     [mixerScrollLeft, offsetTranslate, wrapperRef]
@@ -177,7 +186,12 @@ export function TracksCanvas({
       if (!rect) return false;
 
       const relX = e.clientX - rect.left + mixerScrollLeft - pos.x * CELL_WIDTH;
-      const relY = e.clientY - rect.top + scrollTop - offsetTranslate - pos.y * CELL_HEIGHT;
+      const relY =
+        e.clientY -
+        rect.top +
+        scrollTop -
+        offsetTranslate -
+        pos.y * CELL_HEIGHT;
       return relX < 20 && relY < 20 && pos.y >= 0;
     },
     [mixerScrollLeft, offsetTranslate, wrapperRef]
@@ -288,10 +302,7 @@ export function TracksCanvas({
   }, [selectedPos, song, trackColors]);
 
   return (
-    <div
-      id="session-tracks-wrapper"
-      style={{ width: width + 'px' }}
-    >
+    <div id="session-tracks-wrapper" style={{ width: width + 'px' }}>
       <div
         id="session-tracks-wrapper-sub"
         ref={wrapperRef}

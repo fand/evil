@@ -14,7 +14,7 @@
 
 ```typescript
 export class Player {
-  scene: Scene;  // ← 単一ソース
+  scene: Scene; // ← 単一ソース
 
   get bpm(): number {
     return this.scene.bpm;
@@ -40,7 +40,7 @@ export class Player {
 
 ```typescript
 class Synth {
-  pattern_obj: SynthPatternObject;  // ← 単一ソース
+  pattern_obj: SynthPatternObject; // ← 単一ソース
 
   get pattern(): SynthPattern {
     return this.pattern_obj.pattern;
@@ -65,6 +65,7 @@ class Synth {
 ## 3. Synth と SynthView: pattern の二重管理 ✅ 解決済み
 
 **ファイル**:
+
 - `src/Synth.ts`
 - `src/Synth/SynthView.ts`
 
@@ -88,6 +89,7 @@ export class SynthView {
 ## 4. Sampler と SamplerView: pattern の二重管理 ✅ 解決済み
 
 **ファイル**:
+
 - `src/Sampler.ts`
 - `src/Sampler/SamplerView.ts`
 
@@ -96,7 +98,7 @@ export class SynthView {
 ```typescript
 // Sampler.ts
 class Sampler {
-  pattern_obj: SamplerPatternObject;  // ← 単一ソース
+  pattern_obj: SamplerPatternObject; // ← 単一ソース
 
   get pattern(): SamplerPattern {
     return this.pattern_obj.pattern;
@@ -124,6 +126,7 @@ class SamplerView {
 ## 5. Player と Session: scene_length の二重管理 ✅ 解決済み
 
 **ファイル**:
+
 - `src/Player.ts`
 - `src/Session.ts`
 
@@ -147,6 +150,7 @@ class Session {
 ## 6. Synth と SynthCore: scale の参照保持 ✅ 解決済み
 
 **ファイル**:
+
 - `src/Synth.ts`
 - `src/Synth/SynthCore.ts`
 
@@ -165,13 +169,13 @@ export class SynthCore {
 
 ## ステータス
 
-| 優先度 | 問題 | ステータス |
-|--------|------|------------|
-| 高 | 2. Synth: pattern/pattern_obj | ✅ 解決済み |
-| 高 | 3. Synth/SynthView: pattern | ✅ 解決済み |
-| 中 | 1. Player: bpm/key/scale/scene | ✅ 解決済み |
-| 中 | 5. Player/Session: scene_length | ✅ 解決済み |
-| 低 | 4. Sampler/SamplerView | ✅ 解決済み |
-| 低 | 6. Synth/SynthCore: scale | ✅ 解決済み |
+| 優先度 | 問題                            | ステータス  |
+| ------ | ------------------------------- | ----------- |
+| 高     | 2. Synth: pattern/pattern_obj   | ✅ 解決済み |
+| 高     | 3. Synth/SynthView: pattern     | ✅ 解決済み |
+| 中     | 1. Player: bpm/key/scale/scene  | ✅ 解決済み |
+| 中     | 5. Player/Session: scene_length | ✅ 解決済み |
+| 低     | 4. Sampler/SamplerView          | ✅ 解決済み |
+| 低     | 6. Synth/SynthCore: scale       | ✅ 解決済み |
 
 **すべての問題が解決済みです。**

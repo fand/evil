@@ -1,11 +1,6 @@
 import type { Panner } from './Panner';
 import type { FX } from './FX/FX';
-import type {
-  Pattern,
-  PatternObject,
-  TrackParam,
-  EffectParam,
-} from './Song';
+import type { Pattern, PatternObject, TrackParam, EffectParam } from './Song';
 
 export interface Instrument {
   id: number;
