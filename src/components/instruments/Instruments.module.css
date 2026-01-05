@@ -1,0 +1,503 @@
+/* Instrument shared styles */
+
+.instrument {
+  position: relative;
+  display: block;
+  float: left;
+  width: 910px;
+  height: 590px;
+  margin: 0px;
+  padding: 0px;
+  margin-right: 200px;
+  background-color: #fff;
+  border: 1px solid #0df;
+  border-radius: 3px;
+}
+
+.instrument.sampler {
+  border: 1px solid #f3e;
+}
+
+/* Sequencer Header */
+.header {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 910px;
+  height: 35px;
+  border-bottom: 1px solid #0df;
+  border-radius: 3px;
+}
+
+.sampler .header {
+  border-bottom: 1px solid #f3e;
+}
+
+.synthType {
+  position: absolute;
+  top: 0px;
+  left: 12px;
+  width: 70px;
+  height: 16px;
+  margin: 10px 5px;
+  font-size: 10px;
+  color: #0df;
+}
+
+.names {
+  position: absolute;
+  color: #0df;
+  font-size: 12px;
+  top: 0px;
+  left: 100px;
+  white-space: nowrap;
+}
+
+.names * {
+  float: left;
+  font-size: 12px;
+  height: 16px;
+  margin: 9px 0px;
+  padding: 0px;
+  border: none;
+  background: none;
+  outline: none;
+  color: #0df;
+  text-shadow: 0 0 1px #cde;
+  text-align: center;
+}
+
+.names > span {
+  font-size: 9px;
+  height: 12px;
+  margin: 13px 10px 0px 10px;
+}
+
+.synthName {
+  max-width: 60px;
+}
+
+.synthName:hover {
+  text-shadow: 0px 0px 10px #9ef;
+}
+
+.patternName {
+  max-width: 60px;
+}
+
+.patternName:hover {
+  text-shadow: 0px 0px 10px #9ef;
+}
+
+.sequencerMode {
+  position: absolute;
+  color: #0df;
+  font-size: 12px;
+  top: 0px;
+  left: 310px;
+  width: 120px;
+  height: 36px;
+}
+
+.sequencerMode > * {
+  float: left;
+}
+
+.sequencerMode > span {
+  font-size: 12px;
+  height: 16px;
+  margin: 12px 0px;
+  margin-right: 12px;
+}
+
+.sequencerMode > i {
+  font-size: 16px;
+  height: 16px;
+  margin: 10px 6px;
+}
+
+.markers {
+  position: absolute;
+  top: 0px;
+  left: 480px;
+  width: 400px;
+  height: 36px;
+  margin: 0px;
+  padding: 0px;
+  text-align: center;
+}
+
+.markers * {
+  float: left;
+  width: 10px;
+  height: 12px;
+  font-size: 12px;
+  text-align: center;
+  margin: 0px;
+  padding: 12px 6px;
+  color: #8df;
+}
+
+.marker {
+  color: #fafafa;
+}
+
+.markerActive {
+  color: #8df;
+}
+
+.markerActive:hover {
+  cursor: pointer;
+  text-shadow: 0px 0px 4px #088;
+}
+
+.markerNow {
+  color: #fff;
+  text-shadow: 0px 0px 5px #0df;
+}
+
+.markerNow:hover {
+  cursor: default;
+  text-shadow: 0px 0px 10px #0df;
+}
+
+.markerPrev,
+.markerNext {
+  padding: 12px;
+}
+
+.markerPrev:hover,
+.markerNext:hover {
+  text-shadow: 0px 0px 5px #0df;
+}
+
+.markerPos {
+  margin-left: 15px;
+}
+
+.markerPos,
+.markerDivide,
+.markerTotal {
+  padding: 12px 0px;
+  width: 20px;
+}
+
+.headerBtn {
+  width: 16px;
+  margin: 10px;
+  padding: 2px;
+  font-size: 12px;
+}
+
+.btnFalse {
+  color: #eee;
+}
+
+.btnFalse:hover {
+  cursor: pointer;
+  color: #fff;
+  text-shadow: 0px 0px 5px #0df;
+}
+
+.btnTrue {
+  color: #8df;
+}
+
+.patternNosync {
+  position: absolute;
+  width: 16px;
+  margin: 10px;
+  padding: 2px;
+  top: 0px;
+  right: 0px;
+  font-size: 12px;
+}
+
+.patternPlus {
+  position: absolute;
+  top: 0px;
+  right: 30px;
+}
+
+.patternPlus:hover {
+  color: #fff;
+  text-shadow: 0px 0px 10px #0df;
+}
+
+.patternMinus {
+  position: absolute;
+  top: 0px;
+  right: 60px;
+}
+
+.patternMinus:hover {
+  color: #fff;
+  text-shadow: 0px 0px 10px #0df;
+}
+
+/* Sequencer Table */
+.sequencerTable {
+  position: absolute;
+  margin: 0px 7px;
+  padding: 0px;
+  top: 45px;
+  left: 0px;
+  width: 896px;
+  height: 262px;
+  overflow-y: scroll;
+  transition: all 0.2s ease 0s;
+}
+
+.table {
+  position: absolute;
+  margin: 0px;
+  padding: 0px;
+  top: 0px;
+  left: 50px;
+  overflow-y: hidden;
+}
+
+.tableHover {
+  z-index: 100;
+}
+
+.tableOn {
+  z-index: 10;
+}
+
+.tableOff {
+  z-index: 1;
+}
+
+.keyboard {
+  position: absolute;
+  margin: 0px;
+  padding: 0px;
+  top: 2px;
+  left: 0px;
+}
+
+.btnFoldCore {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  padding: 5px;
+  min-width: 20px;
+  min-height: 20px;
+  font-size: 20px;
+  text-align: center;
+  z-index: 10;
+  color: #0df;
+  background-color: #fff;
+}
+
+.btnFoldCore:hover {
+  color: #fff;
+  text-shadow: 0px 0px 5px #0ae;
+}
+
+/* Synth Core */
+.synthCore {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  height: 280px;
+  left: 0px;
+  transition: all 0.2s ease 0s;
+}
+
+.rsModule {
+  color: #0df;
+  background-color: #fff;
+  margin: 0px 10px;
+  padding: 0px;
+  font-size: 12px;
+  text-align: center;
+  vertical-align: top;
+  line-height: 26px;
+  border: 1px solid #0df;
+  border-radius: 3px;
+}
+
+.rsVco0 {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 130px;
+  height: 140px;
+}
+
+.rsVco1 {
+  position: absolute;
+  top: 0px;
+  left: 140px;
+  width: 130px;
+  height: 140px;
+}
+
+.rsVco2 {
+  display: none;
+}
+
+.rsVCO > div {
+  margin: 0px 15px;
+}
+
+.rsVCO label {
+  float: left;
+  width: 35px;
+  padding-right: 5px;
+  font-size: 12px;
+  text-align: right;
+}
+
+.rsVCO select {
+  float: right;
+  width: 55px;
+  font-size: 10px;
+  text-align: left;
+  margin-top: 4px;
+}
+
+.rsVCO input {
+  float: right;
+  width: 50px;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.rsMixer {
+  position: absolute;
+  top: 140px;
+  left: 0px;
+  width: 270px;
+  height: 128px;
+  padding-top: 2px;
+}
+
+.rsMixer > div {
+  margin: 4px 20px;
+}
+
+.rsMixer label {
+  float: left;
+  width: 35px;
+  padding-right: 5px;
+  font-size: 12px;
+  text-align: right;
+}
+
+.rsMixer input {
+  float: right;
+  width: 170px;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 3px;
+}
+
+.rsEG {
+  position: absolute;
+  top: 0px;
+  left: 280px;
+  width: 220px;
+  height: 270px;
+}
+
+.rsEG canvas {
+  margin: 11px;
+  padding-top: 30px;
+  padding-bottom: 2px;
+  width: 180px;
+  height: 50px;
+  border-left: 1px solid #0df;
+  border-bottom: 1px solid #0df;
+}
+
+.rsEG > div {
+  margin: 4px 20px 4px 15px;
+}
+
+.rsEG label {
+  float: left;
+  width: 50px;
+  padding-right: 5px;
+  font-size: 12px;
+  text-align: right;
+}
+
+.rsEG input {
+  float: right;
+  width: 120px;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 3px;
+}
+
+.rsFEG {
+  position: absolute;
+  top: 0px;
+  left: 670px;
+  width: 220px;
+  height: 270px;
+}
+
+.rsFEG canvas {
+  margin: 11px;
+  padding-top: 30px;
+  padding-bottom: 2px;
+  width: 180px;
+  height: 50px;
+  border-left: 1px solid #0df;
+  border-bottom: 1px solid #0df;
+}
+
+.rsFEG > div {
+  margin: 4px 20px 4px 15px;
+}
+
+.rsFEG label {
+  float: left;
+  width: 50px;
+  padding-right: 5px;
+  font-size: 12px;
+  text-align: right;
+}
+
+.rsFEG input {
+  float: right;
+  width: 120px;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 3px;
+}
+
+.rsFilter {
+  position: absolute;
+  top: 0px;
+  left: 510px;
+  width: 150px;
+  height: 270px;
+}
+
+.rsFilterFreq {
+  float: left;
+  text-align: center;
+  left: 0px;
+  margin: 0px 10px;
+  width: 60px;
+}
+
+.rsFilterQ {
+  float: left;
+  text-align: center;
+  width: 60px;
+  margin: 0px;
+}
+
+.filterSlider {
+  width: 60px;
+  height: 195px;
+  margin-top: 7px;
+  -webkit-appearance: slider-vertical;
+}
