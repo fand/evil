@@ -1,0 +1,113 @@
+/* App layout styles */
+
+.wrapper {
+  min-width: 100%;
+  min-height: 100%;
+  overflow: visible;
+  transition: all 0.2s ease 0s;
+}
+
+.instruments {
+  position: absolute;
+  width: 800000px;
+  height: 600px;
+  margin: 0px;
+  padding: 0px;
+  top: 50%;
+  left: 50%;
+  margin-top: -300px;
+  margin-left: -455px; /* 910px / 2 */
+  transition: all 0.2s ease 0s;
+}
+
+.mixer {
+  position: absolute;
+  width: 910px;
+  height: 500px;
+  margin: 0px;
+  padding: 0px;
+  top: 50%;
+  left: 50%;
+  margin-top: -1000px;
+  margin-left: -470px;
+  overflow: hidden;
+  background-color: #fff;
+  border: 1px solid #0df;
+  border-radius: 3px;
+  transition: all 0.2s ease 0s;
+}
+
+.mixerBody {
+  position: absolute;
+  width: 671px;
+  height: 491px;
+  top: 0px;
+  left: 0px;
+  margin: 9px 0px 0px 9px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.mixerSidebar {
+  position: absolute;
+  width: 223px;
+  height: 483px;
+  top: 0px;
+  right: 0px;
+  margin: 9px 7px 9px 0px;
+  overflow: hidden;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  height: calc((100vh - 600px) / 2);
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.control {
+  position: absolute;
+  width: 400px;
+  height: 20px;
+  top: 50%;
+  right: 50%;
+  margin-top: -20px;
+  margin-right: 190px;
+  text-align: right;
+  font-size: 16px;
+  color: #0df;
+}
+
+.control > input,
+.control > select {
+  margin-right: 10px;
+}
+
+.songInfo {
+  position: absolute;
+  width: 220px;
+  height: 60px;
+  top: 50%;
+  left: 50%;
+  margin-top: -35px;
+  margin-left: 240px;
+  text-align: right;
+  font-size: 16px;
+  color: #0df;
+}
+
+.songInfo label {
+  width: 80px;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.songInfo input {
+  outline: none;
+  border: none;
+  width: 140px;
+  text-align: left;
+  color: #0df;
+  font-size: 12px;
+}
