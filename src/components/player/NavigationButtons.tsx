@@ -45,6 +45,11 @@ export function NavigationButtons() {
   const showBottomBtn = isMixer;
   const rightLabel = currentInstrument >= instrumentsCount - 1 ? 'new' : 'next';
 
+  console.log({
+    showLeftBtn,
+    showBottomBtn,
+  });
+
   return (
     <>
       <i
@@ -53,7 +58,7 @@ export function NavigationButtons() {
         data-line1="prev"
         data-line2="synth"
         style={{ display: showLeftBtn ? undefined : 'none' }}
-        onMouseDown={moveLeft}
+        onClick={moveLeft}
       />
       <i
         id="btn-right"
@@ -61,21 +66,21 @@ export function NavigationButtons() {
         data-line1={rightLabel}
         data-line2="synth"
         style={{ display: showRightBtn ? undefined : 'none' }}
-        onMouseDown={moveRight}
+        onClick={moveRight}
       />
       <i
         id="btn-top"
         className="btn fa fa-angle-up"
         data-line1="mixer"
         style={{ display: showTopBtn ? undefined : 'none' }}
-        onMouseDown={moveTop}
+        onClick={moveTop}
       />
       <i
         id="btn-bottom"
         className="btn fa fa-angle-down"
         data-line1="synths"
         style={{ display: showBottomBtn ? undefined : 'none' }}
-        onMouseDown={moveBottom}
+        onClick={moveBottom}
       />
     </>
   );

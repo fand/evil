@@ -324,14 +324,13 @@ canvas:active {
   position: absolute;
 
   width: 800000px;
-  max-height: 600px;
+  height: 600px;
   margin: 0px;
   padding: 0px;
   top: 50%;
   left: 50%;
   margin-top: -300px;
-  margin-left: -470px;
-  /* overflow-y: hidden; */
+  margin-left: -455px; /* 910px / 2 */
 
   transition: all 0.2s ease 0s;
 }
@@ -361,8 +360,11 @@ canvas:active {
   right: 0;
   margin-top: -300px;
 
-  text-align: left;
-  padding: 250px 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
   font-size: 100px;
   box-sizing: border-box;
 
@@ -379,8 +381,6 @@ canvas:active {
   z-index: 100;
 }
 #btn-left {
-  display: none;
-
   position: fixed;
   width: calc((100vw - 910px) / 2);
   height: 600px;
@@ -388,8 +388,11 @@ canvas:active {
   left: 0;
   margin-top: -300px;
 
-  text-align: right;
-  padding: 250px 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
   font-size: 100px;
   box-sizing: border-box;
 
@@ -428,8 +431,6 @@ canvas:active {
   z-index: 100;
 }
 #btn-bottom {
-  display: none;
-
   position: fixed;
   width: 100%;
   height: 100px;
@@ -468,17 +469,10 @@ canvas:active {
   color: #e0e0e0;
   content: attr(data-line1) '\A' attr(data-line2);
 }
-#btn-left:hover:after {
-  width: 100px;
-  height: 60px;
-  top: 180px;
-  right: -15px;
-}
+#btn-left:hover:after,
 #btn-right:hover:after {
-  width: 100px;
-  height: 60px;
-  top: 180px;
-  left: -5px;
+  width: 100%;
+  margin-top: -100%;
 }
 #btn-top:hover:after {
   width: 100%;
