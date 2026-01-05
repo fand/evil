@@ -68,7 +68,13 @@ export class Fuzz extends FX {
     }
   }
 
-  getParam(): { effect: 'Fuzz'; type: string; gain: number; input: number; output: number } {
+  getParam(): {
+    effect: 'Fuzz';
+    type: string;
+    gain: number;
+    input: number;
+    output: number;
+  } {
     return {
       effect: 'Fuzz',
       type: this.type,

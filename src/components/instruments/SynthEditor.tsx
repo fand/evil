@@ -69,7 +69,8 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
   const isActive = currentInstrument === id;
 
   // Get scale array from scale name
-  const scale = SCALE_LIST[scaleName as keyof typeof SCALE_LIST] || SCALE_LIST.Major;
+  const scale =
+    SCALE_LIST[scaleName as keyof typeof SCALE_LIST] || SCALE_LIST.Major;
 
   // Get pattern from model
   const pattern = model.pattern;
@@ -85,33 +86,39 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
   }, [isActive, model.core]);
 
   // Update core parameter
-  const updateCoreParam = useCallback((param: Partial<typeof coreParams>) => {
-    model.core.setParam(param);
-    setCoreParams(model.core.getParam());
-  }, [model.core]);
+  const updateCoreParam = useCallback(
+    (param: Partial<typeof coreParams>) => {
+      model.core.setParam(param);
+      setCoreParams(model.core.getParam());
+    },
+    [model.core]
+  );
 
   // Draw ADSR canvas
-  const drawADSRCanvas = useCallback((canvasRef: React.RefObject<HTMLCanvasElement | null>, adsr: number[]) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const drawADSRCanvas = useCallback(
+    (canvasRef: React.RefObject<HTMLCanvasElement | null>, adsr: number[]) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    const w = (canvas.width = 180);
-    const h = (canvas.height = 50);
-    const w4 = w / 4;
+      const w = (canvas.width = 180);
+      const h = (canvas.height = 50);
+      const w4 = w / 4;
 
-    ctx.clearRect(0, 0, w, h);
-    ctx.beginPath();
-    ctx.moveTo(w4 * (1.0 - adsr[0]), h);
-    ctx.lineTo(w / 4, 0); // attack
-    ctx.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2])); // decay
-    ctx.lineTo(w4 * 3, h * (1.0 - adsr[2])); // sustain
-    ctx.lineTo(w4 * (adsr[3] + 3), h); // release
-    ctx.strokeStyle = 'rgb(0, 220, 255)';
-    ctx.stroke();
-  }, []);
+      ctx.clearRect(0, 0, w, h);
+      ctx.beginPath();
+      ctx.moveTo(w4 * (1.0 - adsr[0]), h);
+      ctx.lineTo(w / 4, 0); // attack
+      ctx.lineTo(w4 * (adsr[1] + 1), h * (1.0 - adsr[2])); // decay
+      ctx.lineTo(w4 * 3, h * (1.0 - adsr[2])); // sustain
+      ctx.lineTo(w4 * (adsr[3] + 3), h); // release
+      ctx.strokeStyle = 'rgb(0, 220, 255)';
+      ctx.stroke();
+    },
+    []
+  );
 
   // Update ADSR canvases when params change
   useEffect(() => {
@@ -135,7 +142,11 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
 
   // Initialize canvases
   useEffect(() => {
-    if (!canvasOffRef.current || !canvasOnRef.current || !canvasHoverRef.current) {
+    if (
+      !canvasOffRef.current ||
+      !canvasOnRef.current ||
+      !canvasHoverRef.current
+    ) {
       return;
     }
 
@@ -172,7 +183,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
 
   // Update playback position
   useEffect(() => {
-    if (!isImageLoaded || !ctxOffRef.current || !cellImageRef.current || isNoSync) {
+    if (
+      !isImageLoaded ||
+      !ctxOffRef.current ||
+      !cellImageRef.current ||
+      isNoSync
+    ) {
       return;
     }
 
@@ -186,8 +202,20 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     const currX = time % SYNTH_CELLS_X;
 
     for (let y = 0; y < SYNTH_CELLS_Y; y++) {
-      drawCell(ctxOffRef.current, cellImageRef.current, CellType.Empty, lastX, y);
-      drawCell(ctxOffRef.current, cellImageRef.current, CellType.Playhead, currX, y);
+      drawCell(
+        ctxOffRef.current,
+        cellImageRef.current,
+        CellType.Empty,
+        lastX,
+        y
+      );
+      drawCell(
+        ctxOffRef.current,
+        cellImageRef.current,
+        CellType.Playhead,
+        currX,
+        y
+      );
     }
 
     setLastTime(time);
@@ -198,7 +226,8 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     (time?: number) => {
       if (!ctxOnRef.current || !cellImageRef.current) return;
 
-      const currentPage = time !== undefined ? Math.floor(time / SYNTH_CELLS_X) : page;
+      const currentPage =
+        time !== undefined ? Math.floor(time / SYNTH_CELLS_X) : page;
       setPage(currentPage);
 
       clearAll(ctxOnRef.current, SYNTH_CELLS_X, SYNTH_CELLS_Y);
@@ -208,13 +237,31 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
         const note = pattern[currentPage * SYNTH_CELLS_X + x];
 
         if (note === 'sustain') {
-          drawCell(ctxOnRef.current, cellImageRef.current, CellType.SustainMiddle, x, lastY);
+          drawCell(
+            ctxOnRef.current,
+            cellImageRef.current,
+            CellType.SustainMiddle,
+            x,
+            lastY
+          );
         } else if (note === 'end') {
-          drawCell(ctxOnRef.current, cellImageRef.current, CellType.SustainEnd, x, lastY);
+          drawCell(
+            ctxOnRef.current,
+            cellImageRef.current,
+            CellType.SustainEnd,
+            x,
+            lastY
+          );
           lastY = 0;
         } else if (typeof note === 'number' && note < 0) {
           const y = SYNTH_CELLS_Y + note;
-          drawCell(ctxOnRef.current, cellImageRef.current, CellType.SustainStart, x, y);
+          drawCell(
+            ctxOnRef.current,
+            cellImageRef.current,
+            CellType.SustainStart,
+            x,
+            y
+          );
           lastY = y;
         } else if (typeof note === 'number' && note > 0) {
           const y = SYNTH_CELLS_Y - note;
@@ -251,10 +298,22 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
         const prevNote = pattern[pos.x_abs - 1];
         if (typeof prevNote === 'number' && prevNote < 0) {
           pattern[pos.x_abs - 1] = -prevNote;
-          drawCell(ctxOnRef.current, cellImageRef.current, CellType.Empty, prevX, y);
+          drawCell(
+            ctxOnRef.current,
+            cellImageRef.current,
+            CellType.Empty,
+            prevX,
+            y
+          );
         } else {
           pattern[pos.x_abs - 1] = 'end';
-          drawCell(ctxOnRef.current, cellImageRef.current, CellType.SustainEnd, prevX, y);
+          drawCell(
+            ctxOnRef.current,
+            cellImageRef.current,
+            CellType.SustainEnd,
+            prevX,
+            y
+          );
         }
       }
 
@@ -269,7 +328,13 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
       // Place the new note
       pattern[pos.x_abs] = pos.note;
       clearColumn(ctxOnRef.current, pos.x, SYNTH_CELLS_Y);
-      drawCell(ctxOnRef.current, cellImageRef.current, CellType.Note, pos.x, pos.y);
+      drawCell(
+        ctxOnRef.current,
+        cellImageRef.current,
+        CellType.Note,
+        pos.x,
+        pos.y
+      );
     },
     [pattern]
   );
@@ -293,11 +358,22 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
         return;
       }
 
-      clearColumns(ctxOnRef.current, l % SYNTH_CELLS_X, r - l + 1, SYNTH_CELLS_Y);
+      clearColumns(
+        ctxOnRef.current,
+        l % SYNTH_CELLS_X,
+        r - l + 1,
+        SYNTH_CELLS_Y
+      );
 
       for (let i = l + 1; i < r; i++) {
         pattern[i] = 'sustain';
-        drawCell(ctxOnRef.current, cellImageRef.current, CellType.SustainMiddle, i % SYNTH_CELLS_X, pos.y);
+        drawCell(
+          ctxOnRef.current,
+          cellImageRef.current,
+          CellType.SustainMiddle,
+          i % SYNTH_CELLS_X,
+          pos.y
+        );
       }
 
       if (pattern[l] === 'sustain' || pattern[l] === 'end') {
@@ -311,10 +387,22 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
         const prevNoteL = pattern[l - 1];
         if (typeof prevNoteL === 'number' && prevNoteL < 0) {
           pattern[l - 1] = -prevNoteL;
-          drawCell(ctxOnRef.current, cellImageRef.current, CellType.Empty, prevX, y);
+          drawCell(
+            ctxOnRef.current,
+            cellImageRef.current,
+            CellType.Empty,
+            prevX,
+            y
+          );
         } else {
           pattern[l - 1] = 'end';
-          drawCell(ctxOnRef.current, cellImageRef.current, CellType.SustainEnd, prevX, y);
+          drawCell(
+            ctxOnRef.current,
+            cellImageRef.current,
+            CellType.SustainEnd,
+            prevX,
+            y
+          );
         }
       }
 
@@ -324,18 +412,42 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
         const nextX = (r + 1) % SYNTH_CELLS_X;
         if (pattern[r + 1] === 'end') {
           pattern[r + 1] = -noteR;
-          drawCell(ctxOnRef.current, cellImageRef.current, CellType.Note, nextX, y);
+          drawCell(
+            ctxOnRef.current,
+            cellImageRef.current,
+            CellType.Note,
+            nextX,
+            y
+          );
         } else {
           pattern[r + 1] = noteR;
-          drawCell(ctxOnRef.current, cellImageRef.current, CellType.SustainStart, nextX, y);
+          drawCell(
+            ctxOnRef.current,
+            cellImageRef.current,
+            CellType.SustainStart,
+            nextX,
+            y
+          );
         }
       }
 
       pattern[l] = -pos.note;
       pattern[r] = 'end';
 
-      drawCell(ctxOnRef.current, cellImageRef.current, CellType.SustainStart, l % SYNTH_CELLS_X, pos.y);
-      drawCell(ctxOnRef.current, cellImageRef.current, CellType.SustainEnd, r % SYNTH_CELLS_X, pos.y);
+      drawCell(
+        ctxOnRef.current,
+        cellImageRef.current,
+        CellType.SustainStart,
+        l % SYNTH_CELLS_X,
+        pos.y
+      );
+      drawCell(
+        ctxOnRef.current,
+        cellImageRef.current,
+        CellType.SustainEnd,
+        r % SYNTH_CELLS_X,
+        pos.y
+      );
     },
     [pattern, addNote]
   );
@@ -343,14 +455,31 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
   // Mouse event handlers
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!canvasHoverRef.current || !ctxHoverRef.current || !cellImageRef.current) return;
+      if (
+        !canvasHoverRef.current ||
+        !ctxHoverRef.current ||
+        !cellImageRef.current
+      )
+        return;
 
-      const pos = getPosFromEvent(e, canvasHoverRef.current, page, SYNTH_CELLS_X, SYNTH_CELLS_Y);
+      const pos = getPosFromEvent(
+        e,
+        canvasHoverRef.current,
+        page,
+        SYNTH_CELLS_X,
+        SYNTH_CELLS_Y
+      );
 
       // Show hover
       if (pos.x !== hoverPos.x || pos.y !== hoverPos.y) {
         clearCell(ctxHoverRef.current, hoverPos.x, hoverPos.y);
-        drawCell(ctxHoverRef.current, cellImageRef.current, CellType.Hover, pos.x, pos.y);
+        drawCell(
+          ctxHoverRef.current,
+          cellImageRef.current,
+          CellType.Hover,
+          pos.x,
+          pos.y
+        );
         setHoverPos(pos);
       }
 
@@ -372,7 +501,20 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
         setClickPos(pos);
       }
     },
-    [hoverPos, isClicked, clickPos, isSustaining, isAdding, sustainL, sustainR, page, pattern, addNote, removeNote, sustainNote]
+    [
+      hoverPos,
+      isClicked,
+      clickPos,
+      isSustaining,
+      isAdding,
+      sustainL,
+      sustainR,
+      page,
+      pattern,
+      addNote,
+      removeNote,
+      sustainNote,
+    ]
   );
 
   const handleMouseDown = useCallback(
@@ -380,7 +522,13 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
       if (!canvasHoverRef.current) return;
 
       setIsClicked(true);
-      const pos = getPosFromEvent(e, canvasHoverRef.current, page, SYNTH_CELLS_X, SYNTH_CELLS_Y);
+      const pos = getPosFromEvent(
+        e,
+        canvasHoverRef.current,
+        page,
+        SYNTH_CELLS_X,
+        SYNTH_CELLS_Y
+      );
 
       if (!isStep) {
         // Sustaining mode
@@ -467,9 +615,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
   };
 
   // Keyboard callbacks
-  const handleKeyboardNoteOn = useCallback((note: number) => {
-    model.noteOn(note, true);
-  }, [model]);
+  const handleKeyboardNoteOn = useCallback(
+    (note: number) => {
+      model.noteOn(note, true);
+    },
+    [model]
+  );
 
   const handleKeyboardNoteOff = useCallback(() => {
     model.noteOff(true);
@@ -482,7 +633,11 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
     >
       <div className="sequencer">
         <div className="header">
-          <select className="synth-type" value={model.type} onChange={handleTypeChange}>
+          <select
+            className="synth-type"
+            value={model.type}
+            onChange={handleTypeChange}
+          >
             <option value="REZ">REZ</option>
             <option value="SAMPLER">SAMPLER</option>
           </select>
@@ -520,14 +675,20 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           </div>
 
           <div className="markers clearfix">
-            <i className="fa fa-angle-left marker-prev" onClick={() => controller.backward(true)} />
+            <i
+              className="fa fa-angle-left marker-prev"
+              onClick={() => controller.backward(true)}
+            />
             {[...Array(8)].map((_, i) => (
               <i
                 key={i}
                 className={`fa fa-circle marker ${i < pageTotal ? 'marker-active' : ''} ${i === page ? 'marker-now' : ''}`}
               />
             ))}
-            <i className="fa fa-angle-right marker-next" onClick={() => controller.forward()} />
+            <i
+              className="fa fa-angle-right marker-next"
+              onClick={() => controller.forward()}
+            />
 
             <span className="marker-pos">{page + 1}</span>
             <span className="marker-divide">/</span>
@@ -571,7 +732,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
         </div>
       </div>
 
-      <div className="synth-core" style={{ height: isPanelOpened ? '280px' : '0px' }}>
+      <div
+        className="synth-core"
+        style={{ height: isPanelOpened ? '280px' : '0px' }}
+      >
         <i
           className={`fa ${isPanelOpened ? 'fa-angle-down' : 'fa-angle-up'} btn-fold-core`}
           onClick={togglePanelFold}
@@ -608,7 +772,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={coreParams.vcos[0]?.octave || 0}
               onChange={(e) => {
                 const newVcos = [...coreParams.vcos];
-                newVcos[0] = { ...newVcos[0], octave: parseInt(e.target.value) };
+                newVcos[0] = {
+                  ...newVcos[0],
+                  octave: parseInt(e.target.value),
+                };
                 updateCoreParam({ vcos: newVcos });
               }}
             />
@@ -628,7 +795,11 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <input className="interval" type="hidden" value={coreParams.vcos[0]?.interval || 0} />
+          <input
+            className="interval"
+            type="hidden"
+            value={coreParams.vcos[0]?.interval || 0}
+          />
           <div className="clearfix">
             <label>SHIFT</label>
             <select
@@ -675,7 +846,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={coreParams.vcos[1]?.octave || 0}
               onChange={(e) => {
                 const newVcos = [...coreParams.vcos];
-                newVcos[1] = { ...newVcos[1], octave: parseInt(e.target.value) };
+                newVcos[1] = {
+                  ...newVcos[1],
+                  octave: parseInt(e.target.value),
+                };
                 updateCoreParam({ vcos: newVcos });
               }}
             />
@@ -705,7 +879,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={coreParams.vcos[1]?.interval || 3}
               onChange={(e) => {
                 const newVcos = [...coreParams.vcos];
-                newVcos[1] = { ...newVcos[1], interval: parseInt(e.target.value) };
+                newVcos[1] = {
+                  ...newVcos[1],
+                  interval: parseInt(e.target.value),
+                };
                 updateCoreParam({ vcos: newVcos });
               }}
             />
@@ -742,7 +919,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={coreParams.vcos[2]?.octave || 3}
               onChange={(e) => {
                 const newVcos = [...coreParams.vcos];
-                newVcos[2] = { ...newVcos[2], octave: parseInt(e.target.value) };
+                newVcos[2] = {
+                  ...newVcos[2],
+                  octave: parseInt(e.target.value),
+                };
                 updateCoreParam({ vcos: newVcos });
               }}
             />
@@ -757,7 +937,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={coreParams.vcos[2]?.interval || 0}
               onChange={(e) => {
                 const newVcos = [...coreParams.vcos];
-                newVcos[2] = { ...newVcos[2], interval: parseInt(e.target.value) };
+                newVcos[2] = {
+                  ...newVcos[2],
+                  interval: parseInt(e.target.value),
+                };
                 updateCoreParam({ vcos: newVcos });
               }}
             />
@@ -838,7 +1021,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={Math.round((coreParams.eg.adsr[0] ?? 0) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
-                model.core.setEGParam(value, coreParams.eg.adsr[1] * 50000, coreParams.eg.adsr[2] * 100, coreParams.eg.adsr[3] * 50000);
+                model.core.setEGParam(
+                  value,
+                  coreParams.eg.adsr[1] * 50000,
+                  coreParams.eg.adsr[2] * 100,
+                  coreParams.eg.adsr[3] * 50000
+                );
                 setCoreParams(model.core.getParam());
               }}
             />
@@ -853,7 +1041,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={Math.round((coreParams.eg.adsr[1] ?? 0.36) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
-                model.core.setEGParam(coreParams.eg.adsr[0] * 50000, value, coreParams.eg.adsr[2] * 100, coreParams.eg.adsr[3] * 50000);
+                model.core.setEGParam(
+                  coreParams.eg.adsr[0] * 50000,
+                  value,
+                  coreParams.eg.adsr[2] * 100,
+                  coreParams.eg.adsr[3] * 50000
+                );
                 setCoreParams(model.core.getParam());
               }}
             />
@@ -868,7 +1061,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={Math.round((coreParams.eg.adsr[2] ?? 0.4) * 100)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
-                model.core.setEGParam(coreParams.eg.adsr[0] * 50000, coreParams.eg.adsr[1] * 50000, value, coreParams.eg.adsr[3] * 50000);
+                model.core.setEGParam(
+                  coreParams.eg.adsr[0] * 50000,
+                  coreParams.eg.adsr[1] * 50000,
+                  value,
+                  coreParams.eg.adsr[3] * 50000
+                );
                 setCoreParams(model.core.getParam());
               }}
             />
@@ -883,7 +1081,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={Math.round((coreParams.eg.adsr[3] ?? 0.2) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
-                model.core.setEGParam(coreParams.eg.adsr[0] * 50000, coreParams.eg.adsr[1] * 50000, coreParams.eg.adsr[2] * 100, value);
+                model.core.setEGParam(
+                  coreParams.eg.adsr[0] * 50000,
+                  coreParams.eg.adsr[1] * 50000,
+                  coreParams.eg.adsr[2] * 100,
+                  value
+                );
                 setCoreParams(model.core.getParam());
               }}
             />
@@ -937,7 +1140,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={Math.round((coreParams.feg.adsr[0] ?? 0) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
-                model.core.setFEGParam(value, coreParams.feg.adsr[1] * 50000, coreParams.feg.adsr[2] * 100, coreParams.feg.adsr[3] * 50000);
+                model.core.setFEGParam(
+                  value,
+                  coreParams.feg.adsr[1] * 50000,
+                  coreParams.feg.adsr[2] * 100,
+                  coreParams.feg.adsr[3] * 50000
+                );
                 setCoreParams(model.core.getParam());
               }}
             />
@@ -952,7 +1160,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={Math.round((coreParams.feg.adsr[1] ?? 0) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
-                model.core.setFEGParam(coreParams.feg.adsr[0] * 50000, value, coreParams.feg.adsr[2] * 100, coreParams.feg.adsr[3] * 50000);
+                model.core.setFEGParam(
+                  coreParams.feg.adsr[0] * 50000,
+                  value,
+                  coreParams.feg.adsr[2] * 100,
+                  coreParams.feg.adsr[3] * 50000
+                );
                 setCoreParams(model.core.getParam());
               }}
             />
@@ -967,7 +1180,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={Math.round((coreParams.feg.adsr[2] ?? 1) * 100)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
-                model.core.setFEGParam(coreParams.feg.adsr[0] * 50000, coreParams.feg.adsr[1] * 50000, value, coreParams.feg.adsr[3] * 50000);
+                model.core.setFEGParam(
+                  coreParams.feg.adsr[0] * 50000,
+                  coreParams.feg.adsr[1] * 50000,
+                  value,
+                  coreParams.feg.adsr[3] * 50000
+                );
                 setCoreParams(model.core.getParam());
               }}
             />
@@ -982,7 +1200,12 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               value={Math.round((coreParams.feg.adsr[3] ?? 0.2) * 50000)}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
-                model.core.setFEGParam(coreParams.feg.adsr[0] * 50000, coreParams.feg.adsr[1] * 50000, coreParams.feg.adsr[2] * 100, value);
+                model.core.setFEGParam(
+                  coreParams.feg.adsr[0] * 50000,
+                  coreParams.feg.adsr[1] * 50000,
+                  coreParams.feg.adsr[2] * 100,
+                  value
+                );
                 setCoreParams(model.core.getParam());
               }}
             />

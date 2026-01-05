@@ -18,11 +18,17 @@ export function SessionGrid() {
   const tracksWrapperRef = useRef<HTMLDivElement>(null);
   const masterWrapperRef = useRef<HTMLDivElement>(null);
   const [mixerScrollLeft, setMixerScrollLeft] = useState(0);
-  const [selectedPos, setSelectedPos] = useState<CellPos | null>({ x: 0, y: 0, type: 'master' });
+  const [selectedPos, setSelectedPos] = useState<CellPos | null>({
+    x: 0,
+    y: 0,
+    type: 'master',
+  });
 
   // Store canvas getter functions for MixerAdapter
   const getTrackCanvasesRef = useRef<(() => HTMLCanvasElement[]) | null>(null);
-  const getMasterCanvasRef = useRef<(() => HTMLCanvasElement | null) | null>(null);
+  const getMasterCanvasRef = useRef<(() => HTMLCanvasElement | null) | null>(
+    null
+  );
 
   // Connect MixerAdapter to canvas refs and start VU meters
   useEffect(() => {
@@ -43,23 +49,35 @@ export function SessionGrid() {
   }, []);
 
   // Callbacks to receive canvas getter functions from child components
-  const handleTrackCanvasesRef = useCallback((getCanvases: () => HTMLCanvasElement[]) => {
-    getTrackCanvasesRef.current = getCanvases;
-  }, []);
+  const handleTrackCanvasesRef = useCallback(
+    (getCanvases: () => HTMLCanvasElement[]) => {
+      getTrackCanvasesRef.current = getCanvases;
+    },
+    []
+  );
 
-  const handleMasterCanvasRef = useCallback((getCanvas: () => HTMLCanvasElement | null) => {
-    getMasterCanvasRef.current = getCanvas;
-  }, []);
+  const handleMasterCanvasRef = useCallback(
+    (getCanvas: () => HTMLCanvasElement | null) => {
+      getMasterCanvasRef.current = getCanvas;
+    },
+    []
+  );
 
   // Handle mixer gain changes - sync to audio engine
-  const handleGainsChange = useCallback((trackGains: number[], masterGain: number) => {
-    controller.setMixerGains?.(trackGains, masterGain);
-  }, []);
+  const handleGainsChange = useCallback(
+    (trackGains: number[], masterGain: number) => {
+      controller.setMixerGains?.(trackGains, masterGain);
+    },
+    []
+  );
 
   // Handle mixer pan changes - sync to audio engine
-  const handlePansChange = useCallback((trackPans: number[], masterPan: number) => {
-    controller.setMixerPans?.(trackPans, masterPan);
-  }, []);
+  const handlePansChange = useCallback(
+    (trackPans: number[], masterPan: number) => {
+      controller.setMixerPans?.(trackPans, masterPan);
+    },
+    []
+  );
 
   // Handle master gain changes
   const handleMasterGainChange = useCallback((masterGain: number) => {

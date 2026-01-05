@@ -67,7 +67,11 @@ export class MixerAdapter {
     const masterCanvas = this.panelRef.getMasterCanvas();
 
     // Draw track VU meters
-    for (let i = 0; i < this.mixer.analysers.length && i < trackCanvases.length; i++) {
+    for (
+      let i = 0;
+      i < this.mixer.analysers.length && i < trackCanvases.length;
+      i++
+    ) {
       const analyser = this.mixer.analysers[i];
       const canvas = trackCanvases[i];
       if (!analyser || !canvas) continue;
@@ -79,8 +83,12 @@ export class MixerAdapter {
 
     // Draw master VU meter
     if (masterCanvas && this.mixer.analyser_master) {
-      const dataL = new Uint8Array(this.mixer.analyser_master[0].frequencyBinCount);
-      const dataR = new Uint8Array(this.mixer.analyser_master[1].frequencyBinCount);
+      const dataL = new Uint8Array(
+        this.mixer.analyser_master[0].frequencyBinCount
+      );
+      const dataR = new Uint8Array(
+        this.mixer.analyser_master[1].frequencyBinCount
+      );
       this.mixer.analyser_master[0].getByteTimeDomainData(dataL);
       this.mixer.analyser_master[1].getByteTimeDomainData(dataR);
       this.drawMasterVU(masterCanvas, dataL, dataR);
@@ -143,7 +151,12 @@ export class MixerAdapter {
   /**
    * Load mixer state from saved data
    */
-  loadState(gains: number[], masterGain: number, pans: number[], masterPan: number) {
+  loadState(
+    gains: number[],
+    masterGain: number,
+    pans: number[],
+    masterPan: number
+  ) {
     store.getState().loadMixerState({
       trackGains: gains,
       masterGain,

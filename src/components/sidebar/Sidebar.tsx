@@ -29,7 +29,11 @@ interface MasterControlProps {
   onRemoveEffect?: (fx: FX) => void;
 }
 
-function MasterControl({ onAddEffect, effects = [], onRemoveEffect }: MasterControlProps) {
+function MasterControl({
+  onAddEffect,
+  effects = [],
+  onRemoveEffect,
+}: MasterControlProps) {
   const { name, bpm, key, scale } = useAppStore(
     useShallow((state) => ({
       name: state.scene.name,
@@ -81,7 +85,10 @@ function MasterControl({ onAddEffect, effects = [], onRemoveEffect }: MasterCont
   return (
     <div id="sidebar-master">
       <div className="sidebar-effects">
-        <fieldset id="sidebar-master-control" className="sidebar-module sidebar-name">
+        <fieldset
+          id="sidebar-master-control"
+          className="sidebar-module sidebar-name"
+        >
           <legend>
             <input
               name="name"
@@ -95,7 +102,12 @@ function MasterControl({ onAddEffect, effects = [], onRemoveEffect }: MasterCont
           {!isEditing ? (
             <div className="display clearfix">
               <div className="display-current-control">{displayText}</div>
-              <input name="edit" type="button" value="edit" onClick={handleEdit} />
+              <input
+                name="edit"
+                type="button"
+                value="edit"
+                onClick={handleEdit}
+              />
             </div>
           ) : (
             <div className="control-edit">
@@ -138,7 +150,12 @@ function MasterControl({ onAddEffect, effects = [], onRemoveEffect }: MasterCont
               </div>
 
               <div className="control clearfix">
-                <input name="save" type="button" value="save" onClick={handleSave} />
+                <input
+                  name="save"
+                  type="button"
+                  value="save"
+                  onClick={handleSave}
+                />
               </div>
             </div>
           )}
@@ -156,7 +173,12 @@ function MasterControl({ onAddEffect, effects = [], onRemoveEffect }: MasterCont
             <option key={fx}>{fx}</option>
           ))}
         </select>
-        <input className="add-btn" type="button" value="add" onClick={handleAddEffect} />
+        <input
+          className="add-btn"
+          type="button"
+          value="add"
+          onClick={handleAddEffect}
+        />
       </fieldset>
     </div>
   );
@@ -216,7 +238,12 @@ function TracksControl({
             <option key={fx}>{fx}</option>
           ))}
         </select>
-        <input className="add-btn" type="button" value="add" onClick={handleAddEffect} />
+        <input
+          className="add-btn"
+          type="button"
+          value="add"
+          onClick={handleAddEffect}
+        />
       </fieldset>
     </div>
   );

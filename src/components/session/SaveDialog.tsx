@@ -28,14 +28,23 @@ export function SaveDialog() {
       history.pushState('', title, dialog.url);
       document.title = title;
     }
-  }, [dialog.isOpen, dialog.type, dialog.url, dialog.songTitle, dialog.userName]);
+  }, [
+    dialog.isOpen,
+    dialog.type,
+    dialog.url,
+    dialog.songTitle,
+    dialog.userName,
+  ]);
 
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.id === 'dialog') {
-      closeDialog();
-    }
-  }, [closeDialog]);
+  const handleBackdropClick = useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.id === 'dialog') {
+        closeDialog();
+      }
+    },
+    [closeDialog]
+  );
 
   const getFullUrl = () => {
     return 'http://evil.gmork.in/' + dialog.url;
@@ -51,22 +60,28 @@ export function SaveDialog() {
         text = '"' + dialog.songTitle + '"';
       }
     }
-    return 'http://twitter.com/intent/tweet?url=' + encodeURI(url + '&text=' + text + '&hashtags=evil');
+    return (
+      'http://twitter.com/intent/tweet?url=' +
+      encodeURI(url + '&text=' + text + '&hashtags=evil')
+    );
   };
 
   const getFacebookUrl = () => {
     return 'http://www.facebook.com/sharer.php?&u=' + getFullUrl();
   };
 
-  const handleFacebookClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    window.open(
-      getFacebookUrl(),
-      'Share on facebook',
-      'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1'
-    );
-    closeDialog();
-  }, [closeDialog]);
+  const handleFacebookClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      window.open(
+        getFacebookUrl(),
+        'Share on facebook',
+        'width=550, height=450,personalbar=0,toolbar=0,scrollbars=1,resizable=1'
+      );
+      closeDialog();
+    },
+    [closeDialog]
+  );
 
   return (
     <div
@@ -90,7 +105,9 @@ export function SaveDialog() {
           <div id="dialog-error" className="dialog-message">
             <i className="fa fa-frown-o dialog-icon"></i>
             <div className="dialog-message-main">Failed.</div>
-            <div className="dialog-message-sub">Hmm... something's going wrong.</div>
+            <div className="dialog-message-sub">
+              Hmm... something's going wrong.
+            </div>
           </div>
         )}
 

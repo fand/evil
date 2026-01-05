@@ -59,90 +59,129 @@ export function Keyboard({
     return Math.floor((e.clientY - rect.top) / KEY_HEIGHT);
   }, []);
 
-  const getText = useCallback((i: number) => {
-    return ((numKeys - i - 1) % scale.length) + 1 + 'th';
-  }, [numKeys, scale.length]);
+  const getText = useCallback(
+    (i: number) => {
+      return ((numKeys - i - 1) % scale.length) + 1 + 'th';
+    },
+    [numKeys, scale.length]
+  );
 
-  const isKey = useCallback((i: number) => {
-    return (numKeys - i - 1) % scale.length === 0;
-  }, [numKeys, scale.length]);
+  const isKey = useCallback(
+    (i: number) => {
+      return (numKeys - i - 1) % scale.length === 0;
+    },
+    [numKeys, scale.length]
+  );
 
-  const clearNormal = useCallback((i: number) => {
-    const ctx = ctxRef.current;
-    if (!ctx || i < 0) return;
-    ctx.clearRect(0, i * KEY_HEIGHT, width, KEY_HEIGHT);
-  }, [width]);
+  const clearNormal = useCallback(
+    (i: number) => {
+      const ctx = ctxRef.current;
+      if (!ctx || i < 0) return;
+      ctx.clearRect(0, i * KEY_HEIGHT, width, KEY_HEIGHT);
+    },
+    [width]
+  );
 
-  const drawNormal = useCallback((i: number) => {
-    const ctx = ctxRef.current;
-    if (!ctx || i < 0) return;
-    clearNormal(i);
-    ctx.fillStyle = colors[0];
-    if (isKey(i)) {
-      ctx.fillRect(0, (i + 1) * KEY_HEIGHT - 5, width, 2);
-    }
-    ctx.fillRect(0, (i + 1) * KEY_HEIGHT - 3, width, 2);
-    ctx.fillStyle = colors[3];
-    ctx.fillText(getText(i), 10, (i + 1) * KEY_HEIGHT - 10);
-  }, [colors, isKey, getText, clearNormal, width]);
+  const drawNormal = useCallback(
+    (i: number) => {
+      const ctx = ctxRef.current;
+      if (!ctx || i < 0) return;
+      clearNormal(i);
+      ctx.fillStyle = colors[0];
+      if (isKey(i)) {
+        ctx.fillRect(0, (i + 1) * KEY_HEIGHT - 5, width, 2);
+      }
+      ctx.fillRect(0, (i + 1) * KEY_HEIGHT - 3, width, 2);
+      ctx.fillStyle = colors[3];
+      ctx.fillText(getText(i), 10, (i + 1) * KEY_HEIGHT - 10);
+    },
+    [colors, isKey, getText, clearNormal, width]
+  );
 
-  const drawHover = useCallback((i: number) => {
-    const ctx = ctxRef.current;
-    if (!ctx || i < 0) return;
-    ctx.fillStyle = colors[1];
-    ctx.fillRect(0, (i + 1) * KEY_HEIGHT - 3, width, 2);
-    if (isKey(i)) {
-      ctx.fillRect(0, (i + 1) * KEY_HEIGHT - 5, width, 2);
-    }
-    ctx.fillText(getText(i), 10, (i + 1) * KEY_HEIGHT - 10);
-  }, [colors, isKey, getText, width]);
+  const drawHover = useCallback(
+    (i: number) => {
+      const ctx = ctxRef.current;
+      if (!ctx || i < 0) return;
+      ctx.fillStyle = colors[1];
+      ctx.fillRect(0, (i + 1) * KEY_HEIGHT - 3, width, 2);
+      if (isKey(i)) {
+        ctx.fillRect(0, (i + 1) * KEY_HEIGHT - 5, width, 2);
+      }
+      ctx.fillText(getText(i), 10, (i + 1) * KEY_HEIGHT - 10);
+    },
+    [colors, isKey, getText, width]
+  );
 
-  const drawActive = useCallback((i: number) => {
-    const ctx = ctxRef.current;
-    if (!ctx || i < 0) return;
-    clearNormal(i);
-    ctx.fillStyle = colors[2];
-    ctx.fillRect(0, i * KEY_HEIGHT, width, KEY_HEIGHT);
-    ctx.fillStyle = colors[4];
-    ctx.fillText(getText(i), 10, (i + 1) * KEY_HEIGHT - 10);
-  }, [colors, getText, clearNormal, width]);
+  const drawActive = useCallback(
+    (i: number) => {
+      const ctx = ctxRef.current;
+      if (!ctx || i < 0) return;
+      clearNormal(i);
+      ctx.fillStyle = colors[2];
+      ctx.fillRect(0, i * KEY_HEIGHT, width, KEY_HEIGHT);
+      ctx.fillStyle = colors[4];
+      ctx.fillText(getText(i), 10, (i + 1) * KEY_HEIGHT - 10);
+    },
+    [colors, getText, clearNormal, width]
+  );
 
-  const clearActive = useCallback((i: number) => {
-    clearNormal(i);
-    drawNormal(i);
-  }, [clearNormal, drawNormal]);
+  const clearActive = useCallback(
+    (i: number) => {
+      clearNormal(i);
+      drawNormal(i);
+    },
+    [clearNormal, drawNormal]
+  );
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    const pos = getPos(e);
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      const pos = getPos(e);
 
-    if (pos !== hoverPos) {
-      drawNormal(hoverPos);
-      drawHover(pos);
-      setHoverPos(pos);
-    }
+      if (pos !== hoverPos) {
+        drawNormal(hoverPos);
+        drawHover(pos);
+        setHoverPos(pos);
+      }
 
-    if (isClicked && clickPos !== pos) {
-      clearActive(clickPos);
+      if (isClicked && clickPos !== pos) {
+        clearActive(clickPos);
+        drawActive(pos);
+        onNoteOff();
+        onNoteOn(numKeys - pos);
+        setClickPos(pos);
+      }
+    },
+    [
+      hoverPos,
+      isClicked,
+      clickPos,
+      numKeys,
+      getPos,
+      drawNormal,
+      drawHover,
+      clearActive,
+      drawActive,
+      onNoteOn,
+      onNoteOff,
+    ]
+  );
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      setIsClicked(true);
+      const pos = getPos(e);
+      const note = numKeys - pos;
+
+      if (onSelectSample) {
+        onSelectSample(note - 1);
+      }
+
       drawActive(pos);
-      onNoteOff();
-      onNoteOn(numKeys - pos);
+      onNoteOn(note);
       setClickPos(pos);
-    }
-  }, [hoverPos, isClicked, clickPos, numKeys, getPos, drawNormal, drawHover, clearActive, drawActive, onNoteOn, onNoteOff]);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    setIsClicked(true);
-    const pos = getPos(e);
-    const note = numKeys - pos;
-
-    if (onSelectSample) {
-      onSelectSample(note - 1);
-    }
-
-    drawActive(pos);
-    onNoteOn(note);
-    setClickPos(pos);
-  }, [numKeys, getPos, drawActive, onNoteOn, onSelectSample]);
+    },
+    [numKeys, getPos, drawActive, onNoteOn, onSelectSample]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsClicked(false);

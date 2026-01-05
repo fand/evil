@@ -55,7 +55,11 @@ class Session {
 
     this.cue_queue = [];
 
-    this.song = { ...DEFAULT_SONG, tracks: [], master: [...DEFAULT_SONG.master] };
+    this.song = {
+      ...DEFAULT_SONG,
+      tracks: [],
+      master: [...DEFAULT_SONG.master],
+    };
 
     this.view = new SessionViewAdapter(this);
   }
@@ -220,7 +224,6 @@ class Session {
 
     // Add track pattern
     if (this.song.tracks.length <= dst.x) {
-
       if (this.song.tracks[src.x].type === 'REZ') {
         this.player.addSynth(dst.y);
       } else if (this.song.tracks[src.x].type === 'SAMPLER') {
@@ -287,16 +290,13 @@ class Session {
     this.savePattern(track_idx, this.current_cells[track_idx]);
 
     if (this.song.tracks[track_idx].patterns[pat_num]) {
-      instrument.setPattern(
-        this.song.tracks[track_idx].patterns[pat_num]!
-      );
+      instrument.setPattern(this.song.tracks[track_idx].patterns[pat_num]!);
     } else {
       // set new pattern
       const pat_name = track_idx + '-' + pat_num;
       instrument.clearPattern();
       instrument.setPatternName(pat_name);
-      this.song.tracks[track_idx].patterns[pat_num] =
-        instrument.getPattern();
+      this.song.tracks[track_idx].patterns[pat_num] = instrument.getPattern();
     }
 
     // draw

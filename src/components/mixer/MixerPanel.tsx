@@ -63,7 +63,9 @@ function TrackChannel({
         min="0"
         max="200"
         value={panToSlider(pan)}
-        onChange={(e) => onPanChange(index, sliderToPan(Number(e.target.value)))}
+        onChange={(e) =>
+          onPanChange(index, sliderToPan(Number(e.target.value)))
+        }
       />
       <input
         className="gain-slider"
@@ -155,7 +157,9 @@ export function TracksMixer({
   useEffect(() => {
     if (onTrackCanvasesRef) {
       onTrackCanvasesRef(() =>
-        trackCanvasesRef.current.filter((c): c is HTMLCanvasElement => c !== null)
+        trackCanvasesRef.current.filter(
+          (c): c is HTMLCanvasElement => c !== null
+        )
       );
     }
   }, [onTrackCanvasesRef, trackGains.length]);
@@ -188,7 +192,11 @@ export function TracksMixer({
   );
 
   return (
-    <div id="console-tracks" className="clearfix" style={{ width: `${trackGains.length * 80 + 2}px` }}>
+    <div
+      id="console-tracks"
+      className="clearfix"
+      style={{ width: `${trackGains.length * 80 + 2}px` }}
+    >
       {trackGains.map((gain, index) => (
         <TrackChannel
           key={index}
@@ -281,7 +289,9 @@ export function MixerPanel({
     if (onMixerRef) {
       onMixerRef({
         getTrackCanvases: () =>
-          trackCanvasesRef.current.filter((c): c is HTMLCanvasElement => c !== null),
+          trackCanvasesRef.current.filter(
+            (c): c is HTMLCanvasElement => c !== null
+          ),
         getMasterCanvas: () => masterCanvasRef.current,
       });
     }
@@ -328,7 +338,11 @@ export function MixerPanel({
 
   return (
     <>
-      <div id="console-tracks" className="clearfix" style={{ width: `${trackGains.length * 80 + 2}px` }}>
+      <div
+        id="console-tracks"
+        className="clearfix"
+        style={{ width: `${trackGains.length * 80 + 2}px` }}
+      >
         {trackGains.map((gain, index) => (
           <TrackChannel
             key={index}

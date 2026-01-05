@@ -66,7 +66,16 @@ export class Compressor extends FX {
     }
   }
 
-  getParam(): { effect: 'Compressor'; attack: number; release: number; threshold: number; ratio: number; knee: number; input: number; output: number } {
+  getParam(): {
+    effect: 'Compressor';
+    attack: number;
+    release: number;
+    threshold: number;
+    ratio: number;
+    knee: number;
+    input: number;
+    output: number;
+  } {
     return {
       effect: 'Compressor',
       attack: this.comp.attack.value,

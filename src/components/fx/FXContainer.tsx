@@ -24,17 +24,41 @@ export function FXContainer({ effects, onRemove }: FXContainerProps) {
 
       switch (param.effect) {
         case 'Fuzz':
-          return <FuzzView key={index} model={fx as Fuzz} onRemove={handleRemove} />;
+          return (
+            <FuzzView key={index} model={fx as Fuzz} onRemove={handleRemove} />
+          );
         case 'Delay':
-          return <DelayView key={index} model={fx as Delay} onRemove={handleRemove} />;
+          return (
+            <DelayView
+              key={index}
+              model={fx as Delay}
+              onRemove={handleRemove}
+            />
+          );
         case 'Reverb':
-          return <ReverbView key={index} model={fx as Reverb} onRemove={handleRemove} />;
+          return (
+            <ReverbView
+              key={index}
+              model={fx as Reverb}
+              onRemove={handleRemove}
+            />
+          );
         case 'Compressor':
           return (
-            <CompressorView key={index} model={fx as Compressor} onRemove={handleRemove} />
+            <CompressorView
+              key={index}
+              model={fx as Compressor}
+              onRemove={handleRemove}
+            />
           );
         case 'Double':
-          return <DoubleView key={index} model={fx as Double} onRemove={handleRemove} />;
+          return (
+            <DoubleView
+              key={index}
+              model={fx as Double}
+              onRemove={handleRemove}
+            />
+          );
         default:
           return null;
       }

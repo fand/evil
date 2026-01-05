@@ -370,11 +370,9 @@ export const store = createStore<Store>()(
         },
       })),
 
-    resetMixer: () =>
-      set({ mixer: initialMixer }),
+    resetMixer: () => set({ mixer: initialMixer }),
 
-    loadMixerState: (mixerState) =>
-      set({ mixer: mixerState }),
+    loadMixerState: (mixerState) => set({ mixer: mixerState }),
 
     // Effects actions
     addMasterEffect: (id) =>
@@ -445,4 +443,3 @@ export const store = createStore<Store>()(
 // Selector helpers for subscribeWithSelector
 export const selectKey = (state: Store) => state.scene.key;
 export const selectScale = (state: Store) => state.scene.scale;
-

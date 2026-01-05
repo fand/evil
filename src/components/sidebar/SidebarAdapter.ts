@@ -151,7 +151,12 @@ export class SidebarAdapter {
   /**
    * Save master settings
    */
-  saveMaster(settings: { name?: string; bpm?: number; key?: string; scale?: string }) {
+  saveMaster(settings: {
+    name?: string;
+    bpm?: number;
+    key?: string;
+    scale?: string;
+  }) {
     if (settings.bpm !== undefined) {
       store.getState().setBPM(settings.bpm);
     }

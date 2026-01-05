@@ -516,7 +516,6 @@ export class SynthCore {
     }
   }
 
-
   connect(dst: AudioNode) {
     this.node.connect(this.filter.lpf);
     this.filter.connect(dst);

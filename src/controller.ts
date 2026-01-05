@@ -14,7 +14,9 @@ class AppController {
 
   get player(): Player {
     if (!this._player) {
-      throw new Error('Player not registered. Call controller.registerPlayer() first.');
+      throw new Error(
+        'Player not registered. Call controller.registerPlayer() first.'
+      );
     }
     return this._player;
   }
@@ -108,15 +110,30 @@ class AppController {
   }
 
   loadPattern(pat: unknown, idx: number, patNum: number) {
-    this.session.loadPattern(pat as Parameters<Session['loadPattern']>[0], idx, patNum);
+    this.session.loadPattern(
+      pat as Parameters<Session['loadPattern']>[0],
+      idx,
+      patNum
+    );
   }
 
-  loadTrack(song: unknown, src: { x: number; y: number }, dst: { x: number; y: number }) {
-    return this.session.loadTrack(song as Parameters<Session['loadTrack']>[0], src, dst);
+  loadTrack(
+    song: unknown,
+    src: { x: number; y: number },
+    dst: { x: number; y: number }
+  ) {
+    return this.session.loadTrack(
+      song as Parameters<Session['loadTrack']>[0],
+      src,
+      dst
+    );
   }
 
   loadMaster(pat: unknown, patNum: number) {
-    this.session.loadMaster(pat as Parameters<Session['loadMaster']>[0], patNum);
+    this.session.loadMaster(
+      pat as Parameters<Session['loadMaster']>[0],
+      patNum
+    );
   }
 
   // ========================================
