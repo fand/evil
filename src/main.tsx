@@ -13,19 +13,20 @@ declare global {
 }
 
 (function main() {
-  // Don't use MutekiTimer here!!
-  // (it causes freeze)
+  // Hide splash screen after load
   setTimeout(() => {
     const top = document.getElementById('top')!;
-    const topLogo = document.getElementById('top-logo')!;
+    const logo = document.getElementById('evil-logo')!;
 
-    top.style.opacity = '0';
+    logo.style.transform = 'translateY(-100px)';
+    logo.style.opacity = '0';
+
     setTimeout(() => {
-      top.style.zIndex = '-1';
-    }, 500);
-
-    topLogo.style.transform = 'translate3d(0px, -100px, 0px)';
-    topLogo.style.opacity = '0';
+      top.style.opacity = '0';
+      setTimeout(() => {
+        top.style.zIndex = '-1';
+      }, 500);
+    }, 300);
   }, 1500);
 
   const ctx = new AudioContext();
