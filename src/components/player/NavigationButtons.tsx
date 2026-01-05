@@ -45,11 +45,6 @@ export function NavigationButtons() {
   const showBottomBtn = isMixer;
   const rightLabel = currentInstrument >= instrumentsCount - 1 ? 'new' : 'next';
 
-  console.log({
-    showLeftBtn,
-    showBottomBtn,
-  });
-
   return (
     <>
       <i

@@ -11,28 +11,20 @@ declare global {
   }
 }
 
-const sorry = function () {
-  const topSorry = document.getElementById('top-sorry');
-  if (topSorry) topSorry.style.display = 'block';
-  document.getElementById('top-logo-wrapper')?.classList.add('logo-sorry');
-};
-
-const initEvil = function () {
+(function main() {
   // Don't use MutekiTimer here!!
   // (it causes freeze)
   setTimeout(() => {
-    const top = document.getElementById('top');
-    const topLogo = document.getElementById('top-logo');
-    if (top) {
-      top.style.opacity = '0';
-      setTimeout(() => {
-        top.style.zIndex = '-1';
-      }, 500);
-    }
-    if (topLogo) {
-      topLogo.style.webkitTransform = 'translate3d(0px, -100px, 0px)';
-      topLogo.style.opacity = '0';
-    }
+    const top = document.getElementById('top')!;
+    const topLogo = document.getElementById('top-logo')!;
+
+    top.style.opacity = '0';
+    setTimeout(() => {
+      top.style.zIndex = '-1';
+    }, 500);
+
+    topLogo.style.transform = 'translate3d(0px, -100px, 0px)';
+    topLogo.style.opacity = '0';
   }, 1500);
 
   const ctx = new AudioContext();
@@ -51,17 +43,5 @@ const initEvil = function () {
   const appRoot = document.getElementById('app');
   if (appRoot) {
     createRoot(appRoot).render(<App />);
-  }
-};
-
-// ------------------------------------------------------------------------------
-// Main
-
-(function () {
-  const ua = window.navigator.userAgent.toLowerCase();
-  if (ua.match(/chrome/g)) {
-    initEvil();
-  } else {
-    sorry();
   }
 })();

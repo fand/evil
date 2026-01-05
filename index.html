@@ -5,51 +5,79 @@
     <title>evil</title>
     <meta http-equiv="Content-Style-Type" content="text/css" />
     <meta http-equiv="Content-Script-Type" content="text/javascript" />
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, minimum-scale=1.0, maximum-scale=1.0"
+    />
     <meta name="format-detection" content="telephone=no" />
 
-    <meta name="description" content="Play Music for Google Chrome, with Web Audio API" />
+    <meta
+      name="description"
+      content="Play Music for Google Chrome, with Web Audio API"
+    />
     <meta property="og:site_name" content="evil" />
-    <meta property="og:title" content="evil">
+    <meta property="og:title" content="evil" />
     <meta property="og:url" content="http://evil.gmork.in/" />
-    <meta property="og:description" content="Play Music for Google Chrome, with Web Audio API" />
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="http://evil.gmork.in/static/img/evil_300.png">
+    <meta
+      property="og:description"
+      content="Play Music for Google Chrome, with Web Audio API"
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:image"
+      content="http://evil.gmork.in/static/img/evil_300.png"
+    />
 
     <!-- Stylesheets -->
-    <link href="./css/main.css" rel="stylesheet" type="text/css" media="screen" />
-    <link href="./css/riff.css" rel="stylesheet" type="text/css" media="screen" />
-    <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" media="screen" />
+    <link
+      href="./css/main.css"
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+    />
+    <link
+      href="./css/riff.css"
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+    />
+    <link
+      href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css"
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+    />
   </head>
   <body>
-
-<div id="top">
-  <div id="top-logo">
-    <div id="top-logo-wrapper">
-      <img id="evil-logo" src="./img/evil_300.png" />
-      <a id="chrome-logo" href="http://www.google.com/intl/ja/chrome/browser/"><img src="./img/chrome_300.png" /></a>
+    <div id="top">
+      <div id="top-logo">
+        <div id="top-logo-wrapper">
+          <img id="evil-logo" src="./img/evil_300.png" />
+          <a
+            id="chrome-logo"
+            href="http://www.google.com/intl/ja/chrome/browser/"
+            ><img src="./img/chrome_300.png"
+          /></a>
+        </div>
+      </div>
     </div>
-  </div>
-  <div id="top-sorry">for <a href="http://www.google.com/intl/ja/chrome/browser/">Google Chrome</a></div>
-</div>
 
-<div id="key-help"></div>
+    <div id="key-help"></div>
 
-<!-- top left -->
-<div id="btn-save" class="fa fa-save"></div>
-<form id="ajax-form" method="POST"></form>
+    <!-- top left -->
+    <div id="btn-save" class="fa fa-save"></div>
+    <form id="ajax-form" method="POST"></form>
 
-<!-- top right -->
-<div id="social" class="clearfix">
-  <div id="hatena"   class="social"></div>
-  <div id="facebook" class="social fa fa-facebook"></div>
-  <div id="twitter"  class="social fa fa-twitter"></div>
-</div>
+    <!-- top right -->
+    <div id="social" class="clearfix">
+      <div id="hatena" class="social"></div>
+      <div id="facebook" class="social fa fa-facebook"></div>
+      <div id="twitter" class="social fa fa-twitter"></div>
+    </div>
 
-<!-- React app root -->
-<div id="app" style="display: contents;"></div>
+    <!-- React app root -->
+    <div id="app" style="display: contents"></div>
 
     <script type="module" src="/src/main.tsx"></script>
-
   </body>
 </html>
