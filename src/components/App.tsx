@@ -37,16 +37,11 @@ export function App() {
 
   return (
     <>
-      {/* Main wrapper */}
       <div id="wrapper" ref={wrapperRef}>
-        <div id="env"></div>
-
-        {/* Instruments */}
         <div id="instruments" className="clearfix" ref={instrumentsRef}>
           <InstrumentsContainer />
         </div>
 
-        {/* Mixer */}
         <div id="mixer">
           <div id="mixer-body">
             <SessionGrid />
@@ -58,7 +53,6 @@ export function App() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer>
         <div id="control">
           <SceneParams />
@@ -76,10 +70,7 @@ export function App() {
         </div>
       </footer>
 
-      {/* Navigation buttons */}
       <NavigationButtons />
-
-      {/* Dialogs */}
       <SaveDialog />
     </>
   );
