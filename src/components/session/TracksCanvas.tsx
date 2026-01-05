@@ -22,6 +22,7 @@ import {
   getColorScheme,
 } from './canvasUtils';
 import type { Song } from '../../Song';
+import styles from './TracksCanvas.module.css';
 
 interface TracksCanvasProps {
   song: Song;
@@ -302,24 +303,24 @@ export function TracksCanvas({
   }, [selectedPos, song, trackColors]);
 
   return (
-    <div id="session-tracks-wrapper" style={{ width: width + 'px' }}>
+    <div className={styles.wrapper} style={{ width: width + 'px' }}>
       <div
-        id="session-tracks-wrapper-sub"
+        className={styles.wrapperSub}
         ref={wrapperRef}
         style={{ width: width + 'px' }}
       >
         <canvas
-          id="session-tracks"
+          className={styles.canvas}
           ref={canvasRef}
           style={{ width: width + 'px', height: height + 'px' }}
         />
         <canvas
-          id="session-tracks-on"
+          className={styles.canvasOn}
           ref={canvasOnRef}
           style={{ width: width + 'px', height: height + 'px' }}
         />
         <canvas
-          id="session-tracks-hover"
+          className={styles.canvasHover}
           ref={canvasHoverRef}
           style={{
             width: width + 'px',

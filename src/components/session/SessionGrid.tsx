@@ -7,6 +7,7 @@ import { SongInfo } from './SongInfo';
 import { TracksMixer, MasterMixer } from '../mixer/MixerPanel';
 import { OFFSET_Y, type CellPos } from './types';
 import type { MixerPanelRef } from '../mixer/MixerPanel';
+import styles from './SessionGrid.module.css';
 
 /**
  * SessionGrid - Main session view container.
@@ -113,7 +114,7 @@ export function SessionGrid() {
 
   return (
     <>
-      <div id="mixer-tracks" onScroll={handleMixerScroll}>
+      <div className={styles.mixerTracks} onScroll={handleMixerScroll}>
         <TracksCanvas
           song={song}
           wrapperRef={tracksWrapperRef}
@@ -122,7 +123,7 @@ export function SessionGrid() {
           onCellSelect={handleCellSelect}
           selectedPos={selectedPos}
         />
-        <div id="effects-tracks" className="clearfix" />
+        <div className={`${styles.effectsTracks} clearfix`} />
         <TracksMixer
           onGainsChange={handleGainsChange}
           onPansChange={handlePansChange}
@@ -130,7 +131,7 @@ export function SessionGrid() {
         />
       </div>
 
-      <div id="mixer-master">
+      <div className={styles.mixerMaster}>
         <MasterCanvas
           song={song}
           wrapperRef={masterWrapperRef}

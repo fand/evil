@@ -20,6 +20,7 @@ import {
   drawSelection,
 } from './canvasUtils';
 import type { Song } from '../../Song';
+import styles from './MasterCanvas.module.css';
 
 interface MasterCanvasProps {
   song: Song;
@@ -249,19 +250,19 @@ export function MasterCanvas({
   }, [selectedPos, song]);
 
   return (
-    <div id="session-master-wrapper" ref={wrapperRef} onScroll={handleScroll}>
+    <div className={styles.wrapper} ref={wrapperRef} onScroll={handleScroll}>
       <canvas
-        id="session-master"
+        className={styles.canvas}
         ref={canvasRef}
         style={{ height: height + 'px' }}
       />
       <canvas
-        id="session-master-on"
+        className={styles.canvasOn}
         ref={canvasOnRef}
         style={{ height: height + 'px' }}
       />
       <canvas
-        id="session-master-hover"
+        className={styles.canvasHover}
         ref={canvasHoverRef}
         style={{
           height: height + 'px',

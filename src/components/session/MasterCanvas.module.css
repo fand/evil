@@ -1,0 +1,22 @@
+/* Master Canvas styles */
+
+.wrapper {
+  position: absolute;
+  width: 94px;
+  height: 242px;
+  top: 0px;
+  right: 0px;
+  margin: 0px 7px 0px 9px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+.canvas,
+.canvasOn,
+.canvasHover {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 80px;
+  height: 240px;
+}
