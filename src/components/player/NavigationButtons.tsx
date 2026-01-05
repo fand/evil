@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { controller } from '../../controller';
 import { useAppStore } from '../../hooks/useStore';
 import { store } from '../../store';
 
 /**
  * Navigation buttons for instrument/mixer switching.
- * These buttons control the CSS transforms for sliding between views.
+ * View transitions are handled by App.tsx via store subscription.
  */
 export function NavigationButtons() {
   const [instrumentsCount, setInstrumentsCount] = useState(1);
@@ -15,55 +15,27 @@ export function NavigationButtons() {
   const viewMode = useAppStore((s) => s.ui.viewMode);
   const isMixer = viewMode === 'MIXER';
 
-  // DOM refs for direct manipulation (matching jQuery behavior)
-  const instrumentsRef = useRef<HTMLElement | null>(null);
-  const wrapperRef = useRef<HTMLElement | null>(null);
-
-  // Initialize DOM refs
-  useEffect(() => {
-    instrumentsRef.current = document.getElementById('instruments');
-    wrapperRef.current = document.getElementById('wrapper');
-  }, []);
-
   const moveRight = useCallback(() => {
     if (isMixer) return;
-
     const newIdx = currentInstrument + 1;
     controller.moveRight(newIdx);
     setInstrumentsCount(controller.instrumentsCount);
-
-    if (instrumentsRef.current) {
-      instrumentsRef.current.style.webkitTransform = `translate3d(${-1110 * newIdx}px, 0px, 0px)`;
-    }
   }, [isMixer, currentInstrument]);
 
   const moveLeft = useCallback(() => {
     if (isMixer) return;
-
     setInstrumentsCount(controller.instrumentsCount);
-
     if (currentInstrument !== 0) {
-      const newIdx = currentInstrument - 1;
-
-      if (instrumentsRef.current) {
-        instrumentsRef.current.style.webkitTransform = `translate3d(${-1110 * newIdx}px, 0px, 0px)`;
-      }
-      controller.moveLeft(newIdx);
+      controller.moveLeft(currentInstrument - 1);
     }
   }, [isMixer, currentInstrument]);
 
   const moveTop = useCallback(() => {
     store.getState().setViewMode('MIXER');
-    if (wrapperRef.current) {
-      wrapperRef.current.style.webkitTransform = 'translate3d(0px, 700px, 0px)';
-    }
   }, []);
 
   const moveBottom = useCallback(() => {
     store.getState().setViewMode('SYNTH');
-    if (wrapperRef.current) {
-      wrapperRef.current.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
-    }
   }, []);
 
   // Determine button visibility and labels

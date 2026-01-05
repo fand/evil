@@ -11,10 +11,17 @@ import { SessionGrid } from './session';
 import { InstrumentsContainer } from './instruments';
 import { SaveDialog } from './session/SaveDialog';
 import { SidebarContainer } from './sidebar/SidebarContainer';
+import { useAppStore } from '../hooks/useStore';
 
 export function App() {
   useResizeHandler();
   const footerRef = useRef<HTMLElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const instrumentsRef = useRef<HTMLDivElement>(null);
+
+  // Subscribe to store state for view transitions
+  const viewMode = useAppStore((s) => s.ui.viewMode);
+  const currentInstrument = useAppStore((s) => s.ui.currentInstrument);
 
   // Set footer height based on window size
   useEffect(() => {
@@ -24,14 +31,29 @@ export function App() {
     }
   }, []);
 
+  // Sync wrapper transform with viewMode
+  useEffect(() => {
+    if (wrapperRef.current) {
+      const y = viewMode === 'MIXER' ? 700 : 0;
+      wrapperRef.current.style.webkitTransform = `translate3d(0px, ${y}px, 0px)`;
+    }
+  }, [viewMode]);
+
+  // Sync instruments transform with currentInstrument
+  useEffect(() => {
+    if (instrumentsRef.current) {
+      instrumentsRef.current.style.webkitTransform = `translate3d(${-1110 * currentInstrument}px, 0px, 0px)`;
+    }
+  }, [currentInstrument]);
+
   return (
     <>
       {/* Main wrapper */}
-      <div id="wrapper">
+      <div id="wrapper" ref={wrapperRef}>
         <div id="env"></div>
 
         {/* Instruments */}
-        <div id="instruments" className="clearfix">
+        <div id="instruments" className="clearfix" ref={instrumentsRef}>
           <InstrumentsContainer />
         </div>
 

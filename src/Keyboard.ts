@@ -144,42 +144,22 @@ class Keyboard {
     if (this.mode === 'MIXER') return;
     const currentIdx = store.getState().ui.currentInstrument;
     if (currentIdx > 0) {
-      const nextIdx = currentIdx - 1;
-      controller.moveLeft(nextIdx);
-      // Update instruments DOM position
-      const instrumentsEl = document.getElementById('instruments');
-      if (instrumentsEl) {
-        instrumentsEl.style.webkitTransform = `translate3d(${-1110 * nextIdx}px, 0px, 0px)`;
-      }
+      controller.moveLeft(currentIdx - 1);
     }
   }
 
   private handleMoveRight() {
     if (this.mode === 'MIXER') return;
     const currentIdx = store.getState().ui.currentInstrument;
-    const nextIdx = currentIdx + 1;
-    controller.moveRight(nextIdx);
-    // Update instruments DOM position
-    const instrumentsEl = document.getElementById('instruments');
-    if (instrumentsEl) {
-      instrumentsEl.style.webkitTransform = `translate3d(${-1110 * nextIdx}px, 0px, 0px)`;
-    }
+    controller.moveRight(currentIdx + 1);
   }
 
   private handleMoveTop() {
     store.getState().setViewMode('MIXER');
-    const wrapperEl = document.getElementById('wrapper');
-    if (wrapperEl) {
-      wrapperEl.style.webkitTransform = 'translate3d(0px, 700px, 0px)';
-    }
   }
 
   private handleMoveBottom() {
     store.getState().setViewMode('SYNTH');
-    const wrapperEl = document.getElementById('wrapper');
-    if (wrapperEl) {
-      wrapperEl.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
-    }
   }
 
   private handlePlayPause() {
