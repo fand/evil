@@ -1,0 +1,232 @@
+/* Sidebar styles */
+
+.sidebarWrapper {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  top: 0px;
+  right: 0px;
+  margin: 0px;
+  padding: 0px;
+}
+
+.sidebar {
+  position: absolute;
+  width: 223px;
+  height: 482px;
+  top: 0px;
+  margin: 0px;
+  padding: 0px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  color: #0df;
+  background-color: #fff;
+  font-size: 12px;
+  text-align: center;
+  vertical-align: top;
+  line-height: 26px;
+}
+
+.tracksWrapper {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.masterWrapper {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+
+.tracks {
+  top: 0px;
+  left: 0px;
+  width: 209px;
+  min-height: 100%;
+}
+
+.master {
+  top: 0px;
+  left: 0px;
+  width: 209px;
+  min-height: 100%;
+}
+
+.effects {
+  min-height: 449px;
+}
+
+.effects > .module:first-child {
+  margin-top: -9px;
+}
+
+/* Sidebar Module (shared by all fieldsets) */
+.module {
+  position: relative;
+  width: 207px;
+  margin: 0px;
+  padding: 0px;
+  border: 1px solid #0df;
+  border-radius: 3px;
+}
+
+.module > div {
+  width: 100%;
+  height: 36px;
+}
+
+.module label {
+  float: left;
+  width: 50px;
+  height: 20px;
+  font-size: 12px;
+  text-align: right;
+  margin: 0px 10px;
+  border: none;
+}
+
+.module input {
+  float: left;
+  width: 120px;
+  right: 0px;
+  font-size: 10px;
+  text-align: center;
+  margin: 0px 5px;
+  margin-top: 4px;
+}
+
+.module select {
+  float: left;
+  width: 100px;
+  font-size: 10px;
+  text-align: center;
+  margin: 0px 10px;
+  margin-top: 4px;
+  margin-left: 25px;
+}
+
+/* Sidebar Name */
+.name > legend {
+  font-size: 12px;
+  text-align: center;
+  width: 80px;
+  height: 26px;
+}
+
+.name > legend > input {
+  color: #0df;
+  font-size: 12px;
+  width: 80px;
+  height: 26px;
+  margin: 0px;
+  padding: 0px;
+  outline: none;
+  border: none;
+}
+
+.name > legend > input:hover {
+  text-shadow: 0px 0px 10px #9ef;
+}
+
+/* Master Control */
+.masterControl > .control {
+  display: none;
+  margin: 5px 0px;
+  height: 26px;
+}
+
+.masterControl label {
+  font-size: 12px;
+  float: left;
+  width: 40px;
+  padding-right: 5px;
+  text-align: right;
+}
+
+.masterControl > .control > select {
+  float: right;
+  width: 70px;
+  font-size: 10px;
+  text-align: left;
+  margin-top: 4px;
+  margin-right: 12px;
+}
+
+.masterControl > .control > input {
+  float: right;
+  width: 65px;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 4px;
+  margin-right: 12px;
+}
+
+.displayCurrentControl {
+  float: left;
+  width: 130px;
+  margin-left: 10px;
+  font-size: 11px;
+}
+
+.masterControl > .display > input {
+  float: right;
+  width: 45px;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 4px;
+  margin-right: 12px;
+}
+
+.controlEdit .control {
+  display: block;
+}
+
+/* Add Effect */
+.addEffect {
+  margin-top: 10px;
+  margin-bottom: 0px;
+  height: 30px;
+}
+
+.addEffect select {
+  float: left;
+  width: 100px;
+  margin-top: 6px;
+}
+
+.addEffect input {
+  float: left;
+  width: 40px;
+  margin-top: 5px;
+}
+
+/* Effect Module */
+.effectMinus {
+  display: block;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  padding: 5px;
+  min-width: 12px;
+  min-height: 12px;
+  font-size: 16px;
+  text-align: center;
+  z-index: 10;
+  color: #0df;
+  background-color: #fff;
+}
+
+.effectMinus:hover {
+  color: #fff;
+  text-shadow: 0px 0px 5px #0df;
+}
+
+/* Clearfix */
+.clearfix::after {
+  display: block;
+  clear: both;
+  height: 0px;
+  visibility: hidden;
+  content: '.';
+}

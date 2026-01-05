@@ -11,6 +11,7 @@ import { InstrumentsContainer } from './instruments';
 import { SaveDialog } from './session/SaveDialog';
 import { SidebarContainer } from './sidebar/SidebarContainer';
 import { useAppStore } from '../hooks/useStore';
+import styles from './App.module.css';
 
 export function App() {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -37,28 +38,28 @@ export function App() {
 
   return (
     <>
-      <div id="wrapper" ref={wrapperRef}>
-        <div id="instruments" className="clearfix" ref={instrumentsRef}>
+      <div className={styles.wrapper} ref={wrapperRef}>
+        <div className={`${styles.instruments} clearfix`} ref={instrumentsRef}>
           <InstrumentsContainer />
         </div>
 
-        <div id="mixer">
-          <div id="mixer-body">
+        <div className={styles.mixer}>
+          <div className={styles.mixerBody}>
             <SessionGrid />
           </div>
 
-          <div id="mixer-sidebar">
+          <div className={styles.mixerSidebar}>
             <SidebarContainer />
           </div>
         </div>
       </div>
 
-      <footer>
-        <div id="control">
+      <footer className={styles.footer}>
+        <div className={styles.control}>
           <SceneParams />
         </div>
         <TransportButtons />
-        <div id="song-info">
+        <div className={styles.songInfo}>
           <div>
             <label>title: </label>
             <input type="text" id="song-title" />

@@ -21,6 +21,7 @@ import {
 import { Keyboard, SYNTH_KEYBOARD_COLORS } from './Keyboard';
 import { SCALE_LIST } from '../../Constant';
 import type { Synth } from '../../Synth';
+import styles from './Instruments.module.css';
 
 interface SynthEditorProps {
   model: Synth;
@@ -628,13 +629,13 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
 
   return (
     <div
-      className={`instrument synth clearfix ${isActive ? 'active' : ''}`}
+      className={`${styles.instrument} ${styles.synth} ${styles.clearfix} ${isActive ? 'active' : ''}`}
       id={`synth${id}`}
     >
       <div className="sequencer">
-        <div className="header">
+        <div className={styles.header}>
           <select
-            className="synth-type"
+            className={styles.synthType}
             value={model.type}
             onChange={handleTypeChange}
           >
@@ -642,10 +643,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
             <option value="SAMPLER">SAMPLER</option>
           </select>
 
-          <div className="names clearfix">
+          <div className={`${styles.names} ${styles.clearfix}`}>
             <input
               type="text"
-              className="synth-name"
+              className={styles.synthName}
               value={model.name}
               onChange={handleSynthNameChange}
               onFocus={() => window.keyboard.beginInput()}
@@ -654,7 +655,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
             <span>&gt;</span>
             <input
               type="text"
-              className="pattern-name"
+              className={styles.patternName}
               value={model.pattern_name}
               onChange={handlePatternNameChange}
               onFocus={() => window.keyboard.beginInput()}
@@ -662,54 +663,54 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
             />
           </div>
 
-          <div className="sequencer-mode clearfix">
+          <div className={`${styles.sequencerMode} ${styles.clearfix}`}>
             <span>input:</span>
             <i
-              className={`fa fa-pencil sequencer-pencil ${!isStep ? 'btn-true' : 'btn-false'}`}
+              className={`fa fa-pencil ${!isStep ? styles.btnTrue : styles.btnFalse}`}
               onClick={() => setIsStep(false)}
             />
             <i
-              className={`fa fa-ellipsis-h sequencer-step ${isStep ? 'btn-true' : 'btn-false'}`}
+              className={`fa fa-ellipsis-h ${isStep ? styles.btnTrue : styles.btnFalse}`}
               onClick={() => setIsStep(true)}
             />
           </div>
 
-          <div className="markers clearfix">
+          <div className={`${styles.markers} ${styles.clearfix}`}>
             <i
-              className="fa fa-angle-left marker-prev"
+              className={`fa fa-angle-left ${styles.markerPrev}`}
               onClick={() => controller.backward(true)}
             />
             {[...Array(8)].map((_, i) => (
               <i
                 key={i}
-                className={`fa fa-circle marker ${i < pageTotal ? 'marker-active' : ''} ${i === page ? 'marker-now' : ''}`}
+                className={`fa fa-circle ${styles.marker} ${i < pageTotal ? styles.markerActive : ''} ${i === page ? styles.markerNow : ''}`}
               />
             ))}
             <i
-              className="fa fa-angle-right marker-next"
+              className={`fa fa-angle-right ${styles.markerNext}`}
               onClick={() => controller.forward()}
             />
 
-            <span className="marker-pos">{page + 1}</span>
-            <span className="marker-divide">/</span>
-            <span className="marker-total">{pageTotal}</span>
+            <span className={styles.markerPos}>{page + 1}</span>
+            <span className={styles.markerDivide}>/</span>
+            <span className={styles.markerTotal}>{pageTotal}</span>
           </div>
 
           <i
-            className={`fa fa-thumb-tack pattern-nosync btn ${isNoSync ? 'btn-true' : 'btn-false'}`}
+            className={`fa fa-thumb-tack ${styles.patternNosync} ${isNoSync ? styles.btnTrue : styles.btnFalse}`}
             onClick={toggleNoSync}
           />
           <i
-            className={`fa fa-minus pattern-minus btn ${pattern.length > SYNTH_CELLS_X ? 'btn-true' : 'btn-false'}`}
+            className={`fa fa-minus ${styles.patternMinus} ${styles.headerBtn} ${pattern.length > SYNTH_CELLS_X ? styles.btnTrue : styles.btnFalse}`}
             onClick={handleMinusPattern}
           />
           <i
-            className="fa fa-plus pattern-plus btn btn-true"
+            className={`fa fa-plus ${styles.patternPlus} ${styles.headerBtn} ${styles.btnTrue}`}
             onClick={handlePlusPattern}
           />
         </div>
 
-        <div className="sequencer-table">
+        <div className={styles.sequencerTable}>
           <Keyboard
             numKeys={SYNTH_CELLS_Y}
             scale={scale}
@@ -719,11 +720,17 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
             onNoteOn={handleKeyboardNoteOn}
             onNoteOff={handleKeyboardNoteOff}
           />
-          <canvas ref={canvasOffRef} className="table table-off" />
-          <canvas ref={canvasOnRef} className="table table-on" />
+          <canvas
+            ref={canvasOffRef}
+            className={`${styles.table} ${styles.tableOff}`}
+          />
+          <canvas
+            ref={canvasOnRef}
+            className={`${styles.table} ${styles.tableOn}`}
+          />
           <canvas
             ref={canvasHoverRef}
-            className="table table-hover"
+            className={`${styles.table} ${styles.tableHover}`}
             onMouseMove={handleMouseMove}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
@@ -733,20 +740,21 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
       </div>
 
       <div
-        className="synth-core"
+        className={styles.synthCore}
         style={{ height: isPanelOpened ? '280px' : '0px' }}
       >
         <i
-          className={`fa ${isPanelOpened ? 'fa-angle-down' : 'fa-angle-up'} btn-fold-core`}
+          className={`fa ${isPanelOpened ? 'fa-angle-down' : 'fa-angle-up'} ${styles.btnFoldCore}`}
           onClick={togglePanelFold}
         />
 
-        <fieldset className="RS_module RS_vco0 RS_VCO">
+        <fieldset
+          className={`${styles.rsModule} ${styles.rsVco0} ${styles.rsVCO}`}
+        >
           <legend>OSC1</legend>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>WAVE</label>
             <select
-              className="shape"
               value={coreParams.vcos[0]?.shape || 'RECT'}
               onChange={(e) => {
                 const newVcos = [...coreParams.vcos];
@@ -762,10 +770,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               <option>SUPERRECT</option>
             </select>
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>OCT</label>
             <input
-              className="octave"
               type="number"
               min="0"
               max="5"
@@ -780,10 +787,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>TUNE</label>
             <input
-              className="fine"
               type="number"
               min="-50"
               max="50"
@@ -795,15 +801,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <input
-            className="interval"
-            type="hidden"
-            value={coreParams.vcos[0]?.interval || 0}
-          />
-          <div className="clearfix">
+          <input type="hidden" value={coreParams.vcos[0]?.interval || 0} />
+          <div className={styles.clearfix}>
             <label>SHIFT</label>
             <select
-              className="harmony"
               value={coreParams.harmony ? 'harmony' : 'chromatic'}
               onChange={(e) => {
                 updateCoreParam({ harmony: e.target.value === 'harmony' });
@@ -815,12 +816,13 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           </div>
         </fieldset>
 
-        <fieldset className="RS_module RS_vco1 RS_VCO">
+        <fieldset
+          className={`${styles.rsModule} ${styles.rsVco1} ${styles.rsVCO}`}
+        >
           <legend>OSC2</legend>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>WAVE</label>
             <select
-              className="shape"
               value={coreParams.vcos[1]?.shape || 'SAW'}
               onChange={(e) => {
                 const newVcos = [...coreParams.vcos];
@@ -836,10 +838,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               <option>SUPERRECT</option>
             </select>
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>OCT</label>
             <input
-              className="octave"
               type="number"
               min="0"
               max="5"
@@ -854,10 +855,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>TUNE</label>
             <input
-              className="fine"
               type="number"
               min="-50"
               max="50"
@@ -869,10 +869,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>SHIFT</label>
             <input
-              className="interval"
               type="number"
               min="-12"
               max="12"
@@ -889,12 +888,13 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           </div>
         </fieldset>
 
-        <fieldset className="RS_module RS_vco2 RS_VCO">
+        <fieldset
+          className={`${styles.rsModule} ${styles.rsVco2} ${styles.rsVCO}`}
+        >
           <legend>OSC3</legend>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>WAVE</label>
             <select
-              className="shape"
               value={coreParams.vcos[2]?.shape || 'NOISE'}
               onChange={(e) => {
                 const newVcos = [...coreParams.vcos];
@@ -909,10 +909,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               <option>NOISE</option>
             </select>
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>OCT</label>
             <input
-              className="octave"
               type="number"
               min="0"
               max="5"
@@ -927,10 +926,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>SHIFT</label>
             <input
-              className="interval"
               type="number"
               min="-12"
               max="12"
@@ -945,10 +943,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>TUNE</label>
             <input
-              className="fine"
               type="number"
               min="-50"
               max="50"
@@ -962,9 +959,9 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           </div>
         </fieldset>
 
-        <fieldset className="RS_module RS_mixer gain">
+        <fieldset className={`${styles.rsModule} ${styles.rsMixer}`}>
           <legend>Mixer</legend>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>OSC1</label>
             <input
               type="range"
@@ -978,7 +975,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>OSC2</label>
             <input
               type="range"
@@ -992,7 +989,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>NOISE</label>
             <input
               type="range"
@@ -1008,10 +1005,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           </div>
         </fieldset>
 
-        <fieldset className="RS_module RS_EG EG">
+        <fieldset className={`${styles.rsModule} ${styles.rsEG}`}>
           <legend>Envelope</legend>
-          <canvas ref={canvasEGRef} className="canvasEG"></canvas>
-          <div className="clearfix">
+          <canvas ref={canvasEGRef}></canvas>
+          <div className={styles.clearfix}>
             <label>ATTACK</label>
             <input
               name="attack"
@@ -1031,7 +1028,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>DECAY</label>
             <input
               name="decay"
@@ -1051,7 +1048,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>SUSTAIN</label>
             <input
               name="sustain"
@@ -1071,7 +1068,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>RELEASE</label>
             <input
               name="release"
@@ -1093,12 +1090,14 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           </div>
         </fieldset>
 
-        <fieldset className="RS_module RS_filter filter clearfix">
+        <fieldset
+          className={`${styles.rsModule} ${styles.rsFilter} ${styles.clearfix}`}
+        >
           <legend>Filter</legend>
-          <div className="RS_filter_freq">
+          <div className={styles.rsFilterFreq}>
             <label>FREQ</label>
             <input
-              className="filter_slider freq"
+              className={styles.filterSlider}
               type="range"
               min="10"
               max="1000"
@@ -1110,10 +1109,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="RS_filter_Q">
+          <div className={styles.rsFilterQ}>
             <label>REZ</label>
             <input
-              className="filter_slider q"
+              className={styles.filterSlider}
               type="range"
               min="0"
               max="40"
@@ -1127,10 +1126,10 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
           </div>
         </fieldset>
 
-        <fieldset className="RS_module RS_FEG FEG">
+        <fieldset className={`${styles.rsModule} ${styles.rsFEG}`}>
           <legend>FilterEnvelope</legend>
-          <canvas ref={canvasFEGRef} className="canvasFEG"></canvas>
-          <div className="clearfix">
+          <canvas ref={canvasFEGRef}></canvas>
+          <div className={styles.clearfix}>
             <label>ATTACK</label>
             <input
               name="attack"
@@ -1150,7 +1149,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>DECAY</label>
             <input
               name="decay"
@@ -1170,7 +1169,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>SUSTAIN</label>
             <input
               name="sustain"
@@ -1190,7 +1189,7 @@ export function SynthEditor({ model, id }: SynthEditorProps) {
               }}
             />
           </div>
-          <div className="clearfix">
+          <div className={styles.clearfix}>
             <label>RELEASE</label>
             <input
               name="release"

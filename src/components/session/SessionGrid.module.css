@@ -1,0 +1,29 @@
+/* Session Grid - mixer tracks and master layout */
+
+.mixerTracks {
+  position: absolute;
+  width: 561px;
+  height: 484px;
+  top: 0px;
+  left: 0px;
+  margin-bottom: 7px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.effectsTracks {
+  /* placeholder for effects */
+}
+
+.mixerMaster {
+  position: absolute;
+  width: 110px;
+  height: 482px;
+  top: 0px;
+  right: 0px;
+  margin-bottom: 9px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 2;
+  background-color: #fff;
+}

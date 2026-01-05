@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import type { Song } from '../../Song';
+import styles from './SongInfo.module.css';
 
 interface SongInfoProps {
   song: Song;
@@ -21,12 +22,11 @@ export function SongInfo({
   }, []);
 
   return (
-    <div id="song-info">
+    <div className={styles.songInfo}>
       <div>
         <label>title: </label>
         <input
           type="text"
-          id="song-title"
           value={song.title || ''}
           onChange={(e) => onTitleChange(e.target.value)}
           onFocus={handleFocus}
@@ -37,7 +37,6 @@ export function SongInfo({
         <label>by: </label>
         <input
           type="text"
-          id="song-creator"
           value={song.creator || ''}
           onChange={(e) => onCreatorChange(e.target.value)}
           onFocus={handleFocus}

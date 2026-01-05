@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Double, DoubleParams } from '../../FX/Double';
+import { sidebarStyles as styles } from '../sidebar/Sidebar';
 
 interface DoubleViewProps {
   model: Double;
@@ -38,11 +39,11 @@ export function DoubleView({ model, onRemove }: DoubleViewProps) {
   );
 
   return (
-    <fieldset className="sidebar-effect sidebar-module">
+    <fieldset className={styles.module}>
       <legend>Double</legend>
-      <i className="fa fa-minus sidebar-effect-minus" onClick={onRemove} />
+      <i className={`fa fa-minus ${styles.effectMinus}`} onClick={onRemove} />
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>delay</label>
         <input
           name="delay"
@@ -54,7 +55,7 @@ export function DoubleView({ model, onRemove }: DoubleViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>width</label>
         <input
           name="width"

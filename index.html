@@ -28,19 +28,26 @@
       content="http://evil.gmork.in/static/img/evil_300.png"
     />
 
+    <!-- Inline styles for initial load (before JS bundle loads) -->
+    <style>
+      #top {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #fff;
+        z-index: 10000;
+        transition: opacity 1.3s ease;
+      }
+      #top img {
+        width: 300px;
+        height: 300px;
+        opacity: 0.2;
+        transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+    </style>
+
     <!-- Stylesheets -->
-    <link
-      href="./css/main.css"
-      rel="stylesheet"
-      type="text/css"
-      media="screen"
-    />
-    <link
-      href="./css/riff.css"
-      rel="stylesheet"
-      type="text/css"
-      media="screen"
-    />
     <link
       href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css"
       rel="stylesheet"
@@ -50,16 +57,7 @@
   </head>
   <body>
     <div id="top">
-      <div id="top-logo">
-        <div id="top-logo-wrapper">
-          <img id="evil-logo" src="./img/evil_300.png" />
-          <a
-            id="chrome-logo"
-            href="http://www.google.com/intl/ja/chrome/browser/"
-            ><img src="./img/chrome_300.png"
-          /></a>
-        </div>
-      </div>
+      <img id="evil-logo" src="./img/evil_300.png" />
     </div>
 
     <div id="key-help"></div>

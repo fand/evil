@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useAppStore, useShallow } from '../../hooks/useStore';
 import { store } from '../../store';
+import styles from './MixerPanel.module.css';
 
 // Format pan value for display
 // pan value: 0 = Right, 0.5 = Center, 1 = Left
@@ -55,10 +56,10 @@ function TrackChannel({
   }, []);
 
   return (
-    <div className="console-track">
-      <div className="pan-label">{formatPan(pan)}</div>
+    <div className={styles.consoleTrack}>
+      <div>{formatPan(pan)}</div>
       <input
-        className="pan-slider"
+        className={styles.panSlider}
         type="range"
         min="0"
         max="200"
@@ -68,14 +69,14 @@ function TrackChannel({
         }
       />
       <input
-        className="gain-slider"
+        className={styles.gainSliderTracks}
         type="range"
         min="0"
         max="100"
         value={gain * 100}
         onChange={(e) => onGainChange(index, Number(e.target.value) / 100)}
       />
-      <canvas ref={canvasRef} className="vu-meter" />
+      <canvas ref={canvasRef} className={styles.vuMeterTracks} />
     </div>
   );
 }
@@ -109,17 +110,17 @@ function MasterChannel({ gain, onGainChange, vuMeterRef }: MasterChannelProps) {
   }, []);
 
   return (
-    <div className="console-track">
+    <div className={styles.consoleTrack}>
       <div>MASTER</div>
       <input
-        className="gain-slider"
+        className={styles.gainSliderMaster}
         type="range"
         min="0"
         max="100"
         value={gain * 100}
         onChange={(e) => onGainChange(Number(e.target.value) / 100)}
       />
-      <canvas ref={canvasRef} className="vu-meter" />
+      <canvas ref={canvasRef} className={styles.vuMeterMaster} />
     </div>
   );
 }
@@ -193,8 +194,7 @@ export function TracksMixer({
 
   return (
     <div
-      id="console-tracks"
-      className="clearfix"
+      className={`${styles.consoleTracks} clearfix`}
       style={{ width: `${trackGains.length * 80 + 2}px` }}
     >
       {trackGains.map((gain, index) => (
@@ -248,7 +248,7 @@ export function MasterMixer({
   }, []);
 
   return (
-    <div id="console-master" className="clearfix">
+    <div className={`${styles.consoleMaster} clearfix`}>
       <MasterChannel
         gain={masterGain}
         onGainChange={handleMasterGainChange}
@@ -339,8 +339,7 @@ export function MixerPanel({
   return (
     <>
       <div
-        id="console-tracks"
-        className="clearfix"
+        className={`${styles.consoleTracks} clearfix`}
         style={{ width: `${trackGains.length * 80 + 2}px` }}
       >
         {trackGains.map((gain, index) => (
@@ -355,7 +354,7 @@ export function MixerPanel({
           />
         ))}
       </div>
-      <div id="console-master" className="clearfix">
+      <div className={`${styles.consoleMaster} clearfix`}>
         <MasterChannel
           gain={masterGain}
           onGainChange={handleMasterGainChange}

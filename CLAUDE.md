@@ -1,0 +1,3 @@
+- `git commit` the progress on each step.
+- Commit messages should be concise and follow the conventional commit rule.
+- Update devlog in `docs/devlog` accordingly.

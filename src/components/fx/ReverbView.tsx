@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Reverb, ReverbParams } from '../../FX/Reverb';
+import { sidebarStyles as styles } from '../sidebar/Sidebar';
 
 const IR_OPTIONS = [
   'BIG_SNARE',
@@ -64,11 +65,11 @@ export function ReverbView({ model, onRemove }: ReverbViewProps) {
   );
 
   return (
-    <fieldset className="sidebar-effect sidebar-module">
+    <fieldset className={styles.module}>
       <legend>Reverb</legend>
-      <i className="fa fa-minus sidebar-effect-minus" onClick={onRemove} />
+      <i className={`fa fa-minus ${styles.effectMinus}`} onClick={onRemove} />
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>type</label>
         <select name="name" value={params.name} onChange={handleNameChange}>
           {IR_OPTIONS.map((ir) => (
@@ -77,7 +78,7 @@ export function ReverbView({ model, onRemove }: ReverbViewProps) {
         </select>
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>wet</label>
         <input
           name="wet"

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Fuzz, FuzzParams } from '../../FX/Fuzz';
+import { sidebarStyles as styles } from '../sidebar/Sidebar';
 
 interface FuzzViewProps {
   model: Fuzz;
@@ -60,11 +61,11 @@ export function FuzzView({ model, onRemove }: FuzzViewProps) {
   );
 
   return (
-    <fieldset className="sidebar-effect sidebar-module">
+    <fieldset className={styles.module}>
       <legend>Fuzz</legend>
-      <i className="fa fa-minus sidebar-effect-minus" onClick={onRemove} />
+      <i className={`fa fa-minus ${styles.effectMinus}`} onClick={onRemove} />
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>input</label>
         <input
           name="input"
@@ -76,7 +77,7 @@ export function FuzzView({ model, onRemove }: FuzzViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>type</label>
         <select name="type" value={params.type} onChange={handleTypeChange}>
           <option>Sigmoid</option>
@@ -84,7 +85,7 @@ export function FuzzView({ model, onRemove }: FuzzViewProps) {
         </select>
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>gain</label>
         <input
           name="gain"
@@ -96,7 +97,7 @@ export function FuzzView({ model, onRemove }: FuzzViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>output</label>
         <input
           name="output"

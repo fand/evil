@@ -1,0 +1,29 @@
+/* Song Info styles */
+
+.songInfo {
+  position: absolute;
+  width: 220px;
+  height: 60px;
+  top: 50%;
+  left: 50%;
+  margin-top: -35px;
+  margin-left: 240px;
+  text-align: right;
+  font-size: 16px;
+  color: #0df;
+}
+
+.songInfo label {
+  width: 80px;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.songInfo input {
+  outline: none;
+  border: none;
+  width: 140px;
+  text-align: left;
+  color: #0df;
+  font-size: 12px;
+}
