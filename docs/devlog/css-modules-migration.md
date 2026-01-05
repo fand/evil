@@ -29,15 +29,15 @@
 | `SongInfo.tsx` | ✅ 完了 | `#song-info` |
 | `SynthEditor.tsx` | ✅ 完了 | `.RS_*`, `.synth-*` |
 | `SamplerEditor.tsx` | ✅ 完了 | `.Sampler_*`, `.sampler` |
-| `SidebarContainer.tsx` | ⏳ 未着手 | `#sidebar-*`, `.sidebar-*` |
-| FXViews | ⏳ 未着手 | `.sidebar-module` |
+| `SidebarContainer.tsx` | ✅ 完了 | `#sidebar-*`, `.sidebar-*` |
+| FXViews | ✅ 完了 | `.sidebar-module` |
 
-### Phase 3: クリーンアップ ⏳ 未着手
-1. `index.html`から`<link>`削除
-2. `static/css/riff.css`, `main.css`削除
-3. 未使用CSS削除
+### Phase 3: クリーンアップ ✅ 完了
+1. ✅ `index.html`から`<link>`削除
+2. ✅ `static/css/riff.css`, `main.css`削除
+3. ✅ 未使用CSS削除
 
-**注**: 未完了コンポーネントがあるため、旧CSSファイルはまだ必要
+**CSS Modules移行完了！**
 
 ## 作成済みファイル
 - `src/styles/global.css`
@@ -50,6 +50,7 @@
 - `src/components/session/SongInfo.module.css`
 - `src/components/mixer/MixerPanel.module.css`
 - `src/components/instruments/Instruments.module.css`
+- `src/components/sidebar/Sidebar.module.css`
 
 ## 注意点
 - ID→クラス変換 (`#mixer` → `styles.mixer`)
@@ -66,17 +67,13 @@
 - すべてのスタイルで `var(--primary-color)` を使用し、色の重複を削減
 - JSXのクラス名をすべてCSS Modulesに置換完了
 
-### Sidebar / FXViews
-**着手しなかった理由:**
-- SidebarContainer, Sidebar, 各FXView（Compressor, Delay, Reverb等）で同様のスタイルを共有
-- `.sidebar-module`, `.sidebar-effects`, `.sidebar-name` など共通クラスが多い
-- エフェクトパラメータのUIが統一されているため、共通コンポーネント化を先にした方が効率的
-
-**移行時の注意:**
-- FXViewsは構造が似ているので、共通の `FXModule.module.css` を作成すると良い
-- `fieldset`, `legend` のスタイリングに注意
+### Sidebar / FXViews ✅ 完了
+**対応内容:**
+- `Sidebar.module.css` にSidebar/FX共通スタイルを作成
+- FXViewsは `sidebarStyles` をインポートして共有
+- `.module`, `.effectMinus`, `.clearfix` などを共通化
 
 ### 移行の優先度
 1. ~~**低**: SynthEditor/SamplerEditor~~ ✅ 完了
-2. **低**: Sidebar/FX - 動作に影響なし、見た目も変わらない
-3. **高**: 旧CSSの削除 - 全コンポーネント移行後に実施
+2. ~~**低**: Sidebar/FX~~ ✅ 完了
+3. ~~**高**: 旧CSSの削除~~ ✅ 完了

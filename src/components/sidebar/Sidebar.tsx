@@ -3,6 +3,7 @@ import { useAppStore, useShallow } from '../../hooks/useStore';
 import { store } from '../../store';
 import { FXContainer } from '../fx';
 import type { FX } from '../../FX/FX';
+import styles from './Sidebar.module.css';
 
 // Available keys
 const KEYS = ['A', 'D', 'G', 'C', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'B', 'E'];
@@ -83,11 +84,10 @@ function MasterControl({
   );
 
   return (
-    <div id="sidebar-master">
-      <div className="sidebar-effects">
+    <div className={styles.master}>
+      <div className={styles.effects}>
         <fieldset
-          id="sidebar-master-control"
-          className="sidebar-module sidebar-name"
+          className={`${styles.module} ${styles.name} ${styles.masterControl}`}
         >
           <legend>
             <input
@@ -100,8 +100,8 @@ function MasterControl({
           </legend>
 
           {!isEditing ? (
-            <div className="display clearfix">
-              <div className="display-current-control">{displayText}</div>
+            <div className={`${styles.display} ${styles.clearfix}`}>
+              <div className={styles.displayCurrentControl}>{displayText}</div>
               <input
                 name="edit"
                 type="button"
@@ -110,8 +110,8 @@ function MasterControl({
               />
             </div>
           ) : (
-            <div className="control-edit">
-              <div className="control clearfix">
+            <div className={styles.controlEdit}>
+              <div className={`${styles.control} ${styles.clearfix}`}>
                 <label>key</label>
                 <select
                   name="key"
@@ -124,7 +124,7 @@ function MasterControl({
                 </select>
               </div>
 
-              <div className="control clearfix">
+              <div className={`${styles.control} ${styles.clearfix}`}>
                 <label>scale</label>
                 <select
                   name="mode"
@@ -137,7 +137,7 @@ function MasterControl({
                 </select>
               </div>
 
-              <div className="control clearfix">
+              <div className={`${styles.control} ${styles.clearfix}`}>
                 <label>bpm</label>
                 <input
                   name="bpm"
@@ -149,7 +149,7 @@ function MasterControl({
                 />
               </div>
 
-              <div className="control clearfix">
+              <div className={`${styles.control} ${styles.clearfix}`}>
                 <input
                   name="save"
                   type="button"
@@ -163,9 +163,8 @@ function MasterControl({
         <FXContainer effects={effects} onRemove={handleRemoveEffect} />
       </div>
 
-      <fieldset className="sidebar-module sidebar-add-effect clearfix">
+      <fieldset className={`${styles.module} ${styles.addEffect} ${styles.clearfix}`}>
         <select
-          className="add-type"
           value={selectedEffect}
           onChange={(e) => setSelectedEffect(e.target.value)}
         >
@@ -174,7 +173,6 @@ function MasterControl({
           ))}
         </select>
         <input
-          className="add-btn"
           type="button"
           value="add"
           onClick={handleAddEffect}
@@ -213,9 +211,9 @@ function TracksControl({
   );
 
   return (
-    <div id="sidebar-tracks">
-      <div className="sidebar-effects">
-        <fieldset className="sidebar-module sidebar-name">
+    <div className={styles.tracks}>
+      <div className={styles.effects}>
+        <fieldset className={`${styles.module} ${styles.name}`}>
           <legend>
             <input
               name="name"
@@ -228,9 +226,8 @@ function TracksControl({
         <FXContainer effects={effects} onRemove={handleRemoveEffect} />
       </div>
 
-      <fieldset className="sidebar-module sidebar-add-effect clearfix">
+      <fieldset className={`${styles.module} ${styles.addEffect} ${styles.clearfix}`}>
         <select
-          className="add-type"
           value={selectedEffect}
           onChange={(e) => setSelectedEffect(e.target.value)}
         >
@@ -239,7 +236,6 @@ function TracksControl({
           ))}
         </select>
         <input
-          className="add-btn"
           type="button"
           value="add"
           onClick={handleAddEffect}
@@ -277,8 +273,8 @@ export function Sidebar({
   const sidebarLeft = mode === 'tracks' ? '0px' : '-223px';
 
   return (
-    <div id="sidebar-wrapper" style={{ left: sidebarLeft }}>
-      <div id="sidebar-tracks-wrapper" className="sidebar">
+    <div className={styles.sidebarWrapper} style={{ left: sidebarLeft }}>
+      <div className={`${styles.tracksWrapper} ${styles.sidebar}`}>
         <TracksControl
           trackName={trackName}
           onNameChange={onTrackNameChange}
@@ -288,7 +284,7 @@ export function Sidebar({
         />
       </div>
 
-      <div id="sidebar-master-wrapper" className="sidebar">
+      <div className={`${styles.masterWrapper} ${styles.sidebar}`}>
         <MasterControl
           onAddEffect={onAddMasterEffect}
           effects={masterEffects}
@@ -298,3 +294,6 @@ export function Sidebar({
     </div>
   );
 }
+
+// Export styles for FX views
+export { styles as sidebarStyles };

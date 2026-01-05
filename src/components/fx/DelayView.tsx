@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Delay, DelayParams } from '../../FX/Delay';
+import { sidebarStyles as styles } from '../sidebar/Sidebar';
 
 interface DelayViewProps {
   model: Delay;
@@ -60,11 +61,11 @@ export function DelayView({ model, onRemove }: DelayViewProps) {
   );
 
   return (
-    <fieldset className="sidebar-effect sidebar-module">
+    <fieldset className={styles.module}>
       <legend>Delay</legend>
-      <i className="fa fa-minus sidebar-effect-minus" onClick={onRemove} />
+      <i className={`fa fa-minus ${styles.effectMinus}`} onClick={onRemove} />
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>delay</label>
         <input
           name="delay"
@@ -76,7 +77,7 @@ export function DelayView({ model, onRemove }: DelayViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>feedback</label>
         <input
           name="feedback"
@@ -88,7 +89,7 @@ export function DelayView({ model, onRemove }: DelayViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>lofi</label>
         <input
           name="lofi"
@@ -100,7 +101,7 @@ export function DelayView({ model, onRemove }: DelayViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>wet</label>
         <input
           name="wet"

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Compressor, CompressorParams } from '../../FX/Compressor';
+import { sidebarStyles as styles } from '../sidebar/Sidebar';
 
 interface CompressorViewProps {
   model: Compressor;
@@ -93,11 +94,11 @@ export function CompressorView({ model, onRemove }: CompressorViewProps) {
   );
 
   return (
-    <fieldset className="sidebar-effect sidebar-module">
+    <fieldset className={styles.module}>
       <legend>Comp</legend>
-      <i className="fa fa-minus sidebar-effect-minus" onClick={onRemove} />
+      <i className={`fa fa-minus ${styles.effectMinus}`} onClick={onRemove} />
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>input</label>
         <input
           name="input"
@@ -109,7 +110,7 @@ export function CompressorView({ model, onRemove }: CompressorViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>attack</label>
         <input
           name="attack"
@@ -121,7 +122,7 @@ export function CompressorView({ model, onRemove }: CompressorViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>release</label>
         <input
           name="release"
@@ -133,7 +134,7 @@ export function CompressorView({ model, onRemove }: CompressorViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>threshold</label>
         <input
           name="threshold"
@@ -145,7 +146,7 @@ export function CompressorView({ model, onRemove }: CompressorViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>ratio</label>
         <input
           name="ratio"
@@ -157,7 +158,7 @@ export function CompressorView({ model, onRemove }: CompressorViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>knee</label>
         <input
           name="knee"
@@ -169,7 +170,7 @@ export function CompressorView({ model, onRemove }: CompressorViewProps) {
         />
       </div>
 
-      <div className="clearfix">
+      <div className={styles.clearfix}>
         <label>output</label>
         <input
           name="output"
