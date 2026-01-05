@@ -1,4 +1,18 @@
-/* Instrument shared styles */
+/* Instrument shared styles with CSS variables */
+
+.synth {
+  --primary-color: #0df;
+  --primary-light: #8df;
+  --primary-shadow: #9ef;
+  --text-shadow: #cde;
+}
+
+.sampler {
+  --primary-color: #f3e;
+  --primary-light: #f8d;
+  --primary-shadow: #f9e;
+  --text-shadow: #ecd;
+}
 
 .instrument {
   position: relative;
@@ -10,12 +24,8 @@
   padding: 0px;
   margin-right: 200px;
   background-color: #fff;
-  border: 1px solid #0df;
+  border: 1px solid var(--primary-color);
   border-radius: 3px;
-}
-
-.instrument.sampler {
-  border: 1px solid #f3e;
 }
 
 /* Sequencer Header */
@@ -25,12 +35,8 @@
   left: -1px;
   width: 910px;
   height: 35px;
-  border-bottom: 1px solid #0df;
+  border-bottom: 1px solid var(--primary-color);
   border-radius: 3px;
-}
-
-.sampler .header {
-  border-bottom: 1px solid #f3e;
 }
 
 .synthType {
@@ -41,12 +47,12 @@
   height: 16px;
   margin: 10px 5px;
   font-size: 10px;
-  color: #0df;
+  color: var(--primary-color);
 }
 
 .names {
   position: absolute;
-  color: #0df;
+  color: var(--primary-color);
   font-size: 12px;
   top: 0px;
   left: 100px;
@@ -62,8 +68,8 @@
   border: none;
   background: none;
   outline: none;
-  color: #0df;
-  text-shadow: 0 0 1px #cde;
+  color: var(--primary-color);
+  text-shadow: 0 0 1px var(--text-shadow);
   text-align: center;
 }
 
@@ -78,7 +84,7 @@
 }
 
 .synthName:hover {
-  text-shadow: 0px 0px 10px #9ef;
+  text-shadow: 0px 0px 10px var(--primary-shadow);
 }
 
 .patternName {
@@ -86,12 +92,12 @@
 }
 
 .patternName:hover {
-  text-shadow: 0px 0px 10px #9ef;
+  text-shadow: 0px 0px 10px var(--primary-shadow);
 }
 
 .sequencerMode {
   position: absolute;
-  color: #0df;
+  color: var(--primary-color);
   font-size: 12px;
   top: 0px;
   left: 310px;
@@ -135,7 +141,7 @@
   text-align: center;
   margin: 0px;
   padding: 12px 6px;
-  color: #8df;
+  color: var(--primary-light);
 }
 
 .marker {
@@ -143,22 +149,22 @@
 }
 
 .markerActive {
-  color: #8df;
+  color: var(--primary-light);
 }
 
 .markerActive:hover {
   cursor: pointer;
-  text-shadow: 0px 0px 4px #088;
+  text-shadow: 0px 0px 4px var(--primary-color);
 }
 
 .markerNow {
   color: #fff;
-  text-shadow: 0px 0px 5px #0df;
+  text-shadow: 0px 0px 5px var(--primary-color);
 }
 
 .markerNow:hover {
   cursor: default;
-  text-shadow: 0px 0px 10px #0df;
+  text-shadow: 0px 0px 10px var(--primary-color);
 }
 
 .markerPrev,
@@ -168,7 +174,7 @@
 
 .markerPrev:hover,
 .markerNext:hover {
-  text-shadow: 0px 0px 5px #0df;
+  text-shadow: 0px 0px 5px var(--primary-color);
 }
 
 .markerPos {
@@ -196,11 +202,16 @@
 .btnFalse:hover {
   cursor: pointer;
   color: #fff;
-  text-shadow: 0px 0px 5px #0df;
+  text-shadow: 0px 0px 5px var(--primary-color);
 }
 
 .btnTrue {
-  color: #8df;
+  color: var(--primary-light);
+}
+
+.btnTrue:hover {
+  color: #fff;
+  text-shadow: 0px 0px 5px var(--primary-color);
 }
 
 .patternNosync {
@@ -221,7 +232,7 @@
 
 .patternPlus:hover {
   color: #fff;
-  text-shadow: 0px 0px 10px #0df;
+  text-shadow: 0px 0px 10px var(--primary-color);
 }
 
 .patternMinus {
@@ -232,7 +243,7 @@
 
 .patternMinus:hover {
   color: #fff;
-  text-shadow: 0px 0px 10px #0df;
+  text-shadow: 0px 0px 10px var(--primary-color);
 }
 
 /* Sequencer Table */
@@ -255,6 +266,10 @@
   top: 0px;
   left: 50px;
   overflow-y: hidden;
+}
+
+.sampler .table {
+  left: 60px;
 }
 
 .tableHover {
@@ -287,13 +302,13 @@
   font-size: 20px;
   text-align: center;
   z-index: 10;
-  color: #0df;
+  color: var(--primary-color);
   background-color: #fff;
 }
 
 .btnFoldCore:hover {
   color: #fff;
-  text-shadow: 0px 0px 5px #0ae;
+  text-shadow: 0px 0px 5px var(--primary-color);
 }
 
 /* Synth Core */
@@ -307,7 +322,7 @@
 }
 
 .rsModule {
-  color: #0df;
+  color: var(--primary-color);
   background-color: #fff;
   margin: 0px 10px;
   padding: 0px;
@@ -315,7 +330,7 @@
   text-align: center;
   vertical-align: top;
   line-height: 26px;
-  border: 1px solid #0df;
+  border: 1px solid var(--primary-color);
   border-radius: 3px;
 }
 
@@ -410,8 +425,8 @@
   padding-bottom: 2px;
   width: 180px;
   height: 50px;
-  border-left: 1px solid #0df;
-  border-bottom: 1px solid #0df;
+  border-left: 1px solid var(--primary-color);
+  border-bottom: 1px solid var(--primary-color);
 }
 
 .rsEG > div {
@@ -448,8 +463,8 @@
   padding-bottom: 2px;
   width: 180px;
   height: 50px;
-  border-left: 1px solid #0df;
-  border-bottom: 1px solid #0df;
+  border-left: 1px solid var(--primary-color);
+  border-bottom: 1px solid var(--primary-color);
 }
 
 .rsFEG > div {
@@ -500,4 +515,214 @@
   height: 195px;
   margin-top: 7px;
   -webkit-appearance: slider-vertical;
+}
+
+/* Sampler Core */
+.samplerCore {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  height: 280px;
+  left: 0px;
+  transition: all 0.2s ease 0s;
+}
+
+.samplerModule {
+  background-color: #fff;
+  margin: 0px 10px;
+  padding: 0px;
+  font-size: 12px;
+  text-align: center;
+  vertical-align: top;
+  line-height: 26px;
+  border: 1px solid var(--primary-color);
+  border-radius: 3px;
+}
+
+.samplerSample {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 470px;
+  height: 270px;
+}
+
+.samplerSample > .wave {
+  width: 100%;
+  height: 170px;
+  margin: 0px;
+}
+
+.samplerSample .fileSelect {
+  width: 100%;
+  height: 40px;
+  margin: 0px;
+  text-align: left;
+  overflow: visible;
+}
+
+.samplerSample .fileSelect > label {
+  float: left;
+  margin-left: 15px;
+  width: 80px;
+  font-size: 12px;
+  text-align: left;
+}
+
+.samplerSample .fileSelect > select {
+  float: left;
+  left: 0px;
+  width: 80px;
+  margin-right: 10px;
+  font-size: 12px;
+  text-align: left;
+}
+
+.samplerSample .fileSelect > .sampleName {
+  position: relative;
+  float: left;
+  cursor: pointer;
+  width: 100px;
+  height: 26px;
+}
+
+.sampleNameHover:hover {
+  background: #fff0fd;
+}
+
+.fileSelect > .sampleName > span {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.fileSelect > .sampleName > i {
+  position: absolute;
+  top: 2px;
+  right: 0px;
+  width: 20px;
+  height: 26px;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.samplerSample .fileSelect > .sampleName:hover {
+  text-shadow: 0px 0px 4px var(--primary-color);
+}
+
+.samplerSample .waveform {
+  width: 300px;
+  height: 120px;
+  border-left: 1px solid var(--primary-color);
+  border-bottom: 1px solid var(--primary-color);
+  margin: 4px 0px 4px 9px;
+}
+
+.samplerSample > .param {
+  width: 400px;
+  margin: 15px;
+}
+
+.samplerSample > .param label {
+  float: left;
+  width: 80px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.samplerSample > .param input {
+  float: right;
+  width: 290px;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.samplerEQ {
+  position: absolute;
+  top: 0px;
+  left: 480px;
+  width: 300px;
+  height: 270px;
+  border: 1px solid var(--primary-color);
+  text-align: center;
+  color: var(--primary-color);
+}
+
+.samplerEQ > .canvasEQ {
+  float: left;
+  width: 270px;
+  height: 100px;
+  border: 1px solid var(--primary-color);
+  border-top: none;
+  margin: 9px 14px;
+}
+
+.samplerEQ > .eqSliders {
+  position: absolute;
+  top: 140px;
+  width: 270px;
+  height: 120px;
+  margin: 0px 15px;
+}
+
+.samplerEQ .eqSlider {
+  float: left;
+  width: 90px;
+  height: 120px;
+  text-align: center;
+}
+
+.samplerEQ .eqSlider > label {
+  width: 90px;
+  height: 20px;
+  text-align: center;
+  margin: 0px;
+  margin-left: -5px;
+}
+
+.samplerEQ .eqSlider > .gainSlider {
+  width: 80px;
+  height: 90px;
+  margin: 0px;
+  margin-top: 2px;
+}
+
+.gainSlider {
+  -webkit-appearance: slider-vertical;
+  -webkit-transform: translateX(2px);
+}
+
+.samplerOutput {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 100px;
+  height: 270px;
+  border: 1px solid var(--primary-color);
+  text-align: center;
+}
+
+.samplerOutput > .gainSlider {
+  width: 80px;
+  height: 195px;
+}
+
+.panSlider {
+  width: 60px;
+  height: 20px;
+  margin-left: 5px;
+  z-index: 2;
+}
+
+/* Clearfix */
+.clearfix::after {
+  display: block;
+  clear: both;
+  height: 0px;
+  visibility: hidden;
+  content: '.';
 }

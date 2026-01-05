@@ -27,8 +27,8 @@
 | `MasterCanvas.tsx` | ✅ 完了 | `#session-master-*` |
 | `MixerPanel.tsx` | ✅ 完了 | `#console-*`, `.console-track` |
 | `SongInfo.tsx` | ✅ 完了 | `#song-info` |
-| `SynthEditor.tsx` | 📝 CSS作成済 | `.RS_*`, `.synth-*` (コンポーネント未更新) |
-| `SamplerEditor.tsx` | ⏳ 未着手 | `.Sampler_*`, `.sampler` |
+| `SynthEditor.tsx` | ✅ 完了 | `.RS_*`, `.synth-*` |
+| `SamplerEditor.tsx` | ✅ 完了 | `.Sampler_*`, `.sampler` |
 | `SidebarContainer.tsx` | ⏳ 未着手 | `#sidebar-*`, `.sidebar-*` |
 | FXViews | ⏳ 未着手 | `.sidebar-module` |
 
@@ -56,18 +56,15 @@
 - camelCase変換 (`synth-core` → `synthCore` or `['synth-core']`)
 - 非React部分 (`#top`, `#dialog`) はグローバルに残す
 
-## 未完了コンポーネントについて
+## 移行済みコンポーネントについて
 
-### SynthEditor / SamplerEditor
-**着手しなかった理由:**
-- JSX内のクラス名が100個以上あり、置換作業が膨大
-- `.RS_*`, `.Sampler_*`, `.instrument`, `.sequencer`, `.header`, `.markers` など多数のネストしたセレクタ
-- SynthとSamplerで色違いのスタイル（cyan `#0df` vs pink `#f3e`）があり、条件分岐が必要
-
-**移行時の注意:**
-- `Instruments.module.css` に共通スタイルは作成済み
-- JSX側で `className="instrument synth"` → `className={styles.instrument}` のように置換が必要
-- Sampler用にカラーバリエーションの対応が必要（CSS変数 or 別module）
+### SynthEditor / SamplerEditor ✅ 完了
+**対応内容:**
+- CSS変数を使ってSynth/Samplerのカラーバリエーションを管理
+  - `.synth { --primary-color: #0df; }`
+  - `.sampler { --primary-color: #f3e; }`
+- すべてのスタイルで `var(--primary-color)` を使用し、色の重複を削減
+- JSXのクラス名をすべてCSS Modulesに置換完了
 
 ### Sidebar / FXViews
 **着手しなかった理由:**
@@ -80,6 +77,6 @@
 - `fieldset`, `legend` のスタイリングに注意
 
 ### 移行の優先度
-1. **低**: SynthEditor/SamplerEditor - 動作に影響なし、見た目も変わらない
-2. **低**: Sidebar/FX - 同上
+1. ~~**低**: SynthEditor/SamplerEditor~~ ✅ 完了
+2. **低**: Sidebar/FX - 動作に影響なし、見た目も変わらない
 3. **高**: 旧CSSの削除 - 全コンポーネント移行後に実施

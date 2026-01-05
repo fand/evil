@@ -18,6 +18,7 @@ import {
 } from './canvasUtils';
 import { Keyboard, SAMPLER_KEYBOARD_COLORS } from './Keyboard';
 import type { Sampler } from '../../Sampler';
+import styles from './Instruments.module.css';
 
 interface SamplerEditorProps {
   model: Sampler;
@@ -520,13 +521,13 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
 
   return (
     <div
-      className={`instrument sampler clearfix ${isActive ? 'active' : ''}`}
+      className={`${styles.instrument} ${styles.sampler} ${styles.clearfix} ${isActive ? 'active' : ''}`}
       id={`sampler${id}`}
     >
       <div className="sequencer">
-        <div className="header">
+        <div className={styles.header}>
           <select
-            className="synth-type"
+            className={styles.synthType}
             value={model.type}
             onChange={handleTypeChange}
           >
@@ -534,10 +535,10 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
             <option value="SAMPLER">SAMPLER</option>
           </select>
 
-          <div className="names clearfix">
+          <div className={`${styles.names} ${styles.clearfix}`}>
             <input
               type="text"
-              className="synth-name"
+              className={styles.synthName}
               value={model.name}
               onChange={handleInstNameChange}
               onFocus={() => window.keyboard.beginInput()}
@@ -546,7 +547,7 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
             <span>&gt;</span>
             <input
               type="text"
-              className="pattern-name"
+              className={styles.patternName}
               value={model.pattern_name}
               onChange={handlePatternNameChange}
               onFocus={() => window.keyboard.beginInput()}
@@ -554,42 +555,42 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
             />
           </div>
 
-          <div className="markers clearfix">
+          <div className={`${styles.markers} ${styles.clearfix}`}>
             <i
-              className="fa fa-angle-left marker-prev"
+              className={`fa fa-angle-left ${styles.markerPrev}`}
               onClick={() => controller.backward(true)}
             />
             {[...Array(8)].map((_, i) => (
               <i
                 key={i}
-                className={`fa fa-circle marker ${i < pageTotal ? 'marker-active' : ''} ${i === page ? 'marker-now' : ''}`}
+                className={`fa fa-circle ${styles.marker} ${i < pageTotal ? styles.markerActive : ''} ${i === page ? styles.markerNow : ''}`}
               />
             ))}
             <i
-              className="fa fa-angle-right marker-next"
+              className={`fa fa-angle-right ${styles.markerNext}`}
               onClick={() => controller.forward()}
             />
 
-            <span className="marker-pos">{page + 1}</span>
-            <span className="marker-divide">/</span>
-            <span className="marker-total">{pageTotal}</span>
+            <span className={styles.markerPos}>{page + 1}</span>
+            <span className={styles.markerDivide}>/</span>
+            <span className={styles.markerTotal}>{pageTotal}</span>
           </div>
 
           <i
-            className={`fa fa-thumb-tack pattern-nosync btn ${isNoSync ? 'btn-true' : 'btn-false'}`}
+            className={`fa fa-thumb-tack ${styles.patternNosync} ${isNoSync ? styles.btnTrue : styles.btnFalse}`}
             onClick={toggleNoSync}
           />
           <i
-            className={`fa fa-minus pattern-minus btn ${pattern.length > SAMPLER_CELLS_X ? 'btn-true' : 'btn-false'}`}
+            className={`fa fa-minus ${styles.patternMinus} ${styles.headerBtn} ${pattern.length > SAMPLER_CELLS_X ? styles.btnTrue : styles.btnFalse}`}
             onClick={handleMinusPattern}
           />
           <i
-            className="fa fa-plus pattern-plus btn btn-true"
+            className={`fa fa-plus ${styles.patternPlus} ${styles.headerBtn} ${styles.btnTrue}`}
             onClick={handlePlusPattern}
           />
         </div>
 
-        <div className="sequencer-table">
+        <div className={styles.sequencerTable}>
           <Keyboard
             numKeys={SAMPLER_CELLS_Y}
             scale={samplerScale}
@@ -600,11 +601,17 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
             onNoteOff={handleKeyboardNoteOff}
             onSelectSample={handleKeyboardSelectSample}
           />
-          <canvas ref={canvasOffRef} className="table table-off" />
-          <canvas ref={canvasOnRef} className="table table-on" />
+          <canvas
+            ref={canvasOffRef}
+            className={`${styles.table} ${styles.tableOff}`}
+          />
+          <canvas
+            ref={canvasOnRef}
+            className={`${styles.table} ${styles.tableOn}`}
+          />
           <canvas
             ref={canvasHoverRef}
-            className="table table-hover"
+            className={`${styles.table} ${styles.tableHover}`}
             onMouseMove={handleMouseMove}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
@@ -613,27 +620,26 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
         </div>
       </div>
 
-      <div className="sampler-core">
-        <fieldset className="Sampler_module Sampler_sample">
+      <div className={styles.samplerCore}>
+        <fieldset className={`${styles.samplerModule} ${styles.samplerSample}`}>
           <legend>Sample</legend>
 
           <div className="wave">
-            <div className="file-select clearfix">
+            <div className={`${styles.fileSelect} ${styles.clearfix}`}>
               <label>SAMPLE</label>
-              <div className="sample-name">
+              <div className={styles.sampleName}>
                 <span>hello</span>
                 <i className="fa fa-angle-down"></i>
               </div>
               <div className="sample-error"></div>
             </div>
 
-            <canvas ref={canvasWaveformRef} className="waveform"></canvas>
+            <canvas ref={canvasWaveformRef} className={styles.waveform}></canvas>
           </div>
 
-          <div className="clearfix param">
+          <div className={`${styles.clearfix} ${styles.param}`}>
             <label>SPEED</label>
             <input
-              className="speed"
               type="range"
               min="0"
               max="200"
@@ -643,14 +649,14 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
           </div>
         </fieldset>
 
-        <fieldset className="Sampler_module Sampler_EQ">
+        <fieldset className={`${styles.samplerModule} ${styles.samplerEQ}`}>
           <legend>EQ</legend>
-          <canvas ref={canvasEQRef} className="canvasEQ"></canvas>
-          <div className="clearfix EQ-sliders">
-            <div className="EQ-slider">
+          <canvas ref={canvasEQRef} className={styles.canvasEQ}></canvas>
+          <div className={`${styles.clearfix} ${styles.eqSliders}`}>
+            <div className={styles.eqSlider}>
               <label>LO</label>
               <input
-                className="gain-slider EQ_lo"
+                className={styles.gainSlider}
                 type="range"
                 min="0"
                 max="200"
@@ -658,10 +664,10 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
                 onChange={(e) => handleEQChange('lo', e.target.value)}
               />
             </div>
-            <div className="EQ-slider">
+            <div className={styles.eqSlider}>
               <label>MID</label>
               <input
-                className="gain-slider EQ_mid"
+                className={styles.gainSlider}
                 type="range"
                 min="0"
                 max="200"
@@ -669,10 +675,10 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
                 onChange={(e) => handleEQChange('mid', e.target.value)}
               />
             </div>
-            <div className="EQ-slider">
+            <div className={styles.eqSlider}>
               <label>HI</label>
               <input
-                className="gain-slider EQ_hi"
+                className={styles.gainSlider}
                 type="range"
                 min="0"
                 max="200"
@@ -683,10 +689,10 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
           </div>
         </fieldset>
 
-        <fieldset className="Sampler_module Sampler_output">
+        <fieldset className={`${styles.samplerModule} ${styles.samplerOutput}`}>
           <legend>output</legend>L{' '}
           <input
-            className="pan-slider"
+            className={styles.panSlider}
             type="range"
             min="0"
             max="200"
@@ -695,7 +701,7 @@ export function SamplerEditor({ model, id }: SamplerEditorProps) {
           />{' '}
           R
           <input
-            className="gain-slider"
+            className={styles.gainSlider}
             type="range"
             min="0"
             max="100"
