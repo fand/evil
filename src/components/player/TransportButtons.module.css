@@ -1,0 +1,89 @@
+/* Transport control buttons */
+
+.play {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 50%;
+  left: 50%;
+  margin: 0px;
+  padding: 0px;
+  margin-left: -35px;
+  margin-top: -30px;
+  font-size: 40px;
+  text-align: center;
+  color: #8df;
+}
+
+.forward {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 50%;
+  left: 50%;
+  margin: 0px;
+  padding: 0px;
+  margin-left: 65px;
+  margin-top: -30px;
+  font-size: 40px;
+  text-align: center;
+  color: #8df;
+}
+
+.backward {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 50%;
+  right: 50%;
+  margin: 0px;
+  padding: 0px;
+  margin-right: 100px;
+  margin-top: -30px;
+  font-size: 40px;
+  text-align: center;
+  color: #8df;
+}
+
+.loop {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  top: 50%;
+  left: 50%;
+  margin: 0px;
+  padding: 0px;
+  margin-left: 180px;
+  margin-top: -25px;
+  font-size: 30px;
+  text-align: center;
+}
+
+.play:hover,
+.forward:hover,
+.backward:hover,
+.loop:hover {
+  color: #ffffff;
+  cursor: pointer;
+  text-shadow:
+    0px 0px 9px rgba(100, 255, 255, 0.8),
+    0px 0px 10px rgba(0, 200, 255, 1);
+}
+
+.play:active,
+.forward:active,
+.backward:active,
+.loop:active {
+  color: #8df;
+  text-shadow: none;
+}
+
+.controlOn {
+  color: #8df;
+  text-shadow: none;
+}
+
+.controlOff {
+  color: #ddd;
+  text-shadow: none;
+}

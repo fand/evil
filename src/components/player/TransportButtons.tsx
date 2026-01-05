@@ -1,5 +1,6 @@
 import { useAppStore } from '../../hooks/useStore';
 import { controller } from '../../controller';
+import styles from './TransportButtons.module.css';
 
 /**
  * Transport control buttons: Play/Pause, Stop, Forward, Backward, Loop
@@ -31,23 +32,19 @@ export function TransportButtons() {
   return (
     <>
       <i
-        id="control-play"
-        className={`fa ${isPlaying ? 'fa-pause' : 'fa-play'}`}
+        className={`${styles.play} fa ${isPlaying ? 'fa-pause' : 'fa-play'}`}
         onMouseDown={handlePlayPause}
       />
       <i
-        id="control-forward"
-        className="fa fa-forward"
+        className={`${styles.forward} fa fa-forward`}
         onMouseDown={handleForward}
       />
       <i
-        id="control-backward"
-        className="fa fa-backward"
+        className={`${styles.backward} fa fa-backward`}
         onMouseDown={handleBackward}
       />
       <i
-        id="control-loop"
-        className={`fa fa-repeat ${isLoop ? 'control-on' : 'control-off'}`}
+        className={`${styles.loop} fa fa-repeat ${isLoop ? styles.controlOn : styles.controlOff}`}
         onMouseDown={handleToggleLoop}
       />
     </>

@@ -1,0 +1,134 @@
+/* Navigation buttons */
+
+.btn {
+  text-shadow: none;
+}
+
+.btnRight {
+  position: fixed;
+  width: calc((100vw - 910px) / 2);
+  height: 600px;
+  top: 50%;
+  right: 0;
+  margin-top: -300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 100px;
+  box-sizing: border-box;
+  background: -webkit-gradient(
+    linear,
+    left top,
+    right top,
+    from(rgba(255, 255, 255, 0)),
+    color-stop(0.5, rgba(255, 255, 255, 0.9)),
+    to(rgba(255, 255, 255, 1))
+  );
+  color: #fafafa;
+  z-index: 100;
+}
+
+.btnLeft {
+  position: fixed;
+  width: calc((100vw - 910px) / 2);
+  height: 600px;
+  top: 50%;
+  left: 0;
+  margin-top: -300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 100px;
+  box-sizing: border-box;
+  background: -webkit-gradient(
+    linear,
+    right top,
+    left top,
+    from(rgba(255, 255, 255, 0)),
+    color-stop(0.5, rgba(255, 255, 255, 0.9)),
+    to(rgba(255, 255, 255, 1))
+  );
+  color: #fafafa;
+  z-index: 100;
+}
+
+.btnTop {
+  position: fixed;
+  width: 100%;
+  height: calc((100vh - 600px) / 2);
+  top: 0;
+  left: 0;
+  text-align: center;
+  font-size: 100px;
+  background: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    from(rgba(255, 255, 255, 0)),
+    color-stop(0.5, rgba(255, 255, 255, 0.9)),
+    to(rgba(255, 255, 255, 1))
+  );
+  color: #fafafa;
+  z-index: 100;
+}
+
+.btnBottom {
+  position: fixed;
+  width: 100%;
+  height: 100px;
+  left: 0;
+  bottom: calc((100vh - 600px) / 2);
+  text-align: center;
+  padding: 0px;
+  font-size: 100px;
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    from(rgba(255, 255, 255, 0)),
+    color-stop(0.5, rgba(255, 255, 255, 0.9)),
+    to(rgba(255, 255, 255, 1))
+  );
+  color: #fafafa;
+  z-index: 100;
+}
+
+.btnRight:hover,
+.btnLeft:hover,
+.btnTop:hover,
+.btnBottom:hover {
+  cursor: default;
+  color: #eee;
+}
+
+.btn:hover:after {
+  position: absolute;
+  text-align: center;
+  font-size: 30px;
+  white-space: pre;
+  font-family: sans-serif;
+  color: #e0e0e0;
+  content: attr(data-line1) '\A' attr(data-line2);
+}
+
+.btnLeft:hover:after,
+.btnRight:hover:after {
+  width: 100%;
+  margin-top: -100%;
+}
+
+.btnTop:hover:after {
+  width: 100%;
+  height: 30px;
+  top: 0px;
+  left: 0px;
+}
+
+.btnBottom:hover:after {
+  width: 100%;
+  height: 30px;
+  bottom: 0px;
+  left: 0px;
+}

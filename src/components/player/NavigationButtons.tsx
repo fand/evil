@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { controller } from '../../controller';
 import { useAppStore } from '../../hooks/useStore';
 import { store } from '../../store';
+import styles from './NavigationButtons.module.css';
 
 /**
  * Navigation buttons for instrument/mixer switching.
@@ -48,31 +49,27 @@ export function NavigationButtons() {
   return (
     <>
       <i
-        id="btn-left"
-        className="btn fa fa-angle-left"
+        className={`${styles.btn} ${styles.btnLeft} fa fa-angle-left`}
         data-line1="prev"
         data-line2="synth"
         style={{ display: showLeftBtn ? undefined : 'none' }}
         onClick={moveLeft}
       />
       <i
-        id="btn-right"
-        className="btn fa fa-angle-right"
+        className={`${styles.btn} ${styles.btnRight} fa fa-angle-right`}
         data-line1={rightLabel}
         data-line2="synth"
         style={{ display: showRightBtn ? undefined : 'none' }}
         onClick={moveRight}
       />
       <i
-        id="btn-top"
-        className="btn fa fa-angle-up"
+        className={`${styles.btn} ${styles.btnTop} fa fa-angle-up`}
         data-line1="mixer"
         style={{ display: showTopBtn ? undefined : 'none' }}
         onClick={moveTop}
       />
       <i
-        id="btn-bottom"
-        className="btn fa fa-angle-down"
+        className={`${styles.btn} ${styles.btnBottom} fa fa-angle-down`}
         data-line1="synths"
         style={{ display: showBottomBtn ? undefined : 'none' }}
         onClick={moveBottom}
