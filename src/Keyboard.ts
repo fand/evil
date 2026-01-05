@@ -82,6 +82,19 @@ class Keyboard {
       if (this.is_writing) {
         return;
       }
+      // Ignore when modifier keys are pressed (e.g., Ctrl+1, Alt+Tab)
+      if (e.ctrlKey || e.altKey || e.metaKey) {
+        return;
+      }
+      // Ignore when input elements are focused
+      const activeElement = document.activeElement;
+      if (
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        activeElement instanceof HTMLSelectElement
+      ) {
+        return;
+      }
       this.is_pressed = true;
       this.noteOn(e.code);
     });
