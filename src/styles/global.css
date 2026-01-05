@@ -1,6 +1,7 @@
 /* Global styles - reset, scrollbar, non-React elements */
 
 * {
+  font-family: sans-serif;
   font-size: 10px;
   -webkit-user-select: none;
   text-shadow: 0px 0px 1px #cde;
